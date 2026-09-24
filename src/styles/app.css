@@ -1,0 +1,120 @@
+/* App-specific tokens and helpers. shadcn tokens live untouched in index.css. */
+
+@font-face {
+  font-family: "Logo";
+  src: url("../assets/fonts/gt-super-text-bold.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  unicode-range:
+    U+0020, U+004C, U+0054-0055, U+0065, U+0069, U+006E-006F, U+0072, U+0074;
+}
+
+@theme inline {
+  --font-logo: "Logo", serif;
+  --text-2xs: 0.6875rem;
+  --breakpoint-3xl: 1920px;
+  --ease-spring: cubic-bezier(0.25, 0.1, 0.25, 1);
+
+  --color-grade-low: var(--grade-low);
+  --color-grade-mid: var(--grade-mid);
+  --color-grade-high: var(--grade-high);
+  --color-grade-fail: var(--grade-fail);
+}
+
+:root {
+  --grade-low: oklch(from var(--primary) 0.755 0.155 h);
+  --grade-mid: oklch(from var(--primary) 0.6 0.145 h);
+  --grade-high: oklch(from var(--primary) 0.46 0.11 h);
+  --grade-fail: var(--destructive);
+}
+
+.dark {
+  --grade-low: oklch(from var(--primary) 0.55 0.12 h);
+  --grade-mid: oklch(from var(--primary) 0.68 0.145 h);
+  --grade-high: oklch(from var(--primary) 0.83 0.13 h);
+}
+
+.variable-spin {
+  animation: variable-spin 4s infinite;
+  transform-origin: center;
+}
+
+@keyframes variable-spin {
+  0% {
+    transform: rotate(0deg);
+    animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  25% {
+    transform: rotate(180deg);
+    animation-timing-function: cubic-bezier(0.8, 0, 0.2, 1);
+  }
+  50% {
+    transform: rotate(360deg);
+    animation-timing-function: cubic-bezier(0.4, 0, 0.6, 1);
+  }
+  75% {
+    transform: rotate(540deg);
+    animation-timing-function: cubic-bezier(0.8, 0, 0.2, 1);
+  }
+  100% {
+    transform: rotate(720deg);
+    animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  }
+}
+
+.shimmer-text {
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--muted-foreground), transparent 40%) 0%,
+    color-mix(in srgb, var(--muted-foreground), transparent 40%) 35%,
+    var(--foreground) 50%,
+    color-mix(in srgb, var(--muted-foreground), transparent 40%) 65%,
+    color-mix(in srgb, var(--muted-foreground), transparent 40%) 100%
+  );
+  background-size: 200% 100%;
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+  animation: shimmer-sweep 3.2s linear infinite;
+}
+
+@keyframes shimmer-sweep {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+.step-dot-active {
+  animation: step-dot-breathe 2.4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes step-dot-breathe {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(0.7);
+    opacity: 0.4;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .step-dot-active,
+  .variable-spin {
+    animation: none;
+  }
+
+  .shimmer-text {
+    animation: none;
+    background: none;
+    color: var(--muted-foreground);
+    -webkit-text-fill-color: var(--muted-foreground);
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "name": "LiU Tentor",
+  "short_name": "LiUTentor",
+  "description": "Hitta och plugga gamla tentor från Linköpings Universitet.",
+  "start_url": "/",
+  "scope": "/",
+  "icons": [
+    {
+      "src": "/favicon-light.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ],
+  "theme_color": "#ffffff",
+  "background_color": "#ffffff",
+  "display": "standalone"
+}
