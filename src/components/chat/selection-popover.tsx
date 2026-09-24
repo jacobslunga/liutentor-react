@@ -10,7 +10,7 @@ export function SelectionPopover({ x, y, onReply }: { x: number; y: number; onRe
     <div className="fixed z-50" style={{ left: x, top: y, transform: "translate(-50%, calc(-100% - 8px))" }}>
       <div className="animate-in duration-150 fade-in-0 zoom-in-95">
         <Button
-          variant="outline"
+          variant="secondary"
           onMouseDown={(e) => {
             // Keep the selection alive until we've read it.
             e.preventDefault();

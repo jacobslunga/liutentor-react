@@ -160,7 +160,7 @@ export function ChatInput({
     >
       <InputGroup
         className={cn(
-          "bg-background shadow-xs dark:bg-background",
+          "overflow-hidden rounded-2xl bg-background shadow-xs dark:bg-background",
           // InputGroup dims itself when anything inside is :disabled, which
           // includes the send button while the prompt is empty. Keep it opaque.
           "has-disabled:bg-background has-disabled:opacity-100 dark:has-disabled:bg-background",
@@ -267,6 +267,7 @@ export function ChatInput({
           </div>
         </InputGroupAddon>
       </InputGroup>
+      <p className="mt-2 text-center text-2xs text-muted-foreground">AI kan göra misstag. Kontrollera svar.</p>
     </form>
   );
 }

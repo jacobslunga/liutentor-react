@@ -218,9 +218,29 @@ export default function ChatWindow({ examId, courseCode, examUrl, solutionUrl, o
     };
   }, []);
 
+  // While we smooth-scroll to the bottom, the scroll passes back through the
+  // "far from bottom" zone; ignore it until we arrive (or give up after a second).
+  const autoScrolling = useRef(false);
+  const autoScrollTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
+
+  function scrollToLatest() {
+    setShowScrollBottom(false);
+    autoScrolling.current = true;
+    clearTimeout(autoScrollTimer.current);
+    autoScrollTimer.current = setTimeout(() => (autoScrolling.current = false), 1000);
+    transcriptRef.current?.scrollToBottom("smooth");
+  }
+
   function onScroll(e: React.UIEvent<HTMLDivElement>) {
     const el = e.currentTarget;
     const distance = el.scrollHeight - (el.scrollTop + el.clientHeight);
+    if (autoScrolling.current) {
+      if (distance < 80) {
+        autoScrolling.current = false;
+        clearTimeout(autoScrollTimer.current);
+      }
+      return;
+    }
     // Hysteresis keeps the button from flickering near the threshold.
     if (distance > 160) setShowScrollBottom(true);
     else if (distance < 80) setShowScrollBottom(false);
@@ -302,10 +322,7 @@ export default function ChatWindow({ examId, courseCode, examUrl, solutionUrl, o
             size="icon"
             className="pointer-events-auto mb-2.5 animate-in rounded-full shadow-md duration-150 fade-in-0"
             aria-label="Rulla till senaste"
-            onClick={() => {
-              setShowScrollBottom(false);
-              transcriptRef.current?.scrollToBottom("smooth");
-            }}
+            onClick={scrollToLatest}
           >
             <ArrowDownIcon />
           </Button>
