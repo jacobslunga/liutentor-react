@@ -2,6 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useAuthStore } from "@/stores/auth";
+import { UserDropdown } from "./user-dropdown";
 
 export function AuthActions({ largerOnDesktop = false }: { largerOnDesktop?: boolean }) {
   const ready = useAuthStore((s) => s.ready);
@@ -10,14 +11,7 @@ export function AuthActions({ largerOnDesktop = false }: { largerOnDesktop?: boo
 
   if (!ready) return null;
 
-  // Replaced by the user dropdown when auth and profile land.
-  if (signedIn) {
-    return (
-      <Button asChild size="sm" variant="outline" className={cn(size)}>
-        <Link to="/me">Profil</Link>
-      </Button>
-    );
-  }
+  if (signedIn) return <UserDropdown />;
 
   return (
     <div className="flex items-center gap-2">

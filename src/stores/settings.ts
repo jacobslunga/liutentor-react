@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
+import { randomAvatarColor } from "@/lib/avatar-colors";
 import { CHAT_MODELS, DEFAULT_MODEL_ID, type ChatModelId } from "@/lib/chat-models";
 import { useUser } from "@/stores/auth";
 
@@ -10,10 +11,13 @@ interface SettingsState {
   showExplainPopover: boolean;
   blurFacitUntilHover: boolean;
   selectedModelId: ChatModelId;
+  /** Local fallback until the profile has a saved avatar color. */
+  avatarColor: string;
   setLayoutMode: (mode: LayoutMode) => void;
   setShowExplainPopover: (value: boolean) => void;
   setBlurFacitUntilHover: (value: boolean) => void;
   setSelectedModelId: (id: ChatModelId) => void;
+  setAvatarColor: (color: string) => void;
 }
 
 /** Rarely-changing user preferences, persisted to localStorage. */
@@ -24,11 +28,13 @@ export const useSettingsStore = create<SettingsState>()(
       showExplainPopover: true,
       blurFacitUntilHover: true,
       selectedModelId: DEFAULT_MODEL_ID,
+      avatarColor: randomAvatarColor(),
       setLayoutMode: (layoutMode) => set({ layoutMode }),
       setShowExplainPopover: (showExplainPopover) => set({ showExplainPopover }),
       setBlurFacitUntilHover: (blurFacitUntilHover) =>
         set({ blurFacitUntilHover }),
       setSelectedModelId: (selectedModelId) => set({ selectedModelId }),
+      setAvatarColor: (avatarColor) => set({ avatarColor }),
     }),
     { name: "liutentor-settings", version: 1 },
   ),
