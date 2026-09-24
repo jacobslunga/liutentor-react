@@ -1,0 +1,230 @@
+@import "katex/dist/katex.min.css";
+
+/* Rendered assistant markdown. Colors map Tailwind Typography onto shadcn tokens. */
+.chat-prose {
+  --tw-prose-body: var(--foreground);
+  --tw-prose-headings: var(--foreground);
+  --tw-prose-lead: var(--muted-foreground);
+  --tw-prose-links: var(--foreground);
+  --tw-prose-bold: var(--foreground);
+  --tw-prose-counters: var(--muted-foreground);
+  --tw-prose-bullets: var(--muted-foreground);
+  --tw-prose-quotes: var(--foreground);
+  --tw-prose-quote-borders: var(--border);
+  --tw-prose-captions: var(--muted-foreground);
+  --tw-prose-kbd: var(--foreground);
+  --tw-prose-kbd-shadows: var(--border);
+  --tw-prose-code: var(--foreground);
+  --tw-prose-pre-code: var(--foreground);
+  --tw-prose-pre-bg: var(--muted);
+  --tw-prose-hr: var(--border);
+  --tw-prose-th-borders: var(--border);
+  --tw-prose-td-borders: var(--border);
+}
+
+.chat-prose .katex-display {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  overscroll-behavior-x: contain;
+  padding: 0.5rem 0;
+  margin: 0.75rem 0;
+}
+
+.chat-prose .katex-display > .katex {
+  width: max-content;
+  min-width: 100%;
+  max-width: none;
+}
+
+.chat-prose .katex {
+  max-width: 100%;
+  white-space: nowrap;
+}
+
+.chat-prose eq {
+  display: inline-flex;
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  overscroll-behavior-x: contain;
+  scrollbar-width: none;
+}
+
+.chat-prose eq > .katex {
+  flex: none;
+}
+
+.chat-prose p,
+.chat-prose li {
+  overflow-wrap: break-word;
+}
+
+.chat-prose .table-scroll {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  margin: 2em 0;
+}
+
+.chat-prose .table-scroll table {
+  width: 100%;
+  min-width: max-content;
+  margin: 0;
+}
+
+.chat-prose pre,
+.chat-prose blockquote {
+  max-width: 100%;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+}
+
+.chat-prose :not(pre) > code::before,
+.chat-prose :not(pre) > code::after {
+  content: none;
+}
+
+.chat-prose .code-block {
+  margin: 1.25rem 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+}
+
+.chat-prose .code-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.4rem 0.75rem 0.4rem 1rem;
+  background-color: var(--muted);
+  border-bottom: 1px solid var(--border);
+}
+
+.chat-prose .code-lang {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.04em;
+  color: var(--muted-foreground);
+}
+
+.chat-prose .code-copy {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  padding: 0.2rem 0.55rem;
+  border-radius: 9999px;
+  color: var(--muted-foreground);
+  transition:
+    background-color 150ms,
+    color 150ms;
+}
+
+.chat-prose .code-copy:hover {
+  background-color: var(--accent);
+  color: var(--foreground);
+}
+
+.chat-prose .code-copy.copied {
+  color: var(--primary);
+}
+
+.chat-prose .code-copy .code-icon-check,
+.chat-prose .code-copy.copied .code-icon-copy {
+  display: none;
+}
+
+.chat-prose .code-copy.copied .code-icon-check {
+  display: inline;
+}
+
+.chat-prose .code-block pre.shiki {
+  margin: 0;
+  border: none;
+  border-radius: 0;
+  padding: 1rem 1.25rem;
+  overflow-x: auto;
+  line-height: 1.6;
+  background-color: var(--shiki-light-bg);
+}
+
+.chat-prose .code-block pre.shiki,
+.chat-prose .code-block pre.shiki span {
+  color: var(--shiki-light);
+}
+
+.dark .chat-prose .code-block pre.shiki {
+  background-color: var(--shiki-dark-bg);
+}
+
+.dark .chat-prose .code-block pre.shiki span {
+  color: var(--shiki-dark);
+}
+
+/* A quoted selection reads as one run of text: block elements collapse inline. */
+.selection-quote :is(p, li, section, h1, h2, h3, h4) {
+  display: inline;
+  margin: 0;
+  font-size: inherit;
+  font-weight: inherit;
+}
+
+.selection-quote :is(p + p, li + li)::before {
+  content: " ";
+}
+
+.selection-quote .katex-display,
+.selection-quote .katex-display > .katex {
+  display: inline;
+  margin: 0;
+}
+
+.selection-quote .katex {
+  font-size: 1em;
+}
+
+.selection-quote pre {
+  display: inline;
+  white-space: pre-wrap;
+}
+
+.selection-quote .code-header {
+  display: none;
+}
+
+/* The prompt border flows while a reply is streaming. */
+.chat-prompt-generating {
+  border-color: transparent !important;
+  background:
+    linear-gradient(var(--background), var(--background)) padding-box,
+    linear-gradient(
+        110deg,
+        color-mix(in srgb, var(--foreground) 18%, transparent),
+        color-mix(in srgb, var(--foreground) 65%, transparent),
+        color-mix(in srgb, var(--foreground) 30%, transparent),
+        color-mix(in srgb, var(--foreground) 18%, transparent)
+      )
+      border-box;
+  background-size:
+    100% 100%,
+    200% 100%;
+  animation: chat-prompt-border-flow 2.4s linear infinite;
+}
+
+@keyframes chat-prompt-border-flow {
+  to {
+    background-position:
+      0 0,
+      -200% 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .chat-prompt-generating {
+    animation: none;
+  }
+}

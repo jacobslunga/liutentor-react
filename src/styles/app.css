@@ -1,4 +1,5 @@
 /* App-specific tokens and helpers. shadcn tokens live untouched in index.css. */
+@plugin "@tailwindcss/typography";
 
 @font-face {
   font-family: "Logo";

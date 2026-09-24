@@ -25,6 +25,10 @@ export default defineConfig(({ mode }) => {
       include: [
         "recharts",
         "cmdk",
+        "markdown-it",
+        "markdown-it-texmath",
+        "katex",
+        "dompurify",
         "@embedpdf/core/react",
         "@embedpdf/engines/react",
         "@embedpdf/plugin-document-manager/react",
