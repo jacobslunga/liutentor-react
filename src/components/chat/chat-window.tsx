@@ -237,7 +237,7 @@ export default function ChatWindow({ examId, courseCode, examUrl, solutionUrl, o
   }
 
   return (
-    <div ref={rootRef} className="relative flex h-full w-full flex-col overflow-hidden bg-background">
+    <div ref={rootRef} className="@container relative flex h-full w-full flex-col overflow-hidden bg-background">
       {isOverDrop && <ChatDropOverlay />}
 
       <div className="pointer-events-none absolute inset-x-0 top-0 z-20">
@@ -312,7 +312,7 @@ export default function ChatWindow({ examId, courseCode, examUrl, solutionUrl, o
         )}
         <ChatInput
           ref={inputRef}
-          className="pointer-events-auto mx-auto max-w-2xl 3xl:max-w-3xl"
+          className="pointer-events-auto mx-auto max-w-2xl @3xl:max-w-3xl @5xl:max-w-4xl"
           initialText={initialDraft.text}
           initialAttachments={initialDraft.attachments}
           selectionContext={selectionContext}

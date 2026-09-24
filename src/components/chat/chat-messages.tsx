@@ -180,7 +180,7 @@ export function ChatMessages({ ref, scrollRef, className, onReplyToSelection }: 
       <div
         ref={rootRef}
         className={cn(
-          "mx-auto flex w-full max-w-2xl min-w-0 flex-col gap-1 px-2.5 3xl:max-w-3xl [&>*:last-child]:min-h-(--last-message-height)",
+          "mx-auto flex w-full max-w-2xl min-w-0 flex-col gap-1 px-2.5 @3xl:max-w-3xl @5xl:max-w-4xl [&>*:last-child]:min-h-(--last-message-height)",
           className,
         )}
         onMouseUp={onMouseUp}
@@ -223,7 +223,7 @@ const MessageRow = memo(function MessageRow({ id, isLast }: { id: string; isLast
             </div>
           )}
           {message.content && (
-            <p className="text-[0.9375rem] leading-relaxed whitespace-pre-wrap">{message.content}</p>
+            <p className="text-[0.9375rem] leading-relaxed whitespace-pre-wrap @3xl:text-[1.0625rem]">{message.content}</p>
           )}
         </div>
       </div>
@@ -248,7 +248,7 @@ const MessageRow = memo(function MessageRow({ id, isLast }: { id: string; isLast
       )}
       {html && (
         <div
-          className="chat-prose prose w-full max-w-none min-w-0 font-[450] dark:prose-invert"
+          className="chat-prose prose w-full max-w-none min-w-0 font-[450] dark:prose-invert @3xl:text-[1.0625rem]"
           dangerouslySetInnerHTML={{ __html: html }}
         />
       )}

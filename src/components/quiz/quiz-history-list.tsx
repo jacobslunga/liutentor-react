@@ -81,7 +81,7 @@ export function QuizHistoryList({ history, signedIn, activeQuizId, onLoad, onDel
       )}
 
       <AlertDialog open={!!pendingDelete} onOpenChange={(open) => !open && setPendingDelete(null)}>
-        <AlertDialogContent>
+        <AlertDialogContent className="data-[size=default]:sm:max-w-md">
           <AlertDialogHeader>
             <AlertDialogTitle>Ta bort quizet?</AlertDialogTitle>
             <AlertDialogDescription>

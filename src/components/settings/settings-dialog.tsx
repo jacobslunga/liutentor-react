@@ -66,7 +66,7 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
           </Button>
         </DialogTrigger>
       )}
-      <DialogContent className="flex max-h-[min(640px,calc(100dvh-2rem))] flex-col">
+      <DialogContent className="flex max-h-[min(720px,calc(100dvh-2rem))] flex-col sm:max-w-lg">
         <DialogHeader>
           <DialogTitle>Inställningar</DialogTitle>
           <DialogDescription>Anpassa hur LiU Tentor beter sig.</DialogDescription>

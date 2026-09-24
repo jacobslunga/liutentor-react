@@ -247,7 +247,7 @@ export function ChatHistoryDialog({ onSelect }: ChatHistoryDialogProps) {
       </Dialog>
 
       <AlertDialog open={!!pendingDelete} onOpenChange={(value) => !value && !deleting && setPendingDelete(null)}>
-        <AlertDialogContent>
+        <AlertDialogContent className="data-[size=default]:sm:max-w-md">
           <AlertDialogHeader>
             <AlertDialogTitle>{pendingDelete === "all" ? "Radera all historik?" : "Är du säker?"}</AlertDialogTitle>
             <AlertDialogDescription>

@@ -62,7 +62,7 @@ export function ExamStatsDialog({ statistics, date, passRate }: ExamStatsDialogP
             {passRate.toFixed(1)}%
           </Button>
         </DialogTrigger>
-        <DialogContent>
+        <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle>Tentastatistik</DialogTitle>
             <DialogDescription>Betygsfördelning {date}</DialogDescription>

@@ -214,7 +214,7 @@ export function ChatInput({
           rows={1}
           placeholder="Fråga vad som helst"
           aria-label="Meddelande"
-          className="max-h-48 min-h-10"
+          className="max-h-48 min-h-10 @3xl:min-h-14 @3xl:text-base"
           onInput={(e) => syncTextState(e.currentTarget.value)}
           onKeyDown={onKeyDown}
         />

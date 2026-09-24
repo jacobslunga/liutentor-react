@@ -90,7 +90,7 @@ export function QuizAnswering({ questions }: { questions: QuizQuestion[] }) {
       </div>
 
       <AlertDialog open={confirmExit} onOpenChange={setConfirmExit}>
-        <AlertDialogContent>
+        <AlertDialogContent className="data-[size=default]:sm:max-w-md">
           <AlertDialogHeader>
             <AlertDialogTitle>Avsluta quizet?</AlertDialogTitle>
             <AlertDialogDescription>

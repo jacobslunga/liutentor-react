@@ -153,7 +153,7 @@ export function ExamUploadForm({ initialCourseCode = "", fixedCourseCode = false
       </Alert>
 
       <AlertDialog open={result !== null}>
-        <AlertDialogContent>
+        <AlertDialogContent className="data-[size=default]:sm:max-w-md">
           <AlertDialogHeader>
             <AlertDialogTitle>{result?.ok ? "Uppladdning lyckades!" : "Något gick fel"}</AlertDialogTitle>
             <AlertDialogDescription>
