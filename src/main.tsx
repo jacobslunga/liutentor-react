@@ -4,7 +4,10 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { ThemeProvider } from "@/components/layout/theme-provider";
 import { queryClient, router } from "@/router";
+import { initAuth } from "@/stores/auth";
 import "./index.css";
+
+void initAuth();
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
