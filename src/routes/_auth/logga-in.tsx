@@ -1,13 +1,24 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { CheckIcon, LoaderCircleIcon, MailIcon } from "lucide-react";
-import { useEffect, useState, type FormEvent } from "react";
+import { useState, type FormEvent } from "react";
 import { PasswordInput } from "@/components/auth/password-input";
 import { LogoIcon } from "@/components/layout/logo-icon";
 import { Button } from "@/components/ui/button";
-import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field";
+import {
+  Field,
+  FieldDescription,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+} from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import { useSeo } from "@/hooks/use-seo";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { validateLiuEmail, validateName, validatePassword } from "@/lib/auth-validation";
+import {
+  validateLiuEmail,
+  validateName,
+  validatePassword,
+} from "@/lib/auth-validation";
 import { supabase } from "@/lib/supabase";
 
 export type AuthTab = "logga-in" | "skapa-konto";
@@ -23,16 +34,19 @@ function AuthPage() {
   const { tab = "logga-in" } = Route.useSearch();
   const navigate = useNavigate({ from: Route.fullPath });
 
-  useEffect(() => {
-    document.title = `${tab === "logga-in" ? "Logga in" : "Skapa konto"} | LiU Tentor`;
-  }, [tab]);
+  useSeo({
+    title: tab === "logga-in" ? "Logga in" : "Skapa konto",
+    description: tab === "logga-in" ? "Logga in till LiU Tentor." : "Skapa ett konto på LiU Tentor.",
+    path: "/logga-in",
+    robots: "noindex, nofollow",
+  });
 
   const setTab = (value: string) =>
     void navigate({ search: { tab: value as AuthTab }, replace: true });
 
   return (
     <div className="flex w-full max-w-sm flex-col items-center space-y-8 lg:max-w-md">
-      <Link to="/" className="mb-1 flex items-center space-x-2">
+      <Link to="/" className="mb-10 flex items-center space-x-2">
         <LogoIcon className="size-8" />
         <span className="font-logo text-xl tracking-tighter">LiU Tentor</span>
       </Link>
@@ -60,22 +74,36 @@ function AuthPage() {
 function LoginForm({ onSwitch }: { onSwitch: () => void }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [errors, setErrors] = useState({ email: "", password: "", general: "" });
+  const [errors, setErrors] = useState({
+    email: "",
+    password: "",
+    general: "",
+  });
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
 
   async function submit(e: FormEvent) {
     e.preventDefault();
-    const next = { email: validateLiuEmail(email), password: validatePassword(password), general: "" };
+    const next = {
+      email: validateLiuEmail(email),
+      password: validatePassword(password),
+      general: "",
+    };
     setErrors(next);
     if (next.email || next.password) return;
 
     setLoading(true);
-    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
     setLoading(false);
 
     if (error) {
-      setErrors({ ...next, general: "Fel e-post eller lösenord. Försök igen." });
+      setErrors({
+        ...next,
+        general: "Fel e-post eller lösenord. Försök igen.",
+      });
       return;
     }
     // The auth layout leaves this page as soon as the session lands.
@@ -89,7 +117,9 @@ function LoginForm({ onSwitch }: { onSwitch: () => void }) {
           <CheckIcon className="size-6 text-primary" />
         </div>
         <p className="font-medium">Inloggad!</p>
-        <p className="text-sm text-muted-foreground">Loggar in dig, tar dig till första sidan...</p>
+        <p className="text-sm text-muted-foreground">
+          Loggar in dig, tar dig till första sidan...
+        </p>
         <LoaderCircleIcon className="mt-1 size-4 animate-spin text-muted-foreground" />
       </div>
     );
@@ -122,14 +152,24 @@ function LoginForm({ onSwitch }: { onSwitch: () => void }) {
           />
           <FieldError>{errors.password}</FieldError>
         </Field>
-        {errors.general && <FieldError className="text-center">{errors.general}</FieldError>}
+        {errors.general && (
+          <FieldError className="text-center">{errors.general}</FieldError>
+        )}
         <Field>
           <Button type="submit" disabled={loading}>
-            {loading ? <LoaderCircleIcon className="animate-spin" /> : "Logga in"}
+            {loading ? (
+              <LoaderCircleIcon className="animate-spin" />
+            ) : (
+              "Logga in"
+            )}
           </Button>
           <FieldDescription className="text-center">
             Inget konto?{" "}
-            <button type="button" className="underline underline-offset-2 hover:text-primary" onClick={onSwitch}>
+            <button
+              type="button"
+              className="underline underline-offset-2 hover:text-primary"
+              onClick={onSwitch}
+            >
               Skapa ett här
             </button>
           </FieldDescription>
@@ -139,7 +179,13 @@ function LoginForm({ onSwitch }: { onSwitch: () => void }) {
   );
 }
 
-const EMPTY_SIGNUP = { email: "", password: "", confirmPassword: "", firstName: "", lastName: "" };
+const EMPTY_SIGNUP = {
+  email: "",
+  password: "",
+  confirmPassword: "",
+  firstName: "",
+  lastName: "",
+};
 
 function SignupForm({ onSwitch }: { onSwitch: () => void }) {
   const [form, setForm] = useState(EMPTY_SIGNUP);
@@ -147,8 +193,10 @@ function SignupForm({ onSwitch }: { onSwitch: () => void }) {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
 
-  const update = (key: keyof typeof EMPTY_SIGNUP) => (e: React.ChangeEvent<HTMLInputElement>) =>
-    setForm((f) => ({ ...f, [key]: e.target.value }));
+  const update =
+    (key: keyof typeof EMPTY_SIGNUP) =>
+    (e: React.ChangeEvent<HTMLInputElement>) =>
+      setForm((f) => ({ ...f, [key]: e.target.value }));
 
   async function submit(e: FormEvent) {
     e.preventDefault();
@@ -166,14 +214,26 @@ function SignupForm({ onSwitch }: { onSwitch: () => void }) {
       general: "",
     };
     setErrors(next);
-    if (next.email || next.password || next.confirmPassword || next.firstName || next.lastName) return;
+    if (
+      next.email ||
+      next.password ||
+      next.confirmPassword ||
+      next.firstName ||
+      next.lastName
+    )
+      return;
 
     setLoading(true);
-    const { data, error } = await supabase.auth.signUp({ email: form.email, password: form.password });
+    const { data, error } = await supabase.auth.signUp({
+      email: form.email,
+      password: form.password,
+    });
 
     if (error) {
       setLoading(false);
-      const taken = error.message.toLowerCase().includes("already registered") || error.status === 422;
+      const taken =
+        error.message.toLowerCase().includes("already registered") ||
+        error.status === 422;
       setErrors({
         ...next,
         general: taken
@@ -186,7 +246,10 @@ function SignupForm({ onSwitch }: { onSwitch: () => void }) {
     if (data.user) {
       await supabase
         .from("profiles")
-        .update({ first_name: form.firstName.trim(), last_name: form.lastName.trim() })
+        .update({
+          first_name: form.firstName.trim(),
+          last_name: form.lastName.trim(),
+        })
         .eq("id", data.user.id);
     }
     setLoading(false);
@@ -203,7 +266,8 @@ function SignupForm({ onSwitch }: { onSwitch: () => void }) {
         <p className="font-medium">Konto skapat!</p>
         <p className="text-sm text-muted-foreground">
           Vi har skickat en bekräftelse till{" "}
-          <span className="font-medium text-foreground">{form.email}</span>. Kontrollera din inkorg.
+          <span className="font-medium text-foreground">{form.email}</span>.
+          Kontrollera din inkorg.
         </p>
         <Button
           size="sm"
@@ -263,7 +327,9 @@ function SignupForm({ onSwitch }: { onSwitch: () => void }) {
           {errors.email ? (
             <FieldError>{errors.email}</FieldError>
           ) : (
-            <FieldDescription>Måste vara din LiU mail (t.ex. abcde123@student.liu.se)</FieldDescription>
+            <FieldDescription>
+              Måste vara din LiU mail (t.ex. abcde123@student.liu.se)
+            </FieldDescription>
           )}
         </Field>
         <Field data-invalid={!!errors.password}>
@@ -292,14 +358,24 @@ function SignupForm({ onSwitch }: { onSwitch: () => void }) {
           />
           <FieldError>{errors.confirmPassword}</FieldError>
         </Field>
-        {errors.general && <FieldError className="text-center">{errors.general}</FieldError>}
+        {errors.general && (
+          <FieldError className="text-center">{errors.general}</FieldError>
+        )}
         <Field>
           <Button type="submit" disabled={loading}>
-            {loading ? <LoaderCircleIcon className="animate-spin" /> : "Skapa konto"}
+            {loading ? (
+              <LoaderCircleIcon className="animate-spin" />
+            ) : (
+              "Skapa konto"
+            )}
           </Button>
           <FieldDescription className="text-center">
             Har du redan ett konto?{" "}
-            <button type="button" className="underline underline-offset-2 hover:text-primary" onClick={onSwitch}>
+            <button
+              type="button"
+              className="underline underline-offset-2 hover:text-primary"
+              onClick={onSwitch}
+            >
               Logga in
             </button>
           </FieldDescription>

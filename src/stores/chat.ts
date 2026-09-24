@@ -53,6 +53,8 @@ interface ChatState {
   currentExamId: string | null;
   currentConversationId: string | null;
   currentConversationTitle: string | null;
+  isConversationTitleReady: boolean;
+  animateConversationTitle: boolean;
   pendingSelection: PendingSelection | null;
 
   open: () => void;
@@ -94,6 +96,8 @@ export const useChatStore = create<ChatState>((set, get) => ({
   currentExamId: null,
   currentConversationId: null,
   currentConversationTitle: null,
+  isConversationTitleReady: false,
+  animateConversationTitle: false,
   pendingSelection: null,
 
   open: () => set({ isOpen: true }),
@@ -147,6 +151,8 @@ export const useChatStore = create<ChatState>((set, get) => ({
       currentExamId: null,
       currentConversationId: null,
       currentConversationTitle: null,
+      isConversationTitleReady: false,
+      animateConversationTitle: false,
       isHistoryOpen: false,
       pendingSelection: null,
     });

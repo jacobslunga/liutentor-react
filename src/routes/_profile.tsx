@@ -1,8 +1,16 @@
-import { Link, Outlet, createFileRoute, redirect, useNavigate, useRouter } from "@tanstack/react-router";
+import {
+  Link,
+  Outlet,
+  createFileRoute,
+  redirect,
+  useNavigate,
+  useRouter,
+} from "@tanstack/react-router";
 import { ArrowLeftIcon } from "lucide-react";
 import { useEffect } from "react";
 import { LogoIcon } from "@/components/layout/logo-icon";
 import { Button } from "@/components/ui/button";
+import { useSeo } from "@/hooks/use-seo";
 import { getUser, useUser } from "@/stores/auth";
 
 export const Route = createFileRoute("/_profile")({
@@ -13,6 +21,12 @@ export const Route = createFileRoute("/_profile")({
 });
 
 function ProfileLayout() {
+  useSeo({
+    title: "Min profil",
+    description: "Hantera din profil på LiU Tentor.",
+    path: "/me",
+    robots: "noindex, nofollow",
+  });
   const router = useRouter();
   const navigate = useNavigate();
   const user = useUser();
@@ -36,9 +50,14 @@ function ProfileLayout() {
             <ArrowLeftIcon />
             Tillbaka
           </Button>
-          <Link to="/" className="flex items-center gap-2 transition-opacity hover:opacity-80">
+          <Link
+            to="/"
+            className="flex items-center gap-2 transition-opacity hover:opacity-80"
+          >
             <LogoIcon className="size-7" />
-            <span className="font-logo text-lg font-medium tracking-tighter">LiU Tentor</span>
+            <span className="font-logo text-lg font-medium tracking-tighter">
+              LiU Tentor
+            </span>
           </Link>
         </div>
       </header>

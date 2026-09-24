@@ -1,18 +1,34 @@
 import { Command as CommandPrimitive } from "cmdk";
 import { SearchIcon } from "lucide-react";
-import { useEffect, useRef, useState, type KeyboardEvent, type ReactNode } from "react";
-import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group";
+import {
+  useEffect,
+  useRef,
+  useState,
+  type KeyboardEvent,
+  type ReactNode,
+} from "react";
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+} from "@/components/ui/input-group";
 import { Kbd } from "@/components/ui/kbd";
-import { Popover, PopoverAnchor, PopoverContent } from "@/components/ui/popover";
+import {
+  Popover,
+  PopoverAnchor,
+  PopoverContent,
+} from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 import { useTypingPlaceholder } from "@/hooks/use-typing-placeholder";
 import { CourseSearchResults } from "./course-search-results";
 import { useCourseSearch } from "./use-course-search";
 
 /**
- * Wires a text input to a cmdk result list shown in a popover under it. cmdk
- * handles arrow keys on its root, so any input inside works; Enter picks the
- * highlighted course, or searches the typed code when nothing matches.
+ * Wires a text input to a cmdk result list shown in a popover under it. The
+ * list renders in a portal, outside the cmdk root, so cmdk's own DOM-based
+ * keyboard handling can't reach it: we drive the highlight ourselves and feed
+ * it back as the controlled value. Enter takes the highlighted course, which
+ * starts on the first result, so a typed course code needs no selection.
  */
 function CourseSearchBase({
   className,
@@ -29,24 +45,48 @@ function CourseSearchBase({
 }) {
   const { query, setQuery, items, goToCourse } = useCourseSearch();
   const [focused, setFocused] = useState(false);
+  const [active, setActive] = useState("");
   const open = focused && query.trim().length > 0;
+
+  // A new result list starts highlighted on its first item.
+  useEffect(() => {
+    setActive(items[0]?.code ?? "");
+  }, [items]);
 
   function select(code: string) {
     goToCourse(code);
     (document.activeElement as HTMLElement | null)?.blur();
   }
 
+  function move(delta: number) {
+    if (items.length === 0) return;
+    const current = items.findIndex((item) => item.code === active);
+    const next = (current + delta + items.length) % items.length;
+    setActive(items[next].code);
+  }
+
   function onKeyDown(e: KeyboardEvent<HTMLInputElement>) {
-    if (e.key === "Enter" && items.length === 0 && query.trim()) {
+    if (e.key === "Enter") {
+      const code = active || query.trim();
+      if (!code) return;
       e.preventDefault();
-      select(query);
+      select(code);
+    } else if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+      e.preventDefault();
+      move(e.key === "ArrowDown" ? 1 : -1);
     } else if (e.key === "Escape") {
       e.currentTarget.blur();
     }
   }
 
   return (
-    <CommandPrimitive shouldFilter={false} loop className={cn("relative w-full", className)}>
+    <CommandPrimitive
+      shouldFilter={false}
+      loop
+      value={active}
+      onValueChange={setActive}
+      className={cn("relative w-full", className)}
+    >
       <Popover open={open}>
         <PopoverAnchor asChild>
           <div>

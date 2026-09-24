@@ -9,13 +9,26 @@ import {
   InteractionManagerPluginPackage,
   PagePointerProvider,
 } from "@embedpdf/plugin-interaction-manager/react";
-import { RenderLayer, RenderPluginPackage } from "@embedpdf/plugin-render/react";
+import {
+  RenderLayer,
+  RenderPluginPackage,
+} from "@embedpdf/plugin-render/react";
 import { Rotate, RotatePluginPackage } from "@embedpdf/plugin-rotate/react";
 import type { PageLayout } from "@embedpdf/plugin-scroll";
 import { Scroller, ScrollPluginPackage } from "@embedpdf/plugin-scroll/react";
-import { SelectionLayer, SelectionPluginPackage } from "@embedpdf/plugin-selection/react";
-import { Viewport, ViewportPluginPackage } from "@embedpdf/plugin-viewport/react";
-import { ZoomGestureWrapper, ZoomMode, ZoomPluginPackage } from "@embedpdf/plugin-zoom/react";
+import {
+  SelectionLayer,
+  SelectionPluginPackage,
+} from "@embedpdf/plugin-selection/react";
+import {
+  Viewport,
+  ViewportPluginPackage,
+} from "@embedpdf/plugin-viewport/react";
+import {
+  ZoomGestureWrapper,
+  ZoomMode,
+  ZoomPluginPackage,
+} from "@embedpdf/plugin-zoom/react";
 import { LoaderCircleIcon } from "lucide-react";
 import { memo, useCallback, useMemo, useState } from "react";
 import { useLatest } from "@/hooks/use-latest";
@@ -36,8 +49,6 @@ export type PdfLayoutMode = "exam-only" | "exam-with-facit" | "default";
 export interface PdfRendererProps {
   pdfUrl: string;
   layoutMode?: PdfLayoutMode;
-  /** Space kept free above the first page, e.g. under a floating header. */
-  topInset?: number;
   explainEnabled?: boolean;
   onExplain?: (text: string) => void;
 }
@@ -67,7 +78,6 @@ function PageLoadingTask({ pending }: { pending: boolean }) {
 export const PdfRenderer = memo(function PdfRenderer({
   pdfUrl,
   layoutMode = "default",
-  topInset,
   explainEnabled = false,
   onExplain,
 }: PdfRendererProps) {
@@ -76,7 +86,8 @@ export const PdfRenderer = memo(function PdfRenderer({
 
   const isMobile = useMediaQuery(MOBILE_QUERY);
   const [liveZoom] = useState(createLiveZoomStore);
-  const maxPageWidth = layoutMode === "exam-only" ? MAX_EXAM_ONLY_PAGE_WIDTH : null;
+  const maxPageWidth =
+    layoutMode === "exam-only" ? MAX_EXAM_ONLY_PAGE_WIDTH : null;
 
   // Only a new URL may rebuild the registry; anything else would reload the document.
   const plugins = useMemo(
@@ -88,7 +99,9 @@ export const PdfRenderer = memo(function PdfRenderer({
       createPluginRegistration(ScrollPluginPackage),
       createPluginRegistration(RenderPluginPackage),
       createPluginRegistration(RotatePluginPackage),
-      createPluginRegistration(ZoomPluginPackage, { defaultZoomLevel: ZoomMode.FitWidth }),
+      createPluginRegistration(ZoomPluginPackage, {
+        defaultZoomLevel: ZoomMode.FitWidth,
+      }),
       createPluginRegistration(InteractionManagerPluginPackage),
       createPluginRegistration(SelectionPluginPackage, {
         toleranceFactor: 2.0,
@@ -100,10 +113,13 @@ export const PdfRenderer = memo(function PdfRenderer({
 
   // Keep page rendering stable across parent re-renders that pass a new callback.
   const onExplainRef = useLatest(onExplain);
-  const explain = useCallback((text: string) => onExplainRef.current?.(text), [onExplainRef]);
+  const explain = useCallback(
+    (text: string) => onExplainRef.current?.(text),
+    [onExplainRef],
+  );
 
   return (
-    <div className="group/pdf relative isolate h-full w-full overflow-hidden bg-background">
+    <div className="group/pdf relative isolate h-full w-full overflow-hidden bg-secondary">
       {isLoading || !engine ? (
         <Spinner />
       ) : (
@@ -115,7 +131,6 @@ export const PdfRenderer = memo(function PdfRenderer({
                   documentId={activeDocumentId}
                   isMobile={isMobile}
                   maxPageWidth={maxPageWidth}
-                  topInset={topInset}
                   onExplain={explainEnabled ? explain : undefined}
                 />
               )
@@ -131,11 +146,15 @@ interface PdfDocumentProps {
   documentId: string;
   isMobile: boolean;
   maxPageWidth: number | null;
-  topInset?: number;
   onExplain?: (text: string) => void;
 }
 
-function PdfDocument({ documentId, isMobile, maxPageWidth, topInset, onExplain }: PdfDocumentProps) {
+function PdfDocument({
+  documentId,
+  isMobile,
+  maxPageWidth,
+  onExplain,
+}: PdfDocumentProps) {
   const renderPage = useCallback(
     (page: PageLayout) => (
       <PdfPage
@@ -173,11 +192,11 @@ function PdfDocument({ documentId, isMobile, maxPageWidth, topInset, onExplain }
             {!isLoaded ? (
               <Spinner />
             ) : (
-              <div
-                className="h-full w-full"
-                style={topInset ? { paddingTop: topInset } : undefined}
-              >
-                <Viewport documentId={documentId} className="pdf-viewport bg-background">
+              <div className="h-full w-full">
+                <Viewport
+                  documentId={documentId}
+                  className="pdf-viewport bg-background"
+                >
                   <PdfScrollbars />
                   <PdfCopyShortcut />
                   {isMobile ? (
@@ -191,7 +210,10 @@ function PdfDocument({ documentId, isMobile, maxPageWidth, topInset, onExplain }
                         enableWheel
                         className="pdf-zoom-gesture"
                       >
-                        <Scroller documentId={documentId} renderPage={renderPage} />
+                        <Scroller
+                          documentId={documentId}
+                          renderPage={renderPage}
+                        />
                       </ZoomGestureWrapper>
                     </>
                   )}
@@ -227,7 +249,7 @@ function PdfPage({ documentId, page, isMobile, onExplain }: PdfPageProps) {
           documentId={documentId}
           pageIndex={page.pageIndex}
           // Dark: the inverted page is screen-blended onto the dark background.
-          className="bg-white dark:bg-background"
+          className="bg-background"
           style={{ width: page.width, height: page.height }}
         >
           <div className="pdf-render-surface absolute inset-0 z-0">

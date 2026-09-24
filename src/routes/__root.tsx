@@ -1,10 +1,16 @@
 import type { QueryClient } from "@tanstack/react-query";
-import { Link, Outlet, createRootRouteWithContext } from "@tanstack/react-router";
+import {
+  Link,
+  Outlet,
+  createRootRouteWithContext,
+} from "@tanstack/react-router";
 import { AppLoadingBar } from "@/components/layout/app-loading-bar";
+import { AnalyticsConsent } from "@/components/layout/analytics-consent";
 import { Button } from "@/components/ui/button";
 import { ExamUploadDialog } from "@/components/upload/exam-upload-dialog";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { useSeo } from "@/hooks/use-seo";
 
 export interface RouterContext {
   queryClient: QueryClient;
@@ -21,15 +27,21 @@ function RootLayout() {
       <AppLoadingBar />
       <Outlet />
       <ExamUploadDialog />
+      <AnalyticsConsent />
       <Toaster position="top-center" duration={4000} />
     </TooltipProvider>
   );
 }
 
 function NotFound() {
+  useSeo({
+    title: "404 – Sidan hittades inte",
+    description: "Sidan du letar efter finns inte.",
+    robots: "noindex, nofollow",
+  });
   return (
     <div className="flex min-h-dvh flex-col items-center justify-center gap-4 p-6 text-center">
-      <h1 className="text-2xl font-semibold tracking-tight">Sidan finns inte</h1>
+      <h1 className="text-2xl font-semibold">Sidan finns inte</h1>
       <p className="text-sm text-muted-foreground">
         Sidan du letar efter har flyttats eller finns inte.
       </p>

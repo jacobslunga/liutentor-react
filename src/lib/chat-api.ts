@@ -3,6 +3,8 @@ export const AI_API_BASE =
   "https://liutentor-hono-687405545415.europe-north2.run.app/api/v1";
 
 export const CHAT_COMPLETION_URL = `${AI_API_BASE}/chat/completion`;
+export const CHAT_COMPLETION_URL_LOCAL =
+  "http://localhost:8080/api/v1/chat/completion";
 
 const ANONYMOUS_ID_KEY = "liutentor_anonymous_id";
 

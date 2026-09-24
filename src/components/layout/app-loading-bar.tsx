@@ -1,6 +1,6 @@
 import { useIsFetching } from "@tanstack/react-query";
 import { useRouterState } from "@tanstack/react-router";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { usePageLoadingStore } from "@/stores/page-loading";
 
 const DURATION = 2000;
@@ -13,6 +13,12 @@ const THROTTLE = 80;
  */
 const SETTLE_DELAY = 250;
 const HIDE_DELAY = 150;
+/**
+ * How long after a page change new work may still start the bar. Only
+ * navigation to another page arms it, so background refetches and in-page
+ * changes (switching a tab, sorting) never make it flash.
+ */
+const ARM_WINDOW = 600;
 const FADE_MS = 300;
 
 /** Asymptotic: creeps toward 100% without arriving until the work finishes. */
@@ -27,11 +33,20 @@ function estimate(elapsed: number) {
  * stops.
  */
 export function AppLoadingBar() {
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
   const routerPending = useRouterState({ select: (s) => s.status === "pending" });
   const fetching = useIsFetching() > 0;
   const pendingTasks = usePageLoadingStore((s) => s.pending > 0);
   const failed = usePageLoadingStore((s) => s.failed);
   const isLoading = routerPending || fetching || pendingTasks;
+  const [armed, setArmed] = useState(false);
+
+  // A new pathname means a new page; search params and hashes don't count.
+  useEffect(() => {
+    setArmed(true);
+    const id = setTimeout(() => setArmed(false), ARM_WINDOW);
+    return () => clearTimeout(id);
+  }, [pathname]);
 
   const barRef = useRef<HTMLDivElement>(null);
   const timers = useRef({
@@ -95,6 +110,8 @@ export function AppLoadingBar() {
         return;
       }
       if (t.raf || t.throttle) return;
+      // Work that isn't part of a page change stays invisible.
+      if (!armed) return;
       clearAll();
       t.start = 0;
       setProgress(0);
@@ -107,7 +124,7 @@ export function AppLoadingBar() {
       clearTimeout(t.settle);
       t.settle = setTimeout(finish, SETTLE_DELAY);
     }
-  }, [isLoading]);
+  }, [isLoading, armed]);
 
   useEffect(() => {
     const t = timers.current;

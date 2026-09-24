@@ -2,6 +2,9 @@
   command = "pnpm build"
   publish = "dist"
 
+[build.environment]
+  NODE_VERSION = "22"
+
 [functions]
   directory = "netlify/functions"
 
@@ -13,12 +16,80 @@
   force = true
 
 [[redirects]]
-  from = "/*"
+  from = "/skapa-konto"
+  to = "/logga-in?tab=skapa-konto"
+  status = 301
+
+[[redirects]]
+  from = "/quiz/:courseCode"
+  to = "/search/:courseCode?tab=quiz"
+  status = 301
+
+[[redirects]]
+  from = "/search/*"
   to = "/index.html"
   status = 200
+
+[[redirects]]
+  from = "/logga-in"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/me"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/om-oss"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/faq"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/feedback"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/upload-exams"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/ai-policy"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/copyright-policy"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/privacy-policy"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/*"
+  to = "/404.html"
+  status = 404
 
 # Hashed build output never changes, so it can be cached forever.
 [[headers]]
   for = "/assets/*"
   [headers.values]
     Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Content-Type-Options = "nosniff"
+    X-Frame-Options = "DENY"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    Permissions-Policy = "camera=(), microphone=(), geolocation=()"

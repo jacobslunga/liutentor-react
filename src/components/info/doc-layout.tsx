@@ -13,7 +13,12 @@ export function DocBlock({
   className?: string;
 }) {
   return (
-    <section className={cn("grid gap-x-12 gap-y-5 py-10 lg:grid-cols-[13rem_minmax(0,1fr)] lg:py-14", className)}>
+    <section
+      className={cn(
+        "grid gap-x-12 gap-y-5 py-10 lg:grid-cols-[13rem_minmax(0,1fr)] lg:py-14",
+        className,
+      )}
+    >
       <div className="lg:sticky lg:top-24 lg:self-start">{heading}</div>
       <div className="max-w-2xl">{children}</div>
     </section>
@@ -21,17 +26,32 @@ export function DocBlock({
 }
 
 export function DocParagraph({ children }: { children: ReactNode }) {
-  return <p className="text-[0.9375rem] leading-[1.75] text-foreground/75">{children}</p>;
+  return (
+    <p className="text-[0.9375rem] leading-[1.75] text-foreground/75">
+      {children}
+    </p>
+  );
 }
 
 export function DocHeading({ children }: { children: ReactNode }) {
-  return <h2 className="font-serif text-lg leading-snug font-medium">{children}</h2>;
+  return <h2 className="text-lg leading-snug font-medium">{children}</h2>;
 }
 
 /** Contact/action block at the end of a document. */
-export function DocContact({ title, body, children }: { title: string; body: string; children?: ReactNode }) {
+export function DocContact({
+  title,
+  body,
+  children,
+}: {
+  title: string;
+  body: string;
+  children?: ReactNode;
+}) {
   return (
-    <DocBlock heading={<DocHeading>{title}</DocHeading>} className="border-t py-14 lg:py-20">
+    <DocBlock
+      heading={<DocHeading>{title}</DocHeading>}
+      className="border-t py-14 lg:py-20"
+    >
       <DocParagraph>{body}</DocParagraph>
       {children && <div className="mt-6">{children}</div>}
     </DocBlock>
@@ -39,12 +59,20 @@ export function DocContact({ title, body, children }: { title: string; body: str
 }
 
 /** Numbered legal sections with a table of contents. */
-export function LegalDocument({ sections, footer }: { sections: DocSection[]; footer?: ReactNode }) {
+export function LegalDocument({
+  sections,
+  footer,
+}: {
+  sections: DocSection[];
+  footer?: ReactNode;
+}) {
   const entries = sections.map((section, i) => ({
     ...section,
     id: `sektion-${i + 1}`,
     number: String(i + 1).padStart(2, "0"),
-    paragraphs: Array.isArray(section.content) ? section.content : [section.content],
+    paragraphs: Array.isArray(section.content)
+      ? section.content
+      : [section.content],
   }));
 
   return (
@@ -59,7 +87,9 @@ export function LegalDocument({ sections, footer }: { sections: DocSection[]; fo
                 className="group flex items-baseline gap-4 border-b py-3 text-sm text-muted-foreground transition-colors duration-150 hover:text-foreground"
                 onClick={(e) => {
                   e.preventDefault();
-                  document.getElementById(entry.id)?.scrollIntoView({ behavior: "smooth", block: "start" });
+                  document
+                    .getElementById(entry.id)
+                    ?.scrollIntoView({ behavior: "smooth", block: "start" });
                 }}
               >
                 <span className="text-xs text-muted-foreground/60 tabular-nums transition-colors duration-150 group-hover:text-primary">
@@ -80,8 +110,12 @@ export function LegalDocument({ sections, footer }: { sections: DocSection[]; fo
             className="grid scroll-mt-24 gap-x-12 gap-y-5 border-t py-10 lg:grid-cols-[13rem_minmax(0,1fr)] lg:py-14"
           >
             <div className="lg:sticky lg:top-24 lg:self-start">
-              <span className="text-xs text-primary tabular-nums">{entry.number}</span>
-              <h2 className="mt-2 font-serif text-lg leading-snug font-medium">{entry.title}</h2>
+              <span className="text-xs text-primary tabular-nums">
+                {entry.number}
+              </span>
+              <h2 className="mt-2 text-lg leading-snug font-medium">
+                {entry.title}
+              </h2>
             </div>
             <div className="max-w-2xl space-y-4">
               {entry.paragraphs.map((paragraph, i) => (

@@ -102,6 +102,8 @@ export function ChatHistoryDialog({ onSelect }: ChatHistoryDialogProps) {
         messages,
         currentConversationId: item.id,
         currentConversationTitle: item.title,
+        isConversationTitleReady: true,
+        animateConversationTitle: false,
         savedScrollPosition: null,
         isHistoryOpen: false,
       });
@@ -129,6 +131,8 @@ export function ChatHistoryDialog({ onSelect }: ChatHistoryDialogProps) {
           messages: [],
           currentConversationId: null,
           currentConversationTitle: null,
+          isConversationTitleReady: false,
+          animateConversationTitle: false,
           savedScrollPosition: null,
           isLoading: false,
         });
@@ -212,7 +216,7 @@ export function ChatHistoryDialog({ onSelect }: ChatHistoryDialogProps) {
           if (value) setSearch("");
         }}
       >
-        <DialogContent className="flex h-[36rem] flex-col">
+        <DialogContent className="flex h-[min(40rem,calc(100dvh-2rem))] flex-col sm:max-w-lg">
           <DialogHeader>
             <DialogTitle>Chatthistorik</DialogTitle>
             <DialogDescription>Sök och öppna tidigare chattar</DialogDescription>

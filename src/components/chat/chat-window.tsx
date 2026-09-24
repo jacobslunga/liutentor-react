@@ -1,8 +1,17 @@
 import { Link } from "@tanstack/react-router";
-import { ArrowDownIcon, ChevronRightIcon, HistoryIcon, PlusIcon } from "lucide-react";
+import {
+  ArrowDownIcon,
+  ChevronRightIcon,
+  HistoryIcon,
+  PlusIcon,
+} from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { useChat } from "@/hooks/use-chat";
 import { normalizeClipboardFile } from "@/lib/chat-attachments";
 import { useChatStore, type PendingSelection } from "@/stores/chat";
@@ -27,7 +36,13 @@ export interface ChatWindowProps {
  * limited to discrete changes (empty/non-empty, open, quote, drop state);
  * streaming only reaches the transcript row being written.
  */
-export default function ChatWindow({ examId, courseCode, examUrl, solutionUrl, onClose }: ChatWindowProps) {
+export default function ChatWindow({
+  examId,
+  courseCode,
+  examUrl,
+  solutionUrl,
+  onClose,
+}: ChatWindowProps) {
   const rootRef = useRef<HTMLDivElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<ChatInputApi>(null);
@@ -36,8 +51,20 @@ export default function ChatWindow({ examId, courseCode, examUrl, solutionUrl, o
   const hasMessages = useChatStore((s) => s.messages.length > 0);
   const isOpen = useChatStore((s) => s.isOpen);
   const conversationId = useChatStore((s) => s.currentConversationId);
+  const conversationTitle = useChatStore((s) => s.currentConversationTitle);
+  const isConversationTitleReady = useChatStore(
+    (s) => s.isConversationTitleReady,
+  );
+  const animateConversationTitle = useChatStore(
+    (s) => s.animateConversationTitle,
+  );
   const { selectedModelId } = useSelectedModel();
-  const { send, cancelGeneration } = useChat({ examId, examUrl, courseCode, solutionUrl });
+  const { send, cancelGeneration } = useChat({
+    examId,
+    examUrl,
+    courseCode,
+    solutionUrl,
+  });
 
   const [selectionContext, setSelectionContext] = useState("");
   const [isOverDrop, setIsOverDrop] = useState(false);
@@ -50,9 +77,18 @@ export default function ChatWindow({ examId, courseCode, examUrl, solutionUrl, o
   });
 
   const submit = useCallback(
-    async (text: string, context?: string, attachments = inputRef.current?.getAttachments() ?? []) => {
-      requestAnimationFrame(() => transcriptRef.current?.scrollUserMessageToTop());
-      await send(text, attachments, { modelId: selectedModelId, selectionContext: context });
+    async (
+      text: string,
+      context?: string,
+      attachments = inputRef.current?.getAttachments() ?? [],
+    ) => {
+      requestAnimationFrame(() =>
+        transcriptRef.current?.scrollUserMessageToTop(),
+      );
+      await send(text, attachments, {
+        modelId: selectedModelId,
+        selectionContext: context,
+      });
     },
     [send, selectedModelId],
   );
@@ -61,7 +97,11 @@ export default function ChatWindow({ examId, courseCode, examUrl, solutionUrl, o
     const input = inputRef.current;
     const text = input?.getText() ?? "";
     const attachments = input?.getAttachments() ?? [];
-    if ((!text.trim() && !attachments.length) || useChatStore.getState().isLoading) return;
+    if (
+      (!text.trim() && !attachments.length) ||
+      useChatStore.getState().isLoading
+    )
+      return;
     const context = selectionContext || undefined;
     input?.setText("");
     input?.clearAttachments();
@@ -88,7 +128,8 @@ export default function ChatWindow({ examId, courseCode, examUrl, solutionUrl, o
       if (useChatStore.getState().isLoading) {
         setSelectionContext(pending.context);
         requestAnimationFrame(() => {
-          if (!inputRef.current?.getText().trim()) inputRef.current?.setText(pending.prompt);
+          if (!inputRef.current?.getText().trim())
+            inputRef.current?.setText(pending.prompt);
           inputRef.current?.focus();
         });
         return;
@@ -116,7 +157,8 @@ export default function ChatWindow({ examId, courseCode, examUrl, solutionUrl, o
     // One may already be waiting (the panel mounts on "Förklara"); the input exists next frame.
     const frame = requestAnimationFrame(take);
     const unsubscribe = useChatStore.subscribe((s, prev) => {
-      if (s.pendingSelection && s.pendingSelection !== prev.pendingSelection) take();
+      if (s.pendingSelection && s.pendingSelection !== prev.pendingSelection)
+        take();
     });
     return () => {
       cancelAnimationFrame(frame);
@@ -161,7 +203,12 @@ export default function ChatWindow({ examId, courseCode, examUrl, solutionUrl, o
   // Cmd/Ctrl+. toggles history.
   useEffect(() => {
     function onKeyDown(e: KeyboardEvent) {
-      if (e.repeat || !(e.metaKey || e.ctrlKey) || (e.key !== "." && e.code !== "Period")) return;
+      if (
+        e.repeat ||
+        !(e.metaKey || e.ctrlKey) ||
+        (e.key !== "." && e.code !== "Period")
+      )
+        return;
       const store = useChatStore.getState();
       if (!store.isOpen) return;
       e.preventDefault();
@@ -176,7 +223,8 @@ export default function ChatWindow({ examId, courseCode, examUrl, solutionUrl, o
     const root = rootRef.current;
     if (!root) return;
     let depth = 0;
-    const hasFiles = (e: DragEvent) => !!e.dataTransfer?.types.includes("Files");
+    const hasFiles = (e: DragEvent) =>
+      !!e.dataTransfer?.types.includes("Files");
     const onEnter = (e: DragEvent) => {
       if (!hasFiles(e)) return;
       e.preventDefault();
@@ -227,7 +275,10 @@ export default function ChatWindow({ examId, courseCode, examUrl, solutionUrl, o
     setShowScrollBottom(false);
     autoScrolling.current = true;
     clearTimeout(autoScrollTimer.current);
-    autoScrollTimer.current = setTimeout(() => (autoScrolling.current = false), 1000);
+    autoScrollTimer.current = setTimeout(
+      () => (autoScrolling.current = false),
+      1000,
+    );
     transcriptRef.current?.scrollToBottom("smooth");
   }
 
@@ -257,15 +308,27 @@ export default function ChatWindow({ examId, courseCode, examUrl, solutionUrl, o
   }
 
   return (
-    <div ref={rootRef} className="@container relative flex h-full w-full flex-col overflow-hidden bg-background">
+    <div
+      ref={rootRef}
+      className="@container relative flex h-full w-full flex-col overflow-hidden bg-background"
+    >
       {isOverDrop && <ChatDropOverlay />}
 
       <div className="pointer-events-none absolute inset-x-0 top-0 z-20">
         <div className="pointer-events-none relative isolate flex h-14 items-center justify-between gap-2 px-3">
           <div className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-20 bg-linear-to-b from-background to-transparent" />
-          <HeaderButton label="Stäng chatten" onClick={onClose}>
-            <ChevronRightIcon />
-          </HeaderButton>
+          <div className="flex min-w-0 items-center gap-1">
+            <HeaderButton label="Stäng chatten" onClick={onClose}>
+              <ChevronRightIcon />
+            </HeaderButton>
+            {isConversationTitleReady && conversationTitle && (
+              <ConversationTitle
+                key={conversationTitle}
+                title={conversationTitle}
+                animate={animateConversationTitle}
+              />
+            )}
+          </div>
           <div className="pointer-events-auto flex shrink-0 items-center gap-1">
             <HeaderButton label="Ny chatt" onClick={startNewChat}>
               <PlusIcon />
@@ -299,7 +362,9 @@ export default function ChatWindow({ examId, courseCode, examUrl, solutionUrl, o
           <div className="flex min-h-0 flex-1 flex-col items-center justify-center gap-4 px-4 pb-28 text-center">
             <ChatMascot className="size-14 shrink-0" />
             <div className="space-y-2">
-              <h2 className="text-2xl font-semibold">Vad kan jag hjälpa till med?</h2>
+              <h2 className="text-2xl font-semibold">
+                Vad kan jag hjälpa till med?
+              </h2>
               <p className="mx-auto max-w-70 text-sm leading-relaxed text-muted-foreground sm:max-w-md">
                 Ställ frågor om tentan eller få hjälp att förstå lösningarna.
               </p>
@@ -329,7 +394,7 @@ export default function ChatWindow({ examId, courseCode, examUrl, solutionUrl, o
         )}
         <ChatInput
           ref={inputRef}
-          className="pointer-events-auto mx-auto max-w-2xl @3xl:max-w-3xl @5xl:max-w-4xl"
+          className="pointer-events-auto mx-auto max-w-2xl"
           initialText={initialDraft.text}
           initialAttachments={initialDraft.attachments}
           selectionContext={selectionContext}
@@ -344,15 +409,76 @@ export default function ChatWindow({ examId, courseCode, examUrl, solutionUrl, o
   );
 }
 
-function HeaderButton({ label, onClick, children }: { label: string; onClick: () => void; children: React.ReactNode }) {
+function HeaderButton({
+  label,
+  onClick,
+  children,
+}: {
+  label: string;
+  onClick: () => void;
+  children: React.ReactNode;
+}) {
   return (
     <Tooltip>
       <TooltipTrigger asChild>
-        <Button variant="ghost" size="icon" className="pointer-events-auto" aria-label={label} onClick={onClick}>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="pointer-events-auto"
+          aria-label={label}
+          onClick={onClick}
+        >
           {children}
         </Button>
       </TooltipTrigger>
       <TooltipContent>{label}</TooltipContent>
     </Tooltip>
+  );
+}
+
+function ConversationTitle({
+  title,
+  animate,
+}: {
+  title: string;
+  animate: boolean;
+}) {
+  // Capture the animation decision when this title first appears. Consuming the
+  // store flag immediately prevents a panel remount from replaying the effect.
+  const [shouldType] = useState(animate);
+  const [visibleTitle, setVisibleTitle] = useState(() =>
+    animate ? "" : title,
+  );
+
+  useEffect(() => {
+    if (!shouldType) return;
+
+    useChatStore.setState({ animateConversationTitle: false });
+    let length = 0;
+    const timer = window.setInterval(() => {
+      length += 1;
+      setVisibleTitle(title.slice(0, length));
+      if (length < title.length) return;
+      window.clearInterval(timer);
+    }, 28);
+
+    return () => window.clearInterval(timer);
+  }, [shouldType, title]);
+
+  const isTyping = shouldType && visibleTitle.length < title.length;
+
+  return (
+    <span
+      className="pointer-events-none max-w-[min(24rem,50vw)] truncate text-sm font-medium"
+      aria-label={title}
+    >
+      <span aria-hidden="true">{visibleTitle}</span>
+      {isTyping && (
+        <span
+          className="ml-px inline-block h-4 w-px animate-pulse bg-current align-[-2px]"
+          aria-hidden
+        />
+      )}
+    </span>
   );
 }

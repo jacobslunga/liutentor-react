@@ -29,14 +29,21 @@ import {
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { computeCourseStats, passRateClass } from "@/lib/course-stats";
 import { cn } from "@/lib/utils";
+import { useSeo } from "@/hooks/use-seo";
 import { courseExamsQuery } from "@/queries/exams";
-import { useExamSortPreference, type ExamSortBy, type ExamSortDirection } from "@/stores/exam-sort";
+import {
+  useExamSortPreference,
+  type ExamSortBy,
+  type ExamSortDirection,
+} from "@/stores/exam-sort";
 import { useRecentSearches } from "@/stores/recent-searches";
 import { useUploadModal } from "@/stores/upload-modal";
 import type { CourseExams } from "@/types/exam";
 
 const CourseStats = lazy(() => import("@/components/course/course-stats"));
-const CourseQuizPanel = lazy(() => import("@/components/quiz/course-quiz-panel"));
+const CourseQuizPanel = lazy(
+  () => import("@/components/quiz/course-quiz-panel"),
+);
 
 type CourseTab = "exams" | "stats" | "quiz";
 
@@ -45,7 +52,9 @@ export const Route = createFileRoute("/_search/search/$courseCode")({
     parse: ({ courseCode }) => ({ courseCode: courseCode.toUpperCase() }),
     stringify: ({ courseCode }) => ({ courseCode }),
   },
-  validateSearch: (search: Record<string, unknown>): { tab?: "stats" | "quiz" } =>
+  validateSearch: (
+    search: Record<string, unknown>,
+  ): { tab?: "stats" | "quiz" } =>
     search.tab === "stats" || search.tab === "quiz" ? { tab: search.tab } : {},
   component: CoursePage,
 });
@@ -55,8 +64,64 @@ function CoursePage() {
   const { data, isPending } = useQuery(courseExamsQuery(courseCode));
   const addRecentSearch = useRecentSearches((s) => s.add);
 
+  const seo = useMemo(() => {
+    const canonical = `https://liutentor.se/search/${courseCode}`;
+    if (!data) {
+      return {
+        title: `${courseCode} – gamla tentor`,
+        description: `Vi saknar gamla tentor för ${courseCode} vid Linköpings universitet.`,
+        robots: "noindex, follow",
+      };
+    }
+    const exams = data.exams;
+    const solutions = exams.filter((exam) => exam.has_solution).length;
+    const years = exams.map((exam) => exam.exam_date.slice(0, 4)).filter(Boolean).sort();
+    const yearText = years.length
+      ? ` Tentor från ${years[0]}${years.at(-1) !== years[0] ? `–${years.at(-1)}` : ""}.`
+      : "";
+    const description = `${exams.length} gamla tentor${solutions ? ` varav ${solutions} med facit` : ""} för ${courseCode} – ${data.courseName} vid Linköpings universitet.${yearText}`;
+    return {
+      title: `${courseCode} tentor & facit – ${data.courseName}`,
+      description,
+      robots: exams.length ? "index, follow" : "noindex, follow",
+      jsonLd: {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "BreadcrumbList",
+            itemListElement: [
+              { "@type": "ListItem", position: 1, name: "Hem", item: "https://liutentor.se" },
+              { "@type": "ListItem", position: 2, name: courseCode, item: canonical },
+            ],
+          },
+          {
+            "@type": "Course",
+            name: `${courseCode} – ${data.courseName}`,
+            courseCode,
+            description,
+            url: canonical,
+            inLanguage: "sv",
+            provider: { "@type": "CollegeOrUniversity", name: "Linköpings universitet", url: "https://liu.se" },
+          },
+          {
+            "@type": "ItemList",
+            name: `Gamla tentor för ${courseCode}`,
+            numberOfItems: exams.length,
+            itemListElement: exams.map((exam, index) => ({
+              "@type": "ListItem",
+              position: index + 1,
+              name: `${courseCode} ${exam.exam_name}`,
+              url: `${canonical}/${exam.id}`,
+            })),
+          },
+        ],
+      },
+    };
+  }, [courseCode, data]);
+
+  useSeo({ ...seo, path: `/search/${courseCode}` });
+
   useEffect(() => {
-    document.title = `${courseCode} | LiU Tentor`;
     addRecentSearch(courseCode);
   }, [courseCode, addRecentSearch]);
 
@@ -86,10 +151,12 @@ function NoExams({ courseCode }: { courseCode: string }) {
         <div className="mx-auto mb-4 flex size-12 items-center justify-center rounded-full bg-muted">
           <InboxIcon className="size-6 text-muted-foreground" />
         </div>
-        <h1 className="text-2xl font-medium">Vi saknar tentor för {courseCode}</h1>
+        <h1 className="text-2xl font-medium">
+          Vi saknar tentor för {courseCode}
+        </h1>
         <p className="mt-2 text-sm text-muted-foreground">
-          Har du en gammal tenta eller ett facit? Ladda upp den här så blir nästa student som
-          söker på {courseCode} hjälpt direkt.
+          Har du en gammal tenta eller ett facit? Ladda upp den här så blir
+          nästa student som söker på {courseCode} hjälpt direkt.
         </p>
       </div>
       <ExamUploadForm initialCourseCode={courseCode} fixedCourseCode />
@@ -97,7 +164,13 @@ function NoExams({ courseCode }: { courseCode: string }) {
   );
 }
 
-function CourseContent({ courseCode, course }: { courseCode: string; course: CourseExams }) {
+function CourseContent({
+  courseCode,
+  course,
+}: {
+  courseCode: string;
+  course: CourseExams;
+}) {
   const { tab } = Route.useSearch();
   const navigate = useNavigate({ from: Route.fullPath });
   const activeTab: CourseTab = tab ?? "exams";
@@ -106,12 +179,16 @@ function CourseContent({ courseCode, course }: { courseCode: string; course: Cou
 
   const exams = course.exams;
   const { overallPassRate } = useMemo(() => computeCourseStats(exams), [exams]);
-  const avgPassRate = overallPassRate === undefined ? null : Math.round(overallPassRate);
+  const avgPassRate =
+    overallPassRate === undefined ? null : Math.round(overallPassRate);
   const examsWithSolutions = exams.filter((e) => e.has_solution).length;
 
   function setTab(value: string) {
     // Keep the tab in the URL so it can be linked and refreshed.
-    void navigate({ search: value === "exams" ? {} : { tab: value as "stats" | "quiz" }, replace: true });
+    void navigate({
+      search: value === "exams" ? {} : { tab: value as "stats" | "quiz" },
+      replace: true,
+    });
   }
 
   return (
@@ -125,17 +202,23 @@ function CourseContent({ courseCode, course }: { courseCode: string; course: Cou
             <span className="font-medium">{courseCode}</span>
             <Dot />
             <span>
-              <span className="font-bold text-foreground">{exams.length}</span> tentor
+              <span className="font-bold text-foreground">{exams.length}</span>{" "}
+              tentor
             </span>
             <Dot />
             <span>
-              <span className="font-bold text-foreground">{examsWithSolutions}</span> med facit
+              <span className="font-bold text-foreground">
+                {examsWithSolutions}
+              </span>{" "}
+              med facit
             </span>
             {avgPassRate !== null && (
               <>
                 <Dot />
                 <span>
-                  <span className={cn("font-bold", passRateClass(avgPassRate))}>{avgPassRate}%</span>{" "}
+                  <span className={cn("font-bold", passRateClass(avgPassRate))}>
+                    {avgPassRate}%
+                  </span>{" "}
                   godkända i snitt
                 </span>
               </>
@@ -225,14 +308,22 @@ function SortMenu({
         <Button variant="outline" aria-label="Sortera tentor">
           <ArrowLeftRightIcon data-icon="inline-start" />
           {sortBy === "date" ? "Datum" : "Godkänd"}
-          <DirectionIcon data-icon="inline-end" className="text-muted-foreground" />
+          <DirectionIcon
+            data-icon="inline-end"
+            className="text-muted-foreground"
+          />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start">
         <DropdownMenuLabel>Sortera efter</DropdownMenuLabel>
-        <DropdownMenuRadioGroup value={sortBy} onValueChange={(v) => setSortBy(v as ExamSortBy)}>
+        <DropdownMenuRadioGroup
+          value={sortBy}
+          onValueChange={(v) => setSortBy(v as ExamSortBy)}
+        >
           <DropdownMenuRadioItem value="date">Datum</DropdownMenuRadioItem>
-          <DropdownMenuRadioItem value="pass-rate">Godkänd</DropdownMenuRadioItem>
+          <DropdownMenuRadioItem value="pass-rate">
+            Godkänd
+          </DropdownMenuRadioItem>
         </DropdownMenuRadioGroup>
         <DropdownMenuSeparator />
         <DropdownMenuLabel>Ordning</DropdownMenuLabel>

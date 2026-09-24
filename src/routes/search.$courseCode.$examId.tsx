@@ -1,11 +1,11 @@
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { LoaderCircleIcon } from "lucide-react";
-import { useEffect } from "react";
 import { DesktopExamView } from "@/components/exam/desktop-exam-view";
 import { MobileExamView } from "@/components/exam/mobile-exam-view";
 import { Button } from "@/components/ui/button";
 import { useMediaQuery } from "@/hooks/use-media-query";
+import { useSeo } from "@/hooks/use-seo";
 import { courseExamsQuery, examDetailQuery } from "@/queries/exams";
 
 /** Touch tablets use the full-width viewer in either orientation. */
@@ -56,9 +56,12 @@ function ExamPage() {
   const exam = detail?.exam;
   const solutionPdfUrl = detail?.solution?.pdf_url ?? null;
 
-  useEffect(() => {
-    if (exam) document.title = `${exam.course_code} - Tenta ${exam.exam_date} | LiU Tentor`;
-  }, [exam]);
+  useSeo({
+    title: exam ? `${exam.course_code} – Tenta ${exam.exam_date}` : `${courseCode} – Tenta`,
+    description: `Tentamensvisning för ${courseCode} på LiU Tentor.`,
+    path: `/search/${courseCode}/${examId}`,
+    robots: "noindex, nofollow",
+  });
 
   if (!exam) return <ExamPending />;
 

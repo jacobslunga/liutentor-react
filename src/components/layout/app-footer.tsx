@@ -56,7 +56,9 @@ export function AppFooter() {
           <div className="grid grid-cols-2 gap-8 sm:grid-cols-3 lg:col-span-3">
             {groupedLinks.map((section) => (
               <div key={section.title}>
-                <h4 className="text-sm font-medium text-foreground">{section.title}</h4>
+                <h4 className="text-sm font-medium text-foreground">
+                  {section.title}
+                </h4>
                 <ul className="mt-4 space-y-2.5">
                   {section.links.map((link) => (
                     <li key={link.name}>
@@ -76,7 +78,8 @@ export function AppFooter() {
 
         <div className="mt-14 flex flex-col items-start justify-between gap-4 border-t pt-8 sm:flex-row sm:items-center">
           <p className="text-xs text-muted-foreground">
-            &copy; {year} LiU Tentor. Inte affilierad med Linköpings universitet.
+            &copy; {year} LiU Tentor. Inte affilierad med Linköpings
+            universitet.
           </p>
           <div className="flex items-center gap-5">
             <a

@@ -37,7 +37,11 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { downloadFile } from "@/lib/download";
 import { useChatStore } from "@/stores/chat";
 import { useExamViewStore } from "@/stores/exam-view";
@@ -70,10 +74,12 @@ export const ExamHeader = memo(function ExamHeader({
     <div className="pointer-events-none relative isolate flex h-12 w-full items-center justify-between px-3">
       <ButtonGroup className="pointer-events-auto">
         <Button
-          variant="secondary"
+          variant="outline"
           size="icon"
           aria-label="Tillbaka till kursen"
-          onClick={() => void navigate({ to: "/search/$courseCode", params: { courseCode } })}
+          onClick={() =>
+            void navigate({ to: "/search/$courseCode", params: { courseCode } })
+          }
         >
           <ArrowLeftIcon />
         </Button>
@@ -114,7 +120,11 @@ function ChatToggle() {
 }
 
 const LAYOUT_TABS = [
-  { value: "exam-with-facit", icon: Columns2Icon, label: "Visa tenta och facit" },
+  {
+    value: "exam-with-facit",
+    icon: Columns2Icon,
+    label: "Visa tenta och facit",
+  },
   { value: "exam-only", icon: PanelRightOpenIcon, label: "Visa endast tentan" },
 ] as const;
 
@@ -162,7 +172,8 @@ function ActionsMenu({
   const toggleFocusMode = useExamViewStore((s) => s.toggleFocusMode);
   const openUploadModal = useUploadModal((s) => s.open);
   const { theme = "system", setTheme } = useTheme();
-  const ThemeIcon = theme === "light" ? SunIcon : theme === "dark" ? MoonIcon : MonitorIcon;
+  const ThemeIcon =
+    theme === "light" ? SunIcon : theme === "dark" ? MoonIcon : MonitorIcon;
   const [settingsOpen, setSettingsOpen] = useState(false);
 
   return (
@@ -188,9 +199,15 @@ function ActionsMenu({
               </DropdownMenuSubTrigger>
               <DropdownMenuSubContent>
                 <DropdownMenuRadioGroup value={theme} onValueChange={setTheme}>
-                  <DropdownMenuRadioItem value="light">Ljust</DropdownMenuRadioItem>
-                  <DropdownMenuRadioItem value="dark">Mörkt</DropdownMenuRadioItem>
-                  <DropdownMenuRadioItem value="system">System</DropdownMenuRadioItem>
+                  <DropdownMenuRadioItem value="light">
+                    Ljust
+                  </DropdownMenuRadioItem>
+                  <DropdownMenuRadioItem value="dark">
+                    Mörkt
+                  </DropdownMenuRadioItem>
+                  <DropdownMenuRadioItem value="system">
+                    System
+                  </DropdownMenuRadioItem>
                 </DropdownMenuRadioGroup>
               </DropdownMenuSubContent>
             </DropdownMenuSub>
@@ -211,7 +228,12 @@ function ActionsMenu({
             </DropdownMenuSubTrigger>
             <DropdownMenuSubContent>
               <DropdownMenuItem
-                onSelect={() => void downloadFile(examPdfUrl, `${courseCode}_${examDate}_EXAM.pdf`)}
+                onSelect={() =>
+                  void downloadFile(
+                    examPdfUrl,
+                    `${courseCode}_${examDate}_EXAM.pdf`,
+                  )
+                }
               >
                 <FileTextIcon />
                 Tenta
@@ -220,7 +242,10 @@ function ActionsMenu({
                 disabled={!solutionPdfUrl}
                 onSelect={() =>
                   solutionPdfUrl &&
-                  void downloadFile(solutionPdfUrl, `${courseCode}_${examDate}_SOLUTION.pdf`)
+                  void downloadFile(
+                    solutionPdfUrl,
+                    `${courseCode}_${examDate}_SOLUTION.pdf`,
+                  )
                 }
               >
                 <BookOpenCheckIcon />

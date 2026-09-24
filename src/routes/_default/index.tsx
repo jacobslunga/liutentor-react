@@ -5,6 +5,7 @@ import { LogoIcon } from "@/components/layout/logo-icon";
 import { HeroCourseSearch } from "@/components/search/course-search";
 import { RecentSearches } from "@/components/search/recent-searches";
 import { Button } from "@/components/ui/button";
+import { useSeo } from "@/hooks/use-seo";
 import { useUploadModal } from "@/stores/upload-modal";
 
 export const Route = createFileRoute("/_default/")({
@@ -12,12 +13,17 @@ export const Route = createFileRoute("/_default/")({
 });
 
 function HomePage() {
+  useSeo({
+    title: "Sök tentor",
+    description: "Hitta och plugga på gamla tentor från Linköpings universitet",
+    path: "/",
+  });
   const openUploadModal = useUploadModal((s) => s.open);
 
   return (
     <div className="relative flex min-h-dvh w-full flex-col items-center justify-start bg-background p-4 pt-[20dvh]">
       <div className="absolute top-5 right-5 flex flex-row items-center justify-center gap-2">
-        <AuthActions largerOnDesktop />
+        <AuthActions />
       </div>
 
       <div className="mb-20 flex w-full max-w-150 flex-col items-center gap-6">

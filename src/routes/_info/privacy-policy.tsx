@@ -44,7 +44,8 @@ const sections: DocSection[] = [
       "Vi använder moderna molntjänster för att driva tjänsten och möjliggöra AI-funktionalitet:",
     items: [
       "Supabase: Vår databas och autentiseringstjänst. Din data lagras på servrar i Frankfurt, Tyskland (EU).",
-      "AI-leverantörer (Google): Vid användning av chatten skickas meddelanden och relevant tentainnehåll till dessa för att generera svar. Ingen personlig profilinformation (som din e-post) delas med dessa leverantörer.",
+      "AI-leverantör (OpenAI): Vid användning av chatten skickas meddelanden och relevant tentainnehåll till OpenAI för att generera svar. Ingen personlig profilinformation, som din e-postadress, skickas med chattförfrågan.",
+      "Analystjänst (Google Analytics): Om du godkänner analys används tjänsten för att förstå hur webbplatsen används och förbättra användarupplevelsen.",
       "Infrastruktur: Vi säljer aldrig dina personuppgifter till tredje part.",
     ],
   },
@@ -61,7 +62,7 @@ const sections: DocSection[] = [
   {
     title: "Cookies",
     content:
-      "Vi använder cookies för att hantera din inloggningssession samt för att spara vissa inställningar lokalt. Du kan styra användningen av cookies via din webbläsares inställningar.",
+      "Vi använder nödvändig lokal lagring för inloggningssession och inställningar. Google Analytics aktiveras först när du godkänner analys i webbplatsens samtyckesruta. Ditt val sparas lokalt och du kan även rensa det via webbläsarens webbplatsdata.",
   },
   {
     title: "Dina rättigheter",
@@ -97,7 +98,7 @@ function PrivacyPolicyPage() {
         eyebrow="Juridiskt"
         title="Integritetspolicy"
         lead="Hos LiU Tentor värnar vi om din integritet och behandlar dina personuppgifter i enlighet med EU:s dataskyddsförordning (GDPR). Här beskriver vi vilka uppgifter vi samlar in, hur de hanteras säkert i Frankfurt (EU), och vilka rättigheter du har som användare."
-        meta="Senast uppdaterad 29 juli 2026"
+        meta="Senast uppdaterad 24 september 2026"
       />
       <LegalDocument
         sections={sections}

@@ -1,6 +1,11 @@
 import { useCallback, useEffect, useRef } from "react";
-import { CHAT_COMPLETION_URL, getAnonymousId, readSseEvents } from "@/lib/chat-api";
+import {
+  CHAT_COMPLETION_URL,
+  getAnonymousId,
+  readSseEvents,
+} from "@/lib/chat-api";
 import { DEFAULT_MODEL_ID } from "@/lib/chat-models";
+import { queryClient } from "@/lib/query-client";
 import { getAuthHeaders, supabase } from "@/lib/supabase";
 import { useAuthStore } from "@/stores/auth";
 import {
@@ -15,7 +20,9 @@ const CANCELLED_NOTE = "> *Avbruten av användaren*";
 const GENERIC_ERROR = "Något gick fel. Försök igen senare.";
 
 function truncateTitle(title: string, maxLength: number): string {
-  return title.length <= maxLength ? title : `${title.slice(0, maxLength - 1).trimEnd()}…`;
+  return title.length <= maxLength
+    ? title
+    : `${title.slice(0, maxLength - 1).trimEnd()}…`;
 }
 
 export interface ChatContext {
@@ -68,12 +75,18 @@ export function useChat(ctx: ChatContext) {
         } else {
           // Later turn: drop it and hand the question back to the input.
           if (userMsg?.role === "user") {
-            cancelled = { content: userMsg.content, attachments: userMsg.attachments ?? [] };
+            cancelled = {
+              content: userMsg.content,
+              attachments: userMsg.attachments ?? [],
+            };
           }
           next = msgs.slice(0, -2);
         }
       } else {
-        next = [...msgs.slice(0, -1), { ...last, content: `${last.content.trim()}\n\n${CANCELLED_NOTE}` }];
+        next = [
+          ...msgs.slice(0, -1),
+          { ...last, content: `${last.content.trim()}\n\n${CANCELLED_NOTE}` },
+        ];
       }
     }
 
@@ -85,18 +98,30 @@ export function useChat(ctx: ChatContext) {
   }, []);
 
   const send = useCallback(
-    async (content: string, attachments: ChatAttachment[] = [], opts: SendOptions = {}) => {
+    async (
+      content: string,
+      attachments: ChatAttachment[] = [],
+      opts: SendOptions = {},
+    ) => {
       const store = useChatStore.getState();
-      if ((!content.trim() && attachments.length === 0) || store.isLoading) return;
+      if ((!content.trim() && attachments.length === 0) || store.isLoading)
+        return;
 
       const { examId, examUrl, courseCode, solutionUrl } = ctxRef.current;
       const trimmed = content.trim();
+      const isFirstMessage = store.messages.length === 0;
       const fallbackTitle = (max: number) =>
         truncateTitle(trimmed, max) ||
-        (attachments[0]?.name ? truncateTitle(attachments[0].name, max) : "Ny chatt");
+        (attachments[0]?.name
+          ? truncateTitle(attachments[0].name, max)
+          : "Ny chatt");
 
       if (!store.currentConversationTitle) {
-        useChatStore.setState({ currentConversationTitle: fallbackTitle(80) });
+        useChatStore.setState({
+          currentConversationTitle: fallbackTitle(80),
+          isConversationTitleReady: false,
+          animateConversationTitle: false,
+        });
       }
 
       // Signed-in users get a conversation row so the turn lands in history.
@@ -108,20 +133,31 @@ export function useChat(ctx: ChatContext) {
           .insert({ user_id: userId, title })
           .select("id")
           .single();
-        if (error) console.error("Failed to initialize conversation history:", error);
-        else useChatStore.setState({ currentConversationId: data.id, currentConversationTitle: title });
+        if (error)
+          console.error("Failed to initialize conversation history:", error);
+        else
+          useChatStore.setState({
+            currentConversationId: data.id,
+            currentConversationTitle: title,
+          });
       }
 
       const userMessage: Message = {
         id: createMessageId(),
         role: "user",
         content,
-        ...(opts.selectionContext ? { selectionContext: opts.selectionContext } : {}),
+        ...(opts.selectionContext
+          ? { selectionContext: opts.selectionContext }
+          : {}),
         ...(attachments.length ? { attachments } : {}),
       };
       const assistantId = createMessageId();
       useChatStore.setState((s) => ({
-        messages: [...s.messages, userMessage, { id: assistantId, role: "assistant", content: "" }],
+        messages: [
+          ...s.messages,
+          userMessage,
+          { id: assistantId, role: "assistant", content: "" },
+        ],
         isLoading: true,
       }));
 
@@ -130,7 +166,8 @@ export function useChat(ctx: ChatContext) {
 
       let streamText = "";
       let pendingFrame = 0;
-      const patch = (p: Partial<Message>) => useChatStore.getState().updateMessage(assistantId, p);
+      const patch = (p: Partial<Message>) =>
+        useChatStore.getState().updateMessage(assistantId, p);
       const cancelFlush = () => {
         if (pendingFrame) cancelAnimationFrame(pendingFrame);
         pendingFrame = 0;
@@ -164,12 +201,16 @@ export function useChat(ctx: ChatContext) {
             solutionUrl: solutionUrl || undefined,
             modelId: opts.modelId || DEFAULT_MODEL_ID,
             conversationId: useChatStore.getState().currentConversationId,
+            isFirstMessage,
             selectionContext: opts.selectionContext || undefined,
           }),
         );
         // Includes this turn's files: the user message is already in the store.
-        for (const attachment of useChatStore.getState().getActiveAttachments()) {
-          if (attachment.file) formData.append("files", attachment.file, attachment.name);
+        for (const attachment of useChatStore
+          .getState()
+          .getActiveAttachments()) {
+          if (attachment.file)
+            formData.append("files", attachment.file, attachment.name);
         }
 
         const response = await fetch(`${CHAT_COMPLETION_URL}/${examId}`, {
@@ -191,6 +232,7 @@ export function useChat(ctx: ChatContext) {
             step?: string;
             message?: string;
             items?: MessageSource[];
+            title?: string;
           };
           if (event === "text") {
             streamText += payload.delta ?? "";
@@ -200,10 +242,24 @@ export function useChat(ctx: ChatContext) {
               status:
                 payload.step === "search_done"
                   ? null
-                  : { step: payload.step ?? "", message: payload.message ?? "" },
+                  : {
+                      step: payload.step ?? "",
+                      message: payload.message ?? "",
+                    },
             });
           } else if (event === "sources") {
             patch({ sources: payload.items ?? [] });
+          } else if (event === "title" && payload.title?.trim()) {
+            useChatStore.setState({
+              currentConversationTitle: payload.title.trim(),
+              isConversationTitleReady: true,
+              animateConversationTitle: true,
+            });
+            if (userId) {
+              void queryClient.invalidateQueries({
+                queryKey: ["conversations", userId],
+              });
+            }
           } else if (event === "done") {
             patch({ status: null });
           } else if (event === "error") {
@@ -214,7 +270,9 @@ export function useChat(ctx: ChatContext) {
 
         cancelFlush();
         patch({
-          content: streamText.trim() || (failed ? GENERIC_ERROR : "Jag kunde inte generera ett svar."),
+          content:
+            streamText.trim() ||
+            (failed ? GENERIC_ERROR : "Jag kunde inte generera ett svar."),
         });
       } catch (error) {
         cancelFlush();

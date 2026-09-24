@@ -1,6 +1,14 @@
 import { Link } from "@tanstack/react-router";
 import { LoaderCircleIcon, MousePointer2Icon, UploadIcon } from "lucide-react";
-import { lazy, Suspense, useCallback, useEffect, useLayoutEffect, useRef, type ReactNode } from "react";
+import {
+  lazy,
+  Suspense,
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  type ReactNode,
+} from "react";
 import { ExamHeader } from "@/components/exam/exam-header";
 import { FacitEdge } from "@/components/exam/facit-edge";
 import { ResizeHandle } from "@/components/exam/resize-handle";
@@ -13,22 +21,23 @@ import { useSettingsStore } from "@/stores/settings";
 import type { Exam } from "@/types/exam";
 
 const PdfRenderer = lazy(() =>
-  import("@/components/pdf/pdf-renderer").then((m) => ({ default: m.PdfRenderer })),
+  import("@/components/pdf/pdf-renderer").then((m) => ({
+    default: m.PdfRenderer,
+  })),
 );
 const ChatWindow = lazy(() => import("@/components/chat/chat-window"));
 
 const SPLIT_MIN = 20;
 const SPLIT_MAX = 80;
 const SPLIT_KEY_STEP = 2;
-const OVERLAY_MIN = 300;
+const OVERLAY_MIN = 420;
 const OVERLAY_MAX_SHARE = 0.85;
-/** Room for the floating header above the first page. */
-const HEADER_INSET = 64;
 /** The header is summoned from the very top in focus mode, and leaves below this. */
 const HEADER_ACTIVE_Y = 96;
 const FOCUS_SUMMON_Y = 8;
 
-const clampSplit = (percent: number) => Math.min(Math.max(percent, SPLIT_MIN), SPLIT_MAX);
+const clampSplit = (percent: number) =>
+  Math.min(Math.max(percent, SPLIT_MIN), SPLIT_MAX);
 
 function PaneSpinner() {
   return (
@@ -86,10 +95,14 @@ export function DesktopExamView({
     rootRef.current?.style.setProperty("--exam-split", `${split.current}%`);
   }, []);
   const applyOverlayWidth = useCallback((width: number) => {
-    overlayWidth.current = Math.round(
-      Math.max(OVERLAY_MIN, Math.min(width, window.innerWidth * OVERLAY_MAX_SHARE)),
+    const max = window.innerWidth * OVERLAY_MAX_SHARE;
+    // The minimum gives way on a window too narrow to honour it.
+    const min = Math.min(OVERLAY_MIN, max);
+    overlayWidth.current = Math.round(Math.max(min, Math.min(width, max)));
+    rootRef.current?.style.setProperty(
+      "--exam-overlay-width",
+      `${overlayWidth.current}px`,
     );
-    rootRef.current?.style.setProperty("--exam-overlay-width", `${overlayWidth.current}px`);
   }, []);
 
   useLayoutEffect(() => {
@@ -103,7 +116,9 @@ export function DesktopExamView({
 
   // A new exam starts with fresh view state and an empty chat.
   useEffect(() => {
-    useExamViewStore.getState().reset(useSettingsStore.getState().blurFacitUntilHover);
+    useExamViewStore
+      .getState()
+      .reset(useSettingsStore.getState().blurFacitUntilHover);
     const chat = useChatStore.getState();
     chat.close();
     chat.clearChat();
@@ -135,8 +150,10 @@ export function DesktopExamView({
 
       if (view.focusMode) {
         // Hysteresis: summoned from the very top, dismissed well below it.
-        if (!view.isHeaderMounted && e.clientY < FOCUS_SUMMON_Y) view.setHeaderMounted(true);
-        else if (view.isHeaderMounted && e.clientY > HEADER_ACTIVE_Y) view.setHeaderMounted(false);
+        if (!view.isHeaderMounted && e.clientY < FOCUS_SUMMON_Y)
+          view.setHeaderMounted(true);
+        else if (view.isHeaderMounted && e.clientY > HEADER_ACTIVE_Y)
+          view.setHeaderMounted(false);
       }
 
       const { isExamOnly, hasFacit } = latest.current;
@@ -157,7 +174,8 @@ export function DesktopExamView({
 
       if (inSafeZone && !view.isFacitVisible) return;
       if (!view.isFacitVisible && e.clientY < 80) return;
-      if (view.isFacitVisible && e.clientX >= w - overlayWidth.current - 40) return;
+      if (view.isFacitVisible && e.clientX >= w - overlayWidth.current - 40)
+        return;
 
       const next = e.clientX > w * 0.92 && !inSafeZone;
       if (next !== view.isFacitVisible) view.setFacitVisible(next);
@@ -165,7 +183,8 @@ export function DesktopExamView({
 
     function onLeave() {
       const view = useExamViewStore.getState();
-      if (!view.isFacitManual && view.isFacitVisible) view.setFacitVisible(false);
+      if (!view.isFacitManual && view.isFacitVisible)
+        view.setFacitVisible(false);
     }
 
     window.addEventListener("mousemove", onMove, { passive: true });
@@ -196,7 +215,11 @@ export function DesktopExamView({
 
       if (chat.isOpen) return;
       const target = e.target as HTMLElement | null;
-      if (target?.isContentEditable || target?.tagName === "INPUT" || target?.tagName === "TEXTAREA") {
+      if (
+        target?.isContentEditable ||
+        target?.tagName === "INPUT" ||
+        target?.tagName === "TEXTAREA"
+      ) {
         return;
       }
       // Let browser/OS shortcuts through (cmd/ctrl+F, alt combos, ...).
@@ -207,7 +230,10 @@ export function DesktopExamView({
 
       if (!isExamOnly && (e.key === "ArrowLeft" || e.key === "ArrowRight")) {
         e.preventDefault();
-        applySplit(split.current + (e.key === "ArrowRight" ? SPLIT_KEY_STEP : -SPLIT_KEY_STEP));
+        applySplit(
+          split.current +
+            (e.key === "ArrowRight" ? SPLIT_KEY_STEP : -SPLIT_KEY_STEP),
+        );
       } else if (key === "c") {
         e.preventDefault();
         chat.open();
@@ -232,7 +258,10 @@ export function DesktopExamView({
   const splitRowWidth = useRef({ left: 0, width: 1 });
 
   return (
-    <div ref={rootRef} className="relative flex h-dvh w-full flex-col overflow-hidden bg-background">
+    <div
+      ref={rootRef}
+      className="relative flex h-dvh w-full flex-col overflow-hidden bg-background"
+    >
       {isHeaderMounted && (
         <div className="absolute inset-x-0 top-0 z-30 animate-in duration-200 fade-in-0 slide-in-from-top-2">
           <ExamHeader
@@ -246,7 +275,10 @@ export function DesktopExamView({
         </div>
       )}
 
-      <div ref={splitRowRef} className="relative flex h-full min-h-0 flex-1 flex-row overflow-hidden">
+      <div
+        ref={splitRowRef}
+        className="relative flex h-full min-h-0 flex-1 flex-row overflow-hidden"
+      >
         <div
           className="relative isolate h-full min-w-0 overflow-hidden bg-background"
           style={{ width: isExamOnly ? "100%" : "var(--exam-split)" }}
@@ -255,12 +287,13 @@ export function DesktopExamView({
             <PdfRenderer
               pdfUrl={examPdfUrl}
               layoutMode={layoutMode}
-              topInset={HEADER_INSET}
               explainEnabled={showExplain}
               onExplain={explain}
             />
           </Suspense>
-          {isExamOnly && hasFacit && !isFacitVisible && !chatOpen && <FacitEdge />}
+          {isExamOnly && hasFacit && !isFacitVisible && !chatOpen && (
+            <FacitEdge />
+          )}
         </div>
 
         {!isExamOnly && (
@@ -270,7 +303,10 @@ export function DesktopExamView({
                 onResizeStart={() => {
                   // The row can't change size mid-drag, so measure it once.
                   const rect = splitRowRef.current?.getBoundingClientRect();
-                  splitRowWidth.current = { left: rect?.left ?? 0, width: rect?.width || window.innerWidth };
+                  splitRowWidth.current = {
+                    left: rect?.left ?? 0,
+                    width: rect?.width || window.innerWidth,
+                  };
                 }}
                 onResize={(x) => {
                   const { left, width } = splitRowWidth.current;
@@ -360,7 +396,7 @@ function SideOverlay({
       aria-hidden={!visible}
       inert={!visible}
       className={cn(
-        "fixed right-0 bottom-0 flex h-dvh border-l bg-background shadow-xl transition-[translate,opacity,filter] duration-200 ease-(--ease-spring) dark:shadow-none",
+        "fixed right-0 bottom-0 flex h-dvh border-l bg-background shadow-xl transition-[translate,opacity,filter] duration-200 ease-spring dark:shadow-none",
         zIndex,
         // `starting:` animates the first open too, when the overlay mounts already visible.
         visible
@@ -398,13 +434,14 @@ function SolutionPane({
     <div
       className="absolute inset-0"
       onMouseEnter={() => setBlurred(false)}
-      onMouseLeave={() => setBlurred(useSettingsStore.getState().blurFacitUntilHover)}
+      onMouseLeave={() =>
+        setBlurred(useSettingsStore.getState().blurFacitUntilHover)
+      }
     >
       <Suspense fallback={<PaneSpinner />}>
         <PdfRenderer
           pdfUrl={pdfUrl}
           layoutMode="exam-with-facit"
-          topInset={HEADER_INSET}
           explainEnabled={explainEnabled}
           onExplain={onExplain}
         />
@@ -415,7 +452,9 @@ function SolutionPane({
           blurred ? "opacity-100" : "opacity-0",
         )}
       >
-        <p className="text-sm font-medium text-muted-foreground">Håll muspekaren för att visa facit</p>
+        <p className="text-sm text-muted-foreground">
+          Håll muspekaren för att visa facit
+        </p>
         <MousePointer2Icon className="size-6 text-muted-foreground" />
       </div>
     </div>
@@ -432,9 +471,12 @@ function NoSolution() {
               <UploadIcon className="size-6 text-muted-foreground transition-colors group-hover:text-primary" />
             </div>
             <div>
-              <p className="font-medium text-foreground/80">Inget facit tillgängligt</p>
+              <p className="font-medium text-foreground/80">
+                Inget facit tillgängligt
+              </p>
               <p className="mt-1 max-w-55 text-xs leading-relaxed text-muted-foreground">
-                Hjälp andra studenter genom att ladda upp facit till denna tenta.
+                Hjälp andra studenter genom att ladda upp facit till denna
+                tenta.
               </p>
             </div>
             <Button asChild size="sm" variant="outline">
