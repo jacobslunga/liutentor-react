@@ -43,80 +43,87 @@ export function ExamStatsDialog({ statistics, date, passRate }: ExamStatsDialogP
   }));
   const maxCount = Math.max(...chartData.map((d) => d.count));
 
+  // The dialog sits inside a clickable exam row. React bubbles events from
+  // portals through the component tree, so clicks and keys on the overlay or
+  // content would reach the row and open the exam; stop them here.
   return (
-    <Dialog>
-      <DialogTrigger asChild>
-        <Button
-          variant="ghost"
-          size="sm"
-          className={cn("tabular-nums", passRateClass(passRate))}
-          // The row itself navigates to the exam.
-          onClick={(e) => e.stopPropagation()}
-        >
-          {passRate.toFixed(1)}%
-        </Button>
-      </DialogTrigger>
-      <DialogContent onClick={(e) => e.stopPropagation()}>
-        <DialogHeader>
-          <DialogTitle>Tentastatistik</DialogTitle>
-          <DialogDescription>Betygsfördelning {date}</DialogDescription>
-        </DialogHeader>
+    <span
+      className="contents"
+      onClick={(e) => e.stopPropagation()}
+      onKeyDown={(e) => e.stopPropagation()}
+    >
+      <Dialog>
+        <DialogTrigger asChild>
+          <Button
+            variant="ghost"
+            size="sm"
+            className={cn("tabular-nums", passRateClass(passRate))}
+          >
+            {passRate.toFixed(1)}%
+          </Button>
+        </DialogTrigger>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Tentastatistik</DialogTitle>
+            <DialogDescription>Betygsfördelning {date}</DialogDescription>
+          </DialogHeader>
 
-        <div className="flex flex-col gap-4">
-          <div className="flex items-center justify-between text-sm">
-            <span className="text-muted-foreground">{total} studenter</span>
-            <span className={cn("font-mono", passRateClass(passRate))}>
-              {passRate}% godkänt
-            </span>
-          </div>
+          <div className="flex flex-col gap-4">
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-muted-foreground">{total} studenter</span>
+              <span className={cn("font-mono", passRateClass(passRate))}>
+                {passRate}% godkänt
+              </span>
+            </div>
 
-          <div className="rounded-md border p-3">
-            <div className="flex h-32 items-end gap-2">
+            <div className="rounded-md border p-3">
+              <div className="flex h-32 items-end gap-2">
+                {chartData.map(({ grade, count, color }) => (
+                  <div key={grade} className="flex flex-1 flex-col items-center gap-1">
+                    <span className="text-2xs text-muted-foreground">{count}</span>
+                    <div
+                      className="w-full rounded-t-sm"
+                      style={{ height: `${(count / maxCount) * 88}px`, backgroundColor: color }}
+                    />
+                    <span className="text-2xs text-muted-foreground">{grade}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="space-y-2">
               {chartData.map(({ grade, count, color }) => (
-                <div key={grade} className="flex flex-1 flex-col items-center gap-1">
-                  <span className="text-2xs text-muted-foreground">{count}</span>
-                  <div
-                    className="w-full rounded-t-sm"
-                    style={{ height: `${(count / maxCount) * 88}px`, backgroundColor: color }}
-                  />
-                  <span className="text-2xs text-muted-foreground">{grade}</span>
+                <div key={grade} className="flex items-center justify-between text-sm">
+                  <div className="flex items-center gap-2">
+                    <div className="size-2 rounded-md" style={{ backgroundColor: color }} />
+                    <span>Betyg {grade}</span>
+                  </div>
+                  <span className="text-muted-foreground">
+                    {count} ({((count / total) * 100).toFixed(1)}%)
+                  </span>
                 </div>
               ))}
             </div>
           </div>
 
-          <div className="space-y-2">
-            {chartData.map(({ grade, count, color }) => (
-              <div key={grade} className="flex items-center justify-between text-sm">
-                <div className="flex items-center gap-2">
-                  <div className="size-2 rounded-md" style={{ backgroundColor: color }} />
-                  <span>Betyg {grade}</span>
-                </div>
-                <span className="text-muted-foreground">
-                  {count} ({((count / total) * 100).toFixed(1)}%)
-                </span>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <DialogFooter className="sm:justify-between">
-          <p className="self-center text-xs text-muted-foreground">
-            Data från{" "}
-            <a
-              href="https://ysektionen.se/student/tentastatistik/"
-              target="_blank"
-              rel="noreferrer"
-              className="text-primary hover:underline"
-            >
-              Y-Sektionen
-            </a>
-          </p>
-          <DialogClose asChild>
-            <Button variant="outline">Stäng</Button>
-          </DialogClose>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+          <DialogFooter className="sm:justify-between">
+            <p className="self-center text-xs text-muted-foreground">
+              Data från{" "}
+              <a
+                href="https://ysektionen.se/student/tentastatistik/"
+                target="_blank"
+                rel="noreferrer"
+                className="text-primary hover:underline"
+              >
+                Y-Sektionen
+              </a>
+            </p>
+            <DialogClose asChild>
+              <Button variant="outline">Stäng</Button>
+            </DialogClose>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </span>
   );
 }

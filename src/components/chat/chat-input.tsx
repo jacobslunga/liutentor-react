@@ -158,7 +158,15 @@ export function ChatInput({
         submit();
       }}
     >
-      <InputGroup className={cn("bg-background shadow-xs", isLoading && "chat-prompt-generating")}>
+      <InputGroup
+        className={cn(
+          "bg-background shadow-xs dark:bg-background",
+          // InputGroup dims itself when anything inside is :disabled, which
+          // includes the send button while the prompt is empty. Keep it opaque.
+          "has-disabled:bg-background has-disabled:opacity-100 dark:has-disabled:bg-background",
+          isLoading && "chat-prompt-generating",
+        )}
+      >
         {hasHeader && (
           <InputGroupAddon align="block-start" className="flex-col items-stretch gap-2 border-b bg-muted/50 pb-2">
             {selectionContext && (

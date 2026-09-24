@@ -16,7 +16,7 @@ export function ExamUploadDialog() {
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && close()}>
-      <DialogContent>
+      <DialogContent className="sm:max-w-xl">
         <DialogHeader>
           <DialogTitle>Ladda upp tenta eller facit</DialogTitle>
           <DialogDescription>

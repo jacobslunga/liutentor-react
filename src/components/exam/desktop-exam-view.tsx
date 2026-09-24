@@ -362,7 +362,10 @@ function SideOverlay({
       className={cn(
         "fixed right-0 bottom-0 flex h-dvh border-l bg-background shadow-xl transition-[translate,opacity,filter] duration-200 ease-(--ease-spring) dark:shadow-none",
         zIndex,
-        visible ? "translate-x-0 opacity-100" : "pointer-events-none translate-x-full opacity-0 blur-sm",
+        // `starting:` animates the first open too, when the overlay mounts already visible.
+        visible
+          ? "translate-x-0 opacity-100 starting:translate-x-full starting:opacity-0"
+          : "pointer-events-none translate-x-full opacity-0 blur-sm",
       )}
       style={{ width: "var(--exam-overlay-width)" }}
     >
