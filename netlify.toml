@@ -2,6 +2,9 @@
   command = "pnpm build"
   publish = "dist"
 
+[functions]
+  directory = "netlify/functions"
+
 # Same-origin proxy to the Go exam service (it does not send CORS headers).
 [[redirects]]
   from = "/api/go/*"

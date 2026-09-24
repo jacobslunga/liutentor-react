@@ -3,18 +3,25 @@ import tailwindcss from "@tailwindcss/vite";
 import { tanstackRouter } from "@tanstack/router-plugin/vite";
 import react from "@vitejs/plugin-react";
 import { defineConfig, loadEnv } from "vite";
+import { netlifyFunctionsDev } from "./netlify-functions-dev.ts";
 
 const DEFAULT_GO_API_URL =
   "https://liutentor-go-687405545415.europe-west1.run.app";
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), "");
+  // Functions run in-process during dev and read their config from process.env.
+  for (const [key, value] of Object.entries(env)) process.env[key] ??= value;
 
   return {
     plugins: [
       tanstackRouter({ target: "react", autoCodeSplitting: true }),
       react(),
       tailwindcss(),
+      netlifyFunctionsDev({
+        "/api/upload": "/netlify/functions/upload.mts",
+        "/api/feedback": "/netlify/functions/feedback.mts",
+      }),
     ],
     resolve: {
       alias: { "@": path.resolve(__dirname, "./src") },
