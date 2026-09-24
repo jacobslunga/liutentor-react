@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { randomAvatarColor } from "@/lib/avatar-colors";
+import { DEFAULT_QUIZ_DIFFICULTY, type QuizDifficulty } from "@/types/quiz";
 import { CHAT_MODELS, DEFAULT_MODEL_ID, type ChatModelId } from "@/lib/chat-models";
 import { useUser } from "@/stores/auth";
 
@@ -13,11 +14,14 @@ interface SettingsState {
   selectedModelId: ChatModelId;
   /** Local fallback until the profile has a saved avatar color. */
   avatarColor: string;
+  /** Remembered so students who want easy quizzes get them every time. */
+  quizDifficulty: QuizDifficulty;
   setLayoutMode: (mode: LayoutMode) => void;
   setShowExplainPopover: (value: boolean) => void;
   setBlurFacitUntilHover: (value: boolean) => void;
   setSelectedModelId: (id: ChatModelId) => void;
   setAvatarColor: (color: string) => void;
+  setQuizDifficulty: (difficulty: QuizDifficulty) => void;
 }
 
 /** Rarely-changing user preferences, persisted to localStorage. */
@@ -29,12 +33,14 @@ export const useSettingsStore = create<SettingsState>()(
       blurFacitUntilHover: true,
       selectedModelId: DEFAULT_MODEL_ID,
       avatarColor: randomAvatarColor(),
+      quizDifficulty: DEFAULT_QUIZ_DIFFICULTY,
       setLayoutMode: (layoutMode) => set({ layoutMode }),
       setShowExplainPopover: (showExplainPopover) => set({ showExplainPopover }),
       setBlurFacitUntilHover: (blurFacitUntilHover) =>
         set({ blurFacitUntilHover }),
       setSelectedModelId: (selectedModelId) => set({ selectedModelId }),
       setAvatarColor: (avatarColor) => set({ avatarColor }),
+      setQuizDifficulty: (quizDifficulty) => set({ quizDifficulty }),
     }),
     { name: "liutentor-settings", version: 1 },
   ),

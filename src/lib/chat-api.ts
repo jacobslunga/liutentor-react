@@ -1,4 +1,4 @@
-const AI_API_BASE =
+export const AI_API_BASE =
   import.meta.env.VITE_AI_API_URL ??
   "https://liutentor-hono-687405545415.europe-north2.run.app/api/v1";
 

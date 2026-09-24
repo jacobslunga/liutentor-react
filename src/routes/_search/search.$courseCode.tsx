@@ -7,6 +7,7 @@ import {
   ChartLineIcon,
   FileTextIcon,
   InboxIcon,
+  LayersIcon,
   LoaderCircleIcon,
   UploadIcon,
 } from "lucide-react";
@@ -35,16 +36,17 @@ import { useUploadModal } from "@/stores/upload-modal";
 import type { CourseExams } from "@/types/exam";
 
 const CourseStats = lazy(() => import("@/components/course/course-stats"));
+const CourseQuizPanel = lazy(() => import("@/components/quiz/course-quiz-panel"));
 
-type CourseTab = "exams" | "stats";
+type CourseTab = "exams" | "stats" | "quiz";
 
 export const Route = createFileRoute("/_search/search/$courseCode")({
   params: {
     parse: ({ courseCode }) => ({ courseCode: courseCode.toUpperCase() }),
     stringify: ({ courseCode }) => ({ courseCode }),
   },
-  validateSearch: (search: Record<string, unknown>): { tab?: "stats" } =>
-    search.tab === "stats" ? { tab: "stats" } : {},
+  validateSearch: (search: Record<string, unknown>): { tab?: "stats" | "quiz" } =>
+    search.tab === "stats" || search.tab === "quiz" ? { tab: search.tab } : {},
   component: CoursePage,
 });
 
@@ -98,7 +100,7 @@ function NoExams({ courseCode }: { courseCode: string }) {
 function CourseContent({ courseCode, course }: { courseCode: string; course: CourseExams }) {
   const { tab } = Route.useSearch();
   const navigate = useNavigate({ from: Route.fullPath });
-  const activeTab: CourseTab = tab === "stats" ? "stats" : "exams";
+  const activeTab: CourseTab = tab ?? "exams";
   const openUploadModal = useUploadModal((s) => s.open);
   const sort = useExamSortPreference("course-page");
 
@@ -109,7 +111,7 @@ function CourseContent({ courseCode, course }: { courseCode: string; course: Cou
 
   function setTab(value: string) {
     // Keep the tab in the URL so it can be linked and refreshed.
-    void navigate({ search: value === "stats" ? { tab: "stats" } : {}, replace: true });
+    void navigate({ search: value === "exams" ? {} : { tab: value as "stats" | "quiz" }, replace: true });
   }
 
   return (
@@ -153,6 +155,10 @@ function CourseContent({ courseCode, course }: { courseCode: string; course: Cou
                   <ChartLineIcon />
                   Statistik
                 </TabsTrigger>
+                <TabsTrigger value="quiz">
+                  <LayersIcon />
+                  Quiz
+                </TabsTrigger>
               </TabsList>
             </Tabs>
 
@@ -176,9 +182,13 @@ function CourseContent({ courseCode, course }: { courseCode: string; course: Cou
                 sortBy={sort.sortBy}
                 sortDirection={sort.sortDirection}
               />
-            ) : (
+            ) : activeTab === "stats" ? (
               <Suspense fallback={<CourseStatsSkeleton />}>
                 <CourseStats exams={exams} />
+              </Suspense>
+            ) : (
+              <Suspense fallback={null}>
+                <CourseQuizPanel courseCode={courseCode} exams={exams} />
               </Suspense>
             )}
           </div>
