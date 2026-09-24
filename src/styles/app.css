@@ -20,6 +20,12 @@
   --color-grade-mid: var(--grade-mid);
   --color-grade-high: var(--grade-high);
   --color-grade-fail: var(--grade-fail);
+
+  --color-rate-1: var(--rate-1);
+  --color-rate-2: var(--rate-2);
+  --color-rate-3: var(--rate-3);
+  --color-rate-4: var(--rate-4);
+  --color-rate-5: var(--rate-5);
 }
 
 :root {
@@ -27,12 +33,26 @@
   --grade-mid: oklch(from var(--primary) 0.6 0.145 h);
   --grade-high: oklch(from var(--primary) 0.46 0.11 h);
   --grade-fail: var(--destructive);
+
+  /* Pass-rate ramp for exam charts: 1 = palest, 5 = strongest. */
+  --rate-1: oklch(from var(--primary) 0.911 0.0453 h);
+  --rate-2: oklch(from var(--primary) 0.8072 0.1109 h);
+  --rate-3: oklch(from var(--primary) 0.7521 0.1557 h);
+  --rate-4: oklch(from var(--primary) 0.6506 0.138 h);
+  --rate-5: oklch(from var(--primary) 0.5382 0.1159 h);
 }
 
 .dark {
   --grade-low: oklch(from var(--primary) 0.55 0.12 h);
   --grade-mid: oklch(from var(--primary) 0.68 0.145 h);
   --grade-high: oklch(from var(--primary) 0.83 0.13 h);
+
+  /* Dark ramp runs dim → bright so "stronger = higher" holds in both themes. */
+  --rate-1: oklch(from var(--primary) 0.42 0.05 h);
+  --rate-2: oklch(from var(--primary) 0.53 0.07 h);
+  --rate-3: oklch(from var(--primary) 0.65 0.085 h);
+  --rate-4: oklch(from var(--primary) 0.75 0.09 h);
+  --rate-5: oklch(from var(--primary) 0.86 0.085 h);
 }
 
 .variable-spin {

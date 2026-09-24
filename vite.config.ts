@@ -19,6 +19,11 @@ export default defineConfig(({ mode }) => {
     resolve: {
       alias: { "@": path.resolve(__dirname, "./src") },
     },
+    // Deps only reached through lazy routes are otherwise discovered late in
+    // dev, which triggers a full reload mid-navigation.
+    optimizeDeps: {
+      include: ["recharts", "cmdk"],
+    },
     server: {
       proxy: {
         // The Go service sends no CORS headers, so the browser reaches it
