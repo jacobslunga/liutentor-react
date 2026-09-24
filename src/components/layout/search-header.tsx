@@ -1,5 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { AuthActions } from "@/components/auth/auth-actions";
+import { HeaderCourseSearch } from "@/components/search/course-search";
 import { LogoIcon } from "./logo-icon";
 
 export function SearchHeader() {
@@ -20,6 +21,10 @@ export function SearchHeader() {
         <div className="shrink-0">
           <AuthActions />
         </div>
+      </div>
+
+      <div className="mx-auto hidden w-full max-w-3xl px-4 pb-3 md:block md:px-8 lg:px-4 xl:pointer-events-none xl:absolute xl:inset-x-0 xl:top-1/2 xl:-translate-y-1/2 xl:pb-0">
+        <HeaderCourseSearch className="pointer-events-auto w-full max-w-md" />
       </div>
     </header>
   );
