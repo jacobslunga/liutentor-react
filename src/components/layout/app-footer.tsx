@@ -1,4 +1,5 @@
 import { Link, type LinkProps } from "@tanstack/react-router";
+import { SettingsDialog } from "@/components/settings/settings-dialog";
 import { LogoIcon } from "./logo-icon";
 
 const groupedLinks: {
@@ -77,12 +78,15 @@ export function AppFooter() {
           <p className="text-xs text-muted-foreground">
             &copy; {year} LiU Tentor. Inte affilierad med Linköpings universitet.
           </p>
-          <a
-            href="mailto:liutentor@gmail.com"
-            className="text-xs text-muted-foreground transition-colors duration-150 hover:text-foreground"
-          >
-            liutentor@gmail.com
-          </a>
+          <div className="flex items-center gap-5">
+            <a
+              href="mailto:liutentor@gmail.com"
+              className="text-xs text-muted-foreground transition-colors duration-150 hover:text-foreground"
+            >
+              liutentor@gmail.com
+            </a>
+            <SettingsDialog />
+          </div>
         </div>
       </div>
     </footer>

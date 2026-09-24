@@ -19,7 +19,7 @@ export function SearchHeader() {
         </Link>
 
         <div className="shrink-0">
-          <AuthActions />
+          <AuthActions showSettings />
         </div>
       </div>
 

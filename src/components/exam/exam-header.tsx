@@ -13,11 +13,13 @@ import {
   MonitorIcon,
   MoonIcon,
   PanelRightOpenIcon,
+  SettingsIcon,
   SunIcon,
   UploadIcon,
 } from "lucide-react";
 import { useTheme } from "next-themes";
-import { memo } from "react";
+import { memo, useState } from "react";
+import { SettingsDialog } from "@/components/settings/settings-dialog";
 import { Button } from "@/components/ui/button";
 import { ButtonGroup } from "@/components/ui/button-group";
 import {
@@ -161,65 +163,73 @@ function ActionsMenu({
   const openUploadModal = useUploadModal((s) => s.open);
   const { theme = "system", setTheme } = useTheme();
   const ThemeIcon = theme === "light" ? SunIcon : theme === "dark" ? MoonIcon : MonitorIcon;
+  const [settingsOpen, setSettingsOpen] = useState(false);
 
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon" aria-label="Fler åtgärder">
-          <EllipsisIcon />
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" sideOffset={8} className="w-56">
-        <DropdownMenuGroup>
-          <DropdownMenuItem onSelect={toggleFocusMode}>
-            {focusMode ? <MinimizeIcon /> : <MaximizeIcon />}
-            {focusMode ? "Avsluta fokusläge" : "Fokusläge"}
-            <DropdownMenuShortcut>F</DropdownMenuShortcut>
-          </DropdownMenuItem>
+    <>
+      <SettingsDialog open={settingsOpen} onOpenChange={setSettingsOpen} />
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="ghost" size="icon" aria-label="Fler åtgärder">
+            <EllipsisIcon />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end" sideOffset={8} className="w-56">
+          <DropdownMenuGroup>
+            <DropdownMenuItem onSelect={toggleFocusMode}>
+              {focusMode ? <MinimizeIcon /> : <MaximizeIcon />}
+              {focusMode ? "Avsluta fokusläge" : "Fokusläge"}
+              <DropdownMenuShortcut>F</DropdownMenuShortcut>
+            </DropdownMenuItem>
+            <DropdownMenuSub>
+              <DropdownMenuSubTrigger>
+                <ThemeIcon />
+                Tema
+              </DropdownMenuSubTrigger>
+              <DropdownMenuSubContent>
+                <DropdownMenuRadioGroup value={theme} onValueChange={setTheme}>
+                  <DropdownMenuRadioItem value="light">Ljust</DropdownMenuRadioItem>
+                  <DropdownMenuRadioItem value="dark">Mörkt</DropdownMenuRadioItem>
+                  <DropdownMenuRadioItem value="system">System</DropdownMenuRadioItem>
+                </DropdownMenuRadioGroup>
+              </DropdownMenuSubContent>
+            </DropdownMenuSub>
+            <DropdownMenuItem onSelect={() => setSettingsOpen(true)}>
+              <SettingsIcon />
+              Inställningar
+            </DropdownMenuItem>
+            <DropdownMenuItem onSelect={() => openUploadModal(courseCode)}>
+              <UploadIcon />
+              Ladda upp tenta/facit
+            </DropdownMenuItem>
+          </DropdownMenuGroup>
+          <DropdownMenuSeparator />
           <DropdownMenuSub>
             <DropdownMenuSubTrigger>
-              <ThemeIcon />
-              Tema
+              <DownloadIcon />
+              Ladda ned
             </DropdownMenuSubTrigger>
             <DropdownMenuSubContent>
-              <DropdownMenuRadioGroup value={theme} onValueChange={setTheme}>
-                <DropdownMenuRadioItem value="light">Ljust</DropdownMenuRadioItem>
-                <DropdownMenuRadioItem value="dark">Mörkt</DropdownMenuRadioItem>
-                <DropdownMenuRadioItem value="system">System</DropdownMenuRadioItem>
-              </DropdownMenuRadioGroup>
+              <DropdownMenuItem
+                onSelect={() => void downloadFile(examPdfUrl, `${courseCode}_${examDate}_EXAM.pdf`)}
+              >
+                <FileTextIcon />
+                Tenta
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                disabled={!solutionPdfUrl}
+                onSelect={() =>
+                  solutionPdfUrl &&
+                  void downloadFile(solutionPdfUrl, `${courseCode}_${examDate}_SOLUTION.pdf`)
+                }
+              >
+                <BookOpenCheckIcon />
+                Facit
+              </DropdownMenuItem>
             </DropdownMenuSubContent>
           </DropdownMenuSub>
-          <DropdownMenuItem onSelect={() => openUploadModal(courseCode)}>
-            <UploadIcon />
-            Ladda upp tenta/facit
-          </DropdownMenuItem>
-        </DropdownMenuGroup>
-        <DropdownMenuSeparator />
-        <DropdownMenuSub>
-          <DropdownMenuSubTrigger>
-            <DownloadIcon />
-            Ladda ned
-          </DropdownMenuSubTrigger>
-          <DropdownMenuSubContent>
-            <DropdownMenuItem
-              onSelect={() => void downloadFile(examPdfUrl, `${courseCode}_${examDate}_EXAM.pdf`)}
-            >
-              <FileTextIcon />
-              Tenta
-            </DropdownMenuItem>
-            <DropdownMenuItem
-              disabled={!solutionPdfUrl}
-              onSelect={() =>
-                solutionPdfUrl &&
-                void downloadFile(solutionPdfUrl, `${courseCode}_${examDate}_SOLUTION.pdf`)
-              }
-            >
-              <BookOpenCheckIcon />
-              Facit
-            </DropdownMenuItem>
-          </DropdownMenuSubContent>
-        </DropdownMenuSub>
-      </DropdownMenuContent>
-    </DropdownMenu>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </>
   );
 }
