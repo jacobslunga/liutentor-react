@@ -5,7 +5,7 @@ import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/in
 import { Kbd } from "@/components/ui/kbd";
 import { Popover, PopoverAnchor, PopoverContent } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
-import { useCourseCodes } from "@/queries/exams";
+import { useTypingPlaceholder } from "@/hooks/use-typing-placeholder";
 import { CourseSearchResults } from "./course-search-results";
 import { useCourseSearch } from "./use-course-search";
 
@@ -73,63 +73,10 @@ function CourseSearchBase({
   );
 }
 
-const EXAMPLE_TYPE_MS = 55;
-const EXAMPLE_DELETE_MS = 30;
-const EXAMPLE_HOLD_MS = 1200;
-const EXAMPLE_GAP_MS = 500;
-
-/**
- * Types example course codes into the placeholder. Writes the attribute
- * directly so the animation never re-renders the search; the placeholder is
- * hidden while there is a query, so it simply keeps running underneath.
- */
-function useTypingPlaceholder(inputRef: React.RefObject<HTMLInputElement | null>) {
-  const { codes } = useCourseCodes();
-
-  useEffect(() => {
-    const input = inputRef.current;
-    if (!input || !codes.length) return;
-
-    const examples = [...codes].sort(() => Math.random() - 0.5);
-    let index = 0;
-    let chars = 0;
-    let deleting = false;
-    let timer: ReturnType<typeof setTimeout>;
-
-    const tick = () => {
-      const current = examples[index % examples.length];
-      const doneTyping = chars === current.length && !deleting;
-      const doneDeleting = chars === 0 && deleting;
-      const delay = doneTyping
-        ? EXAMPLE_HOLD_MS
-        : doneDeleting
-          ? EXAMPLE_GAP_MS
-          : deleting
-            ? EXAMPLE_DELETE_MS
-            : EXAMPLE_TYPE_MS;
-
-      timer = setTimeout(() => {
-        if (doneTyping) deleting = true;
-        else if (doneDeleting) {
-          deleting = false;
-          index += 1;
-        } else {
-          chars += deleting ? -1 : 1;
-          input.placeholder = `Sök efter ${current.slice(0, chars)}`;
-        }
-        tick();
-      }, delay);
-    };
-
-    tick();
-    return () => clearTimeout(timer);
-  }, [codes, inputRef]);
-}
-
 /** Large pill search on the home page. */
 export function HeroCourseSearch() {
   const inputRef = useRef<HTMLInputElement>(null);
-  useTypingPlaceholder(inputRef);
+  useTypingPlaceholder(inputRef, "Sök efter ");
 
   useEffect(() => inputRef.current?.focus(), []);
 

@@ -2,6 +2,7 @@ import type { QueryClient } from "@tanstack/react-query";
 import { Link, Outlet, createRootRouteWithContext } from "@tanstack/react-router";
 import { AppLoadingBar } from "@/components/layout/app-loading-bar";
 import { Button } from "@/components/ui/button";
+import { ExamUploadDialog } from "@/components/upload/exam-upload-dialog";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 
@@ -19,6 +20,7 @@ function RootLayout() {
     <TooltipProvider delayDuration={200}>
       <AppLoadingBar />
       <Outlet />
+      <ExamUploadDialog />
       <Toaster position="top-center" duration={4000} />
     </TooltipProvider>
   );

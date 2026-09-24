@@ -14,6 +14,7 @@ import { lazy, Suspense, useEffect, useMemo } from "react";
 import { CourseExamsTable } from "@/components/course/course-exams-table";
 import { CourseStatsSkeleton } from "@/components/course/course-stats-skeleton";
 import { HeaderCourseSearch } from "@/components/search/course-search";
+import { ExamUploadForm } from "@/components/upload/exam-upload-form";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -77,8 +78,6 @@ function CoursePage() {
 }
 
 function NoExams({ courseCode }: { courseCode: string }) {
-  const openUploadModal = useUploadModal((s) => s.open);
-
   return (
     <div className="mx-auto flex min-h-[60vh] w-full max-w-2xl flex-col items-center justify-center gap-8 py-8">
       <div className="max-w-xl text-center">
@@ -91,10 +90,7 @@ function NoExams({ courseCode }: { courseCode: string }) {
           söker på {courseCode} hjälpt direkt.
         </p>
       </div>
-      <Button onClick={() => openUploadModal(courseCode)}>
-        <UploadIcon data-icon="inline-start" />
-        Ladda upp tenta
-      </Button>
+      <ExamUploadForm initialCourseCode={courseCode} fixedCourseCode />
     </div>
   );
 }
