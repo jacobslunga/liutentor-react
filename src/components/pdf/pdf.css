@@ -1,0 +1,49 @@
+/* Styles EmbedPDF's DOM needs that utilities can't reach. */
+
+.pdf-viewport {
+  scrollbar-width: auto;
+  scrollbar-color: var(--muted-foreground) var(--muted);
+  overscroll-behavior: contain;
+}
+
+.pdf-viewport::-webkit-scrollbar {
+  width: 14px;
+  height: 14px;
+}
+
+.pdf-viewport::-webkit-scrollbar-track {
+  background: var(--muted);
+}
+
+.pdf-viewport::-webkit-scrollbar-thumb {
+  background: var(--muted-foreground);
+  border: 3px solid var(--muted);
+  border-radius: 9999px;
+}
+
+.pdf-viewport::-webkit-scrollbar-thumb:hover {
+  background: var(--foreground);
+}
+
+.pdf-zoom-gesture {
+  will-change: transform;
+}
+
+/* Dark mode: invert the rendered page instead of re-rendering it. */
+.dark .pdf-render-surface {
+  filter: invert(1) hue-rotate(180deg) brightness(0.92);
+  mix-blend-mode: screen;
+}
+
+/* PDF text is rendered into a canvas rather than selectable DOM glyphs. A
+   translucent highlight keeps that canvas text crisp in either color mode. */
+.pdf-selection-surface > div[style*="mix-blend-mode"] {
+  mix-blend-mode: normal !important;
+  opacity: 0.35;
+}
+
+/* EmbedPDF defaults pointer surfaces to touch-action: none. Keep vertical page
+   scrolling on touch devices while allowing horizontal drags to select text. */
+.pdf-mobile-pointer {
+  touch-action: pan-x pan-y pinch-zoom !important;
+}

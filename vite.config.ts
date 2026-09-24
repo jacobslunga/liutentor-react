@@ -22,7 +22,20 @@ export default defineConfig(({ mode }) => {
     // Deps only reached through lazy routes are otherwise discovered late in
     // dev, which triggers a full reload mid-navigation.
     optimizeDeps: {
-      include: ["recharts", "cmdk"],
+      include: [
+        "recharts",
+        "cmdk",
+        "@embedpdf/core/react",
+        "@embedpdf/engines/react",
+        "@embedpdf/plugin-document-manager/react",
+        "@embedpdf/plugin-interaction-manager/react",
+        "@embedpdf/plugin-render/react",
+        "@embedpdf/plugin-rotate/react",
+        "@embedpdf/plugin-scroll/react",
+        "@embedpdf/plugin-selection/react",
+        "@embedpdf/plugin-viewport/react",
+        "@embedpdf/plugin-zoom/react",
+      ],
     },
     server: {
       proxy: {
