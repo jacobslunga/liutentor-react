@@ -9,50 +9,450 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as IndexRouteImport } from './routes/index'
+import { Route as AuthRouteImport } from './routes/_auth'
+import { Route as DefaultRouteImport } from './routes/_default'
+import { Route as InfoRouteImport } from './routes/_info'
+import { Route as ProfileRouteImport } from './routes/_profile'
+import { Route as SearchRouteImport } from './routes/_search'
+import { Route as SkapaKontoRouteImport } from './routes/skapa-konto'
+import { Route as AuthLoggaInRouteImport } from './routes/_auth/logga-in'
+import { Route as DefaultIndexRouteImport } from './routes/_default/index'
+import { Route as InfoAiPolicyRouteImport } from './routes/_info/ai-policy'
+import { Route as InfoCopyrightPolicyRouteImport } from './routes/_info/copyright-policy'
+import { Route as InfoFaqRouteImport } from './routes/_info/faq'
+import { Route as InfoFeedbackRouteImport } from './routes/_info/feedback'
+import { Route as InfoOmOssRouteImport } from './routes/_info/om-oss'
+import { Route as InfoPrivacyPolicyRouteImport } from './routes/_info/privacy-policy'
+import { Route as InfoUploadExamsRouteImport } from './routes/_info/upload-exams'
+import { Route as ProfileMeRouteImport } from './routes/_profile/me'
+import { Route as QuizCourseCodeRouteImport } from './routes/quiz.$courseCode'
+import { Route as SearchSearchCourseCodeRouteImport } from './routes/_search/search.$courseCode'
+import { Route as SearchCourseCodeExamIdRouteImport } from './routes/search.$courseCode.$examId'
 
-const IndexRoute = IndexRouteImport.update({
+const AuthRoute = AuthRouteImport.update({
+  id: '/_auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DefaultRoute = DefaultRouteImport.update({
+  id: '/_default',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const InfoRoute = InfoRouteImport.update({
+  id: '/_info',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProfileRoute = ProfileRouteImport.update({
+  id: '/_profile',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SearchRoute = SearchRouteImport.update({
+  id: '/_search',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SkapaKontoRoute = SkapaKontoRouteImport.update({
+  id: '/skapa-konto',
+  path: '/skapa-konto',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthLoggaInRoute = AuthLoggaInRouteImport.update({
+  id: '/logga-in',
+  path: '/logga-in',
+  getParentRoute: () => AuthRoute,
+} as any)
+const DefaultIndexRoute = DefaultIndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => DefaultRoute,
+} as any)
+const InfoAiPolicyRoute = InfoAiPolicyRouteImport.update({
+  id: '/ai-policy',
+  path: '/ai-policy',
+  getParentRoute: () => InfoRoute,
+} as any)
+const InfoCopyrightPolicyRoute = InfoCopyrightPolicyRouteImport.update({
+  id: '/copyright-policy',
+  path: '/copyright-policy',
+  getParentRoute: () => InfoRoute,
+} as any)
+const InfoFaqRoute = InfoFaqRouteImport.update({
+  id: '/faq',
+  path: '/faq',
+  getParentRoute: () => InfoRoute,
+} as any)
+const InfoFeedbackRoute = InfoFeedbackRouteImport.update({
+  id: '/feedback',
+  path: '/feedback',
+  getParentRoute: () => InfoRoute,
+} as any)
+const InfoOmOssRoute = InfoOmOssRouteImport.update({
+  id: '/om-oss',
+  path: '/om-oss',
+  getParentRoute: () => InfoRoute,
+} as any)
+const InfoPrivacyPolicyRoute = InfoPrivacyPolicyRouteImport.update({
+  id: '/privacy-policy',
+  path: '/privacy-policy',
+  getParentRoute: () => InfoRoute,
+} as any)
+const InfoUploadExamsRoute = InfoUploadExamsRouteImport.update({
+  id: '/upload-exams',
+  path: '/upload-exams',
+  getParentRoute: () => InfoRoute,
+} as any)
+const ProfileMeRoute = ProfileMeRouteImport.update({
+  id: '/me',
+  path: '/me',
+  getParentRoute: () => ProfileRoute,
+} as any)
+const QuizCourseCodeRoute = QuizCourseCodeRouteImport.update({
+  id: '/quiz/$courseCode',
+  path: '/quiz/$courseCode',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SearchSearchCourseCodeRoute = SearchSearchCourseCodeRouteImport.update({
+  id: '/search/$courseCode',
+  path: '/search/$courseCode',
+  getParentRoute: () => SearchRoute,
+} as any)
+const SearchCourseCodeExamIdRoute = SearchCourseCodeExamIdRouteImport.update({
+  id: '/search/$courseCode/$examId',
+  path: '/search/$courseCode/$examId',
   getParentRoute: () => rootRouteImport,
 } as any)
 
 export interface FileRoutesByFullPath {
-  '/': typeof IndexRoute
+  '/': typeof DefaultIndexRoute
+  '/skapa-konto': typeof SkapaKontoRoute
+  '/logga-in': typeof AuthLoggaInRoute
+  '/ai-policy': typeof InfoAiPolicyRoute
+  '/copyright-policy': typeof InfoCopyrightPolicyRoute
+  '/faq': typeof InfoFaqRoute
+  '/feedback': typeof InfoFeedbackRoute
+  '/om-oss': typeof InfoOmOssRoute
+  '/privacy-policy': typeof InfoPrivacyPolicyRoute
+  '/upload-exams': typeof InfoUploadExamsRoute
+  '/me': typeof ProfileMeRoute
+  '/quiz/$courseCode': typeof QuizCourseCodeRoute
+  '/search/$courseCode': typeof SearchSearchCourseCodeRoute
+  '/search/$courseCode/$examId': typeof SearchCourseCodeExamIdRoute
 }
 export interface FileRoutesByTo {
-  '/': typeof IndexRoute
+  '/': typeof DefaultIndexRoute
+  '/skapa-konto': typeof SkapaKontoRoute
+  '/logga-in': typeof AuthLoggaInRoute
+  '/ai-policy': typeof InfoAiPolicyRoute
+  '/copyright-policy': typeof InfoCopyrightPolicyRoute
+  '/faq': typeof InfoFaqRoute
+  '/feedback': typeof InfoFeedbackRoute
+  '/om-oss': typeof InfoOmOssRoute
+  '/privacy-policy': typeof InfoPrivacyPolicyRoute
+  '/upload-exams': typeof InfoUploadExamsRoute
+  '/me': typeof ProfileMeRoute
+  '/quiz/$courseCode': typeof QuizCourseCodeRoute
+  '/search/$courseCode': typeof SearchSearchCourseCodeRoute
+  '/search/$courseCode/$examId': typeof SearchCourseCodeExamIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
-  '/': typeof IndexRoute
+  '/_auth': typeof AuthRouteWithChildren
+  '/_default': typeof DefaultRouteWithChildren
+  '/_info': typeof InfoRouteWithChildren
+  '/_profile': typeof ProfileRouteWithChildren
+  '/_search': typeof SearchRouteWithChildren
+  '/skapa-konto': typeof SkapaKontoRoute
+  '/_auth/logga-in': typeof AuthLoggaInRoute
+  '/_info/ai-policy': typeof InfoAiPolicyRoute
+  '/_info/copyright-policy': typeof InfoCopyrightPolicyRoute
+  '/_info/faq': typeof InfoFaqRoute
+  '/_info/feedback': typeof InfoFeedbackRoute
+  '/_info/om-oss': typeof InfoOmOssRoute
+  '/_info/privacy-policy': typeof InfoPrivacyPolicyRoute
+  '/_info/upload-exams': typeof InfoUploadExamsRoute
+  '/_profile/me': typeof ProfileMeRoute
+  '/quiz/$courseCode': typeof QuizCourseCodeRoute
+  '/_default/': typeof DefaultIndexRoute
+  '/_search/search/$courseCode': typeof SearchSearchCourseCodeRoute
+  '/search/$courseCode/$examId': typeof SearchCourseCodeExamIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/skapa-konto'
+    | '/logga-in'
+    | '/ai-policy'
+    | '/copyright-policy'
+    | '/faq'
+    | '/feedback'
+    | '/om-oss'
+    | '/privacy-policy'
+    | '/upload-exams'
+    | '/me'
+    | '/quiz/$courseCode'
+    | '/search/$courseCode'
+    | '/search/$courseCode/$examId'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/skapa-konto'
+    | '/logga-in'
+    | '/ai-policy'
+    | '/copyright-policy'
+    | '/faq'
+    | '/feedback'
+    | '/om-oss'
+    | '/privacy-policy'
+    | '/upload-exams'
+    | '/me'
+    | '/quiz/$courseCode'
+    | '/search/$courseCode'
+    | '/search/$courseCode/$examId'
+  id:
+    | '__root__'
+    | '/_auth'
+    | '/_default'
+    | '/_info'
+    | '/_profile'
+    | '/_search'
+    | '/skapa-konto'
+    | '/_auth/logga-in'
+    | '/_info/ai-policy'
+    | '/_info/copyright-policy'
+    | '/_info/faq'
+    | '/_info/feedback'
+    | '/_info/om-oss'
+    | '/_info/privacy-policy'
+    | '/_info/upload-exams'
+    | '/_profile/me'
+    | '/quiz/$courseCode'
+    | '/_default/'
+    | '/_search/search/$courseCode'
+    | '/search/$courseCode/$examId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
-  IndexRoute: typeof IndexRoute
+  AuthRoute: typeof AuthRouteWithChildren
+  DefaultRoute: typeof DefaultRouteWithChildren
+  InfoRoute: typeof InfoRouteWithChildren
+  ProfileRoute: typeof ProfileRouteWithChildren
+  SearchRoute: typeof SearchRouteWithChildren
+  SkapaKontoRoute: typeof SkapaKontoRoute
+  QuizCourseCodeRoute: typeof QuizCourseCodeRoute
+  SearchCourseCodeExamIdRoute: typeof SearchCourseCodeExamIdRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/': {
-      id: '/'
+    '/_auth': {
+      id: '/_auth'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_default': {
+      id: '/_default'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof DefaultRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_info': {
+      id: '/_info'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof InfoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_profile': {
+      id: '/_profile'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof ProfileRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_search': {
+      id: '/_search'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof SearchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/skapa-konto': {
+      id: '/skapa-konto'
+      path: '/skapa-konto'
+      fullPath: '/skapa-konto'
+      preLoaderRoute: typeof SkapaKontoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_auth/logga-in': {
+      id: '/_auth/logga-in'
+      path: '/logga-in'
+      fullPath: '/logga-in'
+      preLoaderRoute: typeof AuthLoggaInRouteImport
+      parentRoute: typeof AuthRoute
+    }
+    '/_default/': {
+      id: '/_default/'
       path: '/'
       fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
+      preLoaderRoute: typeof DefaultIndexRouteImport
+      parentRoute: typeof DefaultRoute
+    }
+    '/_info/ai-policy': {
+      id: '/_info/ai-policy'
+      path: '/ai-policy'
+      fullPath: '/ai-policy'
+      preLoaderRoute: typeof InfoAiPolicyRouteImport
+      parentRoute: typeof InfoRoute
+    }
+    '/_info/copyright-policy': {
+      id: '/_info/copyright-policy'
+      path: '/copyright-policy'
+      fullPath: '/copyright-policy'
+      preLoaderRoute: typeof InfoCopyrightPolicyRouteImport
+      parentRoute: typeof InfoRoute
+    }
+    '/_info/faq': {
+      id: '/_info/faq'
+      path: '/faq'
+      fullPath: '/faq'
+      preLoaderRoute: typeof InfoFaqRouteImport
+      parentRoute: typeof InfoRoute
+    }
+    '/_info/feedback': {
+      id: '/_info/feedback'
+      path: '/feedback'
+      fullPath: '/feedback'
+      preLoaderRoute: typeof InfoFeedbackRouteImport
+      parentRoute: typeof InfoRoute
+    }
+    '/_info/om-oss': {
+      id: '/_info/om-oss'
+      path: '/om-oss'
+      fullPath: '/om-oss'
+      preLoaderRoute: typeof InfoOmOssRouteImport
+      parentRoute: typeof InfoRoute
+    }
+    '/_info/privacy-policy': {
+      id: '/_info/privacy-policy'
+      path: '/privacy-policy'
+      fullPath: '/privacy-policy'
+      preLoaderRoute: typeof InfoPrivacyPolicyRouteImport
+      parentRoute: typeof InfoRoute
+    }
+    '/_info/upload-exams': {
+      id: '/_info/upload-exams'
+      path: '/upload-exams'
+      fullPath: '/upload-exams'
+      preLoaderRoute: typeof InfoUploadExamsRouteImport
+      parentRoute: typeof InfoRoute
+    }
+    '/_profile/me': {
+      id: '/_profile/me'
+      path: '/me'
+      fullPath: '/me'
+      preLoaderRoute: typeof ProfileMeRouteImport
+      parentRoute: typeof ProfileRoute
+    }
+    '/quiz/$courseCode': {
+      id: '/quiz/$courseCode'
+      path: '/quiz/$courseCode'
+      fullPath: '/quiz/$courseCode'
+      preLoaderRoute: typeof QuizCourseCodeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_search/search/$courseCode': {
+      id: '/_search/search/$courseCode'
+      path: '/search/$courseCode'
+      fullPath: '/search/$courseCode'
+      preLoaderRoute: typeof SearchSearchCourseCodeRouteImport
+      parentRoute: typeof SearchRoute
+    }
+    '/search/$courseCode/$examId': {
+      id: '/search/$courseCode/$examId'
+      path: '/search/$courseCode/$examId'
+      fullPath: '/search/$courseCode/$examId'
+      preLoaderRoute: typeof SearchCourseCodeExamIdRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
 }
 
+interface AuthRouteChildren {
+  AuthLoggaInRoute: typeof AuthLoggaInRoute
+}
+
+const AuthRouteChildren: AuthRouteChildren = {
+  AuthLoggaInRoute: AuthLoggaInRoute,
+}
+
+const AuthRouteWithChildren = AuthRoute._addFileChildren(AuthRouteChildren)
+
+interface DefaultRouteChildren {
+  DefaultIndexRoute: typeof DefaultIndexRoute
+}
+
+const DefaultRouteChildren: DefaultRouteChildren = {
+  DefaultIndexRoute: DefaultIndexRoute,
+}
+
+const DefaultRouteWithChildren =
+  DefaultRoute._addFileChildren(DefaultRouteChildren)
+
+interface InfoRouteChildren {
+  InfoAiPolicyRoute: typeof InfoAiPolicyRoute
+  InfoCopyrightPolicyRoute: typeof InfoCopyrightPolicyRoute
+  InfoFaqRoute: typeof InfoFaqRoute
+  InfoFeedbackRoute: typeof InfoFeedbackRoute
+  InfoOmOssRoute: typeof InfoOmOssRoute
+  InfoPrivacyPolicyRoute: typeof InfoPrivacyPolicyRoute
+  InfoUploadExamsRoute: typeof InfoUploadExamsRoute
+}
+
+const InfoRouteChildren: InfoRouteChildren = {
+  InfoAiPolicyRoute: InfoAiPolicyRoute,
+  InfoCopyrightPolicyRoute: InfoCopyrightPolicyRoute,
+  InfoFaqRoute: InfoFaqRoute,
+  InfoFeedbackRoute: InfoFeedbackRoute,
+  InfoOmOssRoute: InfoOmOssRoute,
+  InfoPrivacyPolicyRoute: InfoPrivacyPolicyRoute,
+  InfoUploadExamsRoute: InfoUploadExamsRoute,
+}
+
+const InfoRouteWithChildren = InfoRoute._addFileChildren(InfoRouteChildren)
+
+interface ProfileRouteChildren {
+  ProfileMeRoute: typeof ProfileMeRoute
+}
+
+const ProfileRouteChildren: ProfileRouteChildren = {
+  ProfileMeRoute: ProfileMeRoute,
+}
+
+const ProfileRouteWithChildren =
+  ProfileRoute._addFileChildren(ProfileRouteChildren)
+
+interface SearchRouteChildren {
+  SearchSearchCourseCodeRoute: typeof SearchSearchCourseCodeRoute
+}
+
+const SearchRouteChildren: SearchRouteChildren = {
+  SearchSearchCourseCodeRoute: SearchSearchCourseCodeRoute,
+}
+
+const SearchRouteWithChildren =
+  SearchRoute._addFileChildren(SearchRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
-  IndexRoute: IndexRoute,
+  AuthRoute: AuthRouteWithChildren,
+  DefaultRoute: DefaultRouteWithChildren,
+  InfoRoute: InfoRouteWithChildren,
+  ProfileRoute: ProfileRouteWithChildren,
+  SearchRoute: SearchRouteWithChildren,
+  SkapaKontoRoute: SkapaKontoRoute,
+  QuizCourseCodeRoute: QuizCourseCodeRoute,
+  SearchCourseCodeExamIdRoute: SearchCourseCodeExamIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
