@@ -35,11 +35,22 @@ interface ExamPickerProps {
   /** Rendered as the trigger's label. */
   children: React.ReactNode;
   triggerClassName?: string;
+  triggerVariant?: "secondary" | "outline";
+  triggerSize?: "default" | "sm";
   align?: "start" | "center" | "end";
 }
 
 /** Popover listing all exams of the course; picking one navigates to it. */
-export function ExamPicker({ exams, examId, courseCode, children, triggerClassName, align = "start" }: ExamPickerProps) {
+export function ExamPicker({
+  exams,
+  examId,
+  courseCode,
+  children,
+  triggerClassName,
+  triggerVariant = "secondary",
+  triggerSize = "default",
+  align = "start",
+}: ExamPickerProps) {
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const listRef = useRef<HTMLDivElement>(null);
@@ -67,7 +78,7 @@ export function ExamPicker({ exams, examId, courseCode, children, triggerClassNa
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <Button variant="secondary" className={cn("gap-1.5", triggerClassName)}>
+        <Button variant={triggerVariant} size={triggerSize} aria-label="Byt tenta" className={cn("gap-1.5", triggerClassName)}>
           {children}
           <ChevronDownIcon
             data-icon="inline-end"
@@ -109,7 +120,7 @@ export function ExamPicker({ exams, examId, courseCode, children, triggerClassNa
           </div>
         </div>
 
-        <div ref={listRef} className="max-h-80 space-y-0.5 overflow-y-auto p-1.5">
+        <div ref={listRef} className="max-h-[min(20rem,60dvh)] max-w-[calc(100vw-2rem)] space-y-0.5 overflow-y-auto p-1.5">
           {sorted.map((exam) => {
             const current = String(exam.id) === examId;
             return (

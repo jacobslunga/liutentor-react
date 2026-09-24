@@ -1,15 +1,12 @@
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { LoaderCircleIcon } from "lucide-react";
-import { lazy, Suspense, useEffect } from "react";
+import { useEffect } from "react";
 import { DesktopExamView } from "@/components/exam/desktop-exam-view";
+import { MobileExamView } from "@/components/exam/mobile-exam-view";
 import { Button } from "@/components/ui/button";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { courseExamsQuery, examDetailQuery } from "@/queries/exams";
-
-const PdfRenderer = lazy(() =>
-  import("@/components/pdf/pdf-renderer").then((m) => ({ default: m.PdfRenderer })),
-);
 
 /** Touch tablets use the full-width viewer in either orientation. */
 const TOUCH_VIEWER_QUERY = "(max-width: 1023px), (pointer: coarse)";
@@ -66,13 +63,16 @@ function ExamPage() {
   if (!exam) return <ExamPending />;
 
   if (isMobile) {
-    // Replaced by the mobile viewer (exam picker, facit sheet) in a later step.
     return (
-      <div className="h-dvh">
-        <Suspense fallback={<ExamPending />}>
-          <PdfRenderer pdfUrl={exam.pdf_url} />
-        </Suspense>
-      </div>
+      <MobileExamView
+        key={examId}
+        examId={examId}
+        courseCode={courseCode}
+        examPdfUrl={exam.pdf_url}
+        examDate={exam.exam_date}
+        solutionPdfUrl={solutionPdfUrl}
+        exams={course?.exams ?? []}
+      />
     );
   }
 
