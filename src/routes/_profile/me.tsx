@@ -38,7 +38,7 @@ function ProfilePage() {
       <section className="relative p-6 sm:p-8">
         <div className="relative z-10 flex flex-col items-center text-center">
           <AvatarUpload />
-          <h1 className="mt-4 text-2xl font-medium">{displayName || "Din profil"}</h1>
+          <h1 className="font-heading mt-4 text-2xl font-medium">{displayName || "Din profil"}</h1>
           <p className="mt-2 text-sm text-muted-foreground">{user.email}</p>
           <p className="text-xs text-muted-foreground/80">Medlem sedan {memberSince}</p>
           <ActivityStats userId={user.id} />
@@ -46,7 +46,7 @@ function ProfilePage() {
       </section>
 
       <section className="flex flex-col gap-3">
-        <h2 className="text-xs font-medium tracking-wide text-muted-foreground uppercase">Inställningar</h2>
+        <h2 className="text-xs font-medium text-muted-foreground uppercase">Inställningar</h2>
         <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
           <NameForm />
           <div className="divide-y rounded-md border bg-muted/40">

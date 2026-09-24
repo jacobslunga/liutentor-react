@@ -61,8 +61,8 @@ export function CourseExamsTable({ courseCode, exams, sortBy, sortDirection }: C
         </div>
       )}
 
-      <div className="w-full overflow-x-auto rounded-lg border">
-        <div className="w-max min-w-full overflow-hidden rounded-lg sm:w-full">
+      <div className="w-full overflow-x-auto rounded-xl border">
+        <div className="w-max min-w-full overflow-hidden rounded-xl sm:w-full">
           <div className={cn(GRID_COLS, "border-b bg-muted/30 py-3")}>
             <div className="text-xs text-muted-foreground">Tentamen</div>
             <div className="text-xs text-muted-foreground">Typ</div>

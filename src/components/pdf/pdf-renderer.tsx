@@ -119,7 +119,7 @@ export const PdfRenderer = memo(function PdfRenderer({
   );
 
   return (
-    <div className="group/pdf relative isolate h-full w-full overflow-hidden bg-secondary">
+    <div className="group/pdf relative isolate h-full w-full overflow-hidden bg-background">
       {isLoading || !engine ? (
         <Spinner />
       ) : (

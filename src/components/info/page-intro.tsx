@@ -19,7 +19,7 @@ export function PageIntro({
     <header className="border-b">
       <div className="mx-auto max-w-6xl px-5 pt-16 pb-12 sm:px-8 sm:pt-24 sm:pb-16">
         <p className="text-sm font-medium text-muted-foreground">{eyebrow}</p>
-        <h1 className="mt-5 max-w-3xl text-[2.25rem] leading-[1.1] font-bold tracking-[-0.015em] sm:text-5xl lg:text-6xl">
+        <h1 className="font-heading mt-5 max-w-3xl text-[2.25rem] leading-[1.1] font-bold sm:text-5xl lg:text-6xl">
           {title}
         </h1>
         {lead && (

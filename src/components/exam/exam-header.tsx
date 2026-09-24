@@ -6,9 +6,7 @@ import {
   DownloadIcon,
   EllipsisIcon,
   FileTextIcon,
-  LoaderCircleIcon,
   MaximizeIcon,
-  MessageCircleIcon,
   MinimizeIcon,
   MonitorIcon,
   MoonIcon,
@@ -83,7 +81,11 @@ export const ExamHeader = memo(function ExamHeader({
         >
           <ArrowLeftIcon />
         </Button>
-        <ExamPicker exams={exams} examId={examId} courseCode={courseCode}>
+        <ExamPicker
+          exams={exams}
+          examId={examId}
+          courseCode={courseCode}
+        >
           <span className="font-semibold">{examDate}</span>
         </ExamPicker>
       </ButtonGroup>
@@ -104,19 +106,9 @@ export const ExamHeader = memo(function ExamHeader({
 
 function ChatToggle() {
   const isOpen = useChatStore((s) => s.isOpen);
-  const isLoading = useChatStore((s) => s.isLoading);
   const toggle = useChatStore((s) => s.toggle);
 
-  return (
-    <Button onClick={toggle}>
-      {isLoading ? (
-        <LoaderCircleIcon data-icon="inline-start" className="animate-spin" />
-      ) : (
-        <MessageCircleIcon data-icon="inline-start" />
-      )}
-      {isOpen ? "Stäng" : "Chatt"}
-    </Button>
-  );
+  return <Button onClick={toggle}>{isOpen ? "Stäng" : "Chatt"}</Button>;
 }
 
 const LAYOUT_TABS = [

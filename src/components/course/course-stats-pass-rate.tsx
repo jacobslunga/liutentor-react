@@ -146,7 +146,7 @@ function PassRateTooltip({
 
   return (
     <div className="min-w-40 rounded-lg border bg-background px-3 py-2.5 text-xs shadow-xl">
-      <div className="text-[10px] font-semibold tracking-[0.12em] text-muted-foreground uppercase">
+      <div className="text-[10px] font-semibold text-muted-foreground uppercase">
         {dateFormatter.format(new Date(point.timestamp))}
       </div>
       <div className="mt-1.5 flex items-baseline gap-1.5">

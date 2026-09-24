@@ -238,7 +238,12 @@ export function ChatMessages({
         onClick={handleCodeCopy}
       >
         {ids.map((id, i) => (
-          <MessageRow key={id} id={id} isLast={i === ids.length - 1} />
+          <MessageRow
+            key={id}
+            id={id}
+            isLast={i === ids.length - 1}
+            isRecent={i >= ids.length - 2}
+          />
         ))}
       </div>
       {popover && (
@@ -255,21 +260,43 @@ function randomLoadingPhrase() {
 const MessageRow = memo(function MessageRow({
   id,
   isLast,
+  isRecent,
 }: {
   id: string;
   isLast: boolean;
+  /** The newest question and reply: streamed into and measured by scrolling. */
+  isRecent: boolean;
 }) {
   const message = useChatStore((s) => s.messages.find((m) => m.id === id));
   // A new assistant row mounts per turn, so each turn gets its own phrase.
   const [loadingPhrase] = useState(randomLoadingPhrase);
   const isStreaming = useChatStore((s) => isLast && s.isLoading);
+  const rowRef = useRef<HTMLDivElement>(null);
+
+  // Let the row lay out once at full size before it may be skipped offscreen,
+  // so the browser remembers its real height instead of the placeholder.
+  useEffect(() => {
+    let second = 0;
+    const first = requestAnimationFrame(() => {
+      second = requestAnimationFrame(() =>
+        rowRef.current?.setAttribute("data-measured", ""),
+      );
+    });
+    return () => {
+      cancelAnimationFrame(first);
+      cancelAnimationFrame(second);
+    };
+  }, []);
+
   if (!message) return null;
 
   if (message.role === "user") {
     return (
       <div
+        ref={rowRef}
         data-role="user"
-        className="flex min-w-0 scroll-mt-20 justify-end py-2"
+        data-recent={isRecent || undefined}
+        className="chat-row flex min-w-0 scroll-mt-20 justify-end py-2"
       >
         <div className="flex max-w-[85%] min-w-0 flex-col items-start gap-2 rounded-2xl bg-muted px-4 py-3 shadow-xs sm:max-w-[75%]">
           {message.selectionContext && (
@@ -305,8 +332,10 @@ const MessageRow = memo(function MessageRow({
 
   return (
     <div
+      ref={rowRef}
       data-role="assistant"
-      className="w-full min-w-0 overflow-hidden pt-2 pb-8"
+      data-recent={isRecent || undefined}
+      className="chat-row w-full min-w-0 overflow-hidden pt-2 pb-8"
     >
       {showStatus && (
         <div className="mb-2 flex h-6 items-center gap-2">

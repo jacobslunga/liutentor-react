@@ -1,4 +1,5 @@
 import { queryOptions } from "@tanstack/react-query";
+import { listLocalConversations } from "@/lib/local-conversations";
 import { supabase } from "@/lib/supabase";
 import { createMessageId, type Message } from "@/stores/chat";
 
@@ -69,6 +70,13 @@ export const conversationsQuery = (userId: string) =>
         meta: meta[row.id] ?? "",
       }));
     },
+  });
+
+/** Signed-out history, read from this browser. */
+export const localConversationsQuery = () =>
+  queryOptions({
+    queryKey: ["conversations", "local"],
+    queryFn: (): Conversation[] => listLocalConversations(),
   });
 
 /** Saved turns of a conversation, normalised to user/assistant messages. */

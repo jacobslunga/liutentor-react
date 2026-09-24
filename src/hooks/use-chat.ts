@@ -5,6 +5,11 @@ import {
   readSseEvents,
 } from "@/lib/chat-api";
 import { DEFAULT_MODEL_ID } from "@/lib/chat-models";
+import {
+  createLocalConversationId,
+  isLocalConversationId,
+  saveLocalConversation,
+} from "@/lib/local-conversations";
 import { queryClient } from "@/lib/query-client";
 import { getAuthHeaders, supabase } from "@/lib/supabase";
 import { useAuthStore } from "@/stores/auth";
@@ -23,6 +28,20 @@ function truncateTitle(title: string, maxLength: number): string {
   return title.length <= maxLength
     ? title
     : `${title.slice(0, maxLength - 1).trimEnd()}…`;
+}
+
+/** Signed-out chats live in this browser; write the current one back. */
+function persistLocalConversation(courseCode: string) {
+  const { currentConversationId, currentConversationTitle, messages } =
+    useChatStore.getState();
+  if (!isLocalConversationId(currentConversationId)) return;
+  saveLocalConversation(
+    currentConversationId,
+    currentConversationTitle || "Ny chatt",
+    courseCode,
+    messages,
+  );
+  void queryClient.invalidateQueries({ queryKey: ["conversations", "local"] });
 }
 
 export interface ChatContext {
@@ -94,6 +113,7 @@ export function useChat(ctx: ChatContext) {
       messages: next.map((m) => (m.status ? { ...m, status: null } : m)),
       isLoading: false,
     });
+    persistLocalConversation(ctxRef.current.courseCode);
     return cancelled;
   }, []);
 
@@ -140,6 +160,10 @@ export function useChat(ctx: ChatContext) {
             currentConversationId: data.id,
             currentConversationTitle: title,
           });
+      } else if (!userId && !useChatStore.getState().currentConversationId) {
+        useChatStore.setState({
+          currentConversationId: createLocalConversationId(),
+        });
       }
 
       const userMessage: Message = {
@@ -200,7 +224,12 @@ export function useChat(ctx: ChatContext) {
             courseCode,
             solutionUrl: solutionUrl || undefined,
             modelId: opts.modelId || DEFAULT_MODEL_ID,
-            conversationId: useChatStore.getState().currentConversationId,
+            // Local ids never leave the browser; the server only knows its own.
+            conversationId: isLocalConversationId(
+              useChatStore.getState().currentConversationId,
+            )
+              ? undefined
+              : useChatStore.getState().currentConversationId,
             isFirstMessage,
             selectionContext: opts.selectionContext || undefined,
           }),
@@ -284,6 +313,7 @@ export function useChat(ctx: ChatContext) {
         if (!controller.signal.aborted) {
           patch({ status: null });
           useChatStore.getState().setLoading(false);
+          persistLocalConversation(courseCode);
         }
       }
     },

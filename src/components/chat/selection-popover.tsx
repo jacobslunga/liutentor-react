@@ -2,7 +2,6 @@ import { QuoteIcon } from "lucide-react";
 import { createPortal } from "react-dom";
 import { Button } from "@/components/ui/button";
 
-/** "Ask" button floating above a text selection in the transcript. */
 export function SelectionPopover({
   x,
   y,
@@ -13,8 +12,6 @@ export function SelectionPopover({
   onReply: () => void;
 }) {
   return createPortal(
-    // The wrapper carries the positioning transform; the animation runs on the
-    // inner element, since tw-animate's keyframes replace `transform` while running.
     <div
       className="fixed z-50"
       style={{
@@ -26,6 +23,7 @@ export function SelectionPopover({
       <div className="animate-in duration-150 fade-in-0 zoom-in-95">
         <Button
           variant="outline"
+          className="font-medium"
           onMouseDown={(e) => {
             // Keep the selection alive until we've read it.
             e.preventDefault();
@@ -33,7 +31,7 @@ export function SelectionPopover({
             onReply();
           }}
         >
-          <QuoteIcon data-icon="inline-start" />
+          <QuoteIcon data-icon="inline-start" fill="currentColor" />
           Fråga
         </Button>
       </div>

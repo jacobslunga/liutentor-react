@@ -35,7 +35,7 @@ export function AnalyticsConsent() {
           Endast nödvändiga
         </Button>
         <Button size="sm" onClick={() => choose(true)}>
-          Godkänn analys
+          Godkänn
         </Button>
       </div>
     </aside>

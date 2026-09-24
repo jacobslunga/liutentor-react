@@ -21,11 +21,16 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group";
+import {
+  deleteLocalConversations,
+  loadLocalConversationMessages,
+} from "@/lib/local-conversations";
 import { cn } from "@/lib/utils";
 import {
   conversationsQuery,
   deleteConversations,
   loadConversationMessages,
+  localConversationsQuery,
   type Conversation,
 } from "@/queries/conversations";
 import { useUser } from "@/stores/auth";
@@ -57,16 +62,20 @@ interface ChatHistoryDialogProps {
   onSelect: () => void;
 }
 
-/** Search, open and delete saved conversations (signed-in users only). */
+/**
+ * Search, open and delete saved conversations: from the server when signed
+ * in, from this browser otherwise.
+ */
 export function ChatHistoryDialog({ onSelect }: ChatHistoryDialogProps) {
   const open = useChatStore((s) => s.isHistoryOpen);
   const setOpen = useChatStore((s) => s.setHistoryOpen);
   const currentId = useChatStore((s) => s.currentConversationId);
   const user = useUser();
   const queryClient = useQueryClient();
+  const historyQuery = user ? conversationsQuery(user.id) : localConversationsQuery();
   const { data: conversations = [], isPending, isError } = useQuery({
-    ...conversationsQuery(user?.id ?? ""),
-    enabled: open && !!user,
+    ...historyQuery,
+    enabled: open,
   });
 
   const [search, setSearch] = useState("");
@@ -93,7 +102,9 @@ export function ChatHistoryDialog({ onSelect }: ChatHistoryDialogProps) {
     setOpeningId(item.id);
     setActionError(null);
     try {
-      const messages = await loadConversationMessages(item.id);
+      const messages = user
+        ? await loadConversationMessages(item.id)
+        : loadLocalConversationMessages(item.id);
       if (!messages.length) {
         setActionError("Den här chatten har inga sparade meddelanden än.");
         return;
@@ -116,13 +127,14 @@ export function ChatHistoryDialog({ onSelect }: ChatHistoryDialogProps) {
   }
 
   async function confirmDelete() {
-    if (!user || !pendingDelete || deleting) return;
+    if (!pendingDelete || deleting) return;
     const ids = pendingDelete === "all" ? conversations.map((c) => c.id) : [pendingDelete.id];
     setDeleting(true);
     setActionError(null);
     try {
-      await deleteConversations(user.id, ids);
-      queryClient.setQueryData<Conversation[]>(conversationsQuery(user.id).queryKey, (old) =>
+      if (user) await deleteConversations(user.id, ids);
+      else deleteLocalConversations(ids);
+      queryClient.setQueryData<Conversation[]>(historyQuery.queryKey, (old) =>
         old?.filter((c) => !ids.includes(c.id)),
       );
       const current = useChatStore.getState().currentConversationId;
@@ -147,8 +159,7 @@ export function ChatHistoryDialog({ onSelect }: ChatHistoryDialogProps) {
   }
 
   let body;
-  if (!user) body = <p className="px-2 py-4 text-sm text-muted-foreground">Logga in för att se din chatthistorik.</p>;
-  else if (isPending) body = <p className="px-2 py-4 text-sm text-muted-foreground">Hämtar historik...</p>;
+  if (isPending) body = <p className="px-2 py-4 text-sm text-muted-foreground">Hämtar historik...</p>;
   else if (isError) body = <p className="px-2 py-4 text-sm text-destructive">Kunde inte hämta konversationshistorik.</p>;
   else if (!groups.length)
     body = (
@@ -219,7 +230,11 @@ export function ChatHistoryDialog({ onSelect }: ChatHistoryDialogProps) {
         <DialogContent className="flex h-[min(40rem,calc(100dvh-2rem))] flex-col sm:max-w-lg">
           <DialogHeader>
             <DialogTitle>Chatthistorik</DialogTitle>
-            <DialogDescription>Sök och öppna tidigare chattar</DialogDescription>
+            <DialogDescription>
+              {user
+                ? "Sök och öppna tidigare chattar"
+                : "Sparas bara i den här webbläsaren. Logga in för att spara dem på ditt konto."}
+            </DialogDescription>
           </DialogHeader>
           <div className="flex shrink-0 items-center gap-2">
             <InputGroup className="flex-1">

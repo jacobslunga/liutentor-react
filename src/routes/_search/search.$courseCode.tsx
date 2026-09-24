@@ -75,7 +75,10 @@ function CoursePage() {
     }
     const exams = data.exams;
     const solutions = exams.filter((exam) => exam.has_solution).length;
-    const years = exams.map((exam) => exam.exam_date.slice(0, 4)).filter(Boolean).sort();
+    const years = exams
+      .map((exam) => exam.exam_date.slice(0, 4))
+      .filter(Boolean)
+      .sort();
     const yearText = years.length
       ? ` Tentor från ${years[0]}${years.at(-1) !== years[0] ? `–${years.at(-1)}` : ""}.`
       : "";
@@ -90,8 +93,18 @@ function CoursePage() {
           {
             "@type": "BreadcrumbList",
             itemListElement: [
-              { "@type": "ListItem", position: 1, name: "Hem", item: "https://liutentor.se" },
-              { "@type": "ListItem", position: 2, name: courseCode, item: canonical },
+              {
+                "@type": "ListItem",
+                position: 1,
+                name: "Hem",
+                item: "https://liutentor.se",
+              },
+              {
+                "@type": "ListItem",
+                position: 2,
+                name: courseCode,
+                item: canonical,
+              },
             ],
           },
           {
@@ -101,7 +114,11 @@ function CoursePage() {
             description,
             url: canonical,
             inLanguage: "sv",
-            provider: { "@type": "CollegeOrUniversity", name: "Linköpings universitet", url: "https://liu.se" },
+            provider: {
+              "@type": "CollegeOrUniversity",
+              name: "Linköpings universitet",
+              url: "https://liu.se",
+            },
           },
           {
             "@type": "ItemList",
@@ -151,7 +168,7 @@ function NoExams({ courseCode }: { courseCode: string }) {
         <div className="mx-auto mb-4 flex size-12 items-center justify-center rounded-full bg-muted">
           <InboxIcon className="size-6 text-muted-foreground" />
         </div>
-        <h1 className="text-2xl font-medium">
+        <h1 className="font-heading text-2xl font-medium">
           Vi saknar tentor för {courseCode}
         </h1>
         <p className="mt-2 text-sm text-muted-foreground">
@@ -195,7 +212,7 @@ function CourseContent({
     <div className="flex justify-center">
       <div className="flex w-full max-w-4xl flex-col items-start gap-8">
         <div className="w-full">
-          <h1 className="w-full text-3xl leading-tight font-semibold wrap-break-word sm:text-4xl">
+          <h1 className="font-heading w-full text-3xl leading-tight font-semibold wrap-break-word sm:text-4xl">
             {course.courseName}
           </h1>
           <p className="mt-3 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-muted-foreground">
@@ -227,7 +244,7 @@ function CourseContent({
         </div>
 
         <div className="-mt-4 flex w-full flex-col gap-2">
-          <div className="sticky top-12 z-30 flex flex-col gap-3 bg-background/90 pt-2 pb-2.5 backdrop-blur-md sm:flex-row sm:flex-wrap sm:items-center sm:justify-between md:top-0">
+          <div className="sticky top-12 z-30 flex flex-col gap-3 bg-linear-to-b from-background via-background to-transparent pt-2 pb-2.5 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between md:top-0">
             <Tabs value={activeTab} onValueChange={setTab}>
               <TabsList>
                 <TabsTrigger value="exams">

@@ -22,6 +22,20 @@
   --tw-prose-td-borders: var(--border);
 }
 
+/*
+ * Long transcripts: finished rows off screen skip layout and paint. A row only
+ * opts in after it has been laid out once (data-measured), so the remembered
+ * height is real and scroll positions stay exact. The newest question and
+ * reply stay out: one streams, the other is measured when a turn is sent.
+ */
+.chat-row {
+  contain-intrinsic-size: auto 400px;
+}
+
+.chat-row[data-measured]:not([data-recent]) {
+  content-visibility: auto;
+}
+
 .chat-prose .katex-display {
   width: 100%;
   max-width: 100%;
@@ -106,7 +120,6 @@
 .chat-prose .code-lang {
   font-family: var(--font-mono);
   font-size: 0.7rem;
-  letter-spacing: 0.04em;
   color: var(--muted-foreground);
 }
 

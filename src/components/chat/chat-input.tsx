@@ -135,18 +135,15 @@ export function ChatInput({
     const rightWidth = rightControlsRef.current?.offsetWidth ?? 120;
     const compactTextWidth = Math.max(
       1,
-      shell.clientWidth - leftWidth - rightWidth - 40,
+      shell.clientWidth - leftWidth - rightWidth - 44,
     );
 
     measurement.value = textarea.value;
     measurement.style.width = `${compactTextWidth}px`;
     const expanded =
       textarea.value.includes("\n") || measurement.scrollHeight > 24;
-    measurement.style.width = `${expanded ? shell.clientWidth - 40 : compactTextWidth}px`;
-    const textHeight = Math.min(
-      192,
-      Math.max(24, measurement.scrollHeight),
-    );
+    measurement.style.width = `${expanded ? shell.clientWidth - 44 : compactTextWidth}px`;
+    const textHeight = Math.min(192, Math.max(24, measurement.scrollHeight));
 
     const previous = layoutRef.current;
     const startsExpansion =
@@ -287,15 +284,17 @@ export function ChatInput({
       <div ref={shellRef} className="relative mx-auto max-w-2xl">
         <div
           className={cn(
-            "relative overflow-hidden border border-input bg-background p-2 shadow-xs",
-            layout.expanded ? "rounded-2xl pb-12" : "rounded-xl",
+            "relative overflow-hidden border border-input bg-background p-2.5 shadow-xs",
+            layout.expanded && "pb-13",
+            // Single row is a pill; extra rows or a header settle to 2xl.
+            layout.expanded || hasHeader ? "rounded-2xl" : "rounded-[1.75rem]",
             layout.animate &&
               "transition-[border-radius,padding-bottom] duration-200 ease-out",
             isLoading && "chat-prompt-generating",
           )}
         >
           {hasHeader && (
-            <div className="-mx-2 -mt-2 mb-2 flex flex-col items-stretch gap-2 overflow-hidden rounded-t-xl border-b bg-muted/50 px-2.5 pt-2 pb-2.5">
+            <div className="-mx-2.5 -mt-2.5 mb-2 flex flex-col items-stretch gap-2 overflow-hidden rounded-t-xl border-b bg-muted/50 px-2.5 pt-2 pb-2.5">
               {selectionContext && (
                 <div className="flex w-full animate-in items-start gap-3 duration-200 fade-in-0">
                   <CornerDownLeftIcon className="mt-0.5 size-4 shrink-0 -scale-x-100" />
@@ -375,7 +374,7 @@ export function ChatInput({
 
           <div
             ref={leftControlsRef}
-            className="absolute bottom-2 left-2 flex h-8 items-center gap-0.5"
+            className="absolute bottom-2.5 left-2.5 flex h-8 items-center gap-0.5"
           >
             <input
               ref={fileInputRef}
@@ -407,7 +406,7 @@ export function ChatInput({
 
           <div
             ref={rightControlsRef}
-            className="absolute right-2 bottom-2 flex h-8 shrink-0 items-center gap-1"
+            className="absolute right-2.5 bottom-2.5 flex h-8 shrink-0 items-center gap-1"
           >
             <ModelPicker />
             {longLength > 0 && (
@@ -464,7 +463,11 @@ function ModelPicker() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <InputGroupButton variant="ghost" aria-label="Tankenivå">
+        <InputGroupButton
+          variant="ghost"
+          aria-label="Tankenivå"
+          className="px-2 py-4"
+        >
           {label}
           <ChevronDownIcon />
         </InputGroupButton>

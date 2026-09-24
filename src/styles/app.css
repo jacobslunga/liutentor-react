@@ -1,17 +1,39 @@
 /* App-specific tokens and helpers. shadcn tokens live untouched in index.css. */
 @plugin "@tailwindcss/typography";
 
-/* Latin subset of the variable original (325 kB -> 89 kB), axes intact. */
+/* Universal Sans ships two optical cuts: Text for body sizes, Display for
+   headings. Only 400 and 550 exist, so the 550 file covers medium through
+   bold instead of letting font-medium fall back to 400. */
 @font-face {
-  font-family: "GitLab Sans";
-  src: url("../assets/fonts/gitlab-sans-variable-latin.woff2") format("woff2");
+  font-family: "Universal Sans Text";
+  src: url("../assets/fonts/universal-sans-text-regular.woff2") format("woff2");
   font-style: normal;
-  font-weight: 100 900;
+  font-weight: 400;
   font-display: swap;
-  unicode-range:
-    U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC,
-    U+0304, U+0308, U+0329, U+2000-206F, U+2074, U+20AC, U+2122, U+2191,
-    U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: "Universal Sans Text";
+  src: url("../assets/fonts/universal-sans-text-medium.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 500 700;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Universal Sans Display";
+  src: url("../assets/fonts/universal-sans-display-regular.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Universal Sans Display";
+  src: url("../assets/fonts/universal-sans-display-medium.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 500 700;
+  font-display: swap;
 }
 
 @font-face {

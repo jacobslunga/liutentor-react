@@ -63,7 +63,7 @@ export function ExamUploadForm({ initialCourseCode = "", fixedCourseCode = false
           <p className="text-sm font-medium text-muted-foreground">Kurskod</p>
           <div className="flex items-center justify-center gap-2 rounded-md border bg-muted/30 px-4 py-3">
             <BookIcon className="size-4 text-muted-foreground" />
-            <span className="font-mono text-lg font-medium tracking-wide">{courseCode}</span>
+            <span className="font-mono text-lg font-medium">{courseCode}</span>
           </div>
         </div>
       ) : (

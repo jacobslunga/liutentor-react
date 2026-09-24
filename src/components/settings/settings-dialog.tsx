@@ -13,11 +13,21 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Kbd } from "@/components/ui/kbd";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import type { ChatModelId } from "@/lib/chat-models";
 import { useRecentSearches } from "@/stores/recent-searches";
-import { useSelectedModel, useSettingsStore, type LayoutMode } from "@/stores/settings";
+import {
+  useSelectedModel,
+  useSettingsStore,
+  type LayoutMode,
+} from "@/stores/settings";
 
 const SHORTCUT_GROUPS = [
   {
@@ -29,7 +39,12 @@ const SHORTCUT_GROUPS = [
       { action: "Stäng chatt och facit", keys: ["Esc"] },
     ],
   },
-  { label: "Layout", shortcuts: [{ action: "Flytta delningslinjen i delad vy", keys: ["←", "→"] }] },
+  {
+    label: "Layout",
+    shortcuts: [
+      { action: "Flytta delningslinjen i delad vy", keys: ["←", "→"] },
+    ],
+  },
   {
     label: "Chatten",
     shortcuts: [
@@ -41,7 +56,10 @@ const SHORTCUT_GROUPS = [
 
 const FIXED_LIMITS = [
   { label: "Meddelanden i chatten", value: "Max 4 000 tecken" },
-  { label: "Bilagor i en aktiv chatt", value: "5 filer, 5 MB per fil, 20 MB totalt" },
+  {
+    label: "Bilagor i en aktiv chatt",
+    value: "5 filer, 5 MB per fil, 20 MB totalt",
+  },
   { label: "Markerad text till chatten", value: "Max 4 000 tecken" },
   { label: "Senaste sökningar", value: "3 kurskoder" },
   { label: "Chatthistorik", value: "Sparas bara när du är inloggad" },
@@ -69,7 +87,9 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
       <DialogContent className="flex max-h-[min(720px,calc(100dvh-2rem))] flex-col sm:max-w-lg">
         <DialogHeader>
           <DialogTitle>Inställningar</DialogTitle>
-          <DialogDescription>Anpassa hur LiU Tentor beter sig.</DialogDescription>
+          <DialogDescription>
+            Anpassa hur LiU Tentor beter sig.
+          </DialogDescription>
         </DialogHeader>
         <div className="-mx-6 min-h-0 overflow-y-auto px-6">
           <SettingsContent />
@@ -91,12 +111,16 @@ function SettingsContent() {
   const { selectedModelId, availableModels } = useSelectedModel();
   const recentSearches = useRecentSearches((s) => s.latest);
   const clearRecentSearches = useRecentSearches((s) => s.clear);
-  const ThemeIcon = theme === "light" ? SunIcon : theme === "dark" ? MoonIcon : MonitorIcon;
+  const ThemeIcon =
+    theme === "light" ? SunIcon : theme === "dark" ? MoonIcon : MonitorIcon;
 
   return (
     <div className="flex flex-col gap-6 pt-1 pb-2">
       <Section title="Utseende">
-        <Row label="Tema" description="System följer inställningen i din enhet.">
+        <Row
+          label="Tema"
+          description="System följer inställningen i din enhet."
+        >
           <Select value={theme} onValueChange={setTheme}>
             <SelectTrigger size="sm" aria-label="Tema">
               <ThemeIcon />
@@ -112,8 +136,14 @@ function SettingsContent() {
       </Section>
 
       <Section title="Läsvy">
-        <Row label="Standardvy" description="Hur en tenta öppnas. Du kan alltid byta i tentavyn.">
-          <Select value={layoutMode} onValueChange={(v) => setLayoutMode(v as LayoutMode)}>
+        <Row
+          label="Standardvy"
+          description="Hur en tenta öppnas. Du kan alltid byta i tentavyn."
+        >
+          <Select
+            value={layoutMode}
+            onValueChange={(v) => setLayoutMode(v as LayoutMode)}
+          >
             <SelectTrigger size="sm" aria-label="Standardvy">
               <SelectValue />
             </SelectTrigger>
@@ -127,19 +157,33 @@ function SettingsContent() {
           label="Dölj facit tills du pekar på det"
           description="Gäller delad vy. Med detta av ligger facit framme direkt."
         >
-          <Switch checked={blurFacit} onCheckedChange={setBlurFacit} aria-label="Dölj facit tills du pekar på det" />
+          <Switch
+            checked={blurFacit}
+            onCheckedChange={setBlurFacit}
+            aria-label="Dölj facit tills du pekar på det"
+          />
         </Row>
         <Row
           label='Visa "Förklara" vid markering'
           description="Knappen som dyker upp när du markerar text i en tenta."
         >
-          <Switch checked={showExplain} onCheckedChange={setShowExplain} aria-label='Visa "Förklara" vid markering' />
+          <Switch
+            checked={showExplain}
+            onCheckedChange={setShowExplain}
+            aria-label='Visa "Förklara" vid markering'
+          />
         </Row>
       </Section>
 
       <Section title="AI-assistenten">
-        <Row label="Tankenivå" description="Hur mycket chatten tänker innan den svarar.">
-          <Select value={selectedModelId} onValueChange={(v) => setSelectedModelId(v as ChatModelId)}>
+        <Row
+          label="Tankenivå"
+          description="Hur mycket chatten tänker innan den svarar."
+        >
+          <Select
+            value={selectedModelId}
+            onValueChange={(v) => setSelectedModelId(v as ChatModelId)}
+          >
             <SelectTrigger size="sm" aria-label="Tankenivå">
               <SelectValue />
             </SelectTrigger>
@@ -153,8 +197,12 @@ function SettingsContent() {
           </Select>
         </Row>
         <p className="pt-3.5 text-xs leading-relaxed text-muted-foreground">
-          AI kan göra misstag – se svaren som pedagogiska förslag, inte som facit. Läs mer i vår{" "}
-          <Link to="/ai-policy" className="text-foreground underline underline-offset-4">
+          AI kan göra misstag – se svaren som pedagogiska förslag, inte som
+          facit. Läs mer i vår{" "}
+          <Link
+            to="/ai-policy"
+            className="text-foreground underline underline-offset-4"
+          >
             AI-policy
           </Link>
           .
@@ -162,13 +210,18 @@ function SettingsContent() {
       </Section>
 
       <section className="space-y-3">
-        <h3 className="text-xs font-medium text-muted-foreground">Tangentbordsgenvägar</h3>
+        <h3 className="text-xs font-medium text-muted-foreground">
+          Tangentbordsgenvägar
+        </h3>
         {SHORTCUT_GROUPS.map((group) => (
           <div key={group.label} className="space-y-1.5">
             <h4 className="text-xs text-muted-foreground/70">{group.label}</h4>
             <div className="divide-y overflow-hidden rounded-md border">
               {group.shortcuts.map((shortcut) => (
-                <div key={shortcut.action} className="flex items-center justify-between gap-4 px-3 py-2">
+                <div
+                  key={shortcut.action}
+                  className="flex items-center justify-between gap-4 px-3 py-2"
+                >
                   <span className="min-w-0 text-sm">{shortcut.action}</span>
                   <span className="flex shrink-0 items-center gap-1">
                     {shortcut.keys.map((key) => (
@@ -183,12 +236,19 @@ function SettingsContent() {
       </section>
 
       <section className="space-y-3">
-        <h3 className="text-xs font-medium text-muted-foreground">Fasta gränser</h3>
+        <h3 className="text-xs font-medium text-muted-foreground">
+          Fasta gränser
+        </h3>
         <dl className="divide-y overflow-hidden rounded-md border">
           {FIXED_LIMITS.map((item) => (
-            <div key={item.label} className="flex items-baseline justify-between gap-4 px-3 py-2">
+            <div
+              key={item.label}
+              className="flex items-baseline justify-between gap-4 px-3 py-2"
+            >
               <dt className="text-sm">{item.label}</dt>
-              <dd className="shrink-0 text-right text-xs text-muted-foreground">{item.value}</dd>
+              <dd className="shrink-0 text-right text-xs text-muted-foreground">
+                {item.value}
+              </dd>
             </div>
           ))}
         </dl>
@@ -226,12 +286,24 @@ function Section({ title, children }: { title: string; children: ReactNode }) {
   );
 }
 
-function Row({ label, description, children }: { label: string; description?: string; children: ReactNode }) {
+function Row({
+  label,
+  description,
+  children,
+}: {
+  label: string;
+  description?: string;
+  children: ReactNode;
+}) {
   return (
     <div className="flex items-start justify-between gap-6 border-b py-3.5 last:border-b-0">
       <div className="min-w-0 space-y-0.5">
         <p className="text-sm font-medium">{label}</p>
-        {description && <p className="text-xs leading-relaxed text-muted-foreground">{description}</p>}
+        {description && (
+          <p className="text-xs leading-relaxed text-muted-foreground">
+            {description}
+          </p>
+        )}
       </div>
       <div className="shrink-0 pt-0.5">{children}</div>
     </div>

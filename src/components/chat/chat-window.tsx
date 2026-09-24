@@ -316,7 +316,7 @@ export default function ChatWindow({
 
       <div className="pointer-events-none absolute inset-x-0 top-0 z-20">
         <div className="pointer-events-none relative isolate flex h-14 items-center justify-between gap-2 px-3">
-          <div className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-20 bg-linear-to-b from-background to-transparent" />
+          <div className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-20 bg-linear-to-b from-background via-background/90 to-transparent" />
           <div className="flex min-w-0 items-center gap-1">
             <HeaderButton label="Stäng chatten" onClick={onClose}>
               <ChevronRightIcon />
@@ -362,7 +362,7 @@ export default function ChatWindow({
           <div className="flex min-h-0 flex-1 flex-col items-center justify-center gap-4 px-4 pb-28 text-center">
             <ChatMascot className="size-14 shrink-0" />
             <div className="space-y-2">
-              <h2 className="text-2xl font-semibold">
+              <h2 className="font-heading text-2xl font-semibold">
                 Vad kan jag hjälpa till med?
               </h2>
               <p className="mx-auto max-w-70 text-sm leading-relaxed text-muted-foreground sm:max-w-md">
@@ -469,7 +469,7 @@ function ConversationTitle({
 
   return (
     <span
-      className="pointer-events-none max-w-[min(24rem,50vw)] truncate text-sm font-medium"
+      className="pointer-events-none max-w-[min(24rem,50vw)] truncate text-sm font-normal"
       aria-label={title}
     >
       <span aria-hidden="true">{visibleTitle}</span>
