@@ -1,5 +1,7 @@
 import { Link } from "@tanstack/react-router";
+import { MessageCircleIcon } from "lucide-react";
 import { AuthActions } from "@/components/auth/auth-actions";
+import { Button } from "@/components/ui/button";
 import { HeaderCourseSearch } from "@/components/search/course-search";
 import { LogoIcon } from "./logo-icon";
 
@@ -18,7 +20,13 @@ export function SearchHeader() {
           </span>
         </Link>
 
-        <div className="shrink-0">
+        <div className="flex shrink-0 items-center gap-2">
+          <Button asChild size="sm" variant="ghost">
+            <Link to="/chatt">
+              <MessageCircleIcon data-icon="inline-start" />
+              Chatt
+            </Link>
+          </Button>
           <AuthActions showSettings />
         </div>
       </div>

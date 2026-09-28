@@ -1,7 +1,14 @@
 import { queryOptions } from "@tanstack/react-query";
 import { listLocalConversations } from "@/lib/local-conversations";
 import { supabase } from "@/lib/supabase";
-import { createMessageId, type Message } from "@/stores/chat";
+import {
+  createMessageId,
+  type Message,
+  type MessageSource,
+} from "@/stores/chat";
+
+/** Which chat a conversation belongs to: the exam panel or the learning chat. */
+export type ConversationKind = "exam" | "learn";
 
 export interface Conversation {
   id: string;
@@ -26,7 +33,8 @@ async function loadMeta(ids: string[]): Promise<Record<string, string>> {
     for (const row of logs ?? []) {
       if (!row?.conversation_id || first.has(row.conversation_id)) continue;
       first.set(row.conversation_id, {
-        courseCode: row.course_code || null,
+        // Learning chats log every referenced course, comma separated.
+        courseCode: row.course_code ? row.course_code.split(",").join(", ") : null,
         examId: typeof row.exam_id === "number" ? row.exam_id : null,
       });
     }
@@ -50,14 +58,24 @@ async function loadMeta(ids: string[]): Promise<Record<string, string>> {
   }
 }
 
-export const conversationsQuery = (userId: string) =>
+/**
+ * A user's conversations of one kind. Learning chats are split by course:
+ * `courseId` null lists the standalone ones, a course id that course's chats.
+ */
+export const conversationsQuery = (
+  userId: string,
+  kind: ConversationKind,
+  courseId: string | null = null,
+) =>
   queryOptions({
-    queryKey: ["conversations", userId],
+    queryKey: conversationsKey(userId, kind, courseId),
     queryFn: async (): Promise<Conversation[]> => {
       const { data, error } = await supabase
         .from("conversations")
         .select("id, title, created_at")
         .eq("user_id", userId)
+        .eq("kind", kind)
+        .filter("course_id", courseId ? "eq" : "is", courseId ?? null)
         .order("created_at", { ascending: false });
       if (error) throw error;
 
@@ -72,18 +90,24 @@ export const conversationsQuery = (userId: string) =>
     },
   });
 
+export const conversationsKey = (
+  userId: string,
+  kind: ConversationKind,
+  courseId: string | null = null,
+) => ["conversations", userId, kind, courseId ?? "standalone"];
+
 /** Signed-out history, read from this browser. */
-export const localConversationsQuery = () =>
+export const localConversationsQuery = (kind: ConversationKind) =>
   queryOptions({
-    queryKey: ["conversations", "local"],
-    queryFn: (): Conversation[] => listLocalConversations(),
+    queryKey: ["conversations", "local", kind],
+    queryFn: (): Conversation[] => listLocalConversations(kind),
   });
 
 /** Saved turns of a conversation, normalised to user/assistant messages. */
 export async function loadConversationMessages(conversationId: string): Promise<Message[]> {
   const { data, error } = await supabase
     .from("ai_chat_logs")
-    .select("role, content, created_at")
+    .select("role, content, sources, created_at")
     .eq("conversation_id", conversationId)
     .order("created_at", { ascending: true });
   if (error) throw error;
@@ -96,8 +120,37 @@ export async function loadConversationMessages(conversationId: string): Promise<
         ? "assistant"
         : null;
     if (!normalized || typeof row?.content !== "string") return [];
-    return [{ id: createMessageId(), role: normalized, content: row.content }];
+    const sources = Array.isArray(row.sources)
+      ? (row.sources as MessageSource[])
+      : undefined;
+    return [
+      {
+        id: createMessageId(),
+        role: normalized,
+        content: row.content,
+        createdAt: row.created_at,
+        ...(sources?.length ? { sources } : {}),
+      },
+    ];
   });
+}
+
+/**
+ * A conversation's title and study course, or null when it does not exist
+ * (or is not ours).
+ */
+export async function loadConversationInfo(
+  conversationId: string,
+): Promise<{ title: string; courseId: string | null } | null> {
+  const { data, error } = await supabase
+    .from("conversations")
+    .select("title, course_id")
+    .eq("id", conversationId)
+    .maybeSingle();
+  if (error) throw error;
+  return data
+    ? { title: data.title || "Ny chatt", courseId: data.course_id ?? null }
+    : null;
 }
 
 export async function deleteConversations(userId: string, ids: string[]) {

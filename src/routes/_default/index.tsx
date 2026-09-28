@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { UploadIcon } from "lucide-react";
 import { AuthActions } from "@/components/auth/auth-actions";
+import { AppModeTabs } from "@/components/layout/app-mode-tabs";
 import { LogoIcon } from "@/components/layout/logo-icon";
 import { HeroCourseSearch } from "@/components/search/course-search";
 import { RecentSearches } from "@/components/search/recent-searches";
@@ -25,6 +26,12 @@ function HomePage() {
       <div className="absolute top-5 right-5 flex flex-row items-center justify-center gap-2">
         <AuthActions />
       </div>
+
+      {/* Below the account buttons on phones, centred between them on wider screens. */}
+      <AppModeTabs
+        active="tentor"
+        className="absolute top-18 left-1/2 -translate-x-1/2 sm:top-5"
+      />
 
       <div className="mb-20 flex w-full max-w-150 flex-col items-center gap-6">
         <div className="flex flex-row items-center justify-center space-x-2">

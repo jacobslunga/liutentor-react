@@ -8,14 +8,14 @@
 
 @theme inline {
   --font-heading:
-    "Cereal", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-    "Helvetica Neue", sans-serif;
+    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue",
+    sans-serif;
   --font-mono:
     "JetBrains Mono Variable", ui-monospace, SFMono-Regular, "SF Mono", Menlo,
     Consolas, monospace;
   --font-sans:
-    "Cereal", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
-    Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu,
+    Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -136,5 +136,51 @@
   }
   html {
     @apply font-sans;
+  }
+}
+
+/*
+ * Soft mesh gradient for feature announcements (the chat intro dialog).
+ * Fixed colors on purpose: it is an illustration, the same in both themes.
+ */
+.intro-mesh {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  background:
+    radial-gradient(55% 75% at 0% 15%, #e58ee8 0%, transparent 62%),
+    radial-gradient(55% 70% at 8% 100%, #f07c6c 0%, transparent 62%),
+    radial-gradient(40% 95% at 47% 60%, #f6d98b 0%, transparent 66%),
+    radial-gradient(45% 65% at 62% 92%, #ecb5ef 0%, transparent 62%),
+    radial-gradient(70% 95% at 100% 25%, #cddffb 0%, transparent 72%), #e2e5fa;
+}
+
+/* A second, blurred copy that drifts, so the colors slowly breathe. */
+.intro-mesh::before {
+  content: "";
+  position: absolute;
+  inset: -20%;
+  z-index: -1;
+  background:
+    radial-gradient(30% 40% at 25% 35%, #f2a0d8 0%, transparent 70%),
+    radial-gradient(28% 38% at 55% 70%, #f9c77f 0%, transparent 70%),
+    radial-gradient(32% 42% at 78% 30%, #c7c4f7 0%, transparent 70%);
+  filter: blur(40px);
+  opacity: 0.85;
+  animation: intro-mesh-drift 16s ease-in-out infinite alternate;
+}
+
+@keyframes intro-mesh-drift {
+  from {
+    transform: translate3d(-6%, -4%, 0) rotate(0deg) scale(1);
+  }
+  to {
+    transform: translate3d(6%, 5%, 0) rotate(8deg) scale(1.08);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .intro-mesh::before {
+    animation: none;
   }
 }

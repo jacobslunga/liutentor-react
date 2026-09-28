@@ -14,6 +14,7 @@ import {
   type Ref,
   type RefObject,
 } from "react";
+import { toast } from "sonner";
 import { useShallow } from "zustand/react/shallow";
 import { Button } from "@/components/ui/button";
 import { useChatMarkdownReady } from "@/hooks/use-chat-markdown";
@@ -22,10 +23,13 @@ import {
   renderChatMarkdown,
   selectionToMarkdown,
 } from "@/lib/chat-markdown";
+import { splitCourseMentions } from "@/lib/course-mentions";
+import { courseFileUrl } from "@/lib/study-courses";
 import { formatFileSize } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import {
   useChatStore,
+  useChatStoreApi,
   type ChatAttachment,
   type MessageSource,
 } from "@/stores/chat";
@@ -48,7 +52,9 @@ const LOADING_PHRASES = [
 
 const OPAQUE_SOURCE_HOSTS = ["vertexaisearch.cloud.google.com"];
 
-function sourceLabel(source: MessageSource): string {
+type WebSource = Extract<MessageSource, { url: string }>;
+
+function sourceLabel(source: WebSource): string {
   try {
     const host = new URL(source.url).hostname.replace(/^www\./, "");
     return OPAQUE_SOURCE_HOSTS.includes(host) ? source.title || host : host;
@@ -82,6 +88,7 @@ export function ChatMessages({
   className,
   onReplyToSelection,
 }: ChatMessagesProps) {
+  const chatStore = useChatStoreApi();
   const ids = useChatStore(useShallow((s) => s.messages.map((m) => m.id)));
   const mdReady = useChatMarkdownReady();
   const rootRef = useRef<HTMLDivElement>(null);
@@ -104,14 +111,14 @@ export function ChatMessages({
   const restoreScroll = useCallback(() => {
     const el = scrollRef.current;
     if (!el) return;
-    const saved = useChatStore.getState().savedScrollPosition;
+    const saved = chatStore.getState().savedScrollPosition;
     if (saved !== null) {
       el.scrollTop = saved;
     } else {
       scrollToBottom("auto");
       requestAnimationFrame(() => scrollToBottom("auto"));
     }
-  }, [scrollRef, scrollToBottom]);
+  }, [chatStore, scrollRef, scrollToBottom]);
 
   /**
    * Scrolls the newest question to the top and reserves room below it, so the
@@ -144,24 +151,30 @@ export function ChatMessages({
       restoreScroll,
       persistScrollPosition: () => {
         const el = scrollRef.current;
-        if (el) useChatStore.setState({ savedScrollPosition: el.scrollTop });
+        if (el) chatStore.setState({ savedScrollPosition: el.scrollTop });
       },
     }),
-    [scrollToBottom, scrollUserMessageToTop, restoreScroll, scrollRef],
+    [
+      chatStore,
+      scrollToBottom,
+      scrollUserMessageToTop,
+      restoreScroll,
+      scrollRef,
+    ],
   );
 
   // Position the transcript once markdown is up and rows have their real height.
   useEffect(() => {
     if (!mdReady) return;
     if (
-      useChatStore.getState().isLoading &&
-      useChatStore.getState().savedScrollPosition === null
+      chatStore.getState().isLoading &&
+      chatStore.getState().savedScrollPosition === null
     ) {
       requestAnimationFrame(scrollUserMessageToTop);
     } else {
       requestAnimationFrame(restoreScroll);
     }
-  }, [mdReady, restoreScroll, scrollUserMessageToTop]);
+  }, [chatStore, mdReady, restoreScroll, scrollUserMessageToTop]);
 
   // The "Ask" popover hides when the selection clears or the transcript scrolls away.
   useEffect(() => {
@@ -312,8 +325,8 @@ const MessageRow = memo(function MessageRow({
             </div>
           )}
           {message.content && (
-            <p className="text-[0.9375rem] leading-relaxed whitespace-pre-wrap">
-              {message.content}
+            <p className="text-sm leading-relaxed whitespace-pre-wrap sm:text-[0.9375rem]">
+              <UserText text={message.content} />
             </p>
           )}
         </div>
@@ -347,36 +360,109 @@ const MessageRow = memo(function MessageRow({
       )}
       {html && (
         <div
-          className="chat-prose prose w-full prose-h1:text-2xl prose-h2:text-xl prose-h3:text-lg prose-h4:text-base prose-h5:text-sm prose-h6:text-xs prose-h1:font-medium prose-h2:font-medium prose-h3:font-medium prose-h4:font-medium prose-h5:font-medium prose-h6:font-medium max-w-none min-w-0 dark:prose-invert"
+          className="chat-prose prose prose-sm w-full sm:prose-base prose-strong:font-medium prose-h1:text-xl prose-h2:text-lg prose-h3:text-base prose-h4:text-sm sm:prose-h1:text-2xl sm:prose-h2:text-xl sm:prose-h3:text-lg sm:prose-h4:text-base prose-h5:text-sm prose-h6:text-xs prose-h1:font-medium prose-h2:font-medium prose-h3:font-medium prose-h4:font-medium prose-h5:font-medium prose-h6:font-medium max-w-none min-w-0 dark:prose-invert"
           dangerouslySetInnerHTML={{ __html: html }}
         />
       )}
       {!!message.sources?.length && (
         <div className="mt-3 flex flex-wrap gap-1.5">
-          {message.sources.map((source) => (
-            <Button
-              key={source.url}
-              asChild
-              variant="outline"
-              size="xs"
-              className="max-w-56"
-            >
-              <a
-                href={source.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                title={source.title}
+          {message.sources.map((source) =>
+            source.type === "file" ? (
+              <FileSourceChip key={source.fileId} source={source} />
+            ) : (
+              <Button
+                key={source.url}
+                asChild
+                variant="outline"
+                size="xs"
+                className="max-w-56"
               >
-                <GlobeIcon data-icon="inline-start" />
-                <span className="truncate">{sourceLabel(source)}</span>
-              </a>
-            </Button>
-          ))}
+                <a
+                  href={source.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  title={source.title}
+                >
+                  <GlobeIcon data-icon="inline-start" />
+                  <span className="truncate">{sourceLabel(source)}</span>
+                </a>
+              </Button>
+            ),
+          )}
         </div>
       )}
     </div>
   );
 });
+
+/** A cited study-course file; opens the PDF through a short-lived link. */
+function FileSourceChip({
+  source,
+}: {
+  source: Extract<MessageSource, { type: "file" }>;
+}) {
+  const [opening, setOpening] = useState(false);
+
+  async function open() {
+    if (opening) return;
+    // Open the tab inside the click, or the browser blocks it as a popup.
+    const tab = window.open("", "_blank");
+    setOpening(true);
+    try {
+      const url = await courseFileUrl(source.fileId);
+      if (!url) {
+        tab?.close();
+        toast.error("Filen finns inte längre i kursen.");
+        return;
+      }
+      if (tab) {
+        tab.opener = null;
+        tab.location.href = url;
+      } else {
+        window.location.href = url;
+      }
+    } catch {
+      tab?.close();
+      toast.error("Kunde inte öppna filen.");
+    } finally {
+      setOpening(false);
+    }
+  }
+
+  return (
+    <Button
+      variant="outline"
+      size="xs"
+      className="max-w-56"
+      title={source.title}
+      aria-busy={opening}
+      onClick={() => void open()}
+    >
+      {opening ? (
+        <LoaderCircleIcon data-icon="inline-start" className="animate-spin" />
+      ) : (
+        <FileTextIcon data-icon="inline-start" />
+      )}
+      <span className="truncate">{source.title}</span>
+    </Button>
+  );
+}
+
+/** A question as typed, with "@TATA41" course mentions set off. */
+function UserText({ text }: { text: string }) {
+  return splitCourseMentions(text).map((part, i) =>
+    part.type === "text" ? (
+      part.text
+    ) : (
+      <span
+        key={i}
+        className="rounded-md bg-background px-1 py-px font-medium text-foreground"
+      >
+        @{part.code}
+      </span>
+    ),
+  );
+}
 
 function AttachmentChip({ attachment }: { attachment: ChatAttachment }) {
   return (

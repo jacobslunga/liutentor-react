@@ -17,12 +17,16 @@ export function getAnalyticsConsent(): boolean | null {
   }
 }
 
+/** Fired on `window` once the visitor has answered the consent banner. */
+export const ANALYTICS_CONSENT_EVENT = "liutentor:analytics-consent";
+
 export function setAnalyticsConsent(granted: boolean) {
   try {
     localStorage.setItem(CONSENT_KEY, granted ? "granted" : "denied");
   } catch {
     // Privacy modes may block storage; the choice still applies for this tab.
   }
+  window.dispatchEvent(new Event(ANALYTICS_CONSENT_EVENT));
 }
 
 /**

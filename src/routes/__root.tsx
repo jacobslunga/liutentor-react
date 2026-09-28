@@ -6,6 +6,7 @@ import {
 } from "@tanstack/react-router";
 import { AppLoadingBar } from "@/components/layout/app-loading-bar";
 import { AnalyticsConsent } from "@/components/layout/analytics-consent";
+import { ChatIntroDialog } from "@/components/layout/chat-intro-dialog";
 import { Button } from "@/components/ui/button";
 import { ExamUploadDialog } from "@/components/upload/exam-upload-dialog";
 import { Toaster } from "@/components/ui/sonner";
@@ -28,6 +29,7 @@ function RootLayout() {
       <Outlet />
       <ExamUploadDialog />
       <AnalyticsConsent />
+      <ChatIntroDialog />
       <Toaster position="top-center" duration={4000} />
     </TooltipProvider>
   );

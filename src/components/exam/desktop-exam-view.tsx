@@ -15,7 +15,7 @@ import { ResizeHandle } from "@/components/exam/resize-handle";
 import { Button } from "@/components/ui/button";
 import { useLatest } from "@/hooks/use-latest";
 import { cn } from "@/lib/utils";
-import { useChatStore } from "@/stores/chat";
+import { examChatStore, useChatStore } from "@/stores/chat";
 import { useExamViewStore } from "@/stores/exam-view";
 import { useSettingsStore } from "@/stores/settings";
 import type { Exam } from "@/types/exam";
@@ -111,7 +111,7 @@ export function DesktopExamView({
   }, [applySplit, applyOverlayWidth]);
 
   const explain = useCallback((text: string) => {
-    useChatStore.getState().askAboutSelection("Förklara", text);
+    examChatStore.getState().askAboutSelection("Förklara", text);
   }, []);
 
   // A new exam starts with fresh view state and an empty chat.
@@ -119,11 +119,11 @@ export function DesktopExamView({
     useExamViewStore
       .getState()
       .reset(useSettingsStore.getState().blurFacitUntilHover);
-    const chat = useChatStore.getState();
+    const chat = examChatStore.getState();
     chat.close();
     chat.clearChat();
     return () => {
-      const chat = useChatStore.getState();
+      const chat = examChatStore.getState();
       chat.close();
       chat.clearChat();
     };
@@ -162,7 +162,7 @@ export function DesktopExamView({
         !hasFacit ||
         view.isFacitManual ||
         isOverlayResizing.current ||
-        useChatStore.getState().isOpen
+        examChatStore.getState().isOpen
       ) {
         return;
       }
@@ -199,7 +199,7 @@ export function DesktopExamView({
   useEffect(() => {
     function onKeyDown(e: KeyboardEvent) {
       if (e.defaultPrevented) return;
-      const chat = useChatStore.getState();
+      const chat = examChatStore.getState();
       const view = useExamViewStore.getState();
 
       if (e.key === "Escape") {
@@ -363,7 +363,7 @@ export function DesktopExamView({
               courseCode={courseCode}
               examUrl={examPdfUrl}
               solutionUrl={solutionPdfUrl}
-              onClose={() => useChatStore.getState().close()}
+              onClose={() => examChatStore.getState().close()}
             />
           </Suspense>
         </SideOverlay>
