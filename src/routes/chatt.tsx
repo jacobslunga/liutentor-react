@@ -18,11 +18,15 @@ function LearnLayout() {
   const conversationId = params.conversationId ?? null;
   const courseId = params.courseId ?? null;
 
+  // /chatt itself is a public landing page; single chats and courses are
+  // private to their owner and stay out of search results.
   useSeo({
-    title: "Chatt",
-    description: "Plugga med AI. Referera till en kurs med @kurskod.",
+    title: "Chatt – plugga med AI",
+    description:
+      "Plugga med AI på LiU Tentor. Ställ frågor om dina kurser, skriv @kurskod för att prata om en viss kurs och få svar med källor ur dina egna föreläsningar.",
     path: "/chatt",
-    robots: "noindex, nofollow",
+    robots:
+      conversationId || courseId ? "noindex, nofollow" : "index, follow",
   });
 
   return (
