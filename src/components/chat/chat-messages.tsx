@@ -347,7 +347,7 @@ const MessageRow = memo(function MessageRow({
       )}
       {html && (
         <div
-          className="chat-prose prose w-full prose-h1:font-semibold prose-h2:font-semibold prose-h3:font-medium prose-h4:font-medium prose-h5:font-medium prose-h6:font-medium max-w-none min-w-0 dark:prose-invert"
+          className="chat-prose prose w-full prose-h1:text-2xl prose-h2:text-xl prose-h3:text-lg prose-h4:text-base prose-h5:text-sm prose-h6:text-xs prose-h1:font-medium prose-h2:font-medium prose-h3:font-medium prose-h4:font-medium prose-h5:font-medium prose-h6:font-medium max-w-none min-w-0 dark:prose-invert"
           dangerouslySetInnerHTML={{ __html: html }}
         />
       )}

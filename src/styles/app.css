@@ -1,6 +1,14 @@
 /* App-specific tokens and helpers. shadcn tokens live untouched in index.css. */
 @plugin "@tailwindcss/typography";
 
+@font-face {
+  font-family: "Cereal";
+  src: url("../assets/fonts/CerealVF.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 300 900;
+  font-display: swap;
+}
+
 /* Universal Sans ships two optical cuts: Text for body sizes, Display for
    headings. Only 400 and 550 exist, so the 550 file covers medium through
    bold instead of letting font-medium fall back to 400. */
