@@ -16,12 +16,15 @@ interface SettingsState {
   avatarColor: string;
   /** Remembered so students who want easy quizzes get them every time. */
   quizDifficulty: QuizDifficulty;
+  /** The learning chat's conversation sidebar, on wide screens. */
+  chatSidebarOpen: boolean;
   setLayoutMode: (mode: LayoutMode) => void;
   setShowExplainPopover: (value: boolean) => void;
   setBlurFacitUntilHover: (value: boolean) => void;
   setSelectedModelId: (id: ChatModelId) => void;
   setAvatarColor: (color: string) => void;
   setQuizDifficulty: (difficulty: QuizDifficulty) => void;
+  setChatSidebarOpen: (value: boolean) => void;
 }
 
 /** Rarely-changing user preferences, persisted to localStorage. */
@@ -34,6 +37,7 @@ export const useSettingsStore = create<SettingsState>()(
       selectedModelId: DEFAULT_MODEL_ID,
       avatarColor: randomAvatarColor(),
       quizDifficulty: DEFAULT_QUIZ_DIFFICULTY,
+      chatSidebarOpen: true,
       setLayoutMode: (layoutMode) => set({ layoutMode }),
       setShowExplainPopover: (showExplainPopover) => set({ showExplainPopover }),
       setBlurFacitUntilHover: (blurFacitUntilHover) =>
@@ -41,6 +45,7 @@ export const useSettingsStore = create<SettingsState>()(
       setSelectedModelId: (selectedModelId) => set({ selectedModelId }),
       setAvatarColor: (avatarColor) => set({ avatarColor }),
       setQuizDifficulty: (quizDifficulty) => set({ quizDifficulty }),
+      setChatSidebarOpen: (chatSidebarOpen) => set({ chatSidebarOpen }),
     }),
     { name: "liutentor-settings", version: 1 },
   ),

@@ -12,15 +12,20 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { useChat } from "@/hooks/use-chat";
+import { useExamChat } from "@/hooks/use-chat";
 import { normalizeClipboardFile } from "@/lib/chat-attachments";
-import { useChatStore, type PendingSelection } from "@/stores/chat";
+import {
+  useChatStore,
+  useChatStoreApi,
+  type PendingSelection,
+} from "@/stores/chat";
 import { useSelectedModel } from "@/stores/settings";
 import { ChatDropOverlay } from "./chat-drop-overlay";
 import { ChatHistoryDialog } from "./chat-history-dialog";
 import { ChatInput, type ChatInputApi } from "./chat-input";
 import { ChatMascot } from "./chat-mascot";
 import { ChatMessages, type ChatTranscriptApi } from "./chat-messages";
+import { ConversationTitle } from "./conversation-title";
 import "./chat.css";
 
 export interface ChatWindowProps {
@@ -48,18 +53,12 @@ export default function ChatWindow({
   const inputRef = useRef<ChatInputApi>(null);
   const transcriptRef = useRef<ChatTranscriptApi>(null);
 
+  const chatStore = useChatStoreApi();
   const hasMessages = useChatStore((s) => s.messages.length > 0);
   const isOpen = useChatStore((s) => s.isOpen);
   const conversationId = useChatStore((s) => s.currentConversationId);
-  const conversationTitle = useChatStore((s) => s.currentConversationTitle);
-  const isConversationTitleReady = useChatStore(
-    (s) => s.isConversationTitleReady,
-  );
-  const animateConversationTitle = useChatStore(
-    (s) => s.animateConversationTitle,
-  );
   const { selectedModelId } = useSelectedModel();
-  const { send, cancelGeneration } = useChat({
+  const { send, cancelGeneration } = useExamChat({
     examId,
     examUrl,
     courseCode,
@@ -72,7 +71,7 @@ export default function ChatWindow({
 
   // Drafts are read once from the store when the panel mounts.
   const [initialDraft] = useState(() => {
-    const { draftInput, draftAttachments } = useChatStore.getState();
+    const { draftInput, draftAttachments } = chatStore.getState();
     return { text: draftInput, attachments: draftAttachments };
   });
 
@@ -99,7 +98,7 @@ export default function ChatWindow({
     const attachments = input?.getAttachments() ?? [];
     if (
       (!text.trim() && !attachments.length) ||
-      useChatStore.getState().isLoading
+      chatStore.getState().isLoading
     )
       return;
     const context = selectionContext || undefined;
@@ -125,7 +124,7 @@ export default function ChatWindow({
   // "Förklara" from the PDF: ask right away, or queue the quote while a reply streams.
   const startPendingSelection = useCallback(
     (pending: PendingSelection) => {
-      if (useChatStore.getState().isLoading) {
+      if (chatStore.getState().isLoading) {
         setSelectionContext(pending.context);
         requestAnimationFrame(() => {
           if (!inputRef.current?.getText().trim())
@@ -136,27 +135,27 @@ export default function ChatWindow({
       }
       void submit(pending.prompt, pending.context, []);
     },
-    [submit],
+    [chatStore, submit],
   );
 
   // A panel for another exam starts from an empty chat.
   useEffect(() => {
-    const store = useChatStore.getState();
+    const store = chatStore.getState();
     if (store.currentExamId !== examId) {
       store.clearChat();
-      useChatStore.setState({ currentExamId: examId });
+      chatStore.setState({ currentExamId: examId });
       inputRef.current?.discardAttachments();
     }
-  }, [examId]);
+  }, [chatStore, examId]);
 
   useEffect(() => {
     const take = () => {
-      const taken = useChatStore.getState().takePendingSelection();
+      const taken = chatStore.getState().takePendingSelection();
       if (taken) startPendingSelection(taken);
     };
     // One may already be waiting (the panel mounts on "Förklara"); the input exists next frame.
     const frame = requestAnimationFrame(take);
-    const unsubscribe = useChatStore.subscribe((s, prev) => {
+    const unsubscribe = chatStore.subscribe((s, prev) => {
       if (s.pendingSelection && s.pendingSelection !== prev.pendingSelection)
         take();
     });
@@ -164,17 +163,17 @@ export default function ChatWindow({
       cancelAnimationFrame(frame);
       unsubscribe();
     };
-  }, [startPendingSelection]);
+  }, [chatStore, startPendingSelection]);
 
   // Keep what was typed when the panel unmounts (e.g. switching layouts).
   useEffect(
     () => () => {
-      useChatStore.setState({
+      chatStore.setState({
         draftInput: inputRef.current?.getText() ?? "",
         draftAttachments: inputRef.current?.getAttachments() ?? [],
       });
     },
-    [],
+    [chatStore],
   );
 
   useEffect(() => {
@@ -184,10 +183,10 @@ export default function ChatWindow({
         inputRef.current?.focus();
       });
     } else {
-      useChatStore.getState().setHistoryOpen(false);
+      chatStore.getState().setHistoryOpen(false);
       transcriptRef.current?.persistScrollPosition();
     }
-  }, [isOpen]);
+  }, [chatStore, isOpen]);
 
   // Opening a saved conversation lands at its end.
   const pinToBottom = useCallback(() => {
@@ -197,8 +196,8 @@ export default function ChatWindow({
   }, []);
 
   useEffect(() => {
-    if (conversationId && !useChatStore.getState().isLoading) pinToBottom();
-  }, [conversationId, pinToBottom]);
+    if (conversationId && !chatStore.getState().isLoading) pinToBottom();
+  }, [chatStore, conversationId, pinToBottom]);
 
   // Cmd/Ctrl+. toggles history.
   useEffect(() => {
@@ -209,14 +208,14 @@ export default function ChatWindow({
         (e.key !== "." && e.code !== "Period")
       )
         return;
-      const store = useChatStore.getState();
+      const store = chatStore.getState();
       if (!store.isOpen) return;
       e.preventDefault();
       store.setHistoryOpen(!store.isHistoryOpen);
     }
     document.addEventListener("keydown", onKeyDown, true);
     return () => document.removeEventListener("keydown", onKeyDown, true);
-  }, []);
+  }, [chatStore]);
 
   // Files: drop anywhere on the panel, or paste while it is open.
   useEffect(() => {
@@ -246,7 +245,7 @@ export default function ChatWindow({
       inputRef.current?.addFiles(Array.from(e.dataTransfer?.files ?? []));
     };
     const onPaste = (e: ClipboardEvent) => {
-      if (!useChatStore.getState().isOpen) return;
+      if (!chatStore.getState().isOpen) return;
       const files = Array.from(e.clipboardData?.files ?? []);
       if (!files.length) return;
       e.preventDefault();
@@ -264,7 +263,7 @@ export default function ChatWindow({
       root.removeEventListener("drop", onDrop);
       document.removeEventListener("paste", onPaste, true);
     };
-  }, []);
+  }, [chatStore]);
 
   // While we smooth-scroll to the bottom, the scroll passes back through the
   // "far from bottom" zone; ignore it until we arrive (or give up after a second).
@@ -298,9 +297,9 @@ export default function ChatWindow({
   }
 
   function startNewChat() {
-    const store = useChatStore.getState();
+    const store = chatStore.getState();
     store.clearChat();
-    useChatStore.setState({ currentExamId: examId });
+    chatStore.setState({ currentExamId: examId });
     inputRef.current?.setText("");
     inputRef.current?.discardAttachments();
     setSelectionContext("");
@@ -321,13 +320,7 @@ export default function ChatWindow({
             <HeaderButton label="Stäng chatten" onClick={onClose}>
               <ChevronRightIcon />
             </HeaderButton>
-            {isConversationTitleReady && conversationTitle && (
-              <ConversationTitle
-                key={conversationTitle}
-                title={conversationTitle}
-                animate={animateConversationTitle}
-              />
-            )}
+            <ConversationTitle />
           </div>
           <div className="pointer-events-auto flex shrink-0 items-center gap-1">
             <HeaderButton label="Ny chatt" onClick={startNewChat}>
@@ -336,7 +329,7 @@ export default function ChatWindow({
             <HeaderButton
               label="Historik"
               onClick={() => {
-                const store = useChatStore.getState();
+                const store = chatStore.getState();
                 store.setHistoryOpen(!store.isHistoryOpen);
               }}
             >
@@ -433,52 +426,5 @@ function HeaderButton({
       </TooltipTrigger>
       <TooltipContent>{label}</TooltipContent>
     </Tooltip>
-  );
-}
-
-function ConversationTitle({
-  title,
-  animate,
-}: {
-  title: string;
-  animate: boolean;
-}) {
-  // Capture the animation decision when this title first appears. Consuming the
-  // store flag immediately prevents a panel remount from replaying the effect.
-  const [shouldType] = useState(animate);
-  const [visibleTitle, setVisibleTitle] = useState(() =>
-    animate ? "" : title,
-  );
-
-  useEffect(() => {
-    if (!shouldType) return;
-
-    useChatStore.setState({ animateConversationTitle: false });
-    let length = 0;
-    const timer = window.setInterval(() => {
-      length += 1;
-      setVisibleTitle(title.slice(0, length));
-      if (length < title.length) return;
-      window.clearInterval(timer);
-    }, 28);
-
-    return () => window.clearInterval(timer);
-  }, [shouldType, title]);
-
-  const isTyping = shouldType && visibleTitle.length < title.length;
-
-  return (
-    <span
-      className="pointer-events-none max-w-[min(24rem,50vw)] truncate text-sm font-normal"
-      aria-label={title}
-    >
-      <span aria-hidden="true">{visibleTitle}</span>
-      {isTyping && (
-        <span
-          className="ml-px inline-block h-4 w-px animate-pulse bg-current align-[-2px]"
-          aria-hidden
-        />
-      )}
-    </span>
   );
 }

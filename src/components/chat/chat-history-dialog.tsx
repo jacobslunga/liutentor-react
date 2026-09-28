@@ -1,4 +1,3 @@
-import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { LoaderCircleIcon, SearchIcon, Trash2Icon } from "lucide-react";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
@@ -22,41 +21,13 @@ import {
 } from "@/components/ui/dialog";
 import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group";
 import {
-  deleteLocalConversations,
-  loadLocalConversationMessages,
-} from "@/lib/local-conversations";
+  groupConversations,
+  loadMessages,
+  useConversationList,
+} from "@/hooks/use-conversation-list";
 import { cn } from "@/lib/utils";
-import {
-  conversationsQuery,
-  deleteConversations,
-  loadConversationMessages,
-  localConversationsQuery,
-  type Conversation,
-} from "@/queries/conversations";
-import { useUser } from "@/stores/auth";
-import { useChatStore } from "@/stores/chat";
-
-const GROUP_ORDER = ["Idag", "Igår", "Denna veckan", "Denna månaden", "Äldre"] as const;
-
-function sameDay(a: Date, b: Date) {
-  return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
-}
-
-function groupLabel(value: string): (typeof GROUP_ORDER)[number] {
-  const date = new Date(value);
-  const now = new Date();
-  const yesterday = new Date(now);
-  yesterday.setDate(now.getDate() - 1);
-  if (sameDay(date, now)) return "Idag";
-  if (sameDay(date, yesterday)) return "Igår";
-
-  const weekStart = new Date(now);
-  weekStart.setHours(0, 0, 0, 0);
-  weekStart.setDate(weekStart.getDate() - ((weekStart.getDay() + 6) % 7));
-  if (date >= weekStart) return "Denna veckan";
-  if (date.getFullYear() === now.getFullYear() && date.getMonth() === now.getMonth()) return "Denna månaden";
-  return "Äldre";
-}
+import type { Conversation } from "@/queries/conversations";
+import { useChatStore, useChatStoreApi } from "@/stores/chat";
 
 interface ChatHistoryDialogProps {
   onSelect: () => void;
@@ -67,14 +38,11 @@ interface ChatHistoryDialogProps {
  * in, from this browser otherwise.
  */
 export function ChatHistoryDialog({ onSelect }: ChatHistoryDialogProps) {
+  const chatStore = useChatStoreApi();
   const open = useChatStore((s) => s.isHistoryOpen);
   const setOpen = useChatStore((s) => s.setHistoryOpen);
   const currentId = useChatStore((s) => s.currentConversationId);
-  const user = useUser();
-  const queryClient = useQueryClient();
-  const historyQuery = user ? conversationsQuery(user.id) : localConversationsQuery();
-  const { data: conversations = [], isPending, isError } = useQuery({
-    ...historyQuery,
+  const { conversations, isPending, isError, isSignedIn, remove } = useConversationList("exam", {
     enabled: open,
   });
 
@@ -89,12 +57,7 @@ export function ChatHistoryDialog({ onSelect }: ChatHistoryDialogProps) {
     const filtered = q
       ? conversations.filter((c) => c.title.toLowerCase().includes(q) || c.meta.toLowerCase().includes(q))
       : conversations;
-    const byGroup = new Map<string, Conversation[]>();
-    for (const c of filtered) {
-      const label = groupLabel(c.createdAt);
-      byGroup.set(label, [...(byGroup.get(label) ?? []), c]);
-    }
-    return GROUP_ORDER.map((label) => ({ label, items: byGroup.get(label) ?? [] })).filter((g) => g.items.length);
+    return groupConversations(filtered);
   }, [conversations, search]);
 
   async function openConversation(item: Conversation) {
@@ -102,19 +65,17 @@ export function ChatHistoryDialog({ onSelect }: ChatHistoryDialogProps) {
     setOpeningId(item.id);
     setActionError(null);
     try {
-      const messages = user
-        ? await loadConversationMessages(item.id)
-        : loadLocalConversationMessages(item.id);
+      const messages = await loadMessages(item.id);
       if (!messages.length) {
         setActionError("Den här chatten har inga sparade meddelanden än.");
         return;
       }
-      useChatStore.setState({
+      chatStore.setState({
         messages,
         currentConversationId: item.id,
         currentConversationTitle: item.title,
         isConversationTitleReady: true,
-        animateConversationTitle: false,
+        titleTypingStartedAt: null,
         savedScrollPosition: null,
         isHistoryOpen: false,
       });
@@ -132,19 +93,15 @@ export function ChatHistoryDialog({ onSelect }: ChatHistoryDialogProps) {
     setDeleting(true);
     setActionError(null);
     try {
-      if (user) await deleteConversations(user.id, ids);
-      else deleteLocalConversations(ids);
-      queryClient.setQueryData<Conversation[]>(historyQuery.queryKey, (old) =>
-        old?.filter((c) => !ids.includes(c.id)),
-      );
-      const current = useChatStore.getState().currentConversationId;
+      await remove(ids);
+      const current = chatStore.getState().currentConversationId;
       if (current && ids.includes(current)) {
-        useChatStore.setState({
+        chatStore.setState({
           messages: [],
           currentConversationId: null,
           currentConversationTitle: null,
           isConversationTitleReady: false,
-          animateConversationTitle: false,
+          titleTypingStartedAt: null,
           savedScrollPosition: null,
           isLoading: false,
         });
@@ -231,7 +188,7 @@ export function ChatHistoryDialog({ onSelect }: ChatHistoryDialogProps) {
           <DialogHeader>
             <DialogTitle>Chatthistorik</DialogTitle>
             <DialogDescription>
-              {user
+              {isSignedIn
                 ? "Sök och öppna tidigare chattar"
                 : "Sparas bara i den här webbläsaren. Logga in för att spara dem på ditt konto."}
             </DialogDescription>

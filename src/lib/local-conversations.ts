@@ -1,4 +1,4 @@
-import type { Conversation } from "@/queries/conversations";
+import type { Conversation, ConversationKind } from "@/queries/conversations";
 import { createMessageId, type Message } from "@/stores/chat";
 
 /**
@@ -12,6 +12,8 @@ const MAX_CONVERSATIONS = 50;
 type StoredMessage = Pick<Message, "role" | "content" | "context" | "selectionContext" | "sources" | "attachments">;
 
 interface StoredConversation extends Conversation {
+  /** Missing on chats saved before the learning chat existed: those are exam chats. */
+  kind?: ConversationKind;
   messages: StoredMessage[];
 }
 
@@ -47,8 +49,14 @@ function writeAll(conversations: StoredConversation[]) {
   }
 }
 
-export function listLocalConversations(): Conversation[] {
-  return readAll().map(({ id, title, createdAt, meta }) => ({ id, title, createdAt, meta }));
+export function listLocalConversations(kind: ConversationKind): Conversation[] {
+  return readAll()
+    .filter((c) => (c.kind ?? "exam") === kind)
+    .map(({ id, title, createdAt, meta }) => ({ id, title, createdAt, meta }));
+}
+
+export function loadLocalConversationTitle(id: string): string | null {
+  return readAll().find((c) => c.id === id)?.title ?? null;
 }
 
 export function loadLocalConversationMessages(id: string): Message[] {
@@ -56,7 +64,13 @@ export function loadLocalConversationMessages(id: string): Message[] {
   return (stored?.messages ?? []).map((m) => ({ ...m, id: createMessageId() }));
 }
 
-export function saveLocalConversation(id: string, title: string, meta: string, messages: Message[]) {
+export function saveLocalConversation(
+  id: string,
+  title: string,
+  meta: string,
+  messages: Message[],
+  kind: ConversationKind,
+) {
   const persisted = messages
     .filter((m) => m.content.trim() || m.attachments?.length)
     .map(
@@ -88,6 +102,7 @@ export function saveLocalConversation(id: string, title: string, meta: string, m
   const next: StoredConversation = {
     id,
     title,
+    kind,
     meta: existing?.meta || meta,
     createdAt: existing?.createdAt ?? new Date().toISOString(),
     messages: persisted,

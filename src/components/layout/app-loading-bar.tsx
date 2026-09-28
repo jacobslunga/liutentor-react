@@ -21,6 +21,11 @@ const HIDE_DELAY = 150;
 const ARM_WINDOW = 600;
 const FADE_MS = 300;
 
+/** Pages that never show the bar: the chat loads in place, like an app. */
+function isBarless(pathname: string) {
+  return pathname === "/chatt" || pathname.startsWith("/chatt/");
+}
+
 /** Asymptotic: creeps toward 100% without arriving until the work finishes. */
 function estimate(elapsed: number) {
   const completion = (elapsed / DURATION) * 100;
@@ -38,7 +43,8 @@ export function AppLoadingBar() {
   const fetching = useIsFetching() > 0;
   const pendingTasks = usePageLoadingStore((s) => s.pending > 0);
   const failed = usePageLoadingStore((s) => s.failed);
-  const isLoading = routerPending || fetching || pendingTasks;
+  const barless = isBarless(pathname);
+  const isLoading = !barless && (routerPending || fetching || pendingTasks);
   const [armed, setArmed] = useState(false);
 
   // A new pathname means a new page; search params and hashes don't count.
@@ -102,6 +108,16 @@ export function AppLoadingBar() {
       }, HIDE_DELAY);
     };
 
+    if (barless) {
+      // Drop a bar still running from the page we came from, without the
+      // finishing sweep.
+      clearAll();
+      stopAnimation();
+      setVisible(false);
+      setProgress(0);
+      return;
+    }
+
     if (isLoading) {
       // Work arriving during the settle window rejoins the running batch.
       if (t.settle) {
@@ -124,7 +140,7 @@ export function AppLoadingBar() {
       clearTimeout(t.settle);
       t.settle = setTimeout(finish, SETTLE_DELAY);
     }
-  }, [isLoading, armed]);
+  }, [isLoading, armed, barless]);
 
   useEffect(() => {
     const t = timers.current;

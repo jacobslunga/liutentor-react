@@ -1,4 +1,5 @@
-import { create } from "zustand";
+import { createContext, useContext } from "react";
+import { create, useStore } from "zustand";
 
 export interface MessageSource {
   title: string;
@@ -42,7 +43,7 @@ export interface PendingSelection {
   context: string;
 }
 
-interface ChatState {
+export interface ChatState {
   isOpen: boolean;
   isLoading: boolean;
   isHistoryOpen: boolean;
@@ -54,7 +55,16 @@ interface ChatState {
   currentConversationId: string | null;
   currentConversationTitle: string | null;
   isConversationTitleReady: boolean;
-  animateConversationTitle: boolean;
+  /**
+   * When the generated title arrived (performance.now()), so every place that
+   * shows it types it out in step; null shows it whole.
+   */
+  titleTypingStartedAt: number | null;
+  /**
+   * Whether the sidebar row types the title too: yes for a freshly generated
+   * title, no when opening a chat whose row already shows it.
+   */
+  titleTypesInSidebar: boolean;
   pendingSelection: PendingSelection | null;
 
   open: () => void;
@@ -84,82 +94,104 @@ function revokePreviews(attachments: ChatAttachment[]) {
  * Chat state. Components must select the slice they need: the streaming reply
  * replaces the last message every frame, and anything subscribed to
  * `messages` re-renders with it.
+ *
+ * Each chat surface owns a store, so the exam panel and the learning chat never
+ * overwrite each other's conversation.
  */
-export const useChatStore = create<ChatState>((set, get) => ({
-  isOpen: false,
-  isLoading: false,
-  isHistoryOpen: false,
-  messages: [],
-  savedScrollPosition: null,
-  draftInput: "",
-  draftAttachments: [],
-  currentExamId: null,
-  currentConversationId: null,
-  currentConversationTitle: null,
-  isConversationTitleReady: false,
-  animateConversationTitle: false,
-  pendingSelection: null,
+export const createChatStore = () =>
+  create<ChatState>((set, get) => ({
+    isOpen: false,
+    isLoading: false,
+    isHistoryOpen: false,
+    messages: [],
+    savedScrollPosition: null,
+    draftInput: "",
+    draftAttachments: [],
+    currentExamId: null,
+    currentConversationId: null,
+    currentConversationTitle: null,
+    isConversationTitleReady: false,
+    titleTypingStartedAt: null,
+    titleTypesInSidebar: false,
+    pendingSelection: null,
 
-  open: () => set({ isOpen: true }),
-  close: () => set({ isOpen: false }),
-  toggle: () => set((s) => ({ isOpen: !s.isOpen })),
-  setLoading: (isLoading) => set({ isLoading }),
-  setHistoryOpen: (isHistoryOpen) => set({ isHistoryOpen }),
+    open: () => set({ isOpen: true }),
+    close: () => set({ isOpen: false }),
+    toggle: () => set((s) => ({ isOpen: !s.isOpen })),
+    setLoading: (isLoading) => set({ isLoading }),
+    setHistoryOpen: (isHistoryOpen) => set({ isHistoryOpen }),
 
-  askAboutSelection: (prompt, context) =>
-    set({ pendingSelection: { prompt, context }, isOpen: true }),
+    askAboutSelection: (prompt, context) =>
+      set({ pendingSelection: { prompt, context }, isOpen: true }),
 
-  takePendingSelection: () => {
-    const pending = get().pendingSelection;
-    if (pending) set({ pendingSelection: null });
-    return pending;
-  },
+    takePendingSelection: () => {
+      const pending = get().pendingSelection;
+      if (pending) set({ pendingSelection: null });
+      return pending;
+    },
 
-  updateMessage: (id, patch) =>
-    set((s) => ({
-      messages: s.messages.map((m) => (m.id === id ? { ...m, ...patch } : m)),
-    })),
+    updateMessage: (id, patch) =>
+      set((s) => ({
+        messages: s.messages.map((m) => (m.id === id ? { ...m, ...patch } : m)),
+      })),
 
-  getActiveAttachments: () =>
-    get().messages.flatMap((m) => (m.attachments ?? []).filter((a) => a.active && a.file)),
+    getActiveAttachments: () =>
+      get().messages.flatMap((m) => (m.attachments ?? []).filter((a) => a.active && a.file)),
 
-  deactivateAttachment: (id) =>
-    set((s) => ({
-      messages: s.messages.map((m) => {
-        const attachment = m.attachments?.find((a) => a.id === id);
-        if (!attachment) return m;
-        if (attachment.previewUrl) URL.revokeObjectURL(attachment.previewUrl);
-        return {
-          ...m,
-          attachments: m.attachments!.map((a) =>
-            a.id === id ? { ...a, active: false, file: undefined, previewUrl: undefined } : a,
-          ),
-        };
-      }),
-    })),
+    deactivateAttachment: (id) =>
+      set((s) => ({
+        messages: s.messages.map((m) => {
+          const attachment = m.attachments?.find((a) => a.id === id);
+          if (!attachment) return m;
+          if (attachment.previewUrl) URL.revokeObjectURL(attachment.previewUrl);
+          return {
+            ...m,
+            attachments: m.attachments!.map((a) =>
+              a.id === id ? { ...a, active: false, file: undefined, previewUrl: undefined } : a,
+            ),
+          };
+        }),
+      })),
 
-  clearChat: () => {
-    const { messages, draftAttachments } = get();
-    revokePreviews(messages.flatMap((m) => m.attachments ?? []));
-    revokePreviews(draftAttachments);
-    set({
-      messages: [],
-      isLoading: false,
-      savedScrollPosition: null,
-      draftInput: "",
-      draftAttachments: [],
-      currentExamId: null,
-      currentConversationId: null,
-      currentConversationTitle: null,
-      isConversationTitleReady: false,
-      animateConversationTitle: false,
-      isHistoryOpen: false,
-      pendingSelection: null,
-    });
-  },
+    clearChat: () => {
+      const { messages, draftAttachments } = get();
+      revokePreviews(messages.flatMap((m) => m.attachments ?? []));
+      revokePreviews(draftAttachments);
+      set({
+        messages: [],
+        isLoading: false,
+        savedScrollPosition: null,
+        draftInput: "",
+        draftAttachments: [],
+        currentExamId: null,
+        currentConversationId: null,
+        currentConversationTitle: null,
+        isConversationTitleReady: false,
+        titleTypingStartedAt: null,
+        titleTypesInSidebar: false,
+        isHistoryOpen: false,
+        pendingSelection: null,
+      });
+    },
 
-  resetOnLogout: () => {
-    get().clearChat();
-    set({ isOpen: false });
-  },
-}));
+    resetOnLogout: () => {
+      get().clearChat();
+      set({ isOpen: false });
+    },
+  }));
+
+export type ChatStore = ReturnType<typeof createChatStore>;
+
+/** The side panel in the exam view. */
+export const examChatStore = createChatStore();
+/** The standalone learning chat at /chatt. */
+export const learnChatStore = createChatStore();
+
+/** Which store the chat components below it read; the exam panel by default. */
+export const ChatStoreContext = createContext<ChatStore>(examChatStore);
+
+export const useChatStoreApi = () => useContext(ChatStoreContext);
+
+export function useChatStore<T>(selector: (state: ChatState) => T): T {
+  return useStore(useChatStoreApi(), selector);
+}

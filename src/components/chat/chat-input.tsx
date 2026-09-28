@@ -12,11 +12,13 @@ import {
   useEffect,
   useImperativeHandle,
   useLayoutEffect,
+  useMemo,
   useRef,
   useState,
   type KeyboardEvent,
   type Ref,
 } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
 import {
   DropdownMenu,
@@ -38,13 +40,33 @@ import {
   MAX_ATTACHMENTS_TOTAL_SIZE,
 } from "@/lib/chat-attachments";
 import type { ChatModelId } from "@/lib/chat-models";
+import {
+  activeMentionQuery,
+  findMentionRanges,
+  splitCourseMentions,
+} from "@/lib/course-mentions";
 import { formatFileSize } from "@/lib/format";
 import { cn } from "@/lib/utils";
-import { useChatStore, type ChatAttachment } from "@/stores/chat";
+import { coursesQuery } from "@/queries/exams";
+import {
+  useChatStore,
+  useChatStoreApi,
+  type ChatAttachment,
+} from "@/stores/chat";
 import { useSelectedModel, useSettingsStore } from "@/stores/settings";
+import {
+  CourseMentionMenu,
+  type CourseMentionMenuApi,
+} from "./course-mention-menu";
 import { SelectionQuote } from "./selection-quote";
 
 const MAX_LENGTH = 4000;
+/**
+ * A course pill drawn behind the textarea's own text. The ring paints outside
+ * the box, so the pill never shifts the text it sits under.
+ */
+const MENTION_PILL_CLASS =
+  "rounded-[5px] bg-primary/15 text-transparent ring-2 ring-primary/15 box-decoration-clone";
 /** The counter stays hidden until the user approaches the limit. */
 const COUNTER_FROM = MAX_LENGTH * 0.8;
 
@@ -81,6 +103,9 @@ interface ChatInputProps {
   initialAttachments?: ChatAttachment[];
   selectionContext?: string;
   className?: string;
+  placeholder?: string;
+  /** Suggest courses when the user types "@" (the learning chat). */
+  courseMentions?: boolean;
   onSend: () => void;
   onCancel: () => void;
   onClearSelectionContext: () => void;
@@ -96,10 +121,13 @@ export function ChatInput({
   initialAttachments = [],
   selectionContext,
   className,
+  placeholder = "Fråga vad som helst",
+  courseMentions = false,
   onSend,
   onCancel,
   onClearSelectionContext,
 }: ChatInputProps) {
+  const chatStore = useChatStoreApi();
   const isLoading = useChatStore((s) => s.isLoading);
   const shellRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -115,14 +143,38 @@ export function ChatInput({
   const [hasText, setHasText] = useState(!!initialText.trim());
   const [longLength, setLongLength] = useState(0);
   const [layout, setLayout] = useState(INITIAL_PROMPT_LAYOUT);
+  const [mention, setMention] = useState<{
+    start: number;
+    query: string;
+  } | null>(null);
+  const mentionMenuRef = useRef<CourseMentionMenuApi>(null);
   const attachmentsRef = useRef(attachments);
   useEffect(() => {
     attachmentsRef.current = attachments;
   }, [attachments]);
 
+  const mentionLayerRef = useRef<HTMLDivElement>(null);
+
+  /** Redraws the course pills; written to the DOM so typing never re-renders. */
+  const renderMentionPills = (value: string) => {
+    const layer = mentionLayerRef.current;
+    if (!layer) return;
+    const nodes = splitCourseMentions(value).map((part) => {
+      if (part.type === "text") return document.createTextNode(part.text);
+      const pill = document.createElement("span");
+      pill.className = MENTION_PILL_CLASS;
+      pill.textContent = part.text;
+      return pill;
+    });
+    // A trailing newline only takes up a line when something follows it.
+    layer.replaceChildren(...nodes, document.createTextNode("\u200b"));
+    layer.scrollTop = textareaRef.current?.scrollTop ?? 0;
+  };
+
   const syncTextState = (value: string) => {
     setHasText(!!value.trim());
     setLongLength(value.length >= COUNTER_FROM ? value.length : 0);
+    renderMentionPills(value);
   };
 
   const measurePrompt = useCallback((allowAnimation = true) => {
@@ -184,8 +236,86 @@ export function ChatInput({
   const setText = (value: string) => {
     if (textareaRef.current) textareaRef.current.value = value;
     syncTextState(value);
+    setMention(null);
     measurePrompt();
   };
+
+  function syncMention(textarea: HTMLTextAreaElement) {
+    if (!courseMentions) return;
+    const next =
+      textarea.selectionStart === textarea.selectionEnd
+        ? activeMentionQuery(textarea.value, textarea.selectionStart)
+        : null;
+    setMention((current) =>
+      current?.start === next?.start && current?.query === next?.query
+        ? current
+        : next,
+    );
+  }
+
+  /**
+   * Replaces `start..end` as if typed: execCommand keeps the edit on the undo
+   * stack and fires `input`, which syncs everything else.
+   */
+  function replaceRange(start: number, end: number, text: string) {
+    const textarea = textareaRef.current;
+    if (!textarea) return;
+    const before = textarea.value;
+    const expected = before.slice(0, start) + text + before.slice(end);
+    textarea.focus();
+    textarea.setSelectionRange(start, end);
+    const done = document.execCommand(
+      text ? "insertText" : "delete",
+      false,
+      text,
+    );
+    // Firefox can drop trailing whitespace from insertText; whatever the
+    // browser did (or refused to do), make the value what was asked for.
+    if (!done || textarea.value !== expected) {
+      textarea.value = expected;
+      const caret = start + text.length;
+      textarea.setSelectionRange(caret, caret);
+      textarea.dispatchEvent(new Event("input", { bubbles: true }));
+    }
+  }
+
+  function pickMention(code: string) {
+    const textarea = textareaRef.current;
+    if (!textarea || !mention) return;
+    // Take the rest of the word under the caret, and one space after it, so the
+    // inserted trailing space never doubles up.
+    const rest = /^\S*\s?/.exec(textarea.value.slice(textarea.selectionStart));
+    const end = textarea.selectionStart + (rest?.[0].length ?? 0);
+    replaceRange(mention.start, end, `@${code} `);
+  }
+
+  // Known courses delete as one unit; a code still being typed does not.
+  const { data: courses } = useQuery({
+    ...coursesQuery,
+    enabled: courseMentions,
+  });
+  const courseCodes = useMemo(
+    () => new Set(courses?.map((c) => c.code)),
+    [courses],
+  );
+
+  /** Backspace/Delete next to a course mention removes all of it. */
+  function deleteMention(key: string): boolean {
+    const textarea = textareaRef.current;
+    if (!courseMentions || !textarea) return false;
+    const caret = textarea.selectionStart;
+    if (caret !== textarea.selectionEnd) return false;
+    const range = findMentionRanges(textarea.value).find(
+      ({ start, end, code }) =>
+        courseCodes.has(code) &&
+        (key === "Backspace"
+          ? caret > start && caret <= end
+          : caret >= start && caret < end),
+    );
+    if (!range) return false;
+    replaceRange(range.start, range.end, "");
+    return true;
+  }
 
   useLayoutEffect(() => {
     measurePrompt(false);
@@ -201,9 +331,9 @@ export function ChatInput({
   }, [measurePrompt]);
 
   const addFiles = (files: File[]) => {
-    if (useChatStore.getState().isLoading) return;
+    if (chatStore.getState().isLoading) return;
     const existing = [
-      ...useChatStore.getState().getActiveAttachments(),
+      ...chatStore.getState().getActiveAttachments(),
       ...attachmentsRef.current,
     ];
     const { accepted, errors } = acceptFiles(files, existing);
@@ -229,6 +359,7 @@ export function ChatInput({
 
   useEffect(() => {
     textareaRef.current?.focus({ preventScroll: true });
+    renderMentionPills(textareaRef.current?.value ?? "");
   }, []);
 
   const tooLong = longLength > MAX_LENGTH;
@@ -249,6 +380,22 @@ export function ChatInput({
 
   function onKeyDown(e: KeyboardEvent<HTMLTextAreaElement>) {
     if (e.nativeEvent.isComposing || e.keyCode === 229) return;
+    if (mention && mentionMenuRef.current?.handleKey(e.key)) {
+      e.preventDefault();
+      e.stopPropagation();
+      return;
+    }
+    // Modified deletes (word, line) keep their native behaviour.
+    if (
+      (e.key === "Backspace" || e.key === "Delete") &&
+      !e.altKey &&
+      !e.ctrlKey &&
+      !e.metaKey &&
+      deleteMention(e.key)
+    ) {
+      e.preventDefault();
+      return;
+    }
     // Enter sends; Shift+Enter keeps a newline.
     if (
       e.key === "Enter" &&
@@ -348,29 +495,53 @@ export function ChatInput({
             </div>
           )}
 
-          <textarea
-            ref={textareaRef}
-            defaultValue={initialText}
-            rows={1}
-            placeholder="Fråga vad som helst"
-            aria-label="Meddelande"
-            className={cn(
-              "block max-h-50 w-full resize-none overflow-y-auto border-0 bg-transparent py-1 text-[0.9375rem] leading-6 text-foreground outline-none placeholder:text-muted-foreground",
-              layout.expanded && "min-h-16",
-              layout.animate &&
-                "transition-[height,min-height,padding] duration-200 ease-out",
+          <div className="relative">
+            {courseMentions && (
+              <div
+                ref={mentionLayerRef}
+                aria-hidden
+                className={cn(
+                  "pointer-events-none absolute inset-0 overflow-hidden py-1 text-[0.9375rem] leading-6 wrap-break-word whitespace-pre-wrap text-transparent",
+                  layout.animate &&
+                    "transition-[padding] duration-200 ease-out",
+                )}
+                style={{
+                  paddingLeft: layout.expanded ? 8 : layout.leftWidth + 8,
+                  paddingRight: layout.expanded ? 8 : layout.rightWidth + 8,
+                }}
+              />
             )}
-            style={{
-              height: layout.textHeight + 8,
-              paddingLeft: layout.expanded ? 8 : layout.leftWidth + 8,
-              paddingRight: layout.expanded ? 8 : layout.rightWidth + 8,
-            }}
-            onInput={(e) => {
-              syncTextState(e.currentTarget.value);
-              measurePrompt();
-            }}
-            onKeyDown={onKeyDown}
-          />
+            <textarea
+              ref={textareaRef}
+              defaultValue={initialText}
+              rows={1}
+              placeholder={placeholder}
+              aria-label="Meddelande"
+              className={cn(
+                "relative block max-h-50 w-full resize-none overflow-y-auto border-0 bg-transparent py-1 text-[0.9375rem] leading-6 text-foreground outline-none placeholder:text-muted-foreground",
+                layout.expanded && "min-h-16",
+                layout.animate &&
+                  "transition-[height,min-height,padding] duration-200 ease-out",
+              )}
+              style={{
+                height: layout.textHeight + 8,
+                paddingLeft: layout.expanded ? 8 : layout.leftWidth + 8,
+                paddingRight: layout.expanded ? 8 : layout.rightWidth + 8,
+              }}
+              onInput={(e) => {
+                syncTextState(e.currentTarget.value);
+                syncMention(e.currentTarget);
+                measurePrompt();
+              }}
+              onSelect={(e) => syncMention(e.currentTarget)}
+              onBlur={() => setMention(null)}
+              onScroll={(e) => {
+                if (mentionLayerRef.current)
+                  mentionLayerRef.current.scrollTop = e.currentTarget.scrollTop;
+              }}
+              onKeyDown={onKeyDown}
+            />
+          </div>
 
           <div
             ref={leftControlsRef}
@@ -437,6 +608,15 @@ export function ChatInput({
             </InputGroupButton>
           </div>
         </div>
+
+        {mention && (
+          <CourseMentionMenu
+            ref={mentionMenuRef}
+            query={mention.query}
+            onPick={pickMention}
+            onClose={() => setMention(null)}
+          />
+        )}
 
         <textarea
           ref={measurementRef}

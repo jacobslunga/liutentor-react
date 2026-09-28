@@ -22,10 +22,12 @@ import {
   renderChatMarkdown,
   selectionToMarkdown,
 } from "@/lib/chat-markdown";
+import { splitCourseMentions } from "@/lib/course-mentions";
 import { formatFileSize } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import {
   useChatStore,
+  useChatStoreApi,
   type ChatAttachment,
   type MessageSource,
 } from "@/stores/chat";
@@ -82,6 +84,7 @@ export function ChatMessages({
   className,
   onReplyToSelection,
 }: ChatMessagesProps) {
+  const chatStore = useChatStoreApi();
   const ids = useChatStore(useShallow((s) => s.messages.map((m) => m.id)));
   const mdReady = useChatMarkdownReady();
   const rootRef = useRef<HTMLDivElement>(null);
@@ -104,14 +107,14 @@ export function ChatMessages({
   const restoreScroll = useCallback(() => {
     const el = scrollRef.current;
     if (!el) return;
-    const saved = useChatStore.getState().savedScrollPosition;
+    const saved = chatStore.getState().savedScrollPosition;
     if (saved !== null) {
       el.scrollTop = saved;
     } else {
       scrollToBottom("auto");
       requestAnimationFrame(() => scrollToBottom("auto"));
     }
-  }, [scrollRef, scrollToBottom]);
+  }, [chatStore, scrollRef, scrollToBottom]);
 
   /**
    * Scrolls the newest question to the top and reserves room below it, so the
@@ -144,24 +147,24 @@ export function ChatMessages({
       restoreScroll,
       persistScrollPosition: () => {
         const el = scrollRef.current;
-        if (el) useChatStore.setState({ savedScrollPosition: el.scrollTop });
+        if (el) chatStore.setState({ savedScrollPosition: el.scrollTop });
       },
     }),
-    [scrollToBottom, scrollUserMessageToTop, restoreScroll, scrollRef],
+    [chatStore, scrollToBottom, scrollUserMessageToTop, restoreScroll, scrollRef],
   );
 
   // Position the transcript once markdown is up and rows have their real height.
   useEffect(() => {
     if (!mdReady) return;
     if (
-      useChatStore.getState().isLoading &&
-      useChatStore.getState().savedScrollPosition === null
+      chatStore.getState().isLoading &&
+      chatStore.getState().savedScrollPosition === null
     ) {
       requestAnimationFrame(scrollUserMessageToTop);
     } else {
       requestAnimationFrame(restoreScroll);
     }
-  }, [mdReady, restoreScroll, scrollUserMessageToTop]);
+  }, [chatStore, mdReady, restoreScroll, scrollUserMessageToTop]);
 
   // The "Ask" popover hides when the selection clears or the transcript scrolls away.
   useEffect(() => {
@@ -312,8 +315,8 @@ const MessageRow = memo(function MessageRow({
             </div>
           )}
           {message.content && (
-            <p className="text-[0.9375rem] leading-relaxed whitespace-pre-wrap">
-              {message.content}
+            <p className="text-sm leading-relaxed whitespace-pre-wrap sm:text-[0.9375rem]">
+              <UserText text={message.content} />
             </p>
           )}
         </div>
@@ -347,7 +350,8 @@ const MessageRow = memo(function MessageRow({
       )}
       {html && (
         <div
-          className="chat-prose prose w-full prose-h1:text-2xl prose-h2:text-xl prose-h3:text-lg prose-h4:text-base prose-h5:text-sm prose-h6:text-xs prose-h1:font-medium prose-h2:font-medium prose-h3:font-medium prose-h4:font-medium prose-h5:font-medium prose-h6:font-medium max-w-none min-w-0 dark:prose-invert"
+          // Phones get the smaller type scale; there is little room for 16px + KaTeX.
+          className="chat-prose prose prose-sm w-full sm:prose-base prose-h1:text-xl prose-h2:text-lg prose-h3:text-base prose-h4:text-sm sm:prose-h1:text-2xl sm:prose-h2:text-xl sm:prose-h3:text-lg sm:prose-h4:text-base prose-h5:text-sm prose-h6:text-xs prose-h1:font-medium prose-h2:font-medium prose-h3:font-medium prose-h4:font-medium prose-h5:font-medium prose-h6:font-medium max-w-none min-w-0 dark:prose-invert"
           dangerouslySetInnerHTML={{ __html: html }}
         />
       )}
@@ -377,6 +381,22 @@ const MessageRow = memo(function MessageRow({
     </div>
   );
 });
+
+/** A question as typed, with "@TATA41" course mentions set off. */
+function UserText({ text }: { text: string }) {
+  return splitCourseMentions(text).map((part, i) =>
+    part.type === "text" ? (
+      part.text
+    ) : (
+      <span
+        key={i}
+        className="rounded-md bg-background px-1 py-px font-medium text-foreground"
+      >
+        @{part.code}
+      </span>
+    ),
+  );
+}
 
 function AttachmentChip({ attachment }: { attachment: ChatAttachment }) {
   return (

@@ -1,5 +1,5 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { UploadIcon } from "lucide-react";
+import { Link, createFileRoute } from "@tanstack/react-router";
+import { MessageCircleIcon, UploadIcon } from "lucide-react";
 import { AuthActions } from "@/components/auth/auth-actions";
 import { LogoIcon } from "@/components/layout/logo-icon";
 import { HeroCourseSearch } from "@/components/search/course-search";
@@ -38,10 +38,18 @@ function HomePage() {
 
         <RecentSearches />
 
-        <Button variant="outline" onClick={() => openUploadModal()}>
-          <UploadIcon data-icon="inline-start" />
-          Ladda upp fler tentor
-        </Button>
+        <div className="flex flex-wrap items-center justify-center gap-2">
+          <Button asChild variant="outline">
+            <Link to="/chatt">
+              <MessageCircleIcon data-icon="inline-start" />
+              Plugga med AI
+            </Link>
+          </Button>
+          <Button variant="outline" onClick={() => openUploadModal()}>
+            <UploadIcon data-icon="inline-start" />
+            Ladda upp fler tentor
+          </Button>
+        </div>
       </div>
     </div>
   );

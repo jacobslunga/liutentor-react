@@ -3,6 +3,9 @@ import { listLocalConversations } from "@/lib/local-conversations";
 import { supabase } from "@/lib/supabase";
 import { createMessageId, type Message } from "@/stores/chat";
 
+/** Which chat a conversation belongs to: the exam panel or the learning chat. */
+export type ConversationKind = "exam" | "learn";
+
 export interface Conversation {
   id: string;
   title: string;
@@ -26,7 +29,8 @@ async function loadMeta(ids: string[]): Promise<Record<string, string>> {
     for (const row of logs ?? []) {
       if (!row?.conversation_id || first.has(row.conversation_id)) continue;
       first.set(row.conversation_id, {
-        courseCode: row.course_code || null,
+        // Learning chats log every referenced course, comma separated.
+        courseCode: row.course_code ? row.course_code.split(",").join(", ") : null,
         examId: typeof row.exam_id === "number" ? row.exam_id : null,
       });
     }
@@ -50,14 +54,15 @@ async function loadMeta(ids: string[]): Promise<Record<string, string>> {
   }
 }
 
-export const conversationsQuery = (userId: string) =>
+export const conversationsQuery = (userId: string, kind: ConversationKind) =>
   queryOptions({
-    queryKey: ["conversations", userId],
+    queryKey: ["conversations", userId, kind],
     queryFn: async (): Promise<Conversation[]> => {
       const { data, error } = await supabase
         .from("conversations")
         .select("id, title, created_at")
         .eq("user_id", userId)
+        .eq("kind", kind)
         .order("created_at", { ascending: false });
       if (error) throw error;
 
@@ -73,10 +78,10 @@ export const conversationsQuery = (userId: string) =>
   });
 
 /** Signed-out history, read from this browser. */
-export const localConversationsQuery = () =>
+export const localConversationsQuery = (kind: ConversationKind) =>
   queryOptions({
-    queryKey: ["conversations", "local"],
-    queryFn: (): Conversation[] => listLocalConversations(),
+    queryKey: ["conversations", "local", kind],
+    queryFn: (): Conversation[] => listLocalConversations(kind),
   });
 
 /** Saved turns of a conversation, normalised to user/assistant messages. */
@@ -98,6 +103,17 @@ export async function loadConversationMessages(conversationId: string): Promise<
     if (!normalized || typeof row?.content !== "string") return [];
     return [{ id: createMessageId(), role: normalized, content: row.content }];
   });
+}
+
+/** A conversation's title, or null when it does not exist (or is not ours). */
+export async function loadConversationTitle(conversationId: string): Promise<string | null> {
+  const { data, error } = await supabase
+    .from("conversations")
+    .select("title")
+    .eq("id", conversationId)
+    .maybeSingle();
+  if (error) throw error;
+  return data ? data.title || "Ny chatt" : null;
 }
 
 export async function deleteConversations(userId: string, ids: string[]) {

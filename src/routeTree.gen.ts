@@ -14,6 +14,7 @@ import { Route as DefaultRouteImport } from './routes/_default'
 import { Route as InfoRouteImport } from './routes/_info'
 import { Route as ProfileRouteImport } from './routes/_profile'
 import { Route as SearchRouteImport } from './routes/_search'
+import { Route as ChattRouteImport } from './routes/chatt'
 import { Route as SkapaKontoRouteImport } from './routes/skapa-konto'
 import { Route as AuthLoggaInRouteImport } from './routes/_auth/logga-in'
 import { Route as DefaultIndexRouteImport } from './routes/_default/index'
@@ -25,6 +26,8 @@ import { Route as InfoOmOssRouteImport } from './routes/_info/om-oss'
 import { Route as InfoPrivacyPolicyRouteImport } from './routes/_info/privacy-policy'
 import { Route as InfoUploadExamsRouteImport } from './routes/_info/upload-exams'
 import { Route as ProfileMeRouteImport } from './routes/_profile/me'
+import { Route as ChattIndexRouteImport } from './routes/chatt.index'
+import { Route as ChattConversationIdRouteImport } from './routes/chatt.$conversationId'
 import { Route as QuizCourseCodeRouteImport } from './routes/quiz.$courseCode'
 import { Route as SearchSearchCourseCodeRouteImport } from './routes/_search/search.$courseCode'
 import { Route as SearchCourseCodeExamIdRouteImport } from './routes/search.$courseCode.$examId'
@@ -47,6 +50,11 @@ const ProfileRoute = ProfileRouteImport.update({
 } as any)
 const SearchRoute = SearchRouteImport.update({
   id: '/_search',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ChattRoute = ChattRouteImport.update({
+  id: '/chatt',
+  path: '/chatt',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SkapaKontoRoute = SkapaKontoRouteImport.update({
@@ -104,6 +112,16 @@ const ProfileMeRoute = ProfileMeRouteImport.update({
   path: '/me',
   getParentRoute: () => ProfileRoute,
 } as any)
+const ChattIndexRoute = ChattIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => ChattRoute,
+} as any)
+const ChattConversationIdRoute = ChattConversationIdRouteImport.update({
+  id: '/$conversationId',
+  path: '/$conversationId',
+  getParentRoute: () => ChattRoute,
+} as any)
 const QuizCourseCodeRoute = QuizCourseCodeRouteImport.update({
   id: '/quiz/$courseCode',
   path: '/quiz/$courseCode',
@@ -122,6 +140,7 @@ const SearchCourseCodeExamIdRoute = SearchCourseCodeExamIdRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof DefaultIndexRoute
+  '/chatt': typeof ChattRouteWithChildren
   '/skapa-konto': typeof SkapaKontoRoute
   '/logga-in': typeof AuthLoggaInRoute
   '/ai-policy': typeof InfoAiPolicyRoute
@@ -132,7 +151,9 @@ export interface FileRoutesByFullPath {
   '/privacy-policy': typeof InfoPrivacyPolicyRoute
   '/upload-exams': typeof InfoUploadExamsRoute
   '/me': typeof ProfileMeRoute
+  '/chatt/$conversationId': typeof ChattConversationIdRoute
   '/quiz/$courseCode': typeof QuizCourseCodeRoute
+  '/chatt/': typeof ChattIndexRoute
   '/search/$courseCode': typeof SearchSearchCourseCodeRoute
   '/search/$courseCode/$examId': typeof SearchCourseCodeExamIdRoute
 }
@@ -148,7 +169,9 @@ export interface FileRoutesByTo {
   '/privacy-policy': typeof InfoPrivacyPolicyRoute
   '/upload-exams': typeof InfoUploadExamsRoute
   '/me': typeof ProfileMeRoute
+  '/chatt/$conversationId': typeof ChattConversationIdRoute
   '/quiz/$courseCode': typeof QuizCourseCodeRoute
+  '/chatt': typeof ChattIndexRoute
   '/search/$courseCode': typeof SearchSearchCourseCodeRoute
   '/search/$courseCode/$examId': typeof SearchCourseCodeExamIdRoute
 }
@@ -159,6 +182,7 @@ export interface FileRoutesById {
   '/_info': typeof InfoRouteWithChildren
   '/_profile': typeof ProfileRouteWithChildren
   '/_search': typeof SearchRouteWithChildren
+  '/chatt': typeof ChattRouteWithChildren
   '/skapa-konto': typeof SkapaKontoRoute
   '/_auth/logga-in': typeof AuthLoggaInRoute
   '/_info/ai-policy': typeof InfoAiPolicyRoute
@@ -169,8 +193,10 @@ export interface FileRoutesById {
   '/_info/privacy-policy': typeof InfoPrivacyPolicyRoute
   '/_info/upload-exams': typeof InfoUploadExamsRoute
   '/_profile/me': typeof ProfileMeRoute
+  '/chatt/$conversationId': typeof ChattConversationIdRoute
   '/quiz/$courseCode': typeof QuizCourseCodeRoute
   '/_default/': typeof DefaultIndexRoute
+  '/chatt/': typeof ChattIndexRoute
   '/_search/search/$courseCode': typeof SearchSearchCourseCodeRoute
   '/search/$courseCode/$examId': typeof SearchCourseCodeExamIdRoute
 }
@@ -178,6 +204,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/chatt'
     | '/skapa-konto'
     | '/logga-in'
     | '/ai-policy'
@@ -188,7 +215,9 @@ export interface FileRouteTypes {
     | '/privacy-policy'
     | '/upload-exams'
     | '/me'
+    | '/chatt/$conversationId'
     | '/quiz/$courseCode'
+    | '/chatt/'
     | '/search/$courseCode'
     | '/search/$courseCode/$examId'
   fileRoutesByTo: FileRoutesByTo
@@ -204,7 +233,9 @@ export interface FileRouteTypes {
     | '/privacy-policy'
     | '/upload-exams'
     | '/me'
+    | '/chatt/$conversationId'
     | '/quiz/$courseCode'
+    | '/chatt'
     | '/search/$courseCode'
     | '/search/$courseCode/$examId'
   id:
@@ -214,6 +245,7 @@ export interface FileRouteTypes {
     | '/_info'
     | '/_profile'
     | '/_search'
+    | '/chatt'
     | '/skapa-konto'
     | '/_auth/logga-in'
     | '/_info/ai-policy'
@@ -224,8 +256,10 @@ export interface FileRouteTypes {
     | '/_info/privacy-policy'
     | '/_info/upload-exams'
     | '/_profile/me'
+    | '/chatt/$conversationId'
     | '/quiz/$courseCode'
     | '/_default/'
+    | '/chatt/'
     | '/_search/search/$courseCode'
     | '/search/$courseCode/$examId'
   fileRoutesById: FileRoutesById
@@ -236,6 +270,7 @@ export interface RootRouteChildren {
   InfoRoute: typeof InfoRouteWithChildren
   ProfileRoute: typeof ProfileRouteWithChildren
   SearchRoute: typeof SearchRouteWithChildren
+  ChattRoute: typeof ChattRouteWithChildren
   SkapaKontoRoute: typeof SkapaKontoRoute
   QuizCourseCodeRoute: typeof QuizCourseCodeRoute
   SearchCourseCodeExamIdRoute: typeof SearchCourseCodeExamIdRoute
@@ -276,6 +311,13 @@ declare module '@tanstack/react-router' {
       path: ''
       fullPath: '/'
       preLoaderRoute: typeof SearchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/chatt': {
+      id: '/chatt'
+      path: '/chatt'
+      fullPath: '/chatt'
+      preLoaderRoute: typeof ChattRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/skapa-konto': {
@@ -354,6 +396,20 @@ declare module '@tanstack/react-router' {
       fullPath: '/me'
       preLoaderRoute: typeof ProfileMeRouteImport
       parentRoute: typeof ProfileRoute
+    }
+    '/chatt/': {
+      id: '/chatt/'
+      path: '/'
+      fullPath: '/chatt/'
+      preLoaderRoute: typeof ChattIndexRouteImport
+      parentRoute: typeof ChattRoute
+    }
+    '/chatt/$conversationId': {
+      id: '/chatt/$conversationId'
+      path: '/$conversationId'
+      fullPath: '/chatt/$conversationId'
+      preLoaderRoute: typeof ChattConversationIdRouteImport
+      parentRoute: typeof ChattRoute
     }
     '/quiz/$courseCode': {
       id: '/quiz/$courseCode'
@@ -444,12 +500,25 @@ const SearchRouteChildren: SearchRouteChildren = {
 const SearchRouteWithChildren =
   SearchRoute._addFileChildren(SearchRouteChildren)
 
+interface ChattRouteChildren {
+  ChattConversationIdRoute: typeof ChattConversationIdRoute
+  ChattIndexRoute: typeof ChattIndexRoute
+}
+
+const ChattRouteChildren: ChattRouteChildren = {
+  ChattConversationIdRoute: ChattConversationIdRoute,
+  ChattIndexRoute: ChattIndexRoute,
+}
+
+const ChattRouteWithChildren = ChattRoute._addFileChildren(ChattRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRouteWithChildren,
   DefaultRoute: DefaultRouteWithChildren,
   InfoRoute: InfoRouteWithChildren,
   ProfileRoute: ProfileRouteWithChildren,
   SearchRoute: SearchRouteWithChildren,
+  ChattRoute: ChattRouteWithChildren,
   SkapaKontoRoute: SkapaKontoRoute,
   QuizCourseCodeRoute: QuizCourseCodeRoute,
   SearchCourseCodeExamIdRoute: SearchCourseCodeExamIdRoute,
