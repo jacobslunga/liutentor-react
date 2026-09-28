@@ -1,6 +1,8 @@
 import { Link, useNavigate } from "@tanstack/react-router";
 import {
   ArrowDownIcon,
+  ChevronRightIcon,
+  FolderIcon,
   LoaderCircleIcon,
   PanelLeftIcon,
   SquarePenIcon,
@@ -25,10 +27,34 @@ import { useLearnChat } from "@/hooks/use-chat";
 import { loadConversation } from "@/hooks/use-conversation-list";
 import { normalizeClipboardFile } from "@/lib/chat-attachments";
 import { cn } from "@/lib/utils";
-import { useChatStore, useChatStoreApi } from "@/stores/chat";
+import { useChatStore, useChatStoreApi, type Message } from "@/stores/chat";
+import { useStudyCourse } from "@/queries/study-courses";
 import { useLearnSidebar } from "@/stores/learn-sidebar";
+import { CourseHome } from "./course-home";
 import { SidebarShortcutKbd } from "./sidebar-shortcut";
 import { useSelectedModel } from "@/stores/settings";
+
+const PENDING_REPLY_ID = "pending-reply";
+/** Matches the transcript's fade-in (`duration-500`). */
+const REVEAL_MS = 500;
+const REPLY_POLL_MS = 2500;
+const REPLY_POLL_ATTEMPTS = 60;
+/** A question newer than this with no answer is still being answered. */
+const REPLY_WINDOW_MS = 3 * 60 * 1000;
+
+/** The last saved turn is a recent question: its answer is on its way. */
+function isAwaitingReply(messages: Message[]): boolean {
+  const last = messages.at(-1);
+  if (last?.role !== "user" || !last.createdAt) return false;
+  return Date.now() - new Date(last.createdAt).getTime() < REPLY_WINDOW_MS;
+}
+
+const pendingReply = (): Message => ({
+  id: PENDING_REPLY_ID,
+  role: "assistant",
+  content: "",
+  status: { step: "pending", message: "Svaret skrivs fortfarande..." },
+});
 
 /**
  * One conversation in the learning chat, or a new one when `conversationId`
@@ -36,8 +62,11 @@ import { useSelectedModel } from "@/stores/settings";
  */
 export function LearnChat({
   conversationId,
+  courseId = null,
 }: {
   conversationId: string | null;
+  /** On a study course's page (no conversation yet): start a chat in it. */
+  courseId?: string | null;
 }) {
   const chatStore = useChatStoreApi();
   const navigate = useNavigate();
@@ -48,6 +77,7 @@ export function LearnChat({
 
   const hasMessages = useChatStore((s) => s.messages.length > 0);
   const currentId = useChatStore((s) => s.currentConversationId);
+  const inCourse = useChatStore((s) => !!s.currentCourseId) || !!courseId;
   const { selectedModelId } = useSelectedModel();
   const { send, cancelGeneration } = useLearnChat();
   const sidebar = useLearnSidebar();
@@ -62,8 +92,16 @@ export function LearnChat({
   );
   const [isOverDrop, setIsOverDrop] = useState(false);
   const [showScrollBottom, setShowScrollBottom] = useState(false);
-  // Bumped each time a saved conversation is opened, so its transcript fades in.
+  // Bumped each time a saved conversation is opened, so its transcript fades
+  // in. The fade class is dropped as soon as it has run (or after a fallback
+  // delay): a fade left on the transcript could freeze it half-transparent.
   const [revealCount, setRevealCount] = useState(0);
+  const [revealing, setRevealing] = useState(false);
+  useEffect(() => {
+    if (!revealing) return;
+    const timer = window.setTimeout(() => setRevealing(false), REVEAL_MS + 300);
+    return () => window.clearTimeout(timer);
+  }, [revealing, revealCount]);
   const [loadFailure, setLoadFailure] = useState<{
     id: string;
     reason: "missing" | "error";
@@ -84,20 +122,47 @@ export function LearnChat({
   }, []);
 
   // Bring the store in line with the URL: load the conversation it names, or
-  // start empty. The chat the store already holds (e.g. one that just got its
-  // id from its first turn) is left alone.
+  // start empty (in the course whose page this is). The chat the store already
+  // holds (e.g. one that just got its id from its first turn) is left alone.
   useEffect(() => {
     const state = chatStore.getState();
-    if (state.currentConversationId === conversationId) return;
-    if (state.isLoading) cancelGeneration();
+    if (
+      state.currentConversationId === conversationId &&
+      (conversationId !== null || state.currentCourseId === courseId)
+    )
+      return;
+    // A reply still streaming for the chat we leave keeps going and is saved.
     chatStore.getState().clearChat();
     inputRef.current?.discardAttachments();
     if (!conversationId) {
+      chatStore.setState({ currentCourseId: courseId });
       requestAnimationFrame(() => inputRef.current?.focus());
       return;
     }
 
     let cancelled = false;
+
+    // The answer is still being written (the chat was left mid-reply): check
+    // back until it is saved, then show it.
+    const pollForReply = async () => {
+      for (let attempt = 0; attempt < REPLY_POLL_ATTEMPTS; attempt++) {
+        await new Promise((r) => setTimeout(r, REPLY_POLL_MS));
+        if (cancelled) return;
+        const next = await loadConversation(conversationId).catch(() => null);
+        if (cancelled) return;
+        if (next && !isAwaitingReply(next.messages)) {
+          chatStore.setState({ messages: next.messages });
+          pinToBottom();
+          return;
+        }
+      }
+      // Gave up: drop the placeholder rather than spin forever.
+      if (!cancelled)
+        chatStore.setState((s) => ({
+          messages: s.messages.filter((m) => m.id !== PENDING_REPLY_ID),
+        }));
+    };
+
     loadConversation(conversationId)
       .then((conversation) => {
         if (cancelled) return;
@@ -105,9 +170,13 @@ export function LearnChat({
           setLoadFailure({ id: conversationId, reason: "missing" });
           return;
         }
+        const pending = isAwaitingReply(conversation.messages);
         chatStore.setState({
-          messages: conversation.messages,
+          messages: pending
+            ? [...conversation.messages, pendingReply()]
+            : conversation.messages,
           currentConversationId: conversationId,
+          currentCourseId: conversation.courseId,
           currentConversationTitle: conversation.title,
           isConversationTitleReady: true,
           // The header types the title in each time a chat opens; the sidebar
@@ -117,7 +186,9 @@ export function LearnChat({
           savedScrollPosition: null,
         });
         setRevealCount((n) => n + 1);
+        setRevealing(true);
         pinToBottom();
+        if (pending) void pollForReply();
       })
       .catch(() => {
         if (!cancelled) setLoadFailure({ id: conversationId, reason: "error" });
@@ -125,15 +196,12 @@ export function LearnChat({
     return () => {
       cancelled = true;
     };
-  }, [chatStore, conversationId, cancelGeneration, pinToBottom]);
+  }, [chatStore, conversationId, courseId, pinToBottom]);
 
-  // Leaving the chat mid-reply stops it cleanly instead of leaving it spinning.
-  useEffect(
-    () => () => {
-      if (chatStore.getState().isLoading) cancelGeneration();
-    },
-    [chatStore, cancelGeneration],
-  );
+  const onCourseHomeRef = useRef(false);
+  useEffect(() => {
+    onCourseHomeRef.current = !!courseId && !hasMessages;
+  });
 
   // A new chat's first turn creates its id; move the URL onto it.
   const conversationIdRef = useRef(conversationId);
@@ -209,8 +277,9 @@ export function LearnChat({
     const root = rootRef.current;
     if (!root) return;
     let depth = 0;
+    // On a course's page, dropped files are course material, not attachments.
     const hasFiles = (e: DragEvent) =>
-      !!e.dataTransfer?.types.includes("Files");
+      !onCourseHomeRef.current && !!e.dataTransfer?.types.includes("Files");
     const onEnter = (e: DragEvent) => {
       if (!hasFiles(e)) return;
       e.preventDefault();
@@ -286,8 +355,14 @@ export function LearnChat({
     <ChatInput
       ref={inputRef}
       className="pointer-events-auto mx-auto max-w-2xl"
-      placeholder="Fråga något, eller skriv @ för att välja kurs"
+      placeholder={
+        inCourse
+          ? "Fråga om kursen och dess material"
+          : "Fråga något, eller skriv @ för att välja kurs"
+      }
       courseMentions
+      // The course page lists chats right below; the chat itself keeps it.
+      showDisclaimer={!(courseId && !hasMessages)}
       selectionContext={selectionContext}
       onSend={handleSend}
       onCancel={handleCancel}
@@ -321,6 +396,8 @@ export function LearnChat({
         </Button>
       </div>
     );
+  } else if (!hasMessages && courseId) {
+    body = <CourseHome courseId={courseId} input={input} />;
   } else if (!hasMessages) {
     body = (
       <div className="flex min-h-0 flex-1 flex-col items-center justify-center gap-6 px-1 pb-[12vh]">
@@ -339,19 +416,22 @@ export function LearnChat({
     body = (
       <>
         <div
+          key={revealCount}
           ref={scrollRef}
-          className="relative flex min-h-0 min-w-0 flex-1 flex-col overflow-x-hidden overflow-y-auto overscroll-y-contain"
+          className={cn(
+            "relative flex min-h-0 min-w-0 flex-1 flex-col overflow-x-hidden overflow-y-auto overscroll-y-contain",
+            revealing &&
+              "animate-in duration-500 ease-out fade-in-0 slide-in-from-bottom-2 motion-reduce:slide-in-from-bottom-0",
+          )}
           onScroll={onScroll}
+          onAnimationEnd={(e) => {
+            if (e.target === e.currentTarget) setRevealing(false);
+          }}
         >
           <ChatMessages
-            key={revealCount}
             ref={transcriptRef}
             scrollRef={scrollRef}
-            className={cn(
-              "pt-16 pb-36 sm:pb-44",
-              revealCount > 0 &&
-                "animate-in duration-500 ease-out fill-mode-both fade-in-0 slide-in-from-bottom-2 motion-reduce:slide-in-from-bottom-0",
-            )}
+            className="pt-16 pb-36 sm:pb-44"
             onReplyToSelection={replyToSelection}
           />
         </div>
@@ -382,7 +462,7 @@ export function LearnChat({
 
       <div className="pointer-events-none absolute inset-x-0 top-0 z-20">
         <div className="pointer-events-none relative isolate flex h-14 items-center justify-between gap-2 px-3">
-          <div className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-20" />
+          <div className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-20 bg-linear-to-b from-background via-background/90 to-transparent" />
           <div className="flex min-w-0 items-center gap-1">
             {!sidebar.open && (
               <HeaderButton
@@ -393,13 +473,24 @@ export function LearnChat({
                 <PanelLeftIcon />
               </HeaderButton>
             )}
-            {loadState === "ready" && <ConversationTitle />}
+            {loadState === "ready" && <TitlePill showCrumb={!courseId} />}
           </div>
           {(!sidebar.open || !sidebar.inline) && (
             <div className="pointer-events-auto flex shrink-0 items-center gap-1">
               <HeaderButton
                 label="Ny chatt"
-                onClick={() => void navigate({ to: "/chatt" })}
+                onClick={() => {
+                  // A new chat stays in the course the open one belongs to.
+                  const course = chatStore.getState().currentCourseId;
+                  void navigate(
+                    course
+                      ? {
+                          to: "/chatt/kurs/$courseId",
+                          params: { courseId: course },
+                        }
+                      : { to: "/chatt" },
+                  );
+                }}
               >
                 <SquarePenIcon />
               </HeaderButton>
@@ -442,5 +533,47 @@ function HeaderButton({
         {shortcut}
       </TooltipContent>
     </Tooltip>
+  );
+}
+
+/**
+ * The course crumb and conversation title on a frosted pill, so they stay
+ * readable over the transcript scrolling underneath.
+ */
+function TitlePill({ showCrumb }: { showCrumb: boolean }) {
+  const hasTitle = useChatStore(
+    (s) => s.isConversationTitleReady && !!s.currentConversationTitle,
+  );
+  const courseId = useChatStore((s) => s.currentCourseId);
+  const { course } = useStudyCourse(showCrumb ? courseId : null);
+  if (!hasTitle && !course) return null;
+  return (
+    <div
+      className={cn(
+        "pointer-events-auto flex min-w-0 animate-in items-center gap-0.5 py-1 pr-3.5 duration-200 fade-in-0",
+        course ? "pl-1" : "pl-3.5",
+      )}
+    >
+      {course && <CourseCrumb />}
+      <ConversationTitle />
+    </div>
+  );
+}
+
+/** "Kursnamn ›" before the title of a chat that belongs to a study course. */
+function CourseCrumb() {
+  const courseId = useChatStore((s) => s.currentCourseId);
+  const { course } = useStudyCourse(courseId);
+  if (!course) return null;
+  return (
+    <Link
+      to="/chatt/kurs/$courseId"
+      params={{ courseId: course.id }}
+      className="pointer-events-auto flex max-w-[min(12rem,30vw)] shrink-0 items-center gap-1 rounded-full px-2 py-0.5 text-sm text-muted-foreground transition-colors hover:bg-accent/70 hover:text-foreground"
+    >
+      <FolderIcon className="size-3.5 shrink-0 fill-primary text-primary" />
+      <span className="truncate">{course.name}</span>
+      <ChevronRightIcon className="size-3.5 shrink-0" />
+    </Link>
   );
 }

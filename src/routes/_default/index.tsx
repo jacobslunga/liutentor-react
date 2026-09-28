@@ -1,6 +1,7 @@
-import { Link, createFileRoute } from "@tanstack/react-router";
-import { MessageCircleIcon, UploadIcon } from "lucide-react";
+import { createFileRoute } from "@tanstack/react-router";
+import { UploadIcon } from "lucide-react";
 import { AuthActions } from "@/components/auth/auth-actions";
+import { AppModeTabs } from "@/components/layout/app-mode-tabs";
 import { LogoIcon } from "@/components/layout/logo-icon";
 import { HeroCourseSearch } from "@/components/search/course-search";
 import { RecentSearches } from "@/components/search/recent-searches";
@@ -26,6 +27,12 @@ function HomePage() {
         <AuthActions />
       </div>
 
+      {/* Below the account buttons on phones, centred between them on wider screens. */}
+      <AppModeTabs
+        active="tentor"
+        className="absolute top-18 left-1/2 -translate-x-1/2 sm:top-5"
+      />
+
       <div className="mb-20 flex w-full max-w-150 flex-col items-center gap-6">
         <div className="flex flex-row items-center justify-center space-x-2">
           <LogoIcon className="h-12 w-12 md:h-14 md:w-14 lg:h-24 lg:w-24" />
@@ -38,18 +45,10 @@ function HomePage() {
 
         <RecentSearches />
 
-        <div className="flex flex-wrap items-center justify-center gap-2">
-          <Button asChild variant="outline">
-            <Link to="/chatt">
-              <MessageCircleIcon data-icon="inline-start" />
-              Plugga med AI
-            </Link>
-          </Button>
-          <Button variant="outline" onClick={() => openUploadModal()}>
-            <UploadIcon data-icon="inline-start" />
-            Ladda upp fler tentor
-          </Button>
-        </div>
+        <Button variant="outline" onClick={() => openUploadModal()}>
+          <UploadIcon data-icon="inline-start" />
+          Ladda upp fler tentor
+        </Button>
       </div>
     </div>
   );

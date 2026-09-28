@@ -10,7 +10,7 @@ import {
   conversationsQuery,
   deleteConversations,
   loadConversationMessages,
-  loadConversationTitle,
+  loadConversationInfo,
   localConversationsQuery,
   type Conversation,
   type ConversationKind,
@@ -74,41 +74,52 @@ export function loadMessages(id: string): Promise<Message[]> {
     : loadConversationMessages(id);
 }
 
+export interface LoadedConversation {
+  title: string;
+  /** The study course the chat belongs to, if any. */
+  courseId: string | null;
+  messages: Message[];
+}
+
 /** Title and turns of a saved conversation; null when it does not exist. */
 export async function loadConversation(
   id: string,
-): Promise<{ title: string; messages: Message[] } | null> {
+): Promise<LoadedConversation | null> {
   if (isLocalConversationId(id)) {
     const title = loadLocalConversationTitle(id);
     return title === null
       ? null
-      : { title, messages: loadLocalConversationMessages(id) };
+      : { title, courseId: null, messages: loadLocalConversationMessages(id) };
   }
-  const [title, messages] = await Promise.all([
-    loadConversationTitle(id),
+  const [info, messages] = await Promise.all([
+    loadConversationInfo(id),
     loadConversationMessages(id),
   ]);
-  return title === null ? null : { title, messages };
+  return info && { ...info, messages };
 }
 
 /**
  * Saved conversations of one kind: from the server when signed in, from this
- * browser otherwise.
+ * browser otherwise. With `courseId`, the chats of that study course (which
+ * only exist for signed-in users); without, the standalone ones.
  */
 export function useConversationList(
   kind: ConversationKind,
-  { enabled = true }: { enabled?: boolean } = {},
+  {
+    enabled = true,
+    courseId = null,
+  }: { enabled?: boolean; courseId?: string | null } = {},
 ) {
   const user = useUser();
   const queryClient = useQueryClient();
   const historyQuery = user
-    ? conversationsQuery(user.id, kind)
+    ? conversationsQuery(user.id, kind, courseId)
     : localConversationsQuery(kind);
   const {
     data: conversations = [],
     isPending,
     isError,
-  } = useQuery({ ...historyQuery, enabled });
+  } = useQuery({ ...historyQuery, enabled: enabled && (!!user || !courseId) });
 
   const groups = useMemo(
     () => groupConversations(conversations),

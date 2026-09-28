@@ -44,6 +44,7 @@ import { useProfile } from "@/queries/profile";
 import { useChatStore } from "@/stores/chat";
 import { isSidebarShortcut, useLearnSidebar } from "@/stores/learn-sidebar";
 import { ChatSettingsMenu } from "./chat-settings-menu";
+import { SidebarCourses } from "./sidebar-courses";
 import { SidebarShortcutKbd } from "./sidebar-shortcut";
 
 /**
@@ -273,6 +274,7 @@ function SidebarContent() {
         aria-label="Tidigare chattar"
         className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-2 pb-4"
       >
+        <SidebarCourses onNavigate={closeDrawer} />
         {body}
       </nav>
 

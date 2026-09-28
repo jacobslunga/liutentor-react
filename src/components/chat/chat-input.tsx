@@ -106,6 +106,8 @@ interface ChatInputProps {
   placeholder?: string;
   /** Suggest courses when the user types "@" (the learning chat). */
   courseMentions?: boolean;
+  /** The "AI kan göra misstag" line under the prompt. */
+  showDisclaimer?: boolean;
   onSend: () => void;
   onCancel: () => void;
   onClearSelectionContext: () => void;
@@ -123,6 +125,7 @@ export function ChatInput({
   className,
   placeholder = "Fråga vad som helst",
   courseMentions = false,
+  showDisclaimer = true,
   onSend,
   onCancel,
   onClearSelectionContext,
@@ -626,9 +629,11 @@ export function ChatInput({
           className="pointer-events-none absolute h-0 overflow-hidden border-0 p-0 text-[0.9375rem] leading-6 whitespace-pre-wrap invisible"
         />
       </div>
-      <p className="mt-2 text-center text-2xs text-muted-foreground">
-        AI kan göra misstag. Kontrollera svar.
-      </p>
+      {showDisclaimer && (
+        <p className="mt-2 text-center text-2xs text-muted-foreground">
+          AI kan göra misstag. Kontrollera svar.
+        </p>
+      )}
     </form>
   );
 }

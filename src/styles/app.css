@@ -2,49 +2,6 @@
 @plugin "@tailwindcss/typography";
 
 @font-face {
-  font-family: "Cereal";
-  src: url("../assets/fonts/CerealVF.woff2") format("woff2");
-  font-style: normal;
-  font-weight: 300 900;
-  font-display: swap;
-}
-
-/* Universal Sans ships two optical cuts: Text for body sizes, Display for
-   headings. Only 400 and 550 exist, so the 550 file covers medium through
-   bold instead of letting font-medium fall back to 400. */
-@font-face {
-  font-family: "Universal Sans Text";
-  src: url("../assets/fonts/universal-sans-text-regular.woff2") format("woff2");
-  font-style: normal;
-  font-weight: 400;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: "Universal Sans Text";
-  src: url("../assets/fonts/universal-sans-text-medium.woff2") format("woff2");
-  font-style: normal;
-  font-weight: 500 700;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: "Universal Sans Display";
-  src: url("../assets/fonts/universal-sans-display-regular.woff2") format("woff2");
-  font-style: normal;
-  font-weight: 400;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: "Universal Sans Display";
-  src: url("../assets/fonts/universal-sans-display-medium.woff2") format("woff2");
-  font-style: normal;
-  font-weight: 500 700;
-  font-display: swap;
-}
-
-@font-face {
   font-family: "Logo";
   src: url("../assets/fonts/gt-super-text-bold.woff2") format("woff2");
   font-style: normal;

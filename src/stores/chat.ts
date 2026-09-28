@@ -1,10 +1,10 @@
 import { createContext, useContext } from "react";
 import { create, useStore } from "zustand";
 
-export interface MessageSource {
-  title: string;
-  url: string;
-}
+/** A web page, or (with `fileId`) a study-course file, an answer cited. */
+export type MessageSource =
+  | { type?: "web"; title: string; url: string }
+  | { type: "file"; title: string; fileId: string };
 
 export interface MessageStatus {
   step: string;
@@ -36,6 +36,8 @@ export interface Message {
    */
   status?: MessageStatus | null;
   sources?: MessageSource[];
+  /** When the server logged it; only on messages loaded from history. */
+  createdAt?: string;
 }
 
 export interface PendingSelection {
@@ -53,6 +55,8 @@ export interface ChatState {
   draftAttachments: ChatAttachment[];
   currentExamId: string | null;
   currentConversationId: string | null;
+  /** The study course the open (or about to be started) chat belongs to. */
+  currentCourseId: string | null;
   currentConversationTitle: string | null;
   isConversationTitleReady: boolean;
   /**
@@ -109,6 +113,7 @@ export const createChatStore = () =>
     draftAttachments: [],
     currentExamId: null,
     currentConversationId: null,
+    currentCourseId: null,
     currentConversationTitle: null,
     isConversationTitleReady: false,
     titleTypingStartedAt: null,
@@ -165,6 +170,7 @@ export const createChatStore = () =>
         draftAttachments: [],
         currentExamId: null,
         currentConversationId: null,
+        currentCourseId: null,
         currentConversationTitle: null,
         isConversationTitleReady: false,
         titleTypingStartedAt: null,

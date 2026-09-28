@@ -14,8 +14,9 @@ export const Route = createFileRoute("/chatt")({
  * /chatt/$conversationId after the first turn keeps the streaming reply alive.
  */
 function LearnLayout() {
-  const conversationId =
-    useParams({ strict: false }).conversationId ?? null;
+  const params = useParams({ strict: false });
+  const conversationId = params.conversationId ?? null;
+  const courseId = params.courseId ?? null;
 
   useSeo({
     title: "Chatt",
@@ -29,7 +30,7 @@ function LearnLayout() {
       <div className="flex h-dvh w-full overflow-hidden bg-background">
         <ChatSidebar />
         <main className="relative flex min-w-0 flex-1 flex-col">
-          <LearnChat conversationId={conversationId} />
+          <LearnChat conversationId={conversationId} courseId={courseId} />
         </main>
       </div>
     </ChatStoreContext.Provider>

@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef } from "react";
 import {
+  AI_API_BASE,
   CHAT_COMPLETION_URL,
   getAnonymousId,
   LEARN_COMPLETION_URL,
@@ -10,6 +11,7 @@ import { conversationCourses } from "@/lib/course-mentions";
 import {
   createLocalConversationId,
   isLocalConversationId,
+  loadLocalConversationMessages,
   saveLocalConversation,
 } from "@/lib/local-conversations";
 import { queryClient } from "@/lib/query-client";
@@ -23,9 +25,10 @@ import {
   type Message,
   type MessageSource,
 } from "@/stores/chat";
-import type {
-  Conversation,
-  ConversationKind,
+import {
+  conversationsKey,
+  type Conversation,
+  type ConversationKind,
 } from "@/queries/conversations";
 import { useCourseCodes } from "@/queries/exams";
 
@@ -53,6 +56,24 @@ function persistLocalConversation(store: ChatStore, transport: ChatTransport) {
   void queryClient.invalidateQueries({ queryKey: ["conversations", "local"] });
 }
 
+/**
+ * Tells the API to stop a turn. Only the Stop button does this: leaving a
+ * chat lets the answer finish and be saved.
+ */
+async function cancelTurnOnServer(turnId: string) {
+  try {
+    await fetch(`${AI_API_BASE}/chat/turns/${turnId}/cancel`, {
+      method: "POST",
+      headers: {
+        "x-anonymous-user-id": getAnonymousId(),
+        ...(await getAuthHeaders()),
+      },
+    });
+  } catch {
+    // Best effort: the answer then simply completes.
+  }
+}
+
 /** Where a chat surface sends its turns and what it sends besides the history. */
 export interface ChatTransport {
   kind: ConversationKind;
@@ -61,6 +82,8 @@ export interface ChatTransport {
   payload: Record<string, unknown>;
   /** Label kept with a signed-out conversation, e.g. the course code. */
   meta: string;
+  /** The study course a new conversation is created in. */
+  courseId?: string | null;
 }
 
 export interface ChatContext {
@@ -104,10 +127,15 @@ export function useLearnChat() {
   const { nameByCode } = useCourseCodes();
   return useChat(store, (messages) => {
     const courses = conversationCourses(messages, nameByCode);
+    const courseId = store.getState().currentCourseId;
     return {
       kind: "learn",
+      courseId,
       url: LEARN_COMPLETION_URL,
-      payload: courses.length ? { courses } : {},
+      payload: {
+        ...(courses.length ? { courses } : {}),
+        ...(courseId ? { courseId } : {}),
+      },
       meta: courses.map((c) => c.code).join(", "),
     };
   });
@@ -126,6 +154,8 @@ export function useChat(
   transport: (messages: Message[]) => ChatTransport,
 ) {
   const abortRef = useRef<AbortController | null>(null);
+  /** The turn being streamed, so Stop can cancel it on the server. */
+  const turnIdRef = useRef<string | null>(null);
   const transportRef = useRef(transport);
   useEffect(() => {
     transportRef.current = transport;
@@ -135,9 +165,12 @@ export function useChat(
     [store],
   );
 
-  useEffect(() => () => abortRef.current?.abort(), []);
+  // No abort on unmount: a reply keeps streaming (and is saved) after the user
+  // leaves the chat. Only an explicit Stop cancels it.
 
   const cancelGeneration = useCallback((): CancelledTurn | null => {
+    if (turnIdRef.current) void cancelTurnOnServer(turnIdRef.current);
+    turnIdRef.current = null;
     abortRef.current?.abort();
     abortRef.current = null;
 
@@ -211,7 +244,12 @@ export function useChat(
         const title = fallbackTitle(50);
         const { data, error } = await supabase
           .from("conversations")
-          .insert({ user_id: userId, title, kind: currentTransport().kind })
+          .insert({
+            user_id: userId,
+            title,
+            kind: currentTransport().kind,
+            course_id: currentTransport().courseId ?? null,
+          })
           .select("id")
           .single();
         if (error)
@@ -222,9 +260,9 @@ export function useChat(
             currentConversationTitle: title,
           });
           // List the chat right away; the refetch fills in the rest.
-          const { kind, meta } = currentTransport();
+          const { kind, meta, courseId } = currentTransport();
           queryClient.setQueryData<Conversation[]>(
-            ["conversations", userId, kind],
+            conversationsKey(userId, kind, courseId),
             (old) =>
               old && [
                 {
@@ -245,6 +283,12 @@ export function useChat(
           currentConversationId: createLocalConversationId(),
         });
       }
+
+      // The chat this turn belongs to. The user may open another one while the
+      // reply streams; the turn then keeps going but stops touching the screen.
+      const turnConversationId = store.getState().currentConversationId;
+      const isShown = () =>
+        store.getState().currentConversationId === turnConversationId;
 
       const userMessage: Message = {
         id: createMessageId(),
@@ -267,14 +311,52 @@ export function useChat(
 
       const controller = new AbortController();
       abortRef.current = controller;
+      const turnId = crypto.randomUUID();
+      turnIdRef.current = turnId;
       const transportAtSend = currentTransport();
       // Signed-out history lists the chat as soon as it is asked.
       persistLocalConversation(store, transportAtSend);
 
+      // The turn's own copy, so it can be saved even if the chat is closed.
+      const turnMessages = store.getState().messages;
+      let turnReply: Partial<Message> = {};
+      let turnTitle = store.getState().currentConversationTitle || "Ny chatt";
+
       let streamText = "";
       let pendingFrame = 0;
-      const patch = (p: Partial<Message>) =>
-        store.getState().updateMessage(assistantId, p);
+      const patch = (p: Partial<Message>) => {
+        turnReply = { ...turnReply, ...p };
+        if (isShown()) store.getState().updateMessage(assistantId, p);
+      };
+
+      /** Signed-out chats are saved by the browser, from the turn's own copy. */
+      const persistTurn = () => {
+        if (!isLocalConversationId(turnConversationId)) return;
+        const final = turnMessages.map((m) =>
+          m.id === assistantId ? { ...m, ...turnReply, status: null } : m,
+        );
+        saveLocalConversation(
+          turnConversationId,
+          turnTitle,
+          transportAtSend.meta,
+          final,
+          transportAtSend.kind,
+        );
+        void queryClient.invalidateQueries({
+          queryKey: ["conversations", "local"],
+        });
+        // Reopened while this streamed: its reloaded copy lacks the answer.
+        const shown = store.getState().messages;
+        if (
+          isShown() &&
+          !shown.some((m) => m.id === assistantId) &&
+          shown.length === final.length - 1
+        ) {
+          store.setState({
+            messages: loadLocalConversationMessages(turnConversationId),
+          });
+        }
+      };
       const cancelFlush = () => {
         if (pendingFrame) cancelAnimationFrame(pendingFrame);
         pendingFrame = 0;
@@ -313,6 +395,7 @@ export function useChat(
               : store.getState().currentConversationId,
             isFirstMessage,
             selectionContext: opts.selectionContext || undefined,
+            turnId,
           }),
         );
         // Includes this turn's files: the user message is already in the store.
@@ -359,13 +442,16 @@ export function useChat(
             patch({ sources: payload.items ?? [] });
           } else if (event === "title" && payload.title?.trim()) {
             const title = payload.title.trim();
-            store.setState({
-              currentConversationTitle: title,
-              isConversationTitleReady: true,
-              titleTypingStartedAt: performance.now(),
-              titleTypesInSidebar: true,
-            });
-            const id = store.getState().currentConversationId;
+            turnTitle = title;
+            if (isShown()) {
+              store.setState({
+                currentConversationTitle: title,
+                isConversationTitleReady: true,
+                titleTypingStartedAt: performance.now(),
+                titleTypesInSidebar: true,
+              });
+            }
+            const id = turnConversationId;
             // Every cached list shows the new title without waiting on a refetch.
             queryClient.setQueriesData<Conversation[]>(
               { queryKey: ["conversations"] },
@@ -392,10 +478,11 @@ export function useChat(
       } finally {
         cancelFlush();
         if (abortRef.current === controller) abortRef.current = null;
+        if (turnIdRef.current === turnId) turnIdRef.current = null;
         if (!controller.signal.aborted) {
           patch({ status: null });
-          store.getState().setLoading(false);
-          persistLocalConversation(store, transportAtSend);
+          if (isShown()) store.getState().setLoading(false);
+          persistTurn();
         }
       }
     },

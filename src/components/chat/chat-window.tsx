@@ -96,10 +96,7 @@ export default function ChatWindow({
     const input = inputRef.current;
     const text = input?.getText() ?? "";
     const attachments = input?.getAttachments() ?? [];
-    if (
-      (!text.trim() && !attachments.length) ||
-      chatStore.getState().isLoading
-    )
+    if ((!text.trim() && !attachments.length) || chatStore.getState().isLoading)
       return;
     const context = selectionContext || undefined;
     input?.setText("");

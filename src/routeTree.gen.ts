@@ -30,6 +30,7 @@ import { Route as ChattIndexRouteImport } from './routes/chatt.index'
 import { Route as ChattConversationIdRouteImport } from './routes/chatt.$conversationId'
 import { Route as QuizCourseCodeRouteImport } from './routes/quiz.$courseCode'
 import { Route as SearchSearchCourseCodeRouteImport } from './routes/_search/search.$courseCode'
+import { Route as ChattKursCourseIdRouteImport } from './routes/chatt.kurs.$courseId'
 import { Route as SearchCourseCodeExamIdRouteImport } from './routes/search.$courseCode.$examId'
 
 const AuthRoute = AuthRouteImport.update({
@@ -132,6 +133,11 @@ const SearchSearchCourseCodeRoute = SearchSearchCourseCodeRouteImport.update({
   path: '/search/$courseCode',
   getParentRoute: () => SearchRoute,
 } as any)
+const ChattKursCourseIdRoute = ChattKursCourseIdRouteImport.update({
+  id: '/kurs/$courseId',
+  path: '/kurs/$courseId',
+  getParentRoute: () => ChattRoute,
+} as any)
 const SearchCourseCodeExamIdRoute = SearchCourseCodeExamIdRouteImport.update({
   id: '/search/$courseCode/$examId',
   path: '/search/$courseCode/$examId',
@@ -155,6 +161,7 @@ export interface FileRoutesByFullPath {
   '/quiz/$courseCode': typeof QuizCourseCodeRoute
   '/chatt/': typeof ChattIndexRoute
   '/search/$courseCode': typeof SearchSearchCourseCodeRoute
+  '/chatt/kurs/$courseId': typeof ChattKursCourseIdRoute
   '/search/$courseCode/$examId': typeof SearchCourseCodeExamIdRoute
 }
 export interface FileRoutesByTo {
@@ -173,6 +180,7 @@ export interface FileRoutesByTo {
   '/quiz/$courseCode': typeof QuizCourseCodeRoute
   '/chatt': typeof ChattIndexRoute
   '/search/$courseCode': typeof SearchSearchCourseCodeRoute
+  '/chatt/kurs/$courseId': typeof ChattKursCourseIdRoute
   '/search/$courseCode/$examId': typeof SearchCourseCodeExamIdRoute
 }
 export interface FileRoutesById {
@@ -198,6 +206,7 @@ export interface FileRoutesById {
   '/_default/': typeof DefaultIndexRoute
   '/chatt/': typeof ChattIndexRoute
   '/_search/search/$courseCode': typeof SearchSearchCourseCodeRoute
+  '/chatt/kurs/$courseId': typeof ChattKursCourseIdRoute
   '/search/$courseCode/$examId': typeof SearchCourseCodeExamIdRoute
 }
 export interface FileRouteTypes {
@@ -219,6 +228,7 @@ export interface FileRouteTypes {
     | '/quiz/$courseCode'
     | '/chatt/'
     | '/search/$courseCode'
+    | '/chatt/kurs/$courseId'
     | '/search/$courseCode/$examId'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -237,6 +247,7 @@ export interface FileRouteTypes {
     | '/quiz/$courseCode'
     | '/chatt'
     | '/search/$courseCode'
+    | '/chatt/kurs/$courseId'
     | '/search/$courseCode/$examId'
   id:
     | '__root__'
@@ -261,6 +272,7 @@ export interface FileRouteTypes {
     | '/_default/'
     | '/chatt/'
     | '/_search/search/$courseCode'
+    | '/chatt/kurs/$courseId'
     | '/search/$courseCode/$examId'
   fileRoutesById: FileRoutesById
 }
@@ -425,6 +437,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SearchSearchCourseCodeRouteImport
       parentRoute: typeof SearchRoute
     }
+    '/chatt/kurs/$courseId': {
+      id: '/chatt/kurs/$courseId'
+      path: '/kurs/$courseId'
+      fullPath: '/chatt/kurs/$courseId'
+      preLoaderRoute: typeof ChattKursCourseIdRouteImport
+      parentRoute: typeof ChattRoute
+    }
     '/search/$courseCode/$examId': {
       id: '/search/$courseCode/$examId'
       path: '/search/$courseCode/$examId'
@@ -503,11 +522,13 @@ const SearchRouteWithChildren =
 interface ChattRouteChildren {
   ChattConversationIdRoute: typeof ChattConversationIdRoute
   ChattIndexRoute: typeof ChattIndexRoute
+  ChattKursCourseIdRoute: typeof ChattKursCourseIdRoute
 }
 
 const ChattRouteChildren: ChattRouteChildren = {
   ChattConversationIdRoute: ChattConversationIdRoute,
   ChattIndexRoute: ChattIndexRoute,
+  ChattKursCourseIdRoute: ChattKursCourseIdRoute,
 }
 
 const ChattRouteWithChildren = ChattRoute._addFileChildren(ChattRouteChildren)
