@@ -12,6 +12,7 @@ function url(path: string) {
 export default async () => {
   const staticPaths = [
     "/",
+    "/chatt",
     "/om-oss",
     "/faq",
     "/ai-policy",

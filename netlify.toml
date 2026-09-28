@@ -35,6 +35,17 @@
   to = "/index.html"
   status = 200
 
+# The learning chat: /chatt, /chatt/<conversation> and /chatt/kurs/<course>.
+[[redirects]]
+  from = "/chatt"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/chatt/*"
+  to = "/index.html"
+  status = 200
+
 [[redirects]]
   from = "/me"
   to = "/index.html"

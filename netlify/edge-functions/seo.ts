@@ -14,6 +14,11 @@ type Seo = {
 
 const staticPages: Record<string, Omit<Seo, "canonicalPath">> = {
   "/": { title: "Sök tentor", description: DEFAULT_DESCRIPTION },
+  "/chatt": {
+    title: "Chatt – plugga med AI",
+    description:
+      "Plugga med AI på LiU Tentor. Ställ frågor om dina kurser, skriv @kurskod för att prata om en viss kurs och få svar med källor ur dina egna föreläsningar.",
+  },
   "/om-oss": {
     title: "Om oss",
     description: "Läs om LiU Tentor och hur vi hjälper studenter att hitta och plugga på gamla tentor.",
@@ -190,6 +195,7 @@ export const config = {
   path: [
     "/", "/search/*", "/om-oss", "/faq", "/feedback", "/upload-exams",
     "/ai-policy", "/copyright-policy", "/privacy-policy", "/logga-in", "/me",
+    "/chatt",
   ],
 };
 
