@@ -32,7 +32,7 @@ export function AppModeTabs({
           className={cn(
             "min-w-28 rounded-full px-6 py-2 text-center text-[0.9375rem] transition-all duration-200 sm:min-w-32",
             mode === active
-              ? "bg-background text-foreground shadow-sm ring-1 ring-foreground/5"
+              ? "bg-background text-foreground shadow-md ring-1 ring-foreground/5"
               : "text-muted-foreground hover:text-foreground",
           )}
         >

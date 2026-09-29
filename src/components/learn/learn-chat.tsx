@@ -404,7 +404,7 @@ export function LearnChat({
         <div className="flex flex-col items-center gap-4 px-3 text-center">
           <ChatMascot className="size-14 shrink-0" />
           <div className="space-y-2">
-            <h1 className="font-heading text-2xl font-normal sm:text-3xl">
+            <h1 className="font-heading text-2xl font-medium sm:text-3xl">
               Vad vill du lära dig idag?
             </h1>
           </div>
