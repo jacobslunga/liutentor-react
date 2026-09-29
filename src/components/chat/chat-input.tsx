@@ -108,6 +108,8 @@ interface ChatInputProps {
   courseMentions?: boolean;
   /** The "AI kan göra misstag" line under the prompt. */
   showDisclaimer?: boolean;
+  /** A wider prompt, for the full-page learning chat. */
+  wide?: boolean;
   onSend: () => void;
   onCancel: () => void;
   onClearSelectionContext: () => void;
@@ -126,6 +128,7 @@ export function ChatInput({
   placeholder = "Fråga vad som helst",
   courseMentions = false,
   showDisclaimer = true,
+  wide = false,
   onSend,
   onCancel,
   onClearSelectionContext,
@@ -431,7 +434,10 @@ export function ChatInput({
         submit();
       }}
     >
-      <div ref={shellRef} className="relative mx-auto max-w-2xl">
+      <div
+        ref={shellRef}
+        className={cn("relative mx-auto", wide ? "max-w-3xl" : "max-w-2xl")}
+      >
         <div
           className={cn(
             "relative overflow-hidden border border-input bg-background p-2.5 shadow-xs",

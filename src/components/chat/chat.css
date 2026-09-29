@@ -75,18 +75,45 @@
   overflow-wrap: break-word;
 }
 
+/* Tables sit in a bordered card; cells wrap, and only a table too wide even
+   then scrolls sideways. */
 .chat-prose .table-scroll {
   width: 100%;
   max-width: 100%;
   overflow-x: auto;
   overscroll-behavior-x: contain;
-  margin: 2em 0;
+  margin: 1.5em 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
 }
 
 .chat-prose .table-scroll table {
   width: 100%;
-  min-width: max-content;
   margin: 0;
+  border-collapse: collapse;
+}
+
+.chat-prose .table-scroll thead {
+  background-color: var(--muted);
+  border-bottom: 1px solid var(--border);
+}
+
+.chat-prose .table-scroll th {
+  font-weight: 500;
+}
+
+.chat-prose .table-scroll :is(th, td) {
+  min-width: 7rem;
+  padding: 0.6em 1em;
+  vertical-align: top;
+}
+
+.chat-prose .table-scroll tbody tr {
+  border-bottom: 1px solid var(--border);
+}
+
+.chat-prose .table-scroll tbody tr:last-child {
+  border-bottom: none;
 }
 
 .chat-prose pre,

@@ -354,15 +354,15 @@ export function LearnChat({
   const input = (
     <ChatInput
       ref={inputRef}
-      className="pointer-events-auto mx-auto max-w-2xl"
+      className="pointer-events-auto"
       placeholder={
         inCourse
           ? "Fråga om kursen och dess material"
           : "Fråga något, eller skriv @ för att välja kurs"
       }
       courseMentions
-      // The course page lists chats right below; the chat itself keeps it.
-      showDisclaimer={!(courseId && !hasMessages)}
+      wide
+      showDisclaimer={false}
       selectionContext={selectionContext}
       onSend={handleSend}
       onCancel={handleCancel}
@@ -431,7 +431,7 @@ export function LearnChat({
           <ChatMessages
             ref={transcriptRef}
             scrollRef={scrollRef}
-            className="pt-16 pb-36 sm:pb-44"
+            className="max-w-3xl pt-16 pb-36 sm:pb-44"
             onReplyToSelection={replyToSelection}
           />
         </div>
