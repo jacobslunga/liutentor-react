@@ -360,7 +360,7 @@ const MessageRow = memo(function MessageRow({
       )}
       {html && (
         <div
-          className="chat-prose prose prose-sm w-full font-serif sm:prose-base prose-strong:font-semibold prose-h1:text-xl prose-h2:text-lg prose-h3:text-base prose-h4:text-sm sm:prose-h1:text-2xl sm:prose-h2:text-xl sm:prose-h3:text-lg sm:prose-h4:text-base prose-h5:text-sm prose-h6:text-xs prose-headings:font-semibold max-w-none min-w-0 dark:prose-invert"
+          className="chat-prose prose prose-sm w-full sm:prose-base prose-strong:font-semibold prose-h1:text-xl prose-h2:text-lg prose-h3:text-base prose-h4:text-sm sm:prose-h1:text-2xl sm:prose-h2:text-xl sm:prose-h3:text-lg sm:prose-h4:text-base prose-h5:text-sm prose-h6:text-xs prose-headings:font-semibold max-w-none min-w-0 dark:prose-invert"
           dangerouslySetInnerHTML={{ __html: html }}
         />
       )}
