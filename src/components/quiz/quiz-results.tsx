@@ -1,6 +1,5 @@
 import { RotateCwIcon } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { Button, Label } from "@primer/react";
 import { cn } from "@/lib/utils";
 import { useQuizStore } from "@/stores/quiz";
 import type { MultipleChoiceQuizResponse } from "@/types/quiz";
@@ -38,11 +37,10 @@ export function QuizResults({ quizData }: { quizData: MultipleChoiceQuizResponse
         <p className="mb-0.5 text-sm font-medium">Nästa?</p>
         <p className="mb-4 text-xs text-muted-foreground">Gör om quizet eller skapa ett nytt med nya tentor.</p>
         <div className="flex items-center gap-2">
-          <Button size="sm" variant="outline" onClick={retake}>
-            <RotateCwIcon data-icon="inline-start" />
+          <Button size="small" leadingVisual={RotateCwIcon} onClick={retake}>
             Gör om
           </Button>
-          <Button size="sm" className="ml-auto" onClick={reset}>
+          <Button size="small" variant="primary" className="ml-auto" onClick={reset}>
             Nytt quiz
           </Button>
         </div>
@@ -55,13 +53,10 @@ export function QuizResults({ quizData }: { quizData: MultipleChoiceQuizResponse
           return (
             <div key={question.id} className="rounded-md border p-4">
               <div className="mb-3 flex items-center gap-2">
-                <Badge variant="outline">Fråga {qi + 1}</Badge>
-                <Badge
-                  variant="outline"
-                  className={correct ? cn(CORRECT, "text-emerald-700 dark:text-emerald-400") : cn(WRONG, "text-destructive")}
-                >
+                <Label>Fråga {qi + 1}</Label>
+                <Label variant={correct ? "success" : "danger"}>
                   {correct ? "Rätt" : "Fel"}
-                </Badge>
+                </Label>
               </div>
               <QuizMarkdown content={question.question} className="mb-3 text-sm leading-relaxed" />
               <div className="flex flex-col gap-1.5">

@@ -1,28 +1,15 @@
 /* Styles EmbedPDF's DOM needs that utilities can't reach. */
 
+/* No native scrollbars: the vertical one sat on the page edge right beside the
+   split view's resize divider. Pages still scroll by wheel, trackpad, touch and
+   keyboard; sideways, PdfScrollbars draws its own bar once zoomed in. */
 .pdf-viewport {
-  scrollbar-width: auto;
-  scrollbar-color: var(--muted-foreground) var(--muted);
+  scrollbar-width: none;
   overscroll-behavior: contain;
 }
 
 .pdf-viewport::-webkit-scrollbar {
-  width: 14px;
-  height: 14px;
-}
-
-.pdf-viewport::-webkit-scrollbar-track {
-  background: var(--muted);
-}
-
-.pdf-viewport::-webkit-scrollbar-thumb {
-  background: var(--muted-foreground);
-  border: 3px solid var(--muted);
-  border-radius: 9999px;
-}
-
-.pdf-viewport::-webkit-scrollbar-thumb:hover {
-  background: var(--foreground);
+  display: none;
 }
 
 .pdf-zoom-gesture {

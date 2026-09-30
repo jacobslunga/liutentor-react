@@ -1,19 +1,17 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { CheckIcon, LoaderCircleIcon, MailIcon } from "lucide-react";
+import {
+  Banner,
+  Button,
+  FormControl,
+  Link as PrimerLink,
+  SegmentedControl,
+  TextInput,
+} from "@primer/react";
 import { useState, type FormEvent } from "react";
 import { PasswordInput } from "@/components/auth/password-input";
 import { LogoIcon } from "@/components/layout/logo-icon";
-import { Button } from "@/components/ui/button";
-import {
-  Field,
-  FieldDescription,
-  FieldError,
-  FieldGroup,
-  FieldLabel,
-} from "@/components/ui/field";
-import { Input } from "@/components/ui/input";
 import { useSeo } from "@/hooks/use-seo";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   validateLiuEmail,
   validateName,
@@ -41,8 +39,8 @@ function AuthPage() {
     robots: "noindex, nofollow",
   });
 
-  const setTab = (value: string) =>
-    void navigate({ search: { tab: value as AuthTab }, replace: true });
+  const setTab = (value: AuthTab) =>
+    void navigate({ search: { tab: value }, replace: true });
 
   return (
     <div className="flex w-full max-w-sm flex-col items-center space-y-8 lg:max-w-md">
@@ -51,22 +49,27 @@ function AuthPage() {
         <span className="font-logo text-xl tracking-tighter">LiU Tentor</span>
       </Link>
 
-      <Tabs value={tab} onValueChange={setTab} className="w-full">
-        <TabsList className="w-full">
-          <TabsTrigger value="logga-in" className="flex-1">
+      <div className="w-full">
+        <SegmentedControl
+          aria-label="Konto"
+          fullWidth
+          onChange={(i) => setTab(i === 0 ? "logga-in" : "skapa-konto")}
+        >
+          <SegmentedControl.Button selected={tab === "logga-in"}>
             Logga in
-          </TabsTrigger>
-          <TabsTrigger value="skapa-konto" className="flex-1">
+          </SegmentedControl.Button>
+          <SegmentedControl.Button selected={tab === "skapa-konto"}>
             Skapa konto
-          </TabsTrigger>
-        </TabsList>
-        <TabsContent value="logga-in" className="pt-4">
-          <LoginForm onSwitch={() => setTab("skapa-konto")} />
-        </TabsContent>
-        <TabsContent value="skapa-konto" className="pt-4">
-          <SignupForm onSwitch={() => setTab("logga-in")} />
-        </TabsContent>
-      </Tabs>
+          </SegmentedControl.Button>
+        </SegmentedControl>
+        <div className="pt-4">
+          {tab === "logga-in" ? (
+            <LoginForm onSwitch={() => setTab("skapa-konto")} />
+          ) : (
+            <SignupForm onSwitch={() => setTab("logga-in")} />
+          )}
+        </div>
+      </div>
     </div>
   );
 }
@@ -127,54 +130,59 @@ function LoginForm({ onSwitch }: { onSwitch: () => void }) {
 
   return (
     <form onSubmit={submit} noValidate>
-      <FieldGroup>
-        <Field data-invalid={!!errors.email}>
-          <FieldLabel htmlFor="login-email">LiU mail</FieldLabel>
-          <Input
-            id="login-email"
+      <div className="flex flex-col gap-5">
+        <FormControl>
+          <FormControl.Label>LiU mail</FormControl.Label>
+          <TextInput
+            block
             type="email"
             placeholder="abcde123@student.liu.se"
             autoComplete="email"
-            aria-invalid={!!errors.email}
+            validationStatus={errors.email ? "error" : undefined}
             value={email}
             onChange={(e) => setEmail(e.target.value)}
           />
-          <FieldError>{errors.email}</FieldError>
-        </Field>
-        <Field data-invalid={!!errors.password}>
-          <FieldLabel htmlFor="login-password">Lösenord</FieldLabel>
+          {errors.email && (
+            <FormControl.Validation variant="error">
+              {errors.email}
+            </FormControl.Validation>
+          )}
+        </FormControl>
+        <FormControl>
+          <FormControl.Label>Lösenord</FormControl.Label>
           <PasswordInput
-            id="login-password"
             autoComplete="current-password"
-            aria-invalid={!!errors.password}
+            validationStatus={errors.password ? "error" : undefined}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
           />
-          <FieldError>{errors.password}</FieldError>
-        </Field>
+          {errors.password && (
+            <FormControl.Validation variant="error">
+              {errors.password}
+            </FormControl.Validation>
+          )}
+        </FormControl>
         {errors.general && (
-          <FieldError className="text-center">{errors.general}</FieldError>
+          <Banner
+            variant="critical"
+            layout="compact"
+            title="Fel"
+            hideTitle
+            description={errors.general}
+          />
         )}
-        <Field>
-          <Button type="submit" disabled={loading}>
-            {loading ? (
-              <LoaderCircleIcon className="animate-spin" />
-            ) : (
-              "Logga in"
-            )}
+        <div className="flex flex-col gap-3">
+          <Button type="submit" variant="primary" block loading={loading}>
+            Logga in
           </Button>
-          <FieldDescription className="text-center">
+          <p className="text-center text-sm text-muted-foreground">
             Inget konto?{" "}
-            <button
-              type="button"
-              className="underline underline-offset-2 hover:text-primary"
-              onClick={onSwitch}
-            >
+            <PrimerLink as="button" type="button" inline onClick={onSwitch}>
               Skapa ett här
-            </button>
-          </FieldDescription>
-        </Field>
-      </FieldGroup>
+            </PrimerLink>
+          </p>
+        </div>
+      </div>
     </form>
   );
 }
@@ -270,8 +278,7 @@ function SignupForm({ onSwitch }: { onSwitch: () => void }) {
           Kontrollera din inkorg.
         </p>
         <Button
-          size="sm"
-          variant="outline"
+          size="small"
           className="mt-2"
           onClick={() => {
             setSuccess(false);
@@ -286,101 +293,113 @@ function SignupForm({ onSwitch }: { onSwitch: () => void }) {
 
   return (
     <form onSubmit={submit} noValidate>
-      <FieldGroup>
+      <div className="flex flex-col gap-5">
         <div className="flex gap-3">
-          <Field data-invalid={!!errors.firstName} className="flex-1">
-            <FieldLabel htmlFor="signup-first">Förnamn</FieldLabel>
-            <Input
-              id="signup-first"
+          <FormControl className="flex-1">
+            <FormControl.Label>Förnamn</FormControl.Label>
+            <TextInput
+              block
               placeholder="Förnamn"
               autoComplete="given-name"
-              aria-invalid={!!errors.firstName}
+              validationStatus={errors.firstName ? "error" : undefined}
               value={form.firstName}
               onChange={update("firstName")}
             />
-            <FieldError>{errors.firstName}</FieldError>
-          </Field>
-          <Field data-invalid={!!errors.lastName} className="flex-1">
-            <FieldLabel htmlFor="signup-last">Efternamn</FieldLabel>
-            <Input
-              id="signup-last"
+            {errors.firstName && (
+              <FormControl.Validation variant="error">
+                {errors.firstName}
+              </FormControl.Validation>
+            )}
+          </FormControl>
+          <FormControl className="flex-1">
+            <FormControl.Label>Efternamn</FormControl.Label>
+            <TextInput
+              block
               placeholder="Efternamn"
               autoComplete="family-name"
-              aria-invalid={!!errors.lastName}
+              validationStatus={errors.lastName ? "error" : undefined}
               value={form.lastName}
               onChange={update("lastName")}
             />
-            <FieldError>{errors.lastName}</FieldError>
-          </Field>
+            {errors.lastName && (
+              <FormControl.Validation variant="error">
+                {errors.lastName}
+              </FormControl.Validation>
+            )}
+          </FormControl>
         </div>
-        <Field data-invalid={!!errors.email}>
-          <FieldLabel htmlFor="signup-email">LiU mail</FieldLabel>
-          <Input
-            id="signup-email"
+        <FormControl>
+          <FormControl.Label>LiU mail</FormControl.Label>
+          <TextInput
+            block
             type="email"
             placeholder="abcde123@student.liu.se"
             autoComplete="email"
-            aria-invalid={!!errors.email}
+            validationStatus={errors.email ? "error" : undefined}
             value={form.email}
             onChange={update("email")}
           />
           {errors.email ? (
-            <FieldError>{errors.email}</FieldError>
+            <FormControl.Validation variant="error">
+              {errors.email}
+            </FormControl.Validation>
           ) : (
-            <FieldDescription>
+            <FormControl.Caption>
               Måste vara din LiU mail (t.ex. abcde123@student.liu.se)
-            </FieldDescription>
+            </FormControl.Caption>
           )}
-        </Field>
-        <Field data-invalid={!!errors.password}>
-          <FieldLabel htmlFor="signup-password">Lösenord</FieldLabel>
+        </FormControl>
+        <FormControl>
+          <FormControl.Label>Lösenord</FormControl.Label>
           <PasswordInput
-            id="signup-password"
             autoComplete="new-password"
-            aria-invalid={!!errors.password}
+            validationStatus={errors.password ? "error" : undefined}
             value={form.password}
             onChange={update("password")}
           />
           {errors.password ? (
-            <FieldError>{errors.password}</FieldError>
+            <FormControl.Validation variant="error">
+              {errors.password}
+            </FormControl.Validation>
           ) : (
-            <FieldDescription>Minst 8 tecken</FieldDescription>
+            <FormControl.Caption>Minst 8 tecken</FormControl.Caption>
           )}
-        </Field>
-        <Field data-invalid={!!errors.confirmPassword}>
-          <FieldLabel htmlFor="signup-confirm">Bekräfta lösenord</FieldLabel>
+        </FormControl>
+        <FormControl>
+          <FormControl.Label>Bekräfta lösenord</FormControl.Label>
           <PasswordInput
-            id="signup-confirm"
             autoComplete="new-password"
-            aria-invalid={!!errors.confirmPassword}
+            validationStatus={errors.confirmPassword ? "error" : undefined}
             value={form.confirmPassword}
             onChange={update("confirmPassword")}
           />
-          <FieldError>{errors.confirmPassword}</FieldError>
-        </Field>
+          {errors.confirmPassword && (
+            <FormControl.Validation variant="error">
+              {errors.confirmPassword}
+            </FormControl.Validation>
+          )}
+        </FormControl>
         {errors.general && (
-          <FieldError className="text-center">{errors.general}</FieldError>
+          <Banner
+            variant="critical"
+            layout="compact"
+            title="Fel"
+            hideTitle
+            description={errors.general}
+          />
         )}
-        <Field>
-          <Button type="submit" disabled={loading}>
-            {loading ? (
-              <LoaderCircleIcon className="animate-spin" />
-            ) : (
-              "Skapa konto"
-            )}
+        <div className="flex flex-col gap-3">
+          <Button type="submit" variant="primary" block loading={loading}>
+            Skapa konto
           </Button>
-          <FieldDescription className="text-center">
+          <p className="text-center text-sm text-muted-foreground">
             Har du redan ett konto?{" "}
-            <button
-              type="button"
-              className="underline underline-offset-2 hover:text-primary"
-              onClick={onSwitch}
-            >
+            <PrimerLink as="button" type="button" inline onClick={onSwitch}>
               Logga in
-            </button>
-          </FieldDescription>
-        </Field>
-      </FieldGroup>
+            </PrimerLink>
+          </p>
+        </div>
+      </div>
     </form>
   );
 }

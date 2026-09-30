@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@primer/react";
 import {
   getAnalyticsConsent,
   initAnalytics,
@@ -31,10 +31,10 @@ export function AnalyticsConsent() {
         funktioner fungerar oavsett ditt val.
       </p>
       <div className="mt-4 flex justify-end gap-2">
-        <Button variant="outline" size="sm" onClick={() => choose(false)}>
+        <Button size="small" onClick={() => choose(false)}>
           Endast nödvändiga
         </Button>
-        <Button size="sm" onClick={() => choose(true)}>
+        <Button size="small" variant="primary" onClick={() => choose(true)}>
           Godkänn
         </Button>
       </div>

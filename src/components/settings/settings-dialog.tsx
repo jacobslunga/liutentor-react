@@ -1,26 +1,16 @@
-import { Link } from "@tanstack/react-router";
-import { MonitorIcon, MoonIcon, SettingsIcon, SunIcon } from "lucide-react";
-import { useTheme } from "next-themes";
-import type { ReactNode } from "react";
-import { toast } from "sonner";
-import { Button } from "@/components/ui/button";
 import {
+  Button,
   Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import { Kbd } from "@/components/ui/kbd";
-import {
+  IconButton,
   Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Switch } from "@/components/ui/switch";
+  ToggleSwitch,
+} from "@primer/react";
+import { KeybindingHint } from "@primer/react/experimental";
+import { Link } from "@tanstack/react-router";
+import { SettingsIcon } from "lucide-react";
+import { useTheme } from "next-themes";
+import { useState, type ReactNode } from "react";
+import { toast } from "sonner";
 import type { ChatModelId } from "@/lib/chat-models";
 import { useRecentSearches } from "@/stores/recent-searches";
 import {
@@ -36,20 +26,20 @@ const SHORTCUT_GROUPS = [
       { action: "Visa eller dölj facit", keys: ["E"] },
       { action: "Visa eller dölj facit på mobil", keys: ["F"] },
       { action: "Visa eller dölj AI-chatten", keys: ["C"] },
-      { action: "Stäng chatt och facit", keys: ["Esc"] },
+      { action: "Stäng chatt och facit", keys: ["Escape"] },
     ],
   },
   {
     label: "Layout",
     shortcuts: [
-      { action: "Flytta delningslinjen i delad vy", keys: ["←", "→"] },
+      { action: "Flytta delningslinjen i delad vy", keys: ["ArrowLeft", "ArrowRight"] },
     ],
   },
   {
     label: "Chatten",
     shortcuts: [
       { action: "Skicka meddelande", keys: ["Enter"] },
-      { action: "Ny rad", keys: ["Shift", "Enter"] },
+      { action: "Ny rad", keys: ["Shift+Enter"] },
     ],
   },
 ];
@@ -74,28 +64,32 @@ interface SettingsDialogProps {
 
 export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
   const controlled = open !== undefined;
+  const [internalOpen, setInternalOpen] = useState(false);
+  const isOpen = controlled ? open : internalOpen;
+  const setOpen = (value: boolean) =>
+    controlled ? onOpenChange?.(value) : setInternalOpen(value);
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <>
       {!controlled && (
-        <DialogTrigger asChild>
-          <Button variant="ghost" size="icon" aria-label="Inställningar">
-            <SettingsIcon />
-          </Button>
-        </DialogTrigger>
+        <IconButton
+          icon={SettingsIcon}
+          variant="invisible"
+          aria-label="Inställningar"
+          onClick={() => setOpen(true)}
+        />
       )}
-      <DialogContent className="flex max-h-[min(720px,calc(100dvh-2rem))] flex-col sm:max-w-lg">
-        <DialogHeader>
-          <DialogTitle>Inställningar</DialogTitle>
-          <DialogDescription>
-            Anpassa hur LiU Tentor beter sig.
-          </DialogDescription>
-        </DialogHeader>
-        <div className="-mx-6 min-h-0 overflow-y-auto px-6">
+      {isOpen && (
+        <Dialog
+          width="large"
+          title="Inställningar"
+          subtitle="Anpassa hur LiU Tentor beter sig."
+          onClose={() => setOpen(false)}
+        >
           <SettingsContent />
-        </div>
-      </DialogContent>
-    </Dialog>
+        </Dialog>
+      )}
+    </>
   );
 }
 
@@ -111,8 +105,6 @@ function SettingsContent() {
   const { selectedModelId, availableModels } = useSelectedModel();
   const recentSearches = useRecentSearches((s) => s.latest);
   const clearRecentSearches = useRecentSearches((s) => s.clear);
-  const ThemeIcon =
-    theme === "light" ? SunIcon : theme === "dark" ? MoonIcon : MonitorIcon;
 
   return (
     <div className="flex flex-col gap-6 pt-1 pb-2">
@@ -121,16 +113,15 @@ function SettingsContent() {
           label="Tema"
           description="System följer inställningen i din enhet."
         >
-          <Select value={theme} onValueChange={setTheme}>
-            <SelectTrigger size="sm" aria-label="Tema">
-              <ThemeIcon />
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent align="end">
-              <SelectItem value="light">Ljust</SelectItem>
-              <SelectItem value="dark">Mörkt</SelectItem>
-              <SelectItem value="system">System</SelectItem>
-            </SelectContent>
+          <Select
+            size="small"
+            aria-label="Tema"
+            value={theme}
+            onChange={(e) => setTheme(e.target.value)}
+          >
+            <Select.Option value="light">Ljust</Select.Option>
+            <Select.Option value="dark">Mörkt</Select.Option>
+            <Select.Option value="system">System</Select.Option>
           </Select>
         </Row>
       </Section>
@@ -141,36 +132,41 @@ function SettingsContent() {
           description="Hur en tenta öppnas. Du kan alltid byta i tentavyn."
         >
           <Select
+            size="small"
+            aria-label="Standardvy"
             value={layoutMode}
-            onValueChange={(v) => setLayoutMode(v as LayoutMode)}
+            onChange={(e) => setLayoutMode(e.target.value as LayoutMode)}
           >
-            <SelectTrigger size="sm" aria-label="Standardvy">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent align="end">
-              <SelectItem value="exam-with-facit">Tenta och facit</SelectItem>
-              <SelectItem value="exam-only">Endast tenta</SelectItem>
-            </SelectContent>
+            <Select.Option value="exam-with-facit">Tenta och facit</Select.Option>
+            <Select.Option value="exam-only">Endast tenta</Select.Option>
           </Select>
         </Row>
         <Row
+          id="setting-blur-facit"
           label="Dölj facit tills du pekar på det"
           description="Gäller delad vy. Med detta av ligger facit framme direkt."
         >
-          <Switch
+          <ToggleSwitch
+            size="small"
+            buttonLabelOn="På"
+            buttonLabelOff="Av"
             checked={blurFacit}
-            onCheckedChange={setBlurFacit}
-            aria-label="Dölj facit tills du pekar på det"
+            onChange={setBlurFacit}
+            aria-labelledby="setting-blur-facit"
           />
         </Row>
         <Row
+          id="setting-show-explain"
           label='Visa "Förklara" vid markering'
           description="Knappen som dyker upp när du markerar text i en tenta."
         >
-          <Switch
+          <ToggleSwitch
+            size="small"
+            buttonLabelOn="På"
+            buttonLabelOff="Av"
             checked={showExplain}
-            onCheckedChange={setShowExplain}
-            aria-label='Visa "Förklara" vid markering'
+            onChange={setShowExplain}
+            aria-labelledby="setting-show-explain"
           />
         </Row>
       </Section>
@@ -181,19 +177,16 @@ function SettingsContent() {
           description="Hur mycket chatten tänker innan den svarar."
         >
           <Select
+            size="small"
+            aria-label="Tankenivå"
             value={selectedModelId}
-            onValueChange={(v) => setSelectedModelId(v as ChatModelId)}
+            onChange={(e) => setSelectedModelId(e.target.value as ChatModelId)}
           >
-            <SelectTrigger size="sm" aria-label="Tankenivå">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent align="end">
-              {availableModels.map((model) => (
-                <SelectItem key={model.id} value={model.id}>
-                  {model.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
+            {availableModels.map((model) => (
+              <Select.Option key={model.id} value={model.id}>
+                {model.label}
+              </Select.Option>
+            ))}
           </Select>
         </Row>
         <p className="pt-3.5 text-xs leading-relaxed text-muted-foreground">
@@ -225,7 +218,7 @@ function SettingsContent() {
                   <span className="min-w-0 text-sm">{shortcut.action}</span>
                   <span className="flex shrink-0 items-center gap-1">
                     {shortcut.keys.map((key) => (
-                      <Kbd key={key}>{key}</Kbd>
+                      <KeybindingHint key={key} keys={key} size="small" />
                     ))}
                   </span>
                 </div>
@@ -261,8 +254,7 @@ function SettingsContent() {
           }
         >
           <Button
-            variant="outline"
-            size="sm"
+            size="small"
             disabled={!recentSearches.length}
             onClick={() => {
               clearRecentSearches();
@@ -287,10 +279,12 @@ function Section({ title, children }: { title: string; children: ReactNode }) {
 }
 
 function Row({
+  id,
   label,
   description,
   children,
 }: {
+  id?: string;
   label: string;
   description?: string;
   children: ReactNode;
@@ -298,7 +292,9 @@ function Row({
   return (
     <div className="flex items-start justify-between gap-6 border-b py-3.5 last:border-b-0">
       <div className="min-w-0 space-y-0.5">
-        <p className="text-sm font-medium">{label}</p>
+        <p id={id} className="text-sm font-medium">
+          {label}
+        </p>
         {description && (
           <p className="text-xs leading-relaxed text-muted-foreground">
             {description}

@@ -1,15 +1,6 @@
+import { Button, Dialog } from "@primer/react";
 import { MinusIcon } from "lucide-react";
-import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
+import { useState } from "react";
 import { passRateClass } from "@/lib/course-stats";
 import { cn } from "@/lib/utils";
 
@@ -31,6 +22,7 @@ interface ExamStatsDialogProps {
 }
 
 export function ExamStatsDialog({ statistics, date, passRate }: ExamStatsDialogProps) {
+  const [open, setOpen] = useState(false);
   const stats = statistics ?? {};
   const total = Object.values(stats).reduce((a, b) => a + b, 0);
 
@@ -52,78 +44,76 @@ export function ExamStatsDialog({ statistics, date, passRate }: ExamStatsDialogP
       onClick={(e) => e.stopPropagation()}
       onKeyDown={(e) => e.stopPropagation()}
     >
-      <Dialog>
-        <DialogTrigger asChild>
-          <Button
-            variant="ghost"
-            size="sm"
-            className={cn("tabular-nums", passRateClass(passRate))}
-          >
-            {passRate.toFixed(1)}%
-          </Button>
-        </DialogTrigger>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>Tentastatistik</DialogTitle>
-            <DialogDescription>Betygsfördelning {date}</DialogDescription>
-          </DialogHeader>
+      <Button
+        variant="invisible"
+        size="small"
+        className={cn("tabular-nums", passRateClass(passRate))}
+        onClick={() => setOpen(true)}
+      >
+        {passRate.toFixed(1)}%
+      </Button>
+      {open && (
+        <Dialog
+          width="large"
+          title="Tentastatistik"
+          subtitle={`Betygsfördelning ${date}`}
+          onClose={() => setOpen(false)}
+          renderFooter={() => (
+            <Dialog.Footer className="justify-between">
+              <p className="self-center text-xs text-muted-foreground">
+                Data från{" "}
+                <a
+                  href="https://ysektionen.se/student/tentastatistik/"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-primary hover:underline"
+                >
+                  Y-Sektionen
+                </a>
+              </p>
+              <Button onClick={() => setOpen(false)}>Stäng</Button>
+            </Dialog.Footer>
+          )}
+        >
+      <div className="flex flex-col gap-4">
+        <div className="flex items-center justify-between text-sm">
+          <span className="text-muted-foreground">{total} studenter</span>
+          <span className={cn("font-mono", passRateClass(passRate))}>
+            {passRate}% godkänt
+          </span>
+        </div>
 
-          <div className="flex flex-col gap-4">
-            <div className="flex items-center justify-between text-sm">
-              <span className="text-muted-foreground">{total} studenter</span>
-              <span className={cn("font-mono", passRateClass(passRate))}>
-                {passRate}% godkänt
+        <div className="rounded-md border p-3">
+          <div className="flex h-32 items-end gap-2">
+            {chartData.map(({ grade, count, color }) => (
+              <div key={grade} className="flex flex-1 flex-col items-center gap-1">
+                <span className="text-2xs text-muted-foreground">{count}</span>
+                <div
+                  className="w-full rounded-t-sm"
+                  style={{ height: `${(count / maxCount) * 88}px`, backgroundColor: color }}
+                />
+                <span className="text-2xs text-muted-foreground">{grade}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="space-y-2">
+          {chartData.map(({ grade, count, color }) => (
+            <div key={grade} className="flex items-center justify-between text-sm">
+              <div className="flex items-center gap-2">
+                <div className="size-2 rounded-md" style={{ backgroundColor: color }} />
+                <span>Betyg {grade}</span>
+              </div>
+              <span className="text-muted-foreground">
+                {count} ({((count / total) * 100).toFixed(1)}%)
               </span>
             </div>
-
-            <div className="rounded-md border p-3">
-              <div className="flex h-32 items-end gap-2">
-                {chartData.map(({ grade, count, color }) => (
-                  <div key={grade} className="flex flex-1 flex-col items-center gap-1">
-                    <span className="text-2xs text-muted-foreground">{count}</span>
-                    <div
-                      className="w-full rounded-t-sm"
-                      style={{ height: `${(count / maxCount) * 88}px`, backgroundColor: color }}
-                    />
-                    <span className="text-2xs text-muted-foreground">{grade}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              {chartData.map(({ grade, count, color }) => (
-                <div key={grade} className="flex items-center justify-between text-sm">
-                  <div className="flex items-center gap-2">
-                    <div className="size-2 rounded-md" style={{ backgroundColor: color }} />
-                    <span>Betyg {grade}</span>
-                  </div>
-                  <span className="text-muted-foreground">
-                    {count} ({((count / total) * 100).toFixed(1)}%)
-                  </span>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <DialogFooter className="sm:justify-between">
-            <p className="self-center text-xs text-muted-foreground">
-              Data från{" "}
-              <a
-                href="https://ysektionen.se/student/tentastatistik/"
-                target="_blank"
-                rel="noreferrer"
-                className="text-primary hover:underline"
-              >
-                Y-Sektionen
-              </a>
-            </p>
-            <DialogClose asChild>
-              <Button variant="outline">Stäng</Button>
-            </DialogClose>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+          ))}
+        </div>
+      </div>
+        </Dialog>
+      )}
     </span>
   );
 }

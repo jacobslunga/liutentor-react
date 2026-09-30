@@ -1,6 +1,6 @@
 @import "katex/dist/katex.min.css";
 
-/* Rendered assistant markdown. Colors map Tailwind Typography onto shadcn tokens. */
+/* Rendered assistant markdown. Colors map Tailwind Typography onto the app's color tokens. */
 .chat-prose {
   --tw-prose-body: var(--foreground);
   --tw-prose-headings: var(--foreground);

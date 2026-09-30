@@ -1,16 +1,11 @@
 import type { QueryClient } from "@tanstack/react-query";
-import {
-  Link,
-  Outlet,
-  createRootRouteWithContext,
-} from "@tanstack/react-router";
+import { Outlet, createRootRouteWithContext } from "@tanstack/react-router";
 import { AppLoadingBar } from "@/components/layout/app-loading-bar";
 import { AnalyticsConsent } from "@/components/layout/analytics-consent";
 import { ChatIntroDialog } from "@/components/layout/chat-intro-dialog";
-import { Button } from "@/components/ui/button";
+import { RouterLinkButton } from "@/components/primer/router-link-button";
+import { AppToaster } from "@/components/layout/app-toaster";
 import { ExamUploadDialog } from "@/components/upload/exam-upload-dialog";
-import { Toaster } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
 import { useSeo } from "@/hooks/use-seo";
 
 export interface RouterContext {
@@ -24,14 +19,14 @@ export const Route = createRootRouteWithContext<RouterContext>()({
 
 function RootLayout() {
   return (
-    <TooltipProvider delayDuration={200}>
+    <>
       <AppLoadingBar />
       <Outlet />
       <ExamUploadDialog />
       <AnalyticsConsent />
       <ChatIntroDialog />
-      <Toaster position="top-center" duration={4000} />
-    </TooltipProvider>
+      <AppToaster position="top-center" duration={4000} />
+    </>
   );
 }
 
@@ -43,13 +38,11 @@ function NotFound() {
   });
   return (
     <div className="flex min-h-dvh flex-col items-center justify-center gap-4 p-6 text-center">
-      <h1 className="font-heading text-2xl font-semibold">Sidan finns inte</h1>
+      <h1 className="text-2xl font-semibold">Sidan finns inte</h1>
       <p className="text-sm text-muted-foreground">
         Sidan du letar efter har flyttats eller finns inte.
       </p>
-      <Button asChild variant="outline">
-        <Link to="/">Till startsidan</Link>
-      </Button>
+      <RouterLinkButton to="/">Till startsidan</RouterLinkButton>
     </div>
   );
 }

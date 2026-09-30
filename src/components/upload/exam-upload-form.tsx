@@ -1,17 +1,6 @@
-import { BookIcon, FileTextIcon, InfoIcon, LoaderCircleIcon, UploadIcon, XIcon } from "lucide-react";
+import { Banner, Button, Dialog, IconButton } from "@primer/react";
+import { BookIcon, FileTextIcon, UploadIcon, XIcon } from "lucide-react";
 import { useRef, useState, type DragEvent } from "react";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
 import { useTypingPlaceholder } from "@/hooks/use-typing-placeholder";
 import { uploadExams } from "@/lib/upload";
 import { cn } from "@/lib/utils";
@@ -68,9 +57,9 @@ export function ExamUploadForm({ initialCourseCode = "", fixedCourseCode = false
         </div>
       ) : (
         <div className="space-y-2">
-          <Label htmlFor="upload-course-code" className="text-muted-foreground">
+          <label htmlFor="upload-course-code" className="block text-sm font-medium text-muted-foreground">
             Kurskod
-          </Label>
+          </label>
           <input
             id="upload-course-code"
             ref={codeInputRef}
@@ -130,43 +119,52 @@ export function ExamUploadForm({ initialCourseCode = "", fixedCourseCode = false
                   <FileTextIcon className="size-4 shrink-0 text-muted-foreground" />
                   <span className="truncate">{file.name}</span>
                 </div>
-                <Button
-                  variant="ghost"
-                  size="icon-xs"
+                <IconButton
+                  icon={XIcon}
+                  variant="invisible"
+                  size="small"
                   aria-label={`Ta bort ${file.name}`}
                   onClick={() => setFiles((current) => current.filter((_, i) => i !== index))}
-                >
-                  <XIcon />
-                </Button>
+                />
               </div>
             ))}
           </div>
-          <Button size="lg" className="w-full" disabled={!courseCode || loading} onClick={() => void upload()}>
-            {loading ? <LoaderCircleIcon className="animate-spin" /> : "Ladda upp"}
+          <Button
+            size="large"
+            variant="primary"
+            block
+            loading={loading}
+            disabled={!courseCode}
+            onClick={() => void upload()}
+          >
+            Ladda upp
           </Button>
         </div>
       )}
 
-      <Alert>
-        <InfoIcon />
-        <AlertDescription>Uppladdade tentor granskas innan de blir tillgängliga för andra studenter.</AlertDescription>
-      </Alert>
+      <Banner
+        variant="info"
+        layout="compact"
+        title="Granskning"
+        hideTitle
+        description="Uppladdade tentor granskas innan de blir tillgängliga för andra studenter."
+      />
 
-      <AlertDialog open={result !== null}>
-        <AlertDialogContent className="data-[size=default]:sm:max-w-md">
-          <AlertDialogHeader>
-            <AlertDialogTitle>{result?.ok ? "Uppladdning lyckades!" : "Något gick fel"}</AlertDialogTitle>
-            <AlertDialogDescription>
-              {result?.ok
-                ? "Tack! Din tenta har laddats upp och granskas inom kort."
-                : result?.message || "Ett fel uppstod vid uppladdningen."}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogAction onClick={() => setResult(null)}>OK</AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      {result && (
+        <Dialog
+          role="alertdialog"
+          width="large"
+          title={result.ok ? "Uppladdning lyckades!" : "Något gick fel"}
+          onClose={() => setResult(null)}
+          footerButtons={[
+            { content: "OK", buttonType: "primary", onClick: () => setResult(null) },
+          ]}
+        >
+          {result.ok
+            ? "Tack! Din tenta har laddats upp och granskas inom kort."
+            : result.message || "Ett fel uppstod vid uppladdningen."}
+        </Dialog>
+      )}
     </div>
   );
 }

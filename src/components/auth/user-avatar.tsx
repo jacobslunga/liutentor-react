@@ -1,4 +1,4 @@
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar } from "@primer/react";
 import { AVATAR_BG } from "@/lib/avatar-colors";
 import { cn } from "@/lib/utils";
 import { useProfile } from "@/queries/profile";
@@ -7,14 +7,21 @@ import { useProfile } from "@/queries/profile";
 export function UserAvatar({ className, fallbackClassName }: { className?: string; fallbackClassName?: string }) {
   const { profile, initials, avatarColor, isPending } = useProfile();
 
+  if (profile?.avatar_url) {
+    return <Avatar src={profile.avatar_url} alt="Avatar" className={cn("size-8", className)} />;
+  }
+
+  // Primer's Avatar is image-only, so initials get the same round frame by hand.
   return (
-    <Avatar className={className}>
-      {profile?.avatar_url && <AvatarImage src={profile.avatar_url} alt="Avatar" />}
-      <AvatarFallback
-        className={cn("font-medium text-white", AVATAR_BG[avatarColor], fallbackClassName)}
-      >
-        {isPending ? "" : initials}
-      </AvatarFallback>
-    </Avatar>
+    <span
+      className={cn(
+        "inline-flex size-8 items-center justify-center rounded-full text-sm font-medium text-white select-none",
+        AVATAR_BG[avatarColor],
+        className,
+        fallbackClassName,
+      )}
+    >
+      {isPending ? "" : initials}
+    </span>
   );
 }

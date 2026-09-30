@@ -1,13 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { UploadIcon } from "lucide-react";
-import { AuthActions } from "@/components/auth/auth-actions";
-import { AppModeTabs } from "@/components/layout/app-mode-tabs";
+import { HeaderActions } from "@/components/layout/header-actions";
 import { LogoIcon } from "@/components/layout/logo-icon";
 import { HeroCourseSearch } from "@/components/search/course-search";
 import { RecentSearches } from "@/components/search/recent-searches";
-import { Button } from "@/components/ui/button";
 import { useSeo } from "@/hooks/use-seo";
-import { useUploadModal } from "@/stores/upload-modal";
 
 export const Route = createFileRoute("/_default/")({
   component: HomePage,
@@ -19,19 +15,10 @@ function HomePage() {
     description: "Hitta och plugga på gamla tentor från Linköpings universitet",
     path: "/",
   });
-  const openUploadModal = useUploadModal((s) => s.open);
 
   return (
     <div className="relative flex min-h-dvh w-full flex-col items-center justify-start bg-background p-4 pt-[20dvh]">
-      <div className="absolute top-5 right-5 flex flex-row items-center justify-center gap-2">
-        <AuthActions />
-      </div>
-
-      {/* Below the account buttons on phones, centred between them on wider screens. */}
-      <AppModeTabs
-        active="tentor"
-        className="absolute top-18 left-1/2 -translate-x-1/2 sm:top-5"
-      />
+      <HeaderActions className="absolute top-5 right-5" />
 
       <div className="mb-20 flex w-full max-w-150 flex-col items-center gap-6">
         <div className="flex flex-row items-center justify-center space-x-2">
@@ -44,11 +31,6 @@ function HomePage() {
         <HeroCourseSearch />
 
         <RecentSearches />
-
-        <Button variant="outline" onClick={() => openUploadModal()}>
-          <UploadIcon data-icon="inline-start" />
-          Ladda upp fler tentor
-        </Button>
       </div>
     </div>
   );

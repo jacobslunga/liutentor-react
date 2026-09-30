@@ -1,17 +1,9 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { CheckIcon, LoaderCircleIcon, TriangleAlertIcon } from "lucide-react";
+import { Button, FormControl, Textarea, TextInput } from "@primer/react";
+import { createFileRoute } from "@tanstack/react-router";
+import { CheckIcon, TriangleAlertIcon } from "lucide-react";
 import { useState, type FormEvent } from "react";
 import { PageIntro } from "@/components/info/page-intro";
-import { Button } from "@/components/ui/button";
-import {
-  Field,
-  FieldDescription,
-  FieldError,
-  FieldGroup,
-  FieldLabel,
-} from "@/components/ui/field";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
+import { RouterLinkButton } from "@/components/primer/router-link-button";
 import { useDocumentTitle } from "@/hooks/use-document-title";
 
 export const Route = createFileRoute("/_info/feedback")({
@@ -89,9 +81,9 @@ function FeedbackPage() {
                 title="Tack!"
                 body="Vi har tagit emot din feedback och återkommer om det behövs."
                 action={
-                  <Button asChild size="sm" variant="outline">
-                    <Link to="/">Tillbaka till startsidan</Link>
-                  </Button>
+                  <RouterLinkButton to="/" size="small">
+                    Tillbaka till startsidan
+                  </RouterLinkButton>
                 }
               />
             ) : status === "error" ? (
@@ -102,8 +94,7 @@ function FeedbackPage() {
                 body="Försök igen eller kontakta oss direkt på liutentor@gmail.com"
                 action={
                   <Button
-                    size="sm"
-                    variant="outline"
+                    size="small"
                     onClick={() => setStatus("idle")}
                   >
                     Försök igen
@@ -112,96 +103,77 @@ function FeedbackPage() {
               />
             ) : (
               <form onSubmit={submit} noValidate>
-                <FieldGroup>
-                  <Field>
-                    <FieldLabel htmlFor="fb-name">
-                      Namn{" "}
-                      <span className="ml-auto text-xs font-normal text-muted-foreground">
-                        Valfritt
-                      </span>
-                    </FieldLabel>
-                    <Input
-                      id="fb-name"
+                <div className="flex flex-col gap-6">
+                  <FormControl>
+                    <FormControl.Label>Namn</FormControl.Label>
+                    <TextInput
+                      block
                       placeholder="Ditt namn"
                       value={form.name}
                       onChange={update("name")}
                     />
-                  </Field>
-                  <Field data-invalid={!!errors.liuMail}>
-                    <FieldLabel htmlFor="fb-mail">
-                      LiU-mail{" "}
-                      <span className="ml-auto text-xs font-normal text-muted-foreground">
-                        Obligatoriskt
-                      </span>
-                    </FieldLabel>
-                    <Input
-                      id="fb-mail"
+                  </FormControl>
+                  <FormControl required>
+                    <FormControl.Label>LiU-mail</FormControl.Label>
+                    <TextInput
+                      block
                       type="email"
                       placeholder="liuid123@student.liu.se"
-                      aria-invalid={!!errors.liuMail}
+                      validationStatus={errors.liuMail ? "error" : undefined}
                       value={form.liuMail}
                       onChange={update("liuMail")}
                     />
                     {errors.liuMail ? (
-                      <FieldError>{errors.liuMail}</FieldError>
+                      <FormControl.Validation variant="error">
+                        {errors.liuMail}
+                      </FormControl.Validation>
                     ) : (
-                      <FieldDescription>
+                      <FormControl.Caption>
                         Format: liuid123@student.liu.se
-                      </FieldDescription>
+                      </FormControl.Caption>
                     )}
-                  </Field>
-                  <Field>
-                    <FieldLabel htmlFor="fb-part">
-                      Del av hemsidan{" "}
-                      <span className="ml-auto text-xs font-normal text-muted-foreground">
-                        Valfritt
-                      </span>
-                    </FieldLabel>
-                    <Input
-                      id="fb-part"
+                  </FormControl>
+                  <FormControl>
+                    <FormControl.Label>Del av hemsidan</FormControl.Label>
+                    <TextInput
+                      block
                       placeholder="t.ex. Söksidan, PDF-visaren..."
                       value={form.partOfWebsite}
                       onChange={update("partOfWebsite")}
                     />
-                  </Field>
-                  <Field data-invalid={!!errors.message}>
-                    <FieldLabel htmlFor="fb-message">
-                      Meddelande{" "}
-                      <span className="ml-auto text-xs font-normal text-muted-foreground">
-                        Obligatoriskt
-                      </span>
-                    </FieldLabel>
+                  </FormControl>
+                  <FormControl required>
+                    <FormControl.Label>Meddelande</FormControl.Label>
                     <Textarea
-                      id="fb-message"
+                      block
                       rows={6}
                       placeholder="Berätta vad du tänker..."
-                      aria-invalid={!!errors.message}
+                      validationStatus={errors.message ? "error" : undefined}
                       value={form.message}
                       onChange={update("message")}
                     />
                     {errors.message ? (
-                      <FieldError>{errors.message}</FieldError>
+                      <FormControl.Validation variant="error">
+                        {errors.message}
+                      </FormControl.Validation>
                     ) : (
-                      <FieldDescription>Minst 10 tecken</FieldDescription>
+                      <FormControl.Caption>Minst 10 tecken</FormControl.Caption>
                     )}
-                  </Field>
+                  </FormControl>
                   <div className="flex items-center justify-between gap-4 border-t pt-6">
                     <p className="text-xs text-muted-foreground">
                       Vi använder din mail bara för att kunna svara.
                     </p>
                     <Button
                       type="submit"
-                      size="sm"
-                      disabled={status === "sending"}
+                      size="small"
+                      variant="primary"
+                      loading={status === "sending"}
                     >
-                      {status === "sending" ? (
-                        <LoaderCircleIcon className="animate-spin" />
-                      ) : (
-                        "Skicka"
-                      )}
+                      Skicka
                     </Button>
                   </div>
-                </FieldGroup>
+                </div>
               </form>
             )}
           </div>

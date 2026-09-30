@@ -1,10 +1,4 @@
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { Dialog } from "@primer/react";
 import { useUploadModal } from "@/stores/upload-modal";
 import { ExamUploadForm } from "./exam-upload-form";
 
@@ -14,17 +8,16 @@ export function ExamUploadDialog() {
   const courseCode = useUploadModal((s) => s.prefilledCourseCode);
   const close = useUploadModal((s) => s.close);
 
+  if (!isOpen) return null;
+
   return (
-    <Dialog open={isOpen} onOpenChange={(open) => !open && close()}>
-      <DialogContent className="sm:max-w-xl">
-        <DialogHeader>
-          <DialogTitle>Ladda upp tenta eller facit</DialogTitle>
-          <DialogDescription>
-            Hjälp andra studenter på Linköpings Universitet genom att dela gamla tentor och lösningar.
-          </DialogDescription>
-        </DialogHeader>
-        <ExamUploadForm key={courseCode} initialCourseCode={courseCode} fixedCourseCode={!!courseCode} />
-      </DialogContent>
+    <Dialog
+      width="xlarge"
+      title="Ladda upp tenta eller facit"
+      subtitle="Hjälp andra studenter på Linköpings Universitet genom att dela gamla tentor och lösningar."
+      onClose={close}
+    >
+      <ExamUploadForm key={courseCode} initialCourseCode={courseCode} fixedCourseCode={!!courseCode} />
     </Dialog>
   );
 }

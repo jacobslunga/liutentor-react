@@ -5,7 +5,8 @@ React rewrite of [liutentor.se](https://liutentor.se) — find and study old exa
 ## Stack
 
 - Vite + React + TypeScript
-- Tailwind CSS v4 + [shadcn/ui](https://ui.shadcn.com)
+- [Primer React](https://primer.style/product/getting-started/react/) (GitHub's design system) for components, themed for LiU Tentor in `src/styles/primer-theme.css`
+- Tailwind CSS v4 for layout and styling, with color tokens mapped onto Primer's (`src/index.css`)
 - TanStack Router (file-based routes in `src/routes`) + TanStack Query for server data
 - Zustand for client state (always read through selectors)
 - [EmbedPDF](https://www.embedpdf.com) for PDF rendering

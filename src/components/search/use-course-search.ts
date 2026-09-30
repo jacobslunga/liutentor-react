@@ -10,6 +10,10 @@ export interface CourseItem {
 
 const MAX_RESULTS = 10;
 
+/** DOM id of a result option, for the input's aria-activedescendant. */
+export const resultOptionId = (listId: string, code: string) =>
+  `${listId}-${code}`;
+
 /** Shared search state for the course search inputs. */
 export function useCourseSearch() {
   const navigate = useNavigate();

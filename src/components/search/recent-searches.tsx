@@ -1,6 +1,5 @@
-import { Link } from "@tanstack/react-router";
 import { ArrowUpRightIcon } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { RouterLinkButton } from "@/components/primer/router-link-button";
 import { useRecentSearches } from "@/stores/recent-searches";
 
 export function RecentSearches() {
@@ -10,12 +9,15 @@ export function RecentSearches() {
   return (
     <div className="flex flex-wrap items-center justify-center gap-1.5">
       {latest.map((s) => (
-        <Button key={s.courseCode} asChild variant="ghost">
-          <Link to="/search/$courseCode" params={{ courseCode: s.courseCode }}>
-            {s.courseCode}
-            <ArrowUpRightIcon data-icon="inline-end" />
-          </Link>
-        </Button>
+        <RouterLinkButton
+          key={s.courseCode}
+          to="/search/$courseCode"
+          params={{ courseCode: s.courseCode }}
+          variant="invisible"
+          trailingVisual={ArrowUpRightIcon}
+        >
+          {s.courseCode}
+        </RouterLinkButton>
       ))}
     </div>
   );

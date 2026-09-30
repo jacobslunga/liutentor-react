@@ -2,7 +2,7 @@ import { Outlet, createFileRoute, redirect, useNavigate, useRouter } from "@tans
 import { ArrowLeftIcon } from "lucide-react";
 import { useEffect } from "react";
 import { AppFooter } from "@/components/layout/app-footer";
-import { Button } from "@/components/ui/button";
+import { Button } from "@primer/react";
 import { getUser, useUser } from "@/stores/auth";
 
 export const Route = createFileRoute("/_auth")({
@@ -27,12 +27,12 @@ function AuthLayout() {
       <div className="flex min-h-dvh max-w-full flex-col bg-background">
         <main className="flex grow items-start justify-center px-4 pt-20 pb-8 sm:px-8 sm:pt-24">
           <Button
-            variant="ghost"
-            size="sm"
+            variant="invisible"
+            size="small"
             className="absolute top-5 left-5"
+            leadingVisual={ArrowLeftIcon}
             onClick={() => router.history.back()}
           >
-            <ArrowLeftIcon />
             Tillbaka
           </Button>
           <Outlet />

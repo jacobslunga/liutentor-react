@@ -1,6 +1,6 @@
 import { QuoteIcon } from "lucide-react";
 import { createPortal } from "react-dom";
-import { Button } from "@/components/ui/button";
+import { Button } from "@primer/react";
 
 export function SelectionPopover({
   x,
@@ -22,8 +22,8 @@ export function SelectionPopover({
     >
       <div className="animate-in duration-150 fade-in-0 zoom-in-95">
         <Button
-          variant="outline"
           className="font-medium"
+          leadingVisual={<QuoteIcon fill="currentColor" />}
           onMouseDown={(e) => {
             // Keep the selection alive until we've read it.
             e.preventDefault();
@@ -31,7 +31,6 @@ export function SelectionPopover({
             onReply();
           }}
         >
-          <QuoteIcon data-icon="inline-start" fill="currentColor" />
           Fråga
         </Button>
       </div>

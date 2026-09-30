@@ -1,8 +1,9 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { UploadIcon } from "lucide-react";
 import { DocBlock, DocHeading, DocParagraph } from "@/components/info/doc-layout";
 import { PageIntro } from "@/components/info/page-intro";
-import { Button } from "@/components/ui/button";
+import { Button } from "@primer/react";
+import { RouterLinkButton } from "@/components/primer/router-link-button";
 import { useDocumentTitle } from "@/hooks/use-document-title";
 import { cn } from "@/lib/utils";
 import { useUploadModal } from "@/stores/upload-modal";
@@ -98,11 +99,10 @@ function FaqPage() {
             Skicka en rad till oss så svarar vi – eller fyll luckan direkt genom att ladda upp tentor som saknas.
           </DocParagraph>
           <div className="mt-7 flex flex-wrap items-center gap-3">
-            <Button asChild size="sm" variant="outline">
-              <Link to="/feedback">Skicka feedback</Link>
-            </Button>
-            <Button size="sm" variant="outline" onClick={() => openUploadModal()}>
-              <UploadIcon data-icon="inline-start" />
+            <RouterLinkButton to="/feedback" size="small">
+              Skicka feedback
+            </RouterLinkButton>
+            <Button size="small" leadingVisual={UploadIcon} onClick={() => openUploadModal()}>
               Ladda upp tenta
             </Button>
           </div>

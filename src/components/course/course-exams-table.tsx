@@ -2,7 +2,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useNavigate, useRouter } from "@tanstack/react-router";
 import { CheckIcon, MinusIcon } from "lucide-react";
 import { memo, useMemo, useState } from "react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@primer/react";
 import { getExamPrefix } from "@/lib/exams";
 import { cn } from "@/lib/utils";
 import { examDetailQuery } from "@/queries/exams";
@@ -51,8 +51,8 @@ export function CourseExamsTable({ courseCode, exams, sortBy, sortDirection }: C
           {prefixes.map((prefix) => (
             <Button
               key={prefix}
-              size="sm"
-              variant={activeFilters.has(prefix) ? "default" : "outline"}
+              size="small"
+              variant={activeFilters.has(prefix) ? "primary" : "default"}
               onClick={() => toggleFilter(prefix)}
             >
               {prefix}

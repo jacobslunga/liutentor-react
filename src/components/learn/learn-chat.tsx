@@ -1,9 +1,9 @@
+import { IconButton, Spinner } from "@primer/react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import {
   ArrowDownIcon,
   ChevronRightIcon,
   FolderIcon,
-  LoaderCircleIcon,
   PanelLeftIcon,
   SquarePenIcon,
 } from "lucide-react";
@@ -17,12 +17,7 @@ import {
 } from "@/components/chat/chat-messages";
 import { ConversationTitle } from "@/components/chat/conversation-title";
 import "@/components/chat/chat.css";
-import { Button } from "@/components/ui/button";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { RouterLinkButton } from "@/components/primer/router-link-button";
 import { useLearnChat } from "@/hooks/use-chat";
 import { loadConversation } from "@/hooks/use-conversation-list";
 import { normalizeClipboardFile } from "@/lib/chat-attachments";
@@ -31,12 +26,16 @@ import { useChatStore, useChatStoreApi, type Message } from "@/stores/chat";
 import { useStudyCourse } from "@/queries/study-courses";
 import { useLearnSidebar } from "@/stores/learn-sidebar";
 import { CourseHome } from "./course-home";
-import { SidebarShortcutKbd } from "./sidebar-shortcut";
+import { SIDEBAR_SHORTCUT } from "./sidebar-shortcut";
 import { useSelectedModel } from "@/stores/settings";
 
 const PENDING_REPLY_ID = "pending-reply";
-/** Matches the transcript's fade-in (`duration-500`). */
-const REVEAL_MS = 500;
+/**
+ * Opening a saved chat shows its spinner for at least this long. Loads are
+ * often near-instant, and a spinner that flickers for a frame reads as a
+ * glitch; a short, steady beat reads as deliberate.
+ */
+const MIN_LOAD_MS = 200;
 const REPLY_POLL_MS = 2500;
 const REPLY_POLL_ATTEMPTS = 60;
 /** A question newer than this with no answer is still being answered. */
@@ -92,16 +91,9 @@ export function LearnChat({
   );
   const [isOverDrop, setIsOverDrop] = useState(false);
   const [showScrollBottom, setShowScrollBottom] = useState(false);
-  // Bumped each time a saved conversation is opened, so its transcript fades
-  // in. The fade class is dropped as soon as it has run (or after a fallback
-  // delay): a fade left on the transcript could freeze it half-transparent.
-  const [revealCount, setRevealCount] = useState(0);
-  const [revealing, setRevealing] = useState(false);
-  useEffect(() => {
-    if (!revealing) return;
-    const timer = window.setTimeout(() => setRevealing(false), REVEAL_MS + 300);
-    return () => window.clearTimeout(timer);
-  }, [revealing, revealCount]);
+  // Bumped each time a saved conversation is opened, so its transcript mounts
+  // fresh (scroll state included) instead of reusing the previous chat's.
+  const [transcriptKey, setTranscriptKey] = useState(0);
   const [loadFailure, setLoadFailure] = useState<{
     id: string;
     reason: "missing" | "error";
@@ -163,8 +155,11 @@ export function LearnChat({
         }));
     };
 
-    loadConversation(conversationId)
-      .then((conversation) => {
+    Promise.all([
+      loadConversation(conversationId),
+      new Promise((r) => setTimeout(r, MIN_LOAD_MS)),
+    ])
+      .then(([conversation]) => {
         if (cancelled) return;
         if (!conversation) {
           setLoadFailure({ id: conversationId, reason: "missing" });
@@ -185,8 +180,7 @@ export function LearnChat({
           titleTypesInSidebar: false,
           savedScrollPosition: null,
         });
-        setRevealCount((n) => n + 1);
-        setRevealing(true);
+        setTranscriptKey((n) => n + 1);
         pinToBottom();
         if (pending) void pollForReply();
       })
@@ -375,11 +369,9 @@ export function LearnChat({
     body = (
       <div
         role="status"
-        className="flex flex-1 animate-in items-center justify-center gap-2 text-sm text-muted-foreground fill-mode-both fade-in-0"
-        // Quick loads go straight to the fade-in without a spinner flash.
-        style={{ animationDelay: "300ms" }}
+        className="flex flex-1 items-center justify-center gap-2 text-sm text-muted-foreground"
       >
-        <LoaderCircleIcon className="size-5 animate-spin" />
+        <Spinner size="small" srText={null} />
         <span>Laddar konversation...</span>
       </div>
     );
@@ -391,9 +383,7 @@ export function LearnChat({
             ? "Chatten finns inte, eller så har den raderats."
             : "Kunde inte öppna chatten."}
         </p>
-        <Button asChild variant="outline">
-          <Link to="/chatt">Starta en ny chatt</Link>
-        </Button>
+        <RouterLinkButton to="/chatt">Starta en ny chatt</RouterLinkButton>
       </div>
     );
   } else if (!hasMessages && courseId) {
@@ -404,7 +394,7 @@ export function LearnChat({
         <div className="flex flex-col items-center gap-4 px-3 text-center">
           <ChatMascot className="size-14 shrink-0" />
           <div className="space-y-2">
-            <h1 className="font-heading text-2xl font-medium sm:text-3xl">
+            <h1 className="text-2xl font-medium sm:text-3xl">
               Vad vill du lära dig idag?
             </h1>
           </div>
@@ -416,17 +406,10 @@ export function LearnChat({
     body = (
       <>
         <div
-          key={revealCount}
+          key={transcriptKey}
           ref={scrollRef}
-          className={cn(
-            "relative flex min-h-0 min-w-0 flex-1 flex-col overflow-x-hidden overflow-y-auto overscroll-y-contain",
-            revealing &&
-              "animate-in duration-500 ease-out fade-in-0 slide-in-from-bottom-2 motion-reduce:slide-in-from-bottom-0",
-          )}
+          className="relative flex min-h-0 min-w-0 flex-1 flex-col overflow-x-hidden overflow-y-auto overscroll-y-contain"
           onScroll={onScroll}
-          onAnimationEnd={(e) => {
-            if (e.target === e.currentTarget) setRevealing(false);
-          }}
         >
           <ChatMessages
             ref={transcriptRef}
@@ -437,15 +420,12 @@ export function LearnChat({
         </div>
         <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 flex flex-col items-center bg-linear-to-t from-background to-transparent pt-10 pb-3 sm:pb-4">
           {showScrollBottom && (
-            <Button
-              variant="outline"
-              size="icon"
+            <IconButton
+              icon={ArrowDownIcon}
               className="pointer-events-auto mb-2.5 animate-in rounded-full shadow-md duration-150 fade-in-0"
-              aria-label="Rulla till senaste"
+              aria-label="Scrolla längst ned"
               onClick={scrollToLatest}
-            >
-              <ArrowDownIcon />
-            </Button>
+            />
           )}
           {input}
         </div>
@@ -466,18 +446,18 @@ export function LearnChat({
           <div className="flex min-w-0 items-center gap-1">
             {!sidebar.open && (
               <HeaderButton
+                icon={PanelLeftIcon}
                 label="Öppna sidopanelen"
-                shortcut={<SidebarShortcutKbd />}
+                shortcut={SIDEBAR_SHORTCUT}
                 onClick={() => sidebar.setOpen(true)}
-              >
-                <PanelLeftIcon />
-              </HeaderButton>
+              />
             )}
             {loadState === "ready" && <TitlePill showCrumb={!courseId} />}
           </div>
           {(!sidebar.open || !sidebar.inline) && (
             <div className="pointer-events-auto flex shrink-0 items-center gap-1">
               <HeaderButton
+                icon={SquarePenIcon}
                 label="Ny chatt"
                 onClick={() => {
                   // A new chat stays in the course the open one belongs to.
@@ -491,9 +471,7 @@ export function LearnChat({
                       : { to: "/chatt" },
                   );
                 }}
-              >
-                <SquarePenIcon />
-              </HeaderButton>
+              />
             </div>
           )}
         </div>
@@ -505,34 +483,25 @@ export function LearnChat({
 }
 
 function HeaderButton({
+  icon,
   label,
   shortcut,
   onClick,
-  children,
 }: {
+  icon: React.ElementType;
   label: string;
-  shortcut?: React.ReactNode;
+  shortcut?: string;
   onClick: () => void;
-  children: React.ReactNode;
 }) {
   return (
-    <Tooltip>
-      <TooltipTrigger asChild>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="pointer-events-auto"
-          aria-label={label}
-          onClick={onClick}
-        >
-          {children}
-        </Button>
-      </TooltipTrigger>
-      <TooltipContent className="flex items-center gap-2">
-        {label}
-        {shortcut}
-      </TooltipContent>
-    </Tooltip>
+    <IconButton
+      icon={icon}
+      variant="invisible"
+      className="pointer-events-auto"
+      aria-label={label}
+      keybindingHint={shortcut}
+      onClick={onClick}
+    />
   );
 }
 
@@ -550,7 +519,7 @@ function TitlePill({ showCrumb }: { showCrumb: boolean }) {
   return (
     <div
       className={cn(
-        "pointer-events-auto flex min-w-0 animate-in items-center gap-0.5 py-1 pr-3.5 duration-200 fade-in-0",
+        "pointer-events-auto flex min-w-0 items-center gap-0.5 py-1 pr-3.5",
         course ? "pl-1" : "pl-3.5",
       )}
     >

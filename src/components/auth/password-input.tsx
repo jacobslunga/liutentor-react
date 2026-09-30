@@ -1,27 +1,23 @@
+import { TextInput, type TextInputProps } from "@primer/react";
 import { EyeIcon, EyeOffIcon } from "lucide-react";
-import { useState, type ComponentProps } from "react";
-import {
-  InputGroup,
-  InputGroupAddon,
-  InputGroupButton,
-  InputGroupInput,
-} from "@/components/ui/input-group";
+import { useState } from "react";
 
-export function PasswordInput(props: Omit<ComponentProps<"input">, "type">) {
+export function PasswordInput(props: Omit<TextInputProps, "type">) {
   const [visible, setVisible] = useState(false);
 
   return (
-    <InputGroup>
-      <InputGroupInput type={visible ? "text" : "password"} placeholder="••••••••" {...props} />
-      <InputGroupAddon align="inline-end">
-        <InputGroupButton
-          size="icon-xs"
+    <TextInput
+      block
+      type={visible ? "text" : "password"}
+      placeholder="••••••••"
+      trailingAction={
+        <TextInput.Action
+          icon={visible ? EyeOffIcon : EyeIcon}
           aria-label={visible ? "Dölj lösenord" : "Visa lösenord"}
           onClick={() => setVisible((v) => !v)}
-        >
-          {visible ? <EyeOffIcon /> : <EyeIcon />}
-        </InputGroupButton>
-      </InputGroupAddon>
-    </InputGroup>
+        />
+      }
+      {...props}
+    />
   );
 }
