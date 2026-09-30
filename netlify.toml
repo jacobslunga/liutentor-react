@@ -4,6 +4,10 @@
 
 [build.environment]
   NODE_VERSION = "22"
+  # Must match "packageManager" in package.json: the lockfile's patch hashes
+  # and pnpm-manager entry are written by this version, and older pnpm (the
+  # Netlify default) rejects them in a frozen install.
+  PNPM_VERSION = "12.6.0"
 
 [functions]
   directory = "netlify/functions"
