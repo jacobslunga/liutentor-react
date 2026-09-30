@@ -39,7 +39,9 @@ export function CourseSearchResults({
           onSelect={() => onSelect(item.code)}
         >
           <span className="flex min-w-0 items-baseline gap-2">
-            <span className="shrink-0 font-medium">{item.code}</span>
+            {/* Codes are six characters but not equally wide; a fixed column
+                keeps the names lined up. */}
+            <span className="min-w-16 shrink-0 font-medium tabular-nums">{item.code}</span>
             <span className="truncate text-xs text-muted-foreground">
               {item.name}
             </span>

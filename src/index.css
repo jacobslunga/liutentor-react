@@ -41,10 +41,6 @@
 }
 
 :root {
-  /* The app's Tailwind color tokens (bg-background, text-muted-foreground, …),
-     mapped onto Primer functional tokens (@primer/primitives). Light/dark
-     values come from Primer's theme files, keyed on data-color-mode on <html>,
-     so one block serves both modes. */
   --background: var(--bgColor-default);
   --foreground: var(--fgColor-default);
   --card: var(--bgColor-default);

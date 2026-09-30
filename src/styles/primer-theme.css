@@ -1,89 +1,112 @@
-/*
- * LiU Tentor branding on top of Primer (GitHub's design system).
- * Primer's tokens are defined under [data-color-mode="…"][data-*-theme="…"],
- * which matches both <html> and the wrapper div Primer's ThemeProvider
- * renders, so the overrides must match both too. Same specificity, loaded
- * later, so these win. The Tailwind tokens in index.css point at Primer's, so
- * bg-primary, rounded-lg etc. follow automatically.
- */
-
-/* Slightly rounder than GitHub (3 / 6 / 12px). */
 :root {
   --borderRadius-small: 0.25rem;
   --borderRadius-medium: 0.5rem;
   --borderRadius-large: 0.875rem;
 }
 
-/* Light: GitHub's surfaces, LiU Tentor's teal. */
 :is(:root, [data-light-theme])[data-color-mode="light"] {
   --brand-primary: oklch(0.6193 0.1154 172.06);
   --brand-primary-fg: oklch(1 0 0);
 
   --button-primary-bgColor-rest: var(--brand-primary);
-  --button-primary-bgColor-hover: oklch(from var(--brand-primary) calc(l - 0.04) c h);
-  --button-primary-bgColor-active: oklch(from var(--brand-primary) calc(l - 0.08) c h);
-  --button-primary-bgColor-disabled: oklch(from var(--brand-primary) l c h / 0.45);
+  --button-primary-bgColor-hover: oklch(
+    from var(--brand-primary) calc(l - 0.04) c h
+  );
+  --button-primary-bgColor-active: oklch(
+    from var(--brand-primary) calc(l - 0.08) c h
+  );
+  --button-primary-bgColor-disabled: oklch(
+    from var(--brand-primary) l c h / 0.45
+  );
   --button-primary-fgColor-rest: var(--brand-primary-fg);
   --button-primary-iconColor-rest: var(--brand-primary-fg);
 
   /* The active-tab underline: GitHub's coral orange is theirs, not ours. */
   --underlineNav-borderColor-active: oklch(0.55 0.2 290);
+
+  /* Accent (focus rings, active menu items, links, checkboxes): GitHub's
+     blue becomes a tint of the brand. Text-colored accents step darker so
+     links keep >= 4.5:1 on white; the brand itself is ~3.5:1, fine for rings. */
+  --fgColor-accent: oklch(from var(--brand-primary) 0.5 c h);
+  --bgColor-accent-emphasis: var(--brand-primary);
+  --bgColor-accent-muted: oklch(from var(--brand-primary) 0.965 0.03 h);
+  --borderColor-accent-emphasis: var(--brand-primary);
+  --borderColor-accent-muted: oklch(from var(--brand-primary) l c h / 0.4);
+  --control-checked-bgColor-hover: var(--button-primary-bgColor-hover);
+  --control-checked-bgColor-active: var(--button-primary-bgColor-active);
+  --selection-bgColor: oklch(from var(--brand-primary) l c h / 0.2);
 }
 
-/*
- * Dark: the old light-green primary with dark text, and every neutral gray
- * given a trace of its hue (chroma 0.005) instead of GitHub's cool blue.
- * The gray list is generated from Primer's dark theme: each blue-gray keeps
- * its lightness and alpha; status tints and pure black/white are untouched.
- */
 :is(:root, [data-dark-theme])[data-color-mode="dark"] {
   --brand-primary: oklch(0.8332 0.088 144.73);
   --brand-primary-fg: oklch(0.183 0.005 144.73);
 
   --button-primary-bgColor-rest: var(--brand-primary);
-  --button-primary-bgColor-hover: oklch(from var(--brand-primary) calc(l - 0.05) c h);
-  --button-primary-bgColor-active: oklch(from var(--brand-primary) calc(l - 0.1) c h);
-  --button-primary-bgColor-disabled: oklch(from var(--brand-primary) l c h / 0.35);
+  --button-primary-bgColor-hover: oklch(
+    from var(--brand-primary) calc(l - 0.05) c h
+  );
+  --button-primary-bgColor-active: oklch(
+    from var(--brand-primary) calc(l - 0.1) c h
+  );
+  --button-primary-bgColor-disabled: oklch(
+    from var(--brand-primary) l c h / 0.35
+  );
   --button-primary-fgColor-rest: var(--brand-primary-fg);
-  --button-primary-fgColor-disabled: oklch(from var(--brand-primary-fg) l c h / 0.7);
+  --button-primary-fgColor-disabled: oklch(
+    from var(--brand-primary-fg) l c h / 0.7
+  );
   --button-primary-iconColor-rest: var(--brand-primary-fg);
 
   --underlineNav-borderColor-active: oklch(0.72 0.16 290);
 
+  /* Accent, as in light. Rings, borders and link text use the bright brand;
+     filled accents (checkboxes, counters) carry white text, so they take a
+     darker step of it instead. */
+  --fgColor-accent: var(--brand-primary);
+  --bgColor-accent-emphasis: oklch(from var(--brand-primary) 0.52 c h);
+  --bgColor-accent-muted: oklch(from var(--brand-primary) l c h / 0.12);
+  --borderColor-accent-emphasis: var(--brand-primary);
+  --borderColor-accent-muted: oklch(from var(--brand-primary) l c h / 0.4);
+  --control-checked-bgColor-hover: oklch(from var(--brand-primary) 0.56 c h);
+  --control-checked-bgColor-active: oklch(from var(--brand-primary) 0.6 c h);
+  --selection-bgColor: oklch(from var(--brand-primary) l c h / 0.3);
+
   --ansi-black: oklch(0.334 0.005 144.73);
   --ansi-blackBright: oklch(0.529 0.005 144.73);
   --ansi-gray: oklch(0.529 0.005 144.73);
-  --ansi-white: oklch(0.970 0.005 144.73);
+  --ansi-white: oklch(0.97 0.005 144.73);
   --avatarStack-fade-bgColor-default: oklch(0.384 0.005 144.73);
   --avatarStack-fade-bgColor-muted: oklch(0.311 0.005 144.73);
   --bgColor-default: oklch(0.176 0.005 144.73);
   --bgColor-disabled: oklch(0.274 0.005 144.73);
   --bgColor-emphasis: oklch(0.384 0.005 144.73);
-  --bgColor-muted: oklch(0.220 0.005 144.73);
+  --bgColor-muted: oklch(0.22 0.005 144.73);
   --bgColor-neutral-emphasis: oklch(0.529 0.005 144.73);
-  --bgColor-neutral-muted: oklch(0.529 0.005 144.73 / 0.20);
+  --bgColor-neutral-muted: oklch(0.529 0.005 144.73 / 0.2);
   --borderColor-default: oklch(0.384 0.005 144.73);
-  --borderColor-disabled: oklch(0.529 0.005 144.73 / 0.10);
+  --borderColor-disabled: oklch(0.529 0.005 144.73 / 0.1);
   --borderColor-emphasis: oklch(0.529 0.005 144.73);
   --button-inactive-bgColor: oklch(0.292 0.005 144.73);
   --button-inactive-fgColor: oklch(0.677 0.005 144.73);
-  --button-outline-bgColor-rest: oklch(0.970 0.005 144.73);
+  --button-outline-bgColor-rest: oklch(0.97 0.005 144.73);
   --buttonCounter-default-bgColor-rest: oklch(0.334 0.005 144.73);
-  --buttonKeybindingHint-danger-bgColor-active: oklch(0.104 0.005 144.73 / 0.40);
-  --buttonKeybindingHint-danger-bgColor-hover: oklch(0.104 0.005 144.73 / 0.20);
-  --buttonKeybindingHint-danger-borderColor-hover: oklch(0.104 0.005 144.73 / 0.10);
+  --buttonKeybindingHint-danger-bgColor-active: oklch(0.104 0.005 144.73 / 0.4);
+  --buttonKeybindingHint-danger-bgColor-hover: oklch(0.104 0.005 144.73 / 0.2);
+  --buttonKeybindingHint-danger-borderColor-hover: oklch(
+    0.104 0.005 144.73 / 0.1
+  );
   --buttonKeybindingHint-default-bgColor-rest: oklch(0.311 0.005 144.73);
   --buttonKeybindingHint-inactive-bgColor: oklch(0.311 0.005 144.73);
   --codeMirror-syntax-fgColor-comment: oklch(0.529 0.005 144.73);
-  --contribution-default-bgColor-0: oklch(0.220 0.005 144.73);
+  --contribution-default-bgColor-0: oklch(0.22 0.005 144.73);
   --contribution-default-borderColor-0: oklch(0.104 0.005 144.73 / 0.05);
   --control-bgColor-active: oklch(0.311 0.005 144.73);
   --control-bgColor-hover: oklch(0.292 0.005 144.73);
   --control-bgColor-rest: oklch(0.274 0.005 144.73);
-  --control-borderColor-selected: oklch(0.970 0.005 144.73);
+  --control-borderColor-selected: oklch(0.97 0.005 144.73);
   --control-transparent-bgColor-active: oklch(0.529 0.005 144.73 / 0.25);
-  --control-transparent-bgColor-hover: oklch(0.529 0.005 144.73 / 0.20);
-  --control-transparent-bgColor-selected: oklch(0.529 0.005 144.73 / 0.20);
+  --control-transparent-bgColor-hover: oklch(0.529 0.005 144.73 / 0.2);
+  --control-transparent-bgColor-selected: oklch(0.529 0.005 144.73 / 0.2);
   --controlKnob-bgColor-rest: oklch(0.292 0.005 144.73);
   --controlTrack-bgColor-active: oklch(0.334 0.005 144.73);
   --controlTrack-bgColor-hover: oklch(0.311 0.005 144.73);
@@ -99,47 +122,43 @@
   --display-gray-scale-4: oklch(0.492 0.005 144.73);
   --display-gray-scale-8: oklch(0.803 0.005 144.73);
   --display-gray-scale-9: oklch(0.851 0.005 144.73);
-  --fgColor-default: oklch(0.970 0.005 144.73);
+  --fgColor-default: oklch(0.97 0.005 144.73);
   --fgColor-disabled: oklch(0.529 0.005 144.73);
   --fgColor-muted: oklch(0.677 0.005 144.73);
   --fgColor-neutral: oklch(0.677 0.005 144.73);
-  --header-bgColor: oklch(0.220 0.005 144.73 / 0.95);
+  --header-bgColor: oklch(0.22 0.005 144.73 / 0.95);
   --header-borderColor-divider: oklch(0.529 0.005 144.73);
-  --header-fgColor-logo: oklch(0.970 0.005 144.73);
+  --header-fgColor-logo: oklch(0.97 0.005 144.73);
   --headerSearch-bgColor: oklch(0.176 0.005 144.73);
   --headerSearch-borderColor: oklch(0.311 0.005 144.73);
   --label-gray-bgColor-active: oklch(0.358 0.005 144.73);
   --label-gray-bgColor-hover: oklch(0.289 0.005 144.73);
   --label-gray-bgColor-rest: oklch(0.226 0.005 144.73);
   --label-gray-fgColor-active: oklch(0.803 0.005 144.73);
-  --menu-bgColor-active: oklch(0.220 0.005 144.73);
-  --overlay-backdrop-bgColor: oklch(0.274 0.005 144.73 / 0.40);
+  --menu-bgColor-active: oklch(0.22 0.005 144.73);
+  --overlay-backdrop-bgColor: oklch(0.274 0.005 144.73 / 0.4);
   --prettylights-syntax-bracketHighlighterAngle: oklch(0.677 0.005 144.73);
-  --prettylights-syntax-carriageReturn-text: oklch(0.970 0.005 144.73);
+  --prettylights-syntax-carriageReturn-text: oklch(0.97 0.005 144.73);
   --prettylights-syntax-comment: oklch(0.677 0.005 144.73);
-  --prettylights-syntax-markup-bold: oklch(0.970 0.005 144.73);
-  --prettylights-syntax-markup-ignored-text: oklch(0.970 0.005 144.73);
-  --prettylights-syntax-markup-italic: oklch(0.970 0.005 144.73);
-  --prettylights-syntax-storageModifierImport: oklch(0.970 0.005 144.73);
+  --prettylights-syntax-markup-bold: oklch(0.97 0.005 144.73);
+  --prettylights-syntax-markup-ignored-text: oklch(0.97 0.005 144.73);
+  --prettylights-syntax-markup-italic: oklch(0.97 0.005 144.73);
+  --prettylights-syntax-storageModifierImport: oklch(0.97 0.005 144.73);
   --prettylights-syntax-sublimeLinterGutterMark: oklch(0.384 0.005 144.73);
   --sideNav-bgColor-selected: oklch(0.274 0.005 144.73);
-  --skeletonLoader-bgColor: oklch(0.529 0.005 144.73 / 0.20);
+  --skeletonLoader-bgColor: oklch(0.529 0.005 144.73 / 0.2);
   --timelineBadge-bgColor: oklch(0.274 0.005 144.73);
   --bgColor-black: oklch(0.104 0.005 144.73);
   --bgColor-inset: oklch(0.104 0.005 144.73);
-  --borderColor-muted: oklch(0.384 0.005 144.73 / 0.70);
+  --borderColor-muted: oklch(0.384 0.005 144.73 / 0.7);
   --control-checked-fgColor-disabled: oklch(0.104 0.005 144.73);
   --controlTrack-bgColor-rest: oklch(0.104 0.005 144.73);
   --fgColor-black: oklch(0.104 0.005 144.73);
   --fgColor-onInverse: oklch(0.104 0.005 144.73);
   --overlay-bgColor: oklch(0.104 0.005 144.73);
 
-  /* Hand-tuned after the generated list: GitHub's borders (L 0.384) are loud
-     on this surface. Layout lines drop further than control outlines, so
-     inputs and buttons stay easy to find. */
   --borderColor-default: oklch(0.29 0.005 144.73);
   --borderColor-muted: oklch(0.29 0.005 144.73 / 0.7);
   --control-borderColor-rest: oklch(0.34 0.005 144.73);
-  /* Menus and dialogs: a step below the page (0.176), not GitHub's near-black. */
   --overlay-bgColor: oklch(0.155 0.005 144.73);
 }
