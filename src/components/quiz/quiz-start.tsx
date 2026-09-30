@@ -1,10 +1,15 @@
-import { Button } from "@/components/ui/button";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Button, SegmentedControl } from "@primer/react";
 import { useSettingsStore } from "@/stores/settings";
 import { QUIZ_DIFFICULTY_INFO } from "@/lib/quiz";
-import { QUIZ_DIFFICULTIES, type QuizDifficulty } from "@/types/quiz";
+import { QUIZ_DIFFICULTIES } from "@/types/quiz";
 
-export function QuizStart({ canStart, onStart }: { canStart: boolean; onStart: () => void }) {
+export function QuizStart({
+  canStart,
+  onStart,
+}: {
+  canStart: boolean;
+  onStart: () => void;
+}) {
   const difficulty = useSettingsStore((s) => s.quizDifficulty);
   const setDifficulty = useSettingsStore((s) => s.setQuizDifficulty);
 
@@ -16,28 +21,40 @@ export function QuizStart({ canStart, onStart }: { canStart: boolean; onStart: (
 
       {canStart ? (
         <div className="mt-6 flex w-[80%] flex-col items-center">
-          <p className="text-xs font-medium text-muted-foreground">Svårighetsgrad</p>
-          <Tabs
-            value={difficulty}
-            onValueChange={(v) => setDifficulty(v as QuizDifficulty)}
-            className="mt-2 w-full"
+          <p className="text-xs font-medium text-muted-foreground">
+            Svårighetsgrad
+          </p>
+          <SegmentedControl
             aria-label="Svårighetsgrad"
+            fullWidth
+            className="mt-2"
+            onChange={(i) => setDifficulty(QUIZ_DIFFICULTIES[i])}
           >
-            <TabsList className="w-full">
-              {QUIZ_DIFFICULTIES.map((level) => (
-                <TabsTrigger key={level} value={level} className="flex-1">
-                  {QUIZ_DIFFICULTY_INFO[level].label}
-                </TabsTrigger>
-              ))}
-            </TabsList>
-          </Tabs>
-          <p className="mt-2 text-center text-xs leading-relaxed text-muted-foreground">{QUIZ_DIFFICULTY_INFO[difficulty].hint}</p>
+            {QUIZ_DIFFICULTIES.map((level) => (
+              <SegmentedControl.Button
+                key={level}
+                selected={level === difficulty}
+              >
+                {QUIZ_DIFFICULTY_INFO[level].label}
+              </SegmentedControl.Button>
+            ))}
+          </SegmentedControl>
+          <p className="mt-2 text-center text-xs leading-relaxed text-muted-foreground">
+            {QUIZ_DIFFICULTY_INFO[difficulty].hint}
+          </p>
         </div>
       ) : (
-        <p className="mt-4 text-sm text-muted-foreground">Inga tentor hittades med PDF.</p>
+        <p className="mt-4 text-sm text-muted-foreground">
+          Inga tentor hittades med PDF.
+        </p>
       )}
 
-      <Button size="lg" className="mt-6" disabled={!canStart} onClick={onStart}>
+      <Button
+        variant="primary"
+        className="mt-6"
+        disabled={!canStart}
+        onClick={onStart}
+      >
         Generera quiz
       </Button>
     </div>

@@ -1,3 +1,9 @@
+import {
+  ActionList,
+  ActionMenu,
+  ConfirmationDialog,
+  IconButton,
+} from "@primer/react";
 import { Link, useNavigate, useParams } from "@tanstack/react-router";
 import {
   EllipsisIcon,
@@ -7,35 +13,13 @@ import {
   Trash2Icon,
   UserIcon,
 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { AuthActions } from "@/components/auth/auth-actions";
 import { UserAvatar } from "@/components/auth/user-avatar";
 import { TypedTitle } from "@/components/chat/conversation-title";
 import { LogoIcon } from "@/components/layout/logo-icon";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { RouterLinkButton } from "@/components/primer/router-link-button";
 import { useConversationList } from "@/hooks/use-conversation-list";
 import { signOut } from "@/lib/auth";
 import { cn } from "@/lib/utils";
@@ -43,9 +27,10 @@ import type { Conversation } from "@/queries/conversations";
 import { useProfile } from "@/queries/profile";
 import { useChatStore } from "@/stores/chat";
 import { isSidebarShortcut, useLearnSidebar } from "@/stores/learn-sidebar";
+import { useSettingsStore } from "@/stores/settings";
 import { ChatSettingsMenu } from "./chat-settings-menu";
 import { SidebarCourses } from "./sidebar-courses";
-import { SidebarShortcutKbd } from "./sidebar-shortcut";
+import { SIDEBAR_SHORTCUT } from "./sidebar-shortcut";
 
 /**
  * The learning chat's conversation list. Sits beside the chat on wide screens
@@ -75,21 +60,7 @@ export function ChatSidebar() {
     return () => document.removeEventListener("keydown", onKeyDown);
   }, [inline, open, setOpen]);
 
-  if (inline) {
-    return (
-      <aside
-        aria-label="Chattar"
-        className={cn(
-          "shrink-0 overflow-hidden border-r bg-muted/30 transition-[width] duration-200 ease-out",
-          open ? "w-64" : "w-0 border-r-0",
-        )}
-      >
-        <div className="h-full w-64">
-          <SidebarContent />
-        </div>
-      </aside>
-    );
-  }
+  if (inline) return <InlineSidebar open={open} />;
 
   return (
     <>
@@ -113,6 +84,89 @@ export function ChatSidebar() {
         <SidebarContent />
       </aside>
     </>
+  );
+}
+
+const MIN_WIDTH = 208;
+const MAX_WIDTH = 480;
+const DEFAULT_WIDTH = 256;
+const KEY_STEP = 16;
+
+const clampWidth = (width: number) =>
+  Math.round(Math.min(MAX_WIDTH, Math.max(MIN_WIDTH, width)));
+
+/**
+ * The sidebar beside the chat. Its right edge drags to resize, with no visible
+ * grip; double-click resets it. The width is remembered across visits.
+ */
+function InlineSidebar({ open }: { open: boolean }) {
+  const storedWidth = useSettingsStore((s) => s.chatSidebarWidth);
+  const setStoredWidth = useSettingsStore((s) => s.setChatSidebarWidth);
+  // While dragging, the width lives here and is saved once on release.
+  const [dragWidth, setDragWidth] = useState<number | null>(null);
+  const drag = useRef<{ startX: number; startWidth: number } | null>(null);
+  const width = dragWidth ?? storedWidth;
+  const dragging = dragWidth !== null;
+
+  function endDrag() {
+    if (!drag.current) return;
+    drag.current = null;
+    document.body.style.removeProperty("cursor");
+    if (dragWidth !== null) setStoredWidth(dragWidth);
+    setDragWidth(null);
+  }
+
+  return (
+    <aside
+      aria-label="Chattar"
+      style={{ width: open ? width : 0 }}
+      className={cn(
+        "relative shrink-0 overflow-hidden border-r bg-muted/30",
+        // Animate opening and closing, but follow the pointer 1:1 while dragging.
+        !dragging && "transition-[width] duration-200 ease-out",
+        !open && "border-r-0",
+      )}
+    >
+      <div className="h-full" style={{ width }}>
+        <SidebarContent />
+      </div>
+      {open && (
+        <div
+          role="separator"
+          aria-orientation="vertical"
+          aria-label="Sidopanelens bredd"
+          aria-valuemin={MIN_WIDTH}
+          aria-valuemax={MAX_WIDTH}
+          aria-valuenow={width}
+          tabIndex={0}
+          className="absolute inset-y-0 right-0 z-10 w-1.5 cursor-col-resize touch-none outline-none select-none focus-visible:bg-ring"
+          onPointerDown={(e) => {
+            if (e.button !== 0) return;
+            e.preventDefault();
+            e.currentTarget.setPointerCapture(e.pointerId);
+            drag.current = { startX: e.clientX, startWidth: width };
+            // Keep the resize cursor even when the pointer outruns the edge.
+            document.body.style.cursor = "col-resize";
+          }}
+          onPointerMove={(e) => {
+            if (!drag.current) return;
+            setDragWidth(
+              clampWidth(drag.current.startWidth + e.clientX - drag.current.startX),
+            );
+          }}
+          onPointerUp={endDrag}
+          onLostPointerCapture={endDrag}
+          onDoubleClick={() => setStoredWidth(DEFAULT_WIDTH)}
+          onKeyDown={(e) => {
+            const delta =
+              e.key === "ArrowLeft" ? -KEY_STEP : e.key === "ArrowRight" ? KEY_STEP : 0;
+            if (!delta) return;
+            e.preventDefault();
+            setStoredWidth(clampWidth(storedWidth + delta));
+          }}
+        />
+      )}
+    </aside>
   );
 }
 
@@ -197,27 +251,31 @@ function SidebarContent() {
                       </p>
                     )}
                   </Link>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        size="icon-sm"
+                  <ActionMenu>
+                    <ActionMenu.Anchor>
+                      <IconButton
+                        icon={EllipsisIcon}
+                        variant="invisible"
+                        size="small"
                         aria-label={`Alternativ för ${item.title}`}
-                        className="absolute right-1 text-muted-foreground opacity-100 group-hover:opacity-100 data-[state=open]:opacity-100 md:opacity-0"
-                      >
-                        <EllipsisIcon />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="start" className="w-40">
-                      <DropdownMenuItem
-                        variant="destructive"
-                        onSelect={() => setPendingDelete(item)}
-                      >
-                        <Trash2Icon />
-                        Ta bort
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
+                        unsafeDisableTooltip
+                        className="absolute right-1 opacity-100 group-hover:opacity-100 aria-expanded:opacity-100 md:opacity-0"
+                      />
+                    </ActionMenu.Anchor>
+                    <ActionMenu.Overlay align="start" width="small">
+                      <ActionList>
+                        <ActionList.Item
+                          variant="danger"
+                          onSelect={() => setPendingDelete(item)}
+                        >
+                          <ActionList.LeadingVisual>
+                            <Trash2Icon />
+                          </ActionList.LeadingVisual>
+                          Ta bort
+                        </ActionList.Item>
+                      </ActionList>
+                    </ActionMenu.Overlay>
+                  </ActionMenu>
                 </li>
               ))}
             </ul>
@@ -239,35 +297,26 @@ function SidebarContent() {
             LiU Tentor
           </span>
         </Link>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button
-              variant="ghost"
-              size="icon"
-              aria-label="Stäng sidopanelen"
-              onClick={() => setOpen(false)}
-            >
-              <PanelLeftIcon />
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent className="flex items-center gap-2">
-            Stäng sidopanelen
-            <SidebarShortcutKbd />
-          </TooltipContent>
-        </Tooltip>
+        <IconButton
+          icon={PanelLeftIcon}
+          variant="invisible"
+          aria-label="Stäng sidopanelen"
+          keybindingHint={SIDEBAR_SHORTCUT}
+          onClick={() => setOpen(false)}
+        />
       </div>
 
       <div className="shrink-0 px-2 pb-3">
-        <Button
-          asChild
-          variant="ghost"
-          className="w-full justify-start gap-2 rounded-lg px-3"
+        <RouterLinkButton
+          to="/chatt"
+          variant="invisible"
+          block
+          alignContent="start"
+          leadingVisual={SquarePenIcon}
+          onClick={closeDrawer}
         >
-          <Link to="/chatt" onClick={closeDrawer}>
-            <SquarePenIcon />
-            Ny chatt
-          </Link>
-        </Button>
+          Ny chatt
+        </RouterLinkButton>
       </div>
 
       <nav
@@ -295,32 +344,22 @@ function SidebarContent() {
         )}
       </div>
 
-      <AlertDialog
-        open={!!pendingDelete}
-        onOpenChange={(value) => !value && !deleting && setPendingDelete(null)}
-      >
-        <AlertDialogContent className="data-[size=default]:sm:max-w-md">
-          <AlertDialogHeader>
-            <AlertDialogTitle>Radera chatten?</AlertDialogTitle>
-            <AlertDialogDescription>
-              "{pendingDelete?.title}" raderas permanent och kan inte ångras.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={deleting}>Avbryt</AlertDialogCancel>
-            <AlertDialogAction
-              variant="destructive"
-              disabled={deleting}
-              onClick={(e) => {
-                e.preventDefault();
-                void confirmDelete();
-              }}
-            >
-              {deleting ? "Raderar..." : "Radera"}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      {pendingDelete && (
+        <ConfirmationDialog
+          title="Radera chatten?"
+          cancelButtonContent="Avbryt"
+          confirmButtonContent="Radera"
+          confirmButtonType="danger"
+          confirmButtonLoading={deleting}
+          onClose={(gesture) => {
+            if (deleting) return;
+            if (gesture === "confirm") void confirmDelete();
+            else setPendingDelete(null);
+          }}
+        >
+          "{pendingDelete.title}" raderas permanent och kan inte ångras.
+        </ConfirmationDialog>
+      )}
     </div>
   );
 }
@@ -350,38 +389,44 @@ function AccountRow() {
 
   return (
     <div className="flex items-center gap-1">
-      <DropdownMenu>
-        <DropdownMenuTrigger
-          className="flex min-w-0 flex-1 items-center gap-2.5 rounded-lg px-2 py-1.5 text-left transition-colors outline-none hover:bg-accent/60 focus-visible:ring-3 focus-visible:ring-ring/50 data-[state=open]:bg-accent/60"
-          aria-label="Kontomeny"
-        >
-          <UserAvatar className="size-7 shrink-0" fallbackClassName="text-xs" />
-          <span className="min-w-0 flex-1">
-            <span className="block truncate text-sm text-foreground">
-              {name}
-            </span>
-            {displayName && (
-              <span className="block truncate text-xs text-muted-foreground">
-                {user?.email}
-              </span>
-            )}
-          </span>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent side="top" align="start" className="w-56">
-          <DropdownMenuItem onSelect={() => void navigate({ to: "/me" })}>
-            <UserIcon />
-            Profil
-          </DropdownMenuItem>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem
-            variant="destructive"
-            onSelect={() => void signOut()}
+      <ActionMenu>
+        <ActionMenu.Anchor>
+          <button
+            type="button"
+            className="flex min-w-0 flex-1 items-center gap-2.5 rounded-lg px-2 py-1.5 text-left transition-colors outline-none hover:bg-accent/60 focus-visible:ring-3 focus-visible:ring-ring/50 aria-expanded:bg-accent/60"
+            aria-label="Kontomeny"
           >
-            <LogOutIcon />
-            Logga ut
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
+            <UserAvatar className="size-7 shrink-0" fallbackClassName="text-xs" />
+            <span className="min-w-0 flex-1">
+              <span className="block truncate text-sm text-foreground">
+                {name}
+              </span>
+              {displayName && (
+                <span className="block truncate text-xs text-muted-foreground">
+                  {user?.email}
+                </span>
+              )}
+            </span>
+          </button>
+        </ActionMenu.Anchor>
+        <ActionMenu.Overlay side="outside-top" align="start" width="medium">
+          <ActionList>
+            <ActionList.Item onSelect={() => void navigate({ to: "/me" })}>
+              <ActionList.LeadingVisual>
+                <UserIcon />
+              </ActionList.LeadingVisual>
+              Profil
+            </ActionList.Item>
+            <ActionList.Divider />
+            <ActionList.Item variant="danger" onSelect={() => void signOut()}>
+              <ActionList.LeadingVisual>
+                <LogOutIcon />
+              </ActionList.LeadingVisual>
+              Logga ut
+            </ActionList.Item>
+          </ActionList>
+        </ActionMenu.Overlay>
+      </ActionMenu>
       <ChatSettingsMenu />
     </div>
   );

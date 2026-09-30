@@ -1,32 +1,13 @@
+import { ActionList, ActionMenu, Label } from "@primer/react";
+import { UnderlinePanels } from "@primer/react/experimental";
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import {
-  ArrowDownIcon,
-  ArrowLeftRightIcon,
-  ArrowUpIcon,
-  ChartLineIcon,
-  FileTextIcon,
-  InboxIcon,
-  LayersIcon,
-  LoaderCircleIcon,
-  UploadIcon,
-} from "lucide-react";
+import { InboxIcon, LoaderCircleIcon } from "lucide-react";
 import { lazy, Suspense, useEffect, useMemo } from "react";
 import { CourseExamsTable } from "@/components/course/course-exams-table";
-import { CourseStatsSkeleton } from "@/components/course/course-stats-skeleton";
+import { CourseSidebar } from "@/components/course/course-sidebar";
 import { HeaderCourseSearch } from "@/components/search/course-search";
 import { ExamUploadForm } from "@/components/upload/exam-upload-form";
-import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuLabel,
-  DropdownMenuRadioGroup,
-  DropdownMenuRadioItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { computeCourseStats, passRateClass } from "@/lib/course-stats";
 import { cn } from "@/lib/utils";
 import { useSeo } from "@/hooks/use-seo";
@@ -37,25 +18,23 @@ import {
   type ExamSortDirection,
 } from "@/stores/exam-sort";
 import { useRecentSearches } from "@/stores/recent-searches";
-import { useUploadModal } from "@/stores/upload-modal";
 import type { CourseExams } from "@/types/exam";
 
-const CourseStats = lazy(() => import("@/components/course/course-stats"));
 const CourseQuizPanel = lazy(
   () => import("@/components/quiz/course-quiz-panel"),
 );
 
-type CourseTab = "exams" | "stats" | "quiz";
+type CourseTab = "exams" | "quiz";
 
 export const Route = createFileRoute("/_search/search/$courseCode")({
   params: {
     parse: ({ courseCode }) => ({ courseCode: courseCode.toUpperCase() }),
     stringify: ({ courseCode }) => ({ courseCode }),
   },
-  validateSearch: (
-    search: Record<string, unknown>,
-  ): { tab?: "stats" | "quiz" } =>
-    search.tab === "stats" || search.tab === "quiz" ? { tab: search.tab } : {},
+  // Statistics used to be a tab; it now lives in the sidebar, so an old
+  // ?tab=stats link lands on the exams.
+  validateSearch: (search: Record<string, unknown>): { tab?: "quiz" } =>
+    search.tab === "quiz" ? { tab: search.tab } : {},
   component: CoursePage,
 });
 
@@ -143,7 +122,7 @@ function CoursePage() {
   }, [courseCode, addRecentSearch]);
 
   return (
-    <div className="container mx-auto max-w-3xl px-4 pt-2 pb-8 md:px-8 md:py-8 lg:px-4">
+    <div className="container mx-auto max-w-6xl px-4 pt-2 pb-8 md:px-8 md:py-8">
       <div className="sticky top-0 z-30 mb-4 h-12 bg-background pt-2 md:hidden">
         <HeaderCourseSearch className="mx-auto w-full max-w-xl" />
       </div>
@@ -168,7 +147,7 @@ function NoExams({ courseCode }: { courseCode: string }) {
         <div className="mx-auto mb-4 flex size-12 items-center justify-center rounded-full bg-muted">
           <InboxIcon className="size-6 text-muted-foreground" />
         </div>
-        <h1 className="font-heading text-2xl font-medium">
+        <h1 className="text-2xl font-medium">
           Vi saknar tentor för {courseCode}
         </h1>
         <p className="mt-2 text-sm text-muted-foreground">
@@ -191,7 +170,6 @@ function CourseContent({
   const { tab } = Route.useSearch();
   const navigate = useNavigate({ from: Route.fullPath });
   const activeTab: CourseTab = tab ?? "exams";
-  const openUploadModal = useUploadModal((s) => s.open);
   const sort = useExamSortPreference("course-page");
 
   const exams = course.exams;
@@ -200,103 +178,98 @@ function CourseContent({
     overallPassRate === undefined ? null : Math.round(overallPassRate);
   const examsWithSolutions = exams.filter((e) => e.has_solution).length;
 
-  function setTab(value: string) {
+  function setTab(value: CourseTab) {
     // Keep the tab in the URL so it can be linked and refreshed.
     void navigate({
-      search: value === "exams" ? {} : { tab: value as "stats" | "quiz" },
+      search: value === "exams" ? {} : { tab: value },
       replace: true,
     });
   }
 
   return (
-    <div className="flex justify-center">
-      <div className="flex w-full max-w-4xl flex-col items-start gap-8">
-        <div className="w-full">
-          <h1 className="font-heading w-full text-3xl leading-tight font-semibold wrap-break-word sm:text-4xl">
+    <div className="flex w-full flex-col">
+      <header className="flex flex-wrap items-center justify-between gap-4">
+        <div className="flex flex-col min-w-0 flex-wrap items-start gap-y-2">
+          <Label size="large">{courseCode}</Label>
+          <h1 className="text-2xl md:text-4xl leading-tight font-semibold wrap-break-word">
             {course.courseName}
           </h1>
-          <p className="mt-3 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-muted-foreground">
-            <span className="font-medium">{courseCode}</span>
-            <Dot />
-            <span>
-              <span className="font-bold text-foreground">{exams.length}</span>{" "}
-              tentor
-            </span>
-            <Dot />
-            <span>
-              <span className="font-bold text-foreground">
-                {examsWithSolutions}
-              </span>{" "}
-              med facit
-            </span>
-            {avgPassRate !== null && (
-              <>
-                <Dot />
-                <span>
-                  <span className={cn("font-bold", passRateClass(avgPassRate))}>
-                    {avgPassRate}%
-                  </span>{" "}
-                  godkända i snitt
-                </span>
-              </>
-            )}
-          </p>
         </div>
+        {/* The sidebar carries these facts on wide screens. */}
+        <p className="flex w-full flex-wrap items-center gap-x-2 gap-y-1 text-sm text-muted-foreground lg:hidden">
+          <span>
+            <span className="font-bold text-foreground">{exams.length}</span>{" "}
+            tentor
+          </span>
+          <Dot />
+          <span>
+            <span className="font-bold text-foreground">
+              {examsWithSolutions}
+            </span>{" "}
+            med facit
+          </span>
+          {avgPassRate !== null && (
+            <>
+              <Dot />
+              <span>
+                <span className={cn("font-bold", passRateClass(avgPassRate))}>
+                  {avgPassRate}%
+                </span>{" "}
+                godkända i snitt
+              </span>
+            </>
+          )}
+        </p>
+      </header>
 
-        <div className="-mt-4 flex w-full flex-col gap-2">
-          <div className="sticky top-12 z-30 flex flex-col gap-3 bg-linear-to-b from-background via-background to-transparent pt-2 pb-2.5 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between md:top-0">
-            <Tabs value={activeTab} onValueChange={setTab}>
-              <TabsList>
-                <TabsTrigger value="exams">
-                  <FileTextIcon />
-                  Tentor
-                </TabsTrigger>
-                <TabsTrigger value="stats">
-                  <ChartLineIcon />
-                  Statistik
-                </TabsTrigger>
-                <TabsTrigger value="quiz">
-                  <LayersIcon />
-                  Quiz
-                </TabsTrigger>
-              </TabsList>
-            </Tabs>
-
-            <div className="flex items-center gap-2">
-              {activeTab === "exams" && <SortMenu {...sort} />}
-              <Button onClick={() => openUploadModal(courseCode)}>
-                <UploadIcon data-icon="inline-start" />
-                Ladda upp
-              </Button>
-            </div>
-          </div>
-
-          <div
-            key={activeTab}
-            className="mt-5 animate-in duration-150 fade-in-0 slide-in-from-right-3"
+      <div className="grid gap-x-8 gap-y-10 pt-6 lg:grid-cols-[minmax(0,1fr)_18.5rem]">
+        <div className="grid min-w-0 content-start grid-cols-[minmax(0,1fr)_auto] [&>[role=tabpanel]]:col-span-2">
+          <UnderlinePanels
+            aria-label="Kursvy"
+            value={activeTab}
+            onChange={({ value }) => setTab(value as CourseTab)}
+            // Primer insets the tabs by 1rem; flush, they line up with the table.
+            className={cn(STICKY_BAR, "px-0")}
           >
-            {activeTab === "exams" ? (
+            <UnderlinePanels.Tab value="exams" counter={exams.length}>
+              Tentor
+            </UnderlinePanels.Tab>
+            <UnderlinePanels.Tab value="quiz">Quiz</UnderlinePanels.Tab>
+            <UnderlinePanels.Panel value="exams" className="pt-4">
               <CourseExamsTable
                 courseCode={courseCode}
                 exams={exams}
                 sortBy={sort.sortBy}
                 sortDirection={sort.sortDirection}
               />
-            ) : activeTab === "stats" ? (
-              <Suspense fallback={<CourseStatsSkeleton />}>
-                <CourseStats exams={exams} />
-              </Suspense>
-            ) : (
-              <Suspense fallback={null}>
-                <CourseQuizPanel courseCode={courseCode} exams={exams} />
-              </Suspense>
+            </UnderlinePanels.Panel>
+            <UnderlinePanels.Panel value="quiz" className="pt-4">
+              {/* Hidden panels stay mounted; only load the quiz once it's opened. */}
+              {activeTab === "quiz" && (
+                <Suspense fallback={null}>
+                  <CourseQuizPanel courseCode={courseCode} exams={exams} />
+                </Suspense>
+              )}
+            </UnderlinePanels.Panel>
+          </UnderlinePanels>
+          <div
+            className={cn(
+              STICKY_BAR,
+              "col-start-2 row-start-1 flex min-h-12 items-center shadow-[inset_0_-1px_var(--borderColor-muted)]",
             )}
+          >
+            {activeTab === "exams" && <SortMenu {...sort} />}
           </div>
         </div>
+
+        <CourseSidebar exams={exams} />
       </div>
     </div>
   );
 }
+
+/** Sticks under the mobile search bar, and to the top on wider screens. */
+const STICKY_BAR = "sticky top-12 z-20 bg-background md:top-0";
 
 function Dot() {
   return (
@@ -317,41 +290,46 @@ function SortMenu({
   setSortBy: (value: ExamSortBy) => void;
   setSortDirection: (value: ExamSortDirection) => void;
 }) {
-  const DirectionIcon = sortDirection === "desc" ? ArrowDownIcon : ArrowUpIcon;
-
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button variant="outline" aria-label="Sortera tentor">
-          <ArrowLeftRightIcon data-icon="inline-start" />
-          {sortBy === "date" ? "Datum" : "Godkänd"}
-          <DirectionIcon
-            data-icon="inline-end"
-            className="text-muted-foreground"
-          />
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="start">
-        <DropdownMenuLabel>Sortera efter</DropdownMenuLabel>
-        <DropdownMenuRadioGroup
-          value={sortBy}
-          onValueChange={(v) => setSortBy(v as ExamSortBy)}
-        >
-          <DropdownMenuRadioItem value="date">Datum</DropdownMenuRadioItem>
-          <DropdownMenuRadioItem value="pass-rate">
-            Godkänd
-          </DropdownMenuRadioItem>
-        </DropdownMenuRadioGroup>
-        <DropdownMenuSeparator />
-        <DropdownMenuLabel>Ordning</DropdownMenuLabel>
-        <DropdownMenuRadioGroup
-          value={sortDirection}
-          onValueChange={(v) => setSortDirection(v as ExamSortDirection)}
-        >
-          <DropdownMenuRadioItem value="desc">Fallande</DropdownMenuRadioItem>
-          <DropdownMenuRadioItem value="asc">Stigande</DropdownMenuRadioItem>
-        </DropdownMenuRadioGroup>
-      </DropdownMenuContent>
-    </DropdownMenu>
+    <ActionMenu>
+      <ActionMenu.Button size="small" aria-label="Sortera tentor">
+        {sortBy === "date" ? "Datum" : "Godkänd"}
+      </ActionMenu.Button>
+      <ActionMenu.Overlay align="end" width="small">
+        <ActionList>
+          <ActionList.Group selectionVariant="single">
+            <ActionList.GroupHeading>Sortera efter</ActionList.GroupHeading>
+            <ActionList.Item
+              selected={sortBy === "date"}
+              onSelect={() => setSortBy("date")}
+            >
+              Datum
+            </ActionList.Item>
+            <ActionList.Item
+              selected={sortBy === "pass-rate"}
+              onSelect={() => setSortBy("pass-rate")}
+            >
+              Godkänd
+            </ActionList.Item>
+          </ActionList.Group>
+          <ActionList.Divider />
+          <ActionList.Group selectionVariant="single">
+            <ActionList.GroupHeading>Ordning</ActionList.GroupHeading>
+            <ActionList.Item
+              selected={sortDirection === "desc"}
+              onSelect={() => setSortDirection("desc")}
+            >
+              Fallande
+            </ActionList.Item>
+            <ActionList.Item
+              selected={sortDirection === "asc"}
+              onSelect={() => setSortDirection("asc")}
+            >
+              Stigande
+            </ActionList.Item>
+          </ActionList.Group>
+        </ActionList>
+      </ActionMenu.Overlay>
+    </ActionMenu>
   );
 }

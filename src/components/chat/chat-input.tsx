@@ -1,6 +1,6 @@
+import { ActionList, ActionMenu, IconButton } from "@primer/react";
 import {
   ArrowUpIcon,
-  ChevronDownIcon,
   CornerDownLeftIcon,
   FileTextIcon,
   ImageIcon,
@@ -20,19 +20,6 @@ import {
 } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuRadioGroup,
-  DropdownMenuRadioItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { InputGroupButton } from "@/components/ui/input-group";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 import {
   acceptFiles,
   FILE_INPUT_ACCEPT,
@@ -457,13 +444,13 @@ export function ChatInput({
                   <span className="line-clamp-3 min-w-0 flex-1 text-sm leading-relaxed font-normal text-foreground">
                     "<SelectionQuote text={selectionContext} />"
                   </span>
-                  <InputGroupButton
-                    size="icon-xs"
+                  <IconButton
+                    icon={XIcon}
+                    variant="invisible"
+                    size="small"
                     aria-label="Ta bort citatet"
                     onClick={onClearSelectionContext}
-                  >
-                    <XIcon />
-                  </InputGroupButton>
+                  />
                 </div>
               )}
               {attachments.length > 0 && (
@@ -490,13 +477,13 @@ export function ChatInput({
                       <span className="shrink-0 text-muted-foreground">
                         {formatFileSize(a.size)}
                       </span>
-                      <InputGroupButton
-                        size="icon-xs"
+                      <IconButton
+                        icon={XIcon}
+                        variant="invisible"
+                        size="small"
                         aria-label={`Ta bort ${a.name}`}
                         onClick={() => removeAttachment(a.id)}
-                      >
-                        <XIcon />
-                      </InputGroupButton>
+                      />
                     </div>
                   ))}
                 </div>
@@ -567,21 +554,14 @@ export function ChatInput({
                 e.target.value = "";
               }}
             />
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <InputGroupButton
-                  size="icon-sm"
-                  variant="ghost"
-                  className="rounded-full"
-                  aria-label="Bifoga filer"
-                  disabled={isLoading || capacityReached}
-                  onClick={() => fileInputRef.current?.click()}
-                >
-                  <PlusIcon />
-                </InputGroupButton>
-              </TooltipTrigger>
-              <TooltipContent>Bifoga filer</TooltipContent>
-            </Tooltip>
+            <IconButton
+              icon={PlusIcon}
+              variant="invisible"
+              className="rounded-full"
+              aria-label="Bifoga filer"
+              disabled={isLoading || capacityReached}
+              onClick={() => fileInputRef.current?.click()}
+            />
           </div>
 
           <div
@@ -601,20 +581,15 @@ export function ChatInput({
                 {longLength} / {MAX_LENGTH}
               </span>
             )}
-            <InputGroupButton
-              variant="default"
-              size="icon-sm"
+            <IconButton
+              icon={isLoading ? StopIcon : ArrowUpIcon}
+              variant="primary"
               className="rounded-full"
               aria-label={isLoading ? "Avbryt svar" : "Skicka meddelande"}
+              unsafeDisableTooltip
               disabled={!isLoading && !canSend}
               onClick={() => (isLoading ? onCancel() : submit())}
-            >
-              {isLoading ? (
-                <span className="size-2.5 rounded-xs bg-current" aria-hidden />
-              ) : (
-                <ArrowUpIcon />
-              )}
-            </InputGroupButton>
+            />
           </div>
         </div>
 
@@ -644,6 +619,11 @@ export function ChatInput({
   );
 }
 
+/** The "stop generating" square shown on the send button while streaming. */
+function StopIcon() {
+  return <span className="size-2.5 rounded-xs bg-current" aria-hidden />;
+}
+
 function ModelPicker() {
   const { selectedModelId, availableModels } = useSelectedModel();
   const setSelectedModelId = useSettingsStore((s) => s.setSelectedModelId);
@@ -652,29 +632,23 @@ function ModelPicker() {
     availableModels[0].label;
 
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <InputGroupButton
-          variant="ghost"
-          aria-label="Tankenivå"
-          className="px-2 py-4"
-        >
-          {label}
-          <ChevronDownIcon />
-        </InputGroupButton>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent side="top" align="end" className="w-44">
-        <DropdownMenuRadioGroup
-          value={selectedModelId}
-          onValueChange={(v) => setSelectedModelId(v as ChatModelId)}
-        >
+    <ActionMenu>
+      <ActionMenu.Button variant="invisible" size="small" aria-label="Tankenivå">
+        {label}
+      </ActionMenu.Button>
+      <ActionMenu.Overlay side="outside-top" align="end" width="small">
+        <ActionList selectionVariant="single">
           {availableModels.map((model) => (
-            <DropdownMenuRadioItem key={model.id} value={model.id}>
+            <ActionList.Item
+              key={model.id}
+              selected={model.id === selectedModelId}
+              onSelect={() => setSelectedModelId(model.id as ChatModelId)}
+            >
               {model.label}
-            </DropdownMenuRadioItem>
+            </ActionList.Item>
           ))}
-        </DropdownMenuRadioGroup>
-      </DropdownMenuContent>
-    </DropdownMenu>
+        </ActionList>
+      </ActionMenu.Overlay>
+    </ActionMenu>
   );
 }

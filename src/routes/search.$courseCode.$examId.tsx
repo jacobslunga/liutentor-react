@@ -3,7 +3,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { LoaderCircleIcon } from "lucide-react";
 import { DesktopExamView } from "@/components/exam/desktop-exam-view";
 import { MobileExamView } from "@/components/exam/mobile-exam-view";
-import { Button } from "@/components/ui/button";
+import { Button } from "@primer/react";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { useSeo } from "@/hooks/use-seo";
 import { courseExamsQuery, examDetailQuery } from "@/queries/exams";
@@ -40,7 +40,7 @@ function ExamError({ reset }: { reset: () => void }) {
     <div className="flex h-dvh flex-col items-center justify-center gap-2">
       <p className="text-2xl text-foreground/80">Något gick fel!</p>
       <p className="text-sm text-muted-foreground">Ibland fungerar det att bara ladda om sidan :)</p>
-      <Button variant="secondary" onClick={reset}>
+      <Button onClick={reset}>
         Ladda om
       </Button>
     </div>

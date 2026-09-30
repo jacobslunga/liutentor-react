@@ -1,3 +1,4 @@
+import { Button, ConfirmationDialog, IconButton, ProgressBar } from "@primer/react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   AlertCircleIcon,
@@ -8,18 +9,6 @@ import {
 } from "lucide-react";
 import { useRef, useState } from "react";
 import { toast } from "sonner";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
 import { formatFileSize } from "@/lib/format";
 import {
   COURSE_QUOTA_BYTES,
@@ -165,8 +154,7 @@ export function CourseMaterial({ courseId }: { courseId: string }) {
           }}
         />
         <Button
-          size="sm"
-          variant="outline"
+          size="small"
           disabled={usedBytes >= COURSE_QUOTA_BYTES}
           onClick={() => fileInputRef.current?.click()}
         >
@@ -181,7 +169,10 @@ export function CourseMaterial({ courseId }: { courseId: string }) {
             {usedBytes ? formatFileSize(usedBytes) : "0 MB"} av 100 MB
           </span>
         </div>
-        <Progress value={Math.min(100, (usedBytes / COURSE_QUOTA_BYTES) * 100)} />
+        <ProgressBar
+          progress={Math.min(100, (usedBytes / COURSE_QUOTA_BYTES) * 100)}
+          aria-label="Använt utrymme"
+        />
       </div>
 
       {isPending ? (
@@ -235,33 +226,23 @@ export function CourseMaterial({ courseId }: { courseId: string }) {
         </ul>
       )}
 
-      <AlertDialog
-        open={!!pendingDelete}
-        onOpenChange={(value) => !value && !deleting && setPendingDelete(null)}
-      >
-        <AlertDialogContent className="data-[size=default]:sm:max-w-md">
-          <AlertDialogHeader>
-            <AlertDialogTitle>Ta bort filen?</AlertDialogTitle>
-            <AlertDialogDescription>
-              "{pendingDelete?.name}" tas bort från kursen, och chattarna kan
-              inte längre söka i den.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={deleting}>Avbryt</AlertDialogCancel>
-            <AlertDialogAction
-              variant="destructive"
-              disabled={deleting}
-              onClick={(e) => {
-                e.preventDefault();
-                void confirmDelete();
-              }}
-            >
-              {deleting ? "Tar bort..." : "Ta bort"}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      {pendingDelete && (
+        <ConfirmationDialog
+          title="Ta bort filen?"
+          cancelButtonContent="Avbryt"
+          confirmButtonContent="Ta bort"
+          confirmButtonType="danger"
+          confirmButtonLoading={deleting}
+          onClose={(gesture) => {
+            if (deleting) return;
+            if (gesture === "confirm") void confirmDelete();
+            else setPendingDelete(null);
+          }}
+        >
+          "{pendingDelete.name}" tas bort från kursen, och chattarna kan inte
+          längre söka i den.
+        </ConfirmationDialog>
+      )}
     </div>
   );
 }
@@ -290,15 +271,14 @@ function FileRow({
         </p>
       </div>
       {onDelete && (
-        <Button
-          variant="ghost"
-          size="icon-sm"
-          className="shrink-0 text-muted-foreground hover:text-destructive md:opacity-0 md:group-hover:opacity-100 md:focus-visible:opacity-100"
+        <IconButton
+          icon={Trash2Icon}
+          variant="invisible"
+          size="small"
+          className="shrink-0 md:opacity-0 md:group-hover:opacity-100 md:focus-visible:opacity-100"
           aria-label={`Ta bort ${name}`}
           onClick={onDelete}
-        >
-          <Trash2Icon />
-        </Button>
+        />
       )}
     </li>
   );

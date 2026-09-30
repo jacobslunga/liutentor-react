@@ -1,0 +1,122 @@
+diff --git a/dist/ActionList/Item.js b/dist/ActionList/Item.js
+index d8868b2646387fd35fb735ca24bc3b5e1e8d057e..3727de130ded7a0fcaa3228913124c75ec27aa0f 100644
+--- a/dist/ActionList/Item.js
++++ b/dist/ActionList/Item.js
+@@ -513,7 +513,7 @@ const UnwrappedItem = (t0, forwardedRef) => {
+ 	const t43 = !!slots.description;
+ 	let t44;
+ 	if ($[103] !== inactive || $[104] !== loading) {
+-		t44 = loading === true && !inactive && /*#__PURE__*/ jsx(VisuallyHidden, { children: "Loading" });
++		t44 = loading === true && !inactive && /*#__PURE__*/ jsx(VisuallyHidden, { children: "Laddar" });
+ 		$[103] = inactive;
+ 		$[104] = loading;
+ 		$[105] = t44;
+diff --git a/dist/AnchoredOverlay/AnchoredOverlay.js b/dist/AnchoredOverlay/AnchoredOverlay.js
+index d972608a5b6b540ee65dc413772385850068dc20..d35249263efc1a888daa40a27db962ccbfa9dbdf 100644
+--- a/dist/AnchoredOverlay/AnchoredOverlay.js
++++ b/dist/AnchoredOverlay/AnchoredOverlay.js
+@@ -212,7 +212,7 @@ const AnchoredOverlay = ({ renderAnchor, anchorRef: externalAnchorRef, anchorId:
+ 					"aria-labelledby": XButtonAriaLabelledBy,
+ 					"aria-label": void 0
+ 				} : {
+-					"aria-label": XButtonAriaLabel !== null && XButtonAriaLabel !== void 0 ? XButtonAriaLabel : "Close",
++					"aria-label": XButtonAriaLabel !== null && XButtonAriaLabel !== void 0 ? XButtonAriaLabel : "Stäng",
+ 					"aria-labelledby": void 0
+ 				},
+ 				className: clsx(AnchoredOverlay_module_css_default.ResponsiveCloseButton, closeButtonProps.className),
+diff --git a/dist/Banner/Banner.js b/dist/Banner/Banner.js
+index a7f7ea8d23e62f8a44905e72e5ba12e8ebd5644e..3749c9645d6c9a0f84d126ce4635a323bf8e508c 100644
+--- a/dist/Banner/Banner.js
++++ b/dist/Banner/Banner.js
+@@ -186,7 +186,7 @@ const Banner = /*#__PURE__*/ React.forwardRef(function Banner(t0, forwardRef) {
+ 	let t22;
+ 	if ($[42] !== dismissible || $[43] !== onDismiss) {
+ 		t22 = dismissible ? /*#__PURE__*/ jsx(IconButton, {
+-			"aria-label": "Dismiss banner",
++			"aria-label": "Stäng meddelandet",
+ 			onClick: onDismiss,
+ 			className: Banner_module_css_default.BannerDismiss,
+ 			icon: XIcon,
+diff --git a/dist/Button/ButtonBase.js b/dist/Button/ButtonBase.js
+index 71d0cd133b4fe0da443bda2ca9189d1a4ee0ce7e..c1361707f1050168293a012aa4c5bde64e5a0a44 100644
+--- a/dist/Button/ButtonBase.js
++++ b/dist/Button/ButtonBase.js
+@@ -18,7 +18,7 @@ const renderModuleVisual = (Visual, loading, visualName, counterLabel) => /*#__P
+ });
+ renderModuleVisual.displayName = "renderModuleVisual";
+ const ButtonBase = /*#__PURE__*/ forwardRef(({ children, as: Component = "button", ...props }, forwardedRef) => {
+-	const { leadingVisual: LeadingVisual, trailingVisual: TrailingVisual, trailingAction: TrailingAction, ["aria-describedby"]: ariaDescribedBy, ["aria-labelledby"]: ariaLabelledBy, count, icon: Icon, id, variant = "default", size = "medium", alignContent = "center", block = false, loading, loadingAnnouncement = "Loading", inactive, onClick, labelWrap, notificationIndicator, className, ...rest } = props;
++	const { leadingVisual: LeadingVisual, trailingVisual: TrailingVisual, trailingAction: TrailingAction, ["aria-describedby"]: ariaDescribedBy, ["aria-labelledby"]: ariaLabelledBy, count, icon: Icon, id, variant = "default", size = "medium", alignContent = "center", block = false, loading, loadingAnnouncement = "Laddar", inactive, onClick, labelWrap, notificationIndicator, className, ...rest } = props;
+ 	const innerRef = React.useRef(null);
+ 	const mergedRef = useMergedRefs(forwardedRef, innerRef);
+ 	const uuid = useId$1(id);
+diff --git a/dist/Dialog/Dialog.js b/dist/Dialog/Dialog.js
+index e370ad5c192cf5c9873b71a84b4513d675f29d4b..934a257c55dfd6dc781f5842105b54af48114c14 100644
+--- a/dist/Dialog/Dialog.js
++++ b/dist/Dialog/Dialog.js
+@@ -275,7 +275,7 @@ const Buttons = ({ buttons }) => {
+ const CloseButton = ({ onClose, onKeyDown }) => {
+ 	return /*#__PURE__*/ jsx(IconButton, {
+ 		icon: XIcon,
+-		"aria-label": "Close",
++		"aria-label": "Stäng",
+ 		onClick: onClose,
+ 		onKeyDown,
+ 		variant: "invisible",
+diff --git a/dist/Spinner/Spinner.js b/dist/Spinner/Spinner.js
+index 48087affa321df72522c68ceafdafe3eedd3977e..767041e44700d76440533a442bc45468ec5fde99 100644
+--- a/dist/Spinner/Spinner.js
++++ b/dist/Spinner/Spinner.js
+@@ -43,7 +43,7 @@ function Spinner(t0) {
+ 		t3 = $[7];
+ 	}
+ 	const sizeKey = t1 === void 0 ? "medium" : t1;
+-	const srText = t2 === void 0 ? "Loading" : t2;
++	const srText = t2 === void 0 ? "Laddar" : t2;
+ 	const delay = t3 === void 0 ? false : t3;
+ 	const noMotionPreference = useMedia("(prefers-reduced-motion: no-preference)", false);
+ 	const size = sizeMap[sizeKey];
+diff --git a/dist/TextInput/TextInput.js b/dist/TextInput/TextInput.js
+index f03872be54d87048a2908c0284fa9eb4c88d5d08..51c76d0f70da3c0b9928894a8609f49c7dbf48af 100644
+--- a/dist/TextInput/TextInput.js
++++ b/dist/TextInput/TextInput.js
+@@ -17,7 +17,7 @@ import { clsx } from "clsx";
+ import { isValidElementType } from "react-is";
+ import { AlertFillIcon } from "@primer/octicons-react";
+ //#region src/TextInput/TextInput.tsx
+-const TextInput = /*#__PURE__*/ React.forwardRef(({ icon: IconComponent, leadingVisual: LeadingVisual, trailingVisual: TrailingVisual, trailingAction, block, className, contrast, disabled, loading, loaderPosition = "auto", loaderText = "Loading", monospace, validationStatus, size: sizeProp, onFocus, onBlur, variant: variantProp, width: widthProp, minWidth: minWidthProp, maxWidth: maxWidthProp, type = "text", required, characterLimit, onChange, value, defaultValue, "data-component": dataComponent, ...inputProps }, ref) => {
++const TextInput = /*#__PURE__*/ React.forwardRef(({ icon: IconComponent, leadingVisual: LeadingVisual, trailingVisual: TrailingVisual, trailingAction, block, className, contrast, disabled, loading, loaderPosition = "auto", loaderText = "Laddar", monospace, validationStatus, size: sizeProp, onFocus, onBlur, variant: variantProp, width: widthProp, minWidth: minWidthProp, maxWidth: maxWidthProp, type = "text", required, characterLimit, onChange, value, defaultValue, "data-component": dataComponent, ...inputProps }, ref) => {
+ 	var _counter$isOverLimit;
+ 	const [isInputFocused, setIsInputFocused] = useState(false);
+ 	const mergedRefEnabled = useFeatureFlag("primer_react_merged_forwarded_refs");
+diff --git a/dist/ToggleSwitch/ToggleSwitch.js b/dist/ToggleSwitch/ToggleSwitch.js
+index b82672b0572a1d62407dfac1b4ad19bfa5534c36..19f06c1f303997edc3e4ffb947d556c11e729742 100644
+--- a/dist/ToggleSwitch/ToggleSwitch.js
++++ b/dist/ToggleSwitch/ToggleSwitch.js
+@@ -133,7 +133,7 @@ const ToggleSwitch = /*#__PURE__*/ React.forwardRef(function ToggleSwitch(props,
+ 	const size = t1 === void 0 ? "medium" : t1;
+ 	const statusLabelPosition = t2 === void 0 ? "start" : t2;
+ 	const loadingLabelDelay = t3 === void 0 ? 2e3 : t3;
+-	const loadingLabel = t4 === void 0 ? "Loading" : t4;
++	const loadingLabel = t4 === void 0 ? "Laddar" : t4;
+ 	const isControlled = typeof checked !== "undefined";
+ 	const [isOn, setIsOn] = useProvidedStateOrCreate(checked, onChange, Boolean(defaultChecked));
+ 	const acceptsInteraction = !disabled && !loading;
+@@ -222,7 +222,7 @@ const ToggleSwitch = /*#__PURE__*/ React.forwardRef(function ToggleSwitch(props,
+ 	} else t11 = $[39];
+ 	const t12 = !acceptsInteraction;
+ 	const t13 = !isOn;
+-	const t14 = (_buttonLabelOn = buttonLabelOn) !== null && _buttonLabelOn !== void 0 ? _buttonLabelOn : "On";
++	const t14 = (_buttonLabelOn = buttonLabelOn) !== null && _buttonLabelOn !== void 0 ? _buttonLabelOn : "På";
+ 	let t15;
+ 	if ($[40] !== t13 || $[41] !== t14) {
+ 		t15 = /*#__PURE__*/ jsx("span", {
+@@ -234,7 +234,7 @@ const ToggleSwitch = /*#__PURE__*/ React.forwardRef(function ToggleSwitch(props,
+ 		$[41] = t14;
+ 		$[42] = t15;
+ 	} else t15 = $[42];
+-	const t16 = (_buttonLabelOff = buttonLabelOff) !== null && _buttonLabelOff !== void 0 ? _buttonLabelOff : "Off";
++	const t16 = (_buttonLabelOff = buttonLabelOff) !== null && _buttonLabelOff !== void 0 ? _buttonLabelOff : "Av";
+ 	let t17;
+ 	if ($[43] !== isOn || $[44] !== t16) {
+ 		t17 = /*#__PURE__*/ jsx("span", {

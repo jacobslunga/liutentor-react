@@ -1,4 +1,3 @@
-import { Link } from "@tanstack/react-router";
 import { LoaderCircleIcon, MousePointer2Icon, UploadIcon } from "lucide-react";
 import {
   lazy,
@@ -12,7 +11,7 @@ import {
 import { ExamHeader } from "@/components/exam/exam-header";
 import { FacitEdge } from "@/components/exam/facit-edge";
 import { ResizeHandle } from "@/components/exam/resize-handle";
-import { Button } from "@/components/ui/button";
+import { RouterLinkButton } from "@/components/primer/router-link-button";
 import { useLatest } from "@/hooks/use-latest";
 import { cn } from "@/lib/utils";
 import { examChatStore, useChatStore } from "@/stores/chat";
@@ -479,12 +478,9 @@ function NoSolution() {
                 tenta.
               </p>
             </div>
-            <Button asChild size="sm" variant="outline">
-              <Link to="/upload-exams">
-                <UploadIcon data-icon="inline-start" />
-                Ladda upp
-              </Link>
-            </Button>
+            <RouterLinkButton to="/upload-exams" size="small" leadingVisual={UploadIcon}>
+              Ladda upp
+            </RouterLinkButton>
           </div>
         </div>
       </div>

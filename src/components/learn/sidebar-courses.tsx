@@ -1,3 +1,9 @@
+import {
+  ActionList,
+  ActionMenu,
+  ConfirmationDialog,
+  IconButton,
+} from "@primer/react";
 import { useQueryClient } from "@tanstack/react-query";
 import { Link, useNavigate, useParams } from "@tanstack/react-router";
 import {
@@ -10,28 +16,6 @@ import {
 import { HoverCard } from "radix-ui";
 import { useState, type ReactNode } from "react";
 import { toast } from "sonner";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 import {
   createStudyCourse,
   deleteStudyCourse,
@@ -124,19 +108,13 @@ export function SidebarCourses({ onNavigate }: { onNavigate: () => void }) {
       <div className="flex items-center justify-between pr-1 pb-1 pl-3">
         <h3 className="text-xs text-muted-foreground/70">Kurser</h3>
         {user && (
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon-xs"
-                aria-label="Ny kurs"
-                onClick={() => setCreating(true)}
-              >
-                <PlusIcon />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>Ny kurs</TooltipContent>
-          </Tooltip>
+          <IconButton
+            icon={PlusIcon}
+            variant="invisible"
+            size="small"
+            aria-label="Ny kurs"
+            onClick={() => setCreating(true)}
+          />
         )}
       </div>
 
@@ -183,31 +161,37 @@ export function SidebarCourses({ onNavigate }: { onNavigate: () => void }) {
                   <FolderIcon className="size-4 shrink-0 fill-primary text-primary" />
                   <span className="truncate text-sm">{course.name}</span>
                 </Link>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="icon-sm"
+                <ActionMenu>
+                  <ActionMenu.Anchor>
+                    <IconButton
+                      icon={EllipsisIcon}
+                      variant="invisible"
+                      size="small"
                       aria-label={`Alternativ för ${course.name}`}
-                      className="absolute right-1 text-muted-foreground opacity-100 group-hover:opacity-100 data-[state=open]:opacity-100 md:opacity-0"
-                    >
-                      <EllipsisIcon />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="start" className="w-40">
-                    <DropdownMenuItem onSelect={() => setRenaming(course)}>
-                      <PencilIcon />
-                      Byt namn
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
-                      variant="destructive"
-                      onSelect={() => setPendingDelete(course)}
-                    >
-                      <Trash2Icon />
-                      Ta bort
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
+                      unsafeDisableTooltip
+                      className="absolute right-1 opacity-100 group-hover:opacity-100 aria-expanded:opacity-100 md:opacity-0"
+                    />
+                  </ActionMenu.Anchor>
+                  <ActionMenu.Overlay align="start" width="small">
+                    <ActionList>
+                      <ActionList.Item onSelect={() => setRenaming(course)}>
+                        <ActionList.LeadingVisual>
+                          <PencilIcon />
+                        </ActionList.LeadingVisual>
+                        Byt namn
+                      </ActionList.Item>
+                      <ActionList.Item
+                        variant="danger"
+                        onSelect={() => setPendingDelete(course)}
+                      >
+                        <ActionList.LeadingVisual>
+                          <Trash2Icon />
+                        </ActionList.LeadingVisual>
+                        Ta bort
+                      </ActionList.Item>
+                    </ActionList>
+                  </ActionMenu.Overlay>
+                </ActionMenu>
               </li>
             </CourseHoverList>
           ))}
@@ -226,33 +210,23 @@ export function SidebarCourses({ onNavigate }: { onNavigate: () => void }) {
         onSubmit={rename}
       />
 
-      <AlertDialog
-        open={!!pendingDelete}
-        onOpenChange={(value) => !value && !deleting && setPendingDelete(null)}
-      >
-        <AlertDialogContent className="data-[size=default]:sm:max-w-md">
-          <AlertDialogHeader>
-            <AlertDialogTitle>Radera kursen?</AlertDialogTitle>
-            <AlertDialogDescription>
-              "{pendingDelete?.name}" raderas permanent, med allt material och
-              alla chattar i kursen. Det går inte att ångra.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={deleting}>Avbryt</AlertDialogCancel>
-            <AlertDialogAction
-              variant="destructive"
-              disabled={deleting}
-              onClick={(e) => {
-                e.preventDefault();
-                void confirmDelete();
-              }}
-            >
-              {deleting ? "Raderar..." : "Radera"}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      {pendingDelete && (
+        <ConfirmationDialog
+          title="Radera kursen?"
+          cancelButtonContent="Avbryt"
+          confirmButtonContent="Radera"
+          confirmButtonType="danger"
+          confirmButtonLoading={deleting}
+          onClose={(gesture) => {
+            if (deleting) return;
+            if (gesture === "confirm") void confirmDelete();
+            else setPendingDelete(null);
+          }}
+        >
+          "{pendingDelete.name}" raderas permanent, med allt material och alla
+          chattar i kursen. Det går inte att ångra.
+        </ConfirmationDialog>
+      )}
     </section>
   );
 }

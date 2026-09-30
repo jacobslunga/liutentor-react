@@ -8,6 +8,16 @@ import { queryClient } from "@/lib/query-client";
 import { router } from "@/router";
 import { initAuth } from "@/stores/auth";
 import "@fontsource-variable/inter";
+import "@primer/primitives/dist/css/functional/themes/light.css";
+import "@primer/primitives/dist/css/functional/themes/dark.css";
+import "@primer/primitives/dist/css/functional/size/radius.css";
+import "@primer/primitives/dist/css/functional/size/border.css";
+import "@primer/primitives/dist/css/functional/size/size.css";
+import "@primer/primitives/dist/css/functional/typography/typography.css";
+import "@primer/primitives/dist/css/base/size/size.css";
+import "@primer/primitives/dist/css/base/typography/typography.css";
+import "@primer/primitives/dist/css/base/motion/motion.css";
+import "@primer/primitives/dist/css/functional/motion/motion.css";
 import "./index.css";
 
 void initAuth();

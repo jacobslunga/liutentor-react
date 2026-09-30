@@ -1,25 +1,42 @@
+import {
+  Button,
+  FormControl,
+  Label,
+  SkeletonBox,
+  TextInput,
+} from "@primer/react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { CheckIcon, LoaderCircleIcon, LogOutIcon, PlusIcon } from "lucide-react";
+import {
+  CheckIcon,
+  LoaderCircleIcon,
+  LogOutIcon,
+  PlusIcon,
+} from "lucide-react";
 import { useEffect, useRef, useState, type ChangeEvent } from "react";
 import { toast } from "sonner";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Field, FieldLabel } from "@/components/ui/field";
-import { Input } from "@/components/ui/input";
-import { Skeleton } from "@/components/ui/skeleton";
 import { signOut } from "@/lib/auth";
 import { AVATAR_BG, AVATAR_BORDER, AVATAR_COLORS } from "@/lib/avatar-colors";
 import { supabase } from "@/lib/supabase";
 import { cn } from "@/lib/utils";
-import { activityQuery, profileQuery, useProfile, useUpdateProfile, type Profile } from "@/queries/profile";
+import {
+  activityQuery,
+  profileQuery,
+  useProfile,
+  useUpdateProfile,
+  type Profile,
+} from "@/queries/profile";
 import { useSettingsStore } from "@/stores/settings";
 
 export const Route = createFileRoute("/_profile/me")({
   component: ProfilePage,
 });
 
-const dateFormatter = new Intl.DateTimeFormat("sv-SE", { year: "numeric", month: "long", day: "numeric" });
+const dateFormatter = new Intl.DateTimeFormat("sv-SE", {
+  year: "numeric",
+  month: "long",
+  day: "numeric",
+});
 
 function ProfilePage() {
   const { user, isPending, displayName } = useProfile();
@@ -31,22 +48,30 @@ function ProfilePage() {
   if (!user) return null;
   if (isPending) return <ProfileSkeleton />;
 
-  const memberSince = user.created_at ? dateFormatter.format(new Date(user.created_at)) : "—";
+  const memberSince = user.created_at
+    ? dateFormatter.format(new Date(user.created_at))
+    : "—";
 
   return (
     <div className="flex flex-col gap-8">
       <section className="relative p-6 sm:p-8">
         <div className="relative z-10 flex flex-col items-center text-center">
           <AvatarUpload />
-          <h1 className="font-heading mt-4 text-2xl font-medium">{displayName || "Din profil"}</h1>
+          <h1 className="mt-4 text-2xl font-medium">
+            {displayName || "Din profil"}
+          </h1>
           <p className="mt-2 text-sm text-muted-foreground">{user.email}</p>
-          <p className="text-xs text-muted-foreground/80">Medlem sedan {memberSince}</p>
+          <p className="text-xs text-muted-foreground/80">
+            Medlem sedan {memberSince}
+          </p>
           <ActivityStats userId={user.id} />
         </div>
       </section>
 
       <section className="flex flex-col gap-3">
-        <h2 className="text-xs font-medium text-muted-foreground uppercase">Inställningar</h2>
+        <h2 className="text-xs font-medium text-muted-foreground uppercase">
+          Inställningar
+        </h2>
         <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
           <NameForm />
           <div className="divide-y rounded-md border bg-muted/40">
@@ -55,7 +80,9 @@ function ProfilePage() {
               <div className="space-y-2 text-sm">
                 <p className="flex items-center justify-between gap-3">
                   <span className="text-muted-foreground">E-post</span>
-                  <span className="truncate font-medium">{user.email ?? "—"}</span>
+                  <span className="truncate font-medium">
+                    {user.email ?? "—"}
+                  </span>
                 </p>
                 <p className="flex items-center justify-between gap-3">
                   <span className="text-muted-foreground">Registrerad</span>
@@ -63,7 +90,7 @@ function ProfilePage() {
                 </p>
                 <p className="flex items-center justify-between gap-3">
                   <span className="text-muted-foreground">Kontostatus</span>
-                  <Badge variant="secondary">Aktiv</Badge>
+                  <Label variant="success">Aktiv</Label>
                 </p>
               </div>
             </div>
@@ -79,12 +106,12 @@ function ProfilePage() {
 function ProfileSkeleton() {
   return (
     <section className="relative overflow-hidden rounded-3xl bg-muted/40 p-8">
-      <Skeleton className="mx-auto h-8 w-40" />
-      <Skeleton className="mx-auto mt-5 size-28 rounded-full" />
-      <Skeleton className="mx-auto mt-4 h-4 w-56" />
+      <SkeletonBox className="mx-auto h-8 w-40" />
+      <SkeletonBox className="mx-auto mt-5 size-28 rounded-full" />
+      <SkeletonBox className="mx-auto mt-4 h-4 w-56" />
       <div className="mt-6 grid grid-cols-3 gap-3">
         {[0, 1, 2].map((i) => (
-          <Skeleton key={i} className="h-18" />
+          <SkeletonBox key={i} className="h-18" />
         ))}
       </div>
     </section>
@@ -103,7 +130,10 @@ function ActivityStats({ userId }: { userId: string }) {
     <div className="mt-6 w-full max-w-2xl rounded-md border bg-muted/40 p-5 sm:p-6">
       <div className="grid grid-cols-3 gap-2 sm:gap-3">
         {stats.map((stat) => (
-          <div key={stat.label} className="rounded-md border bg-background/70 p-3 sm:p-4">
+          <div
+            key={stat.label}
+            className="rounded-md border bg-background/70 p-3 sm:p-4"
+          >
             <p className="text-2xs text-muted-foreground">{stat.label}</p>
             <p className="mt-1 text-xl font-medium tabular-nums sm:text-2xl">
               {isPending ? "..." : stat.value}
@@ -134,15 +164,21 @@ function AvatarUpload() {
 
     if (error) {
       setUploading(false);
-      toast.error("Kunde inte ladda upp bilden", { description: "Försök igen om en stund." });
+      toast.error("Kunde inte ladda upp bilden", {
+        description: "Försök igen om en stund.",
+      });
       return;
     }
 
     const { data } = supabase.storage.from("avatars").getPublicUrl(path);
     const avatarUrl = `${data.publicUrl}?t=${Date.now()}`;
-    await supabase.from("profiles").update({ avatar_url: avatarUrl }).eq("id", user.id);
-    queryClient.setQueryData<Profile | null>(profileQuery(user.id).queryKey, (old) =>
-      old ? { ...old, avatar_url: avatarUrl } : old,
+    await supabase
+      .from("profiles")
+      .update({ avatar_url: avatarUrl })
+      .eq("id", user.id);
+    queryClient.setQueryData<Profile | null>(
+      profileQuery(user.id).queryKey,
+      (old) => (old ? { ...old, avatar_url: avatarUrl } : old),
     );
     setUploading(false);
     toast.success("Profilbild uppdaterad!");
@@ -169,7 +205,9 @@ function AvatarUpload() {
               alt="Avatar"
               className={cn(
                 "size-full object-cover",
-                uploading ? "opacity-40" : "transition-opacity group-hover:opacity-85",
+                uploading
+                  ? "opacity-40"
+                  : "transition-opacity group-hover:opacity-85",
               )}
             />
           </div>
@@ -177,7 +215,9 @@ function AvatarUpload() {
           <div
             className={cn(
               "relative flex size-30 items-center justify-center rounded-full border-4 text-5xl font-medium text-white sm:size-36",
-              uploading ? "opacity-40" : "transition-opacity group-hover:opacity-85",
+              uploading
+                ? "opacity-40"
+                : "transition-opacity group-hover:opacity-85",
               AVATAR_BG[avatarColor],
               AVATAR_BORDER[avatarColor],
             )}
@@ -198,7 +238,13 @@ function AvatarUpload() {
           )}
         </div>
       </button>
-      <input ref={fileInput} type="file" accept="image/*" className="hidden" onChange={onFile} />
+      <input
+        ref={fileInput}
+        type="file"
+        accept="image/*"
+        className="hidden"
+        onChange={onFile}
+      />
     </>
   );
 }
@@ -221,7 +267,9 @@ function NameForm() {
           toast.success("Profilen sparad!");
         },
         onError: () =>
-          toast.error("Kunde inte spara profilen", { description: "Försök igen om en stund." }),
+          toast.error("Kunde inte spara profilen", {
+            description: "Försök igen om en stund.",
+          }),
       },
     );
   }
@@ -230,36 +278,34 @@ function NameForm() {
     <div className="rounded-md border bg-muted/40 p-5">
       <p className="mb-3 text-sm font-medium">Namn</p>
       <div className="space-y-3">
-        <Field>
-          <FieldLabel htmlFor="profile-first" className="text-xs text-muted-foreground">
-            Förnamn
-          </FieldLabel>
-          <Input
-            id="profile-first"
+        <FormControl>
+          <FormControl.Label>Förnamn</FormControl.Label>
+          <TextInput
+            block
             placeholder="Ditt förnamn"
             value={first}
             onChange={(e) => setFirst(e.target.value)}
           />
-        </Field>
-        <Field>
-          <FieldLabel htmlFor="profile-last" className="text-xs text-muted-foreground">
-            Efternamn
-          </FieldLabel>
-          <Input
-            id="profile-last"
+        </FormControl>
+        <FormControl>
+          <FormControl.Label>Efternamn</FormControl.Label>
+          <TextInput
+            block
             placeholder="Ditt efternamn"
             value={last}
             onChange={(e) => setLast(e.target.value)}
           />
-        </Field>
+        </FormControl>
       </div>
       <div className="mt-4 flex justify-end">
-        <Button size="sm" disabled={update.isPending || !hasChanges} onClick={save}>
-          {update.isPending ? (
-            <LoaderCircleIcon className="animate-spin" />
-          ) : saved ? (
-            <CheckIcon data-icon="inline-start" />
-          ) : null}
+        <Button
+          size="small"
+          variant="primary"
+          loading={update.isPending}
+          disabled={!hasChanges}
+          leadingVisual={saved ? CheckIcon : undefined}
+          onClick={save}
+        >
           {saved ? "Sparat!" : "Spara"}
         </Button>
       </div>
@@ -308,20 +354,21 @@ function SignOutRow() {
     <div className="flex items-center justify-between gap-3 p-5">
       <div>
         <p className="text-sm font-medium">Logga ut</p>
-        <p className="text-xs text-muted-foreground">Avsluta din nuvarande session</p>
+        <p className="text-xs text-muted-foreground">
+          Avsluta din nuvarande session
+        </p>
       </div>
       <Button
-        size="sm"
-        variant="outline"
-        disabled={loading}
+        size="small"
+        loading={loading}
+        leadingVisual={LogOutIcon}
         onClick={async () => {
           setLoading(true);
           await signOut();
           void navigate({ to: "/", replace: true });
         }}
       >
-        {loading ? <LoaderCircleIcon className="animate-spin" /> : <LogOutIcon data-icon="inline-start" />}
-        {!loading && "Logga ut"}
+        Logga ut
       </Button>
     </div>
   );

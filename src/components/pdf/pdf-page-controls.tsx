@@ -1,9 +1,8 @@
 import { useRotate } from "@embedpdf/plugin-rotate/react";
+import { IconButton } from "@primer/react";
 import { useZoom, ZoomMode } from "@embedpdf/plugin-zoom/react";
 import { MinusIcon, PlusIcon, RotateCwIcon } from "lucide-react";
 import { useContext, useRef, useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
 import { ResetZoomContext, useLiveZoomScale } from "./pdf-zoom-context";
 
@@ -47,16 +46,15 @@ export function PdfPageControls({ documentId, className }: { documentId: string;
         className,
       )}
     >
-      <Button
-        variant="ghost"
-        size="icon"
+      <IconButton
+        icon={MinusIcon}
+        variant="invisible"
+        size="medium"
         className="rounded-full"
         aria-label="Zooma ut"
         disabled={!canZoomOut}
         onClick={() => zoom?.zoomOut()}
-      >
-        <MinusIcon />
-      </Button>
+      />
 
       <input
         ref={inputRef}
@@ -81,28 +79,26 @@ export function PdfPageControls({ documentId, className }: { documentId: string;
         }}
       />
 
-      <Button
-        variant="ghost"
-        size="icon"
+      <IconButton
+        icon={PlusIcon}
+        variant="invisible"
+        size="medium"
         className="rounded-full"
         aria-label="Zooma in"
         disabled={!canZoomIn}
         onClick={() => zoom?.zoomIn()}
-      >
-        <PlusIcon />
-      </Button>
+      />
 
-      <Separator orientation="vertical" className="mx-0.5 h-5!" />
+      <div aria-hidden className="mx-0.5 h-5 w-px bg-border" />
 
-      <Button
-        variant="ghost"
-        size="icon"
+      <IconButton
+        icon={RotateCwIcon}
+        variant="invisible"
+        size="medium"
         className="rounded-full"
         aria-label="Rotera medurs"
         onClick={() => rotate?.rotateForward()}
-      >
-        <RotateCwIcon />
-      </Button>
+      />
     </div>
   );
 }
@@ -121,38 +117,35 @@ export function PdfZoomControls({ documentId, className }: { documentId: string;
         className,
       )}
     >
-      <Button
-        variant="ghost"
-        size="icon-lg"
+      <IconButton
+        icon={PlusIcon}
+        variant="invisible"
+        size="large"
         className="size-10 rounded-none"
         aria-label="Zooma in"
         disabled={currentZoom >= MAX_ZOOM - EPSILON}
         onClick={() => zoom?.zoomIn()}
-      >
-        <PlusIcon />
-      </Button>
-      <Separator orientation="vertical" className="h-5!" />
-      <Button
-        variant="ghost"
-        size="icon-lg"
+      />
+      <div aria-hidden className="h-5 w-px bg-border" />
+      <IconButton
+        icon={MinusIcon}
+        variant="invisible"
+        size="large"
         className="size-10 rounded-none"
         aria-label="Zooma ut"
         disabled={currentZoom <= MIN_ZOOM + EPSILON}
         onClick={() => zoom?.zoomOut()}
-      >
-        <MinusIcon />
-      </Button>
-      <Separator orientation="vertical" className="h-5!" />
-      <Button
-        variant="ghost"
-        size="icon-lg"
+      />
+      <div aria-hidden className="h-5 w-px bg-border" />
+      <IconButton
+        icon={RotateCwIcon}
+        variant="invisible"
+        size="large"
         className="size-10 rounded-none"
         aria-label="Rotera medurs"
         disabled={!rotate}
         onClick={() => rotate?.rotateForward()}
-      >
-        <RotateCwIcon />
-      </Button>
+      />
     </div>
   );
 }

@@ -1,4 +1,4 @@
-/* App-specific tokens and helpers. shadcn tokens live untouched in index.css. */
+/* App-specific tokens and helpers. The base color tokens live in index.css. */
 @plugin "@tailwindcss/typography";
 
 @font-face {
@@ -27,6 +27,7 @@
   --color-rate-3: var(--rate-3);
   --color-rate-4: var(--rate-4);
   --color-rate-5: var(--rate-5);
+  --color-chart-point: var(--chart-point);
 }
 
 :root {
@@ -41,6 +42,10 @@
   --rate-3: oklch(from var(--primary) 0.7521 0.1557 h);
   --rate-4: oklch(from var(--primary) 0.6506 0.138 h);
   --rate-5: oklch(from var(--primary) 0.5382 0.1159 h);
+
+  /* Individual points behind a trend line: >= 3:1 on the surface, and far
+     enough in lightness from --primary to read as a separate series. */
+  --chart-point: var(--muted-foreground);
 }
 
 .dark {
@@ -54,6 +59,8 @@
   --rate-3: oklch(from var(--primary) 0.65 0.085 h);
   --rate-4: oklch(from var(--primary) 0.75 0.09 h);
   --rate-5: oklch(from var(--primary) 0.86 0.085 h);
+
+  --chart-point: oklch(0.6 0.005 144.73);
 }
 
 .variable-spin {

@@ -1,13 +1,14 @@
 import { Link } from "@tanstack/react-router";
-import { MessageCircleIcon } from "lucide-react";
-import { AuthActions } from "@/components/auth/auth-actions";
-import { Button } from "@/components/ui/button";
 import { HeaderCourseSearch } from "@/components/search/course-search";
+import { HeaderActions } from "./header-actions";
 import { LogoIcon } from "./logo-icon";
 
 export function SearchHeader() {
   return (
-    <header className="relative w-full bg-background pt-[env(safe-area-inset-top,0px)]">
+    // z-40 lifts the whole header (and the search results under it) above the
+    // page's sticky bars; the centered search's transform would otherwise
+    // trap its dropdown at the page's base layer.
+    <header className="relative z-40 w-full border-b bg-secondary pt-[env(safe-area-inset-top,0px)]">
       <div className="relative flex min-h-16 w-full flex-wrap items-center justify-between gap-y-4 px-4 py-3 md:px-10 lg:px-20 xl:flex-nowrap">
         <Link
           to="/"
@@ -20,15 +21,7 @@ export function SearchHeader() {
           </span>
         </Link>
 
-        <div className="flex shrink-0 items-center gap-2">
-          <Button asChild size="sm" variant="ghost">
-            <Link to="/chatt">
-              <MessageCircleIcon data-icon="inline-start" />
-              Chatt
-            </Link>
-          </Button>
-          <AuthActions showSettings />
-        </div>
+        <HeaderActions />
       </div>
 
       <div className="mx-auto hidden w-full max-w-3xl px-4 pb-3 md:block md:px-8 lg:px-4 xl:pointer-events-none xl:absolute xl:inset-x-0 xl:top-1/2 xl:-translate-y-1/2 xl:pb-0">

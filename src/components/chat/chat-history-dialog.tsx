@@ -1,25 +1,7 @@
-import { LoaderCircleIcon, SearchIcon, Trash2Icon } from "lucide-react";
+import { ConfirmationDialog, Dialog, IconButton, Spinner, TextInput } from "@primer/react";
+import { SearchIcon, Trash2Icon } from "lucide-react";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group";
 import {
   groupConversations,
   loadMessages,
@@ -75,7 +57,10 @@ export function ChatHistoryDialog({ onSelect }: ChatHistoryDialogProps) {
         currentConversationId: item.id,
         currentConversationTitle: item.title,
         isConversationTitleReady: true,
-        titleTypingStartedAt: null,
+        // The header types the title in, as in the learning chat. This runs in
+        // a click handler, not during render.
+        // oxlint-disable-next-line react/purity
+        titleTypingStartedAt: performance.now(),
         savedScrollPosition: null,
         isHistoryOpen: false,
       });
@@ -152,21 +137,19 @@ export function ChatHistoryDialog({ onSelect }: ChatHistoryDialogProps) {
                     {item.meta && <p className="truncate text-xs text-muted-foreground/70">{item.meta}</p>}
                   </button>
                   {openingId === item.id && (
-                    <span role="status" className="flex size-7 shrink-0 items-center justify-center text-muted-foreground">
-                      <LoaderCircleIcon className="size-4 animate-spin" />
-                      <span className="sr-only">Laddar konversation...</span>
+                    <span className="flex size-7 shrink-0 items-center justify-center">
+                      <Spinner size="small" srText="Laddar konversation..." />
                     </span>
                   )}
-                  <Button
-                    variant="ghost"
-                    size="icon-sm"
-                    className="shrink-0 text-muted-foreground/60 transition-opacity hover:text-destructive sm:pointer-events-none sm:opacity-0 sm:group-hover:pointer-events-auto sm:group-hover:opacity-100"
+                  <IconButton
+                    icon={Trash2Icon}
+                    variant="invisible"
+                    size="small"
+                    className="shrink-0 transition-opacity sm:pointer-events-none sm:opacity-0 sm:group-hover:pointer-events-auto sm:group-hover:opacity-100"
                     disabled={deleting}
                     aria-label="Radera chatt"
                     onClick={() => setPendingDelete(item)}
-                  >
-                    <Trash2Icon />
-                  </Button>
+                  />
                 </div>
               ))}
             </div>
@@ -175,78 +158,76 @@ export function ChatHistoryDialog({ onSelect }: ChatHistoryDialogProps) {
       </div>
     );
 
+  function close() {
+    setOpen(false);
+    setSearch("");
+  }
+
   return (
     <>
-      <Dialog
-        open={open}
-        onOpenChange={(value) => {
-          setOpen(value);
-          if (value) setSearch("");
-        }}
-      >
-        <DialogContent className="flex h-[min(40rem,calc(100dvh-2rem))] flex-col sm:max-w-lg">
-          <DialogHeader>
-            <DialogTitle>Chatthistorik</DialogTitle>
-            <DialogDescription>
-              {isSignedIn
-                ? "Sök och öppna tidigare chattar"
-                : "Sparas bara i den här webbläsaren. Logga in för att spara dem på ditt konto."}
-            </DialogDescription>
-          </DialogHeader>
-          <div className="flex shrink-0 items-center gap-2">
-            <InputGroup className="flex-1">
-              <InputGroupAddon>
-                <SearchIcon />
-              </InputGroupAddon>
-              <InputGroupInput
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                placeholder="Sök bland chattar..."
-              />
-            </InputGroup>
-            {conversations.length > 0 && (
-              <Button
-                variant="ghost"
-                size="icon"
-                className="text-destructive"
-                disabled={deleting}
-                aria-label="Radera alla chattar"
-                onClick={() => setPendingDelete("all")}
-              >
-                <Trash2Icon />
-              </Button>
-            )}
-          </div>
-          {actionError && <p className="px-2 text-sm text-destructive">{actionError}</p>}
-          <div className="-mx-2 min-h-0 flex-1 overflow-y-auto overscroll-contain px-2">{body}</div>
-        </DialogContent>
-      </Dialog>
+      {open && (
+        <Dialog
+          width="large"
+          height="large"
+          onClose={close}
+          renderHeader={({ dialogLabelId, dialogDescriptionId }) => (
+            <Dialog.Header>
+              <div className="flex items-start gap-2">
+                <div className="min-w-0 flex-1">
+                  <Dialog.Title id={dialogLabelId}>Chatthistorik</Dialog.Title>
+                  <Dialog.Subtitle id={dialogDescriptionId}>
+                    {isSignedIn
+                      ? "Sök och öppna tidigare chattar"
+                      : "Sparas bara i den här webbläsaren. Logga in för att spara dem på ditt konto."}
+                  </Dialog.Subtitle>
+                </div>
+                <Dialog.CloseButton onClose={close} />
+              </div>
+              <div className="mt-3 flex items-center gap-2">
+                <TextInput
+                  block
+                  leadingVisual={SearchIcon}
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  placeholder="Sök bland chattar..."
+                  aria-label="Sök bland chattar"
+                />
+                {conversations.length > 0 && (
+                  <IconButton
+                    icon={Trash2Icon}
+                    variant="danger"
+                    disabled={deleting}
+                    aria-label="Radera alla chattar"
+                    onClick={() => setPendingDelete("all")}
+                  />
+                )}
+              </div>
+              {actionError && <p className="pt-2 text-sm text-destructive">{actionError}</p>}
+            </Dialog.Header>
+          )}
+        >
+          {body}
+        </Dialog>
+      )}
 
-      <AlertDialog open={!!pendingDelete} onOpenChange={(value) => !value && !deleting && setPendingDelete(null)}>
-        <AlertDialogContent className="data-[size=default]:sm:max-w-md">
-          <AlertDialogHeader>
-            <AlertDialogTitle>{pendingDelete === "all" ? "Radera all historik?" : "Är du säker?"}</AlertDialogTitle>
-            <AlertDialogDescription>
-              {pendingDelete === "all"
-                ? `Alla ${conversations.length} chattar kommer att raderas permanent. Det går inte att ångra.`
-                : "Den här chatten kommer att raderas permanent och kan inte ångras."}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={deleting}>Avbryt</AlertDialogCancel>
-            <AlertDialogAction
-              variant="destructive"
-              disabled={deleting}
-              onClick={(e) => {
-                e.preventDefault();
-                void confirmDelete();
-              }}
-            >
-              {deleting ? "Raderar..." : pendingDelete === "all" ? "Radera alla" : "Radera"}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      {pendingDelete && (
+        <ConfirmationDialog
+          title={pendingDelete === "all" ? "Radera all historik?" : "Är du säker?"}
+          cancelButtonContent="Avbryt"
+          confirmButtonContent={pendingDelete === "all" ? "Radera alla" : "Radera"}
+          confirmButtonType="danger"
+          confirmButtonLoading={deleting}
+          onClose={(gesture) => {
+            if (deleting) return;
+            if (gesture === "confirm") void confirmDelete();
+            else setPendingDelete(null);
+          }}
+        >
+          {pendingDelete === "all"
+            ? `Alla ${conversations.length} chattar kommer att raderas permanent. Det går inte att ångra.`
+            : "Den här chatten kommer att raderas permanent och kan inte ångras."}
+        </ConfirmationDialog>
+      )}
     </>
   );
 }

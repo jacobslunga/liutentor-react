@@ -35,6 +35,21 @@ function fontPreload(): Plugin {
   };
 }
 
+// Primer's component CSS is unlayered, which would beat every Tailwind
+// utility. Wrapping it in a layer (ordered in index.html between Tailwind's
+// base and utilities) lets Primer override preflight while className still
+// overrides Primer.
+function primerCssLayer(): Plugin {
+  return {
+    name: "primer-css-layer",
+    enforce: "pre",
+    transform(code, id) {
+      if (!/@primer[\\/]react[\\/].*\.css$/.test(id.split("?")[0])) return;
+      return { code: `@layer primer {\n${code}\n}`, map: null };
+    },
+  };
+}
+
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), "");
   // Functions run in-process during dev and read their config from process.env.
@@ -54,6 +69,7 @@ export default defineConfig(({ mode }) => {
     plugins: [
       tanstackRouter({ target: "react", autoCodeSplitting: true }),
       react(),
+      primerCssLayer(),
       tailwindcss(),
       fontPreload(),
       netlifyFunctionsDev({
@@ -69,7 +85,6 @@ export default defineConfig(({ mode }) => {
     optimizeDeps: {
       include: [
         "recharts",
-        "cmdk",
         "markdown-it",
         "markdown-it-texmath",
         "katex",

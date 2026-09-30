@@ -1,3 +1,4 @@
+import { IconButton } from "@primer/react";
 import { Link } from "@tanstack/react-router";
 import {
   ArrowDownIcon,
@@ -6,12 +7,6 @@ import {
   PlusIcon,
 } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Button } from "@/components/ui/button";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 import { useExamChat } from "@/hooks/use-chat";
 import { normalizeClipboardFile } from "@/lib/chat-attachments";
 import {
@@ -314,24 +309,27 @@ export default function ChatWindow({
         <div className="pointer-events-none relative isolate flex h-14 items-center justify-between gap-2 px-3">
           <div className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-20 bg-linear-to-b from-background via-background/90 to-transparent" />
           <div className="flex min-w-0 items-center gap-1">
-            <HeaderButton label="Stäng chatten" onClick={onClose}>
-              <ChevronRightIcon />
-            </HeaderButton>
+            <HeaderButton
+              icon={ChevronRightIcon}
+              label="Stäng chatten"
+              onClick={onClose}
+            />
             <ConversationTitle />
           </div>
           <div className="pointer-events-auto flex shrink-0 items-center gap-1">
-            <HeaderButton label="Ny chatt" onClick={startNewChat}>
-              <PlusIcon />
-            </HeaderButton>
             <HeaderButton
+              icon={PlusIcon}
+              label="Ny chatt"
+              onClick={startNewChat}
+            />
+            <HeaderButton
+              icon={HistoryIcon}
               label="Historik"
               onClick={() => {
                 const store = chatStore.getState();
                 store.setHistoryOpen(!store.isHistoryOpen);
               }}
-            >
-              <HistoryIcon />
-            </HeaderButton>
+            />
           </div>
         </div>
       </div>
@@ -352,7 +350,7 @@ export default function ChatWindow({
           <div className="flex min-h-0 flex-1 flex-col items-center justify-center gap-4 px-4 pb-28 text-center">
             <ChatMascot className="size-14 shrink-0" />
             <div className="space-y-2">
-              <h2 className="font-heading text-2xl font-semibold">
+              <h2 className="text-2xl font-semibold">
                 Vad kan jag hjälpa till med?
               </h2>
               <p className="mx-auto max-w-70 text-sm leading-relaxed text-muted-foreground sm:max-w-md">
@@ -372,15 +370,12 @@ export default function ChatWindow({
 
       <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 flex flex-col items-center bg-linear-to-t from-background to-transparent pt-10 pb-3 sm:pb-4">
         {showScrollBottom && hasMessages && (
-          <Button
-            variant="outline"
-            size="icon"
+          <IconButton
+            icon={ArrowDownIcon}
             className="pointer-events-auto mb-2.5 animate-in rounded-full shadow-md duration-150 fade-in-0"
-            aria-label="Rulla till senaste"
+            aria-label="Scrolla längst ned"
             onClick={scrollToLatest}
-          >
-            <ArrowDownIcon />
-          </Button>
+          />
         )}
         <ChatInput
           ref={inputRef}
@@ -400,28 +395,21 @@ export default function ChatWindow({
 }
 
 function HeaderButton({
+  icon,
   label,
   onClick,
-  children,
 }: {
+  icon: React.ElementType;
   label: string;
   onClick: () => void;
-  children: React.ReactNode;
 }) {
   return (
-    <Tooltip>
-      <TooltipTrigger asChild>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="pointer-events-auto"
-          aria-label={label}
-          onClick={onClick}
-        >
-          {children}
-        </Button>
-      </TooltipTrigger>
-      <TooltipContent>{label}</TooltipContent>
-    </Tooltip>
+    <IconButton
+      icon={icon}
+      variant="invisible"
+      className="pointer-events-auto"
+      aria-label={label}
+      onClick={onClick}
+    />
   );
 }

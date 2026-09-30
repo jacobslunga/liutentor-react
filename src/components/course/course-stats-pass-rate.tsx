@@ -1,24 +1,22 @@
 import { useMemo } from "react";
-import { Bar, BarChart, CartesianGrid, Cell, ReferenceLine, XAxis, YAxis } from "recharts";
-import { ChartContainer, ChartTooltip, type ChartConfig } from "@/components/ui/chart";
-import { passRateClass, type PassRatePoint } from "@/lib/course-stats";
+import {
+  CartesianGrid,
+  ComposedChart,
+  Line,
+  ReferenceLine,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
+import type { PassRatePoint } from "@/lib/course-stats";
 import { cn } from "@/lib/utils";
 
-const chartConfig = { rate: { label: "Godkända" } } satisfies ChartConfig;
-
-// Shade bars by pass rate with absolute thresholds, so the same color means the
-// same thing across courses. The ramp is theme-aware: stronger = higher.
-const RATE_SHADES = [
-  { min: 80, color: "var(--rate-5)" },
-  { min: 60, color: "var(--rate-4)" },
-  { min: 40, color: "var(--rate-3)" },
-  { min: 20, color: "var(--rate-2)" },
-  { min: 0, color: "var(--rate-1)" },
-];
-
-function barColor(rate: number) {
-  return RATE_SHADES.find((shade) => rate >= shade.min)?.color ?? "var(--rate-1)";
-}
+/** Sittings in the running average; below this many, the raw line is the trend. */
+const TREND_WINDOW = 5;
+const MIN_POINTS_FOR_TREND = 8;
+/** Year labels past this count collide in the sidebar's width. */
+const MAX_YEAR_LABELS = 5;
 
 const dateFormatter = new Intl.DateTimeFormat("sv-SE", {
   year: "numeric",
@@ -29,117 +27,185 @@ const dateFormatter = new Intl.DateTimeFormat("sv-SE", {
 interface ChartPoint extends PassRatePoint {
   index: number;
   rate: number;
+  trend?: number;
 }
 
 /**
- * One equal-width bar per exam sitting (index as x) rather than a true time
- * axis: sittings are uneven in time, so a time axis leaves big gaps and packed
- * clusters. Year labels sit mid-span, with a thin line at each year boundary.
+ * Pass rate per exam sitting. With many sittings, each is a small gray dot and
+ * one line in the primary color carries the story: a running average over the
+ * last few sittings. Sittings sit evenly spaced (index as x) since they're
+ * uneven in time; year ticks mark the first sitting of a year. A table of every
+ * value sits under the chart, so hover is never the only way to read one.
  */
-export function CourseStatsPassRate({ points, average }: { points: PassRatePoint[]; average: number }) {
-  const { data, yearTicks, yearLabels, yearBoundaries } = useMemo(() => {
-    const data: ChartPoint[] = points
-      .filter((p): p is PassRatePoint & { rate: number } => p.rate !== undefined)
-      .map((p, index) => ({ ...p, index }));
+export function CourseStatsPassRate({
+  points,
+  average,
+  className,
+}: {
+  points: PassRatePoint[];
+  average: number;
+  className?: string;
+}) {
+  const { data, showTrend, yearTicks, yearLabels } = useMemo(() => {
+    const measured = points.filter(
+      (p): p is PassRatePoint & { rate: number } => p.rate !== undefined,
+    );
+    const showTrend = measured.length >= MIN_POINTS_FOR_TREND;
+    const data: ChartPoint[] = measured.map((p, index) => {
+      if (!showTrend) return { ...p, index };
+      const window = measured.slice(Math.max(0, index - TREND_WINDOW + 1), index + 1);
+      const trend = window.reduce((sum, w) => sum + w.rate, 0) / window.length;
+      return { ...p, index, trend };
+    });
 
-    const groups: { year: number; start: number; end: number }[] = [];
+    // First sitting of each year, thinned so labels never collide.
+    const yearStarts: { index: number; year: string }[] = [];
     for (const point of data) {
-      const year = new Date(point.timestamp).getFullYear();
-      const current = groups.at(-1);
-      if (current && current.year === year) current.end = point.index;
-      else groups.push({ year, start: point.index, end: point.index });
+      const year = String(new Date(point.timestamp).getFullYear());
+      if (yearStarts.at(-1)?.year !== year) yearStarts.push({ index: point.index, year });
     }
+    const step = Math.ceil(yearStarts.length / MAX_YEAR_LABELS);
+    const shown = yearStarts.filter((_, i) => i % step === 0);
 
     return {
       data,
-      yearTicks: groups.map((g) => (g.start + g.end) / 2),
-      yearLabels: new Map(groups.map((g) => [(g.start + g.end) / 2, String(g.year)])),
-      yearBoundaries: groups.slice(1).map((g) => g.start - 0.5),
+      showTrend,
+      yearTicks: shown.map((y) => y.index),
+      yearLabels: new Map(shown.map((y) => [y.index, y.year])),
     };
   }, [points]);
 
-  return (
-    <ChartContainer config={chartConfig} className="aspect-auto h-75 w-full">
-      <BarChart data={data} margin={{ top: 16, right: 12, bottom: 0, left: 0 }}>
-        <CartesianGrid vertical={false} />
-        {yearBoundaries.map((x) => (
-          <ReferenceLine key={x} x={x} stroke="var(--border)" />
-        ))}
-        <XAxis
-          dataKey="index"
-          type="number"
-          domain={[-0.5, Math.max(data.length - 1, 0) + 0.5]}
-          ticks={yearTicks}
-          tickFormatter={(t: number) => yearLabels.get(t) ?? ""}
-          tickLine={false}
-          axisLine={false}
-          tickMargin={8}
-          interval="preserveStartEnd"
-        />
-        <YAxis
-          domain={[0, 100]}
-          ticks={[0, 25, 50, 75, 100]}
-          tickFormatter={(v: number) => `${v}%`}
-          tickLine={false}
-          axisLine={false}
-          width={40}
-        />
-        <ChartTooltip cursor={false} content={<PassRateTooltip />} />
-        <Bar dataKey="rate" radius={4} maxBarSize={34} minPointSize={1} animationDuration={300}>
-          {data.map((point) => (
-            <Cell key={point.date} fill={barColor(point.rate)} />
-          ))}
-        </Bar>
-        <ReferenceLine
-          y={average}
-          stroke="var(--muted-foreground)"
-          strokeDasharray="5 4"
-          label={<AverageLabel text={`Snitt ${Math.round(average)}%`} />}
-        />
-      </BarChart>
-    </ChartContainer>
-  );
-}
-
-/** Pill-shaped label pinned to the left end of the average line. */
-function AverageLabel({ text, viewBox }: { text: string; viewBox?: { x?: number; y?: number } }) {
-  const x = (viewBox?.x ?? 0) + 6;
-  const y = viewBox?.y ?? 0;
-  const width = text.length * 6.2 + 16;
+  const first = data[0];
+  const last = data.at(-1);
+  const summary =
+    first && last
+      ? `Andel godkända per tentatillfälle, ${data.length} tillfällen ${new Date(first.timestamp).getFullYear()}–${new Date(last.timestamp).getFullYear()}. Snitt ${Math.round(average)} %, senaste ${last.rate.toFixed(0)} %.`
+      : "Andel godkända per tentatillfälle.";
 
   return (
-    <g pointerEvents="none">
-      <rect
-        x={x}
-        y={y - 10}
-        width={width}
-        height={20}
-        rx={4}
-        fill="var(--background)"
-        fillOpacity={0.85}
-        stroke="var(--border)"
-      />
-      <text
-        x={x + width / 2}
-        y={y}
-        textAnchor="middle"
-        dominantBaseline="central"
-        fontSize={11}
-        fontWeight={500}
-        fill="var(--muted-foreground)"
+    <div className="flex flex-col gap-3">
+      <div
+        role="img"
+        aria-label={summary}
+        className={cn(
+          "h-75 w-full text-xs [&_.recharts-cartesian-axis-tick_text]:fill-muted-foreground [&_.recharts-layer]:outline-hidden [&_.recharts-surface]:outline-hidden",
+          className,
+        )}
       >
-        {text}
-      </text>
-    </g>
+        <ResponsiveContainer initialDimension={{ width: 320, height: 200 }}>
+          <ComposedChart data={data} margin={{ top: 8, right: 8, bottom: 0, left: 0 }}>
+            <CartesianGrid vertical={false} stroke="var(--border)" strokeOpacity={0.6} />
+            <XAxis
+              dataKey="index"
+              type="number"
+              domain={[-0.5, Math.max(data.length - 1, 0) + 0.5]}
+              ticks={yearTicks}
+              tickFormatter={(t: number) => yearLabels.get(t) ?? ""}
+              tickLine={false}
+              axisLine={false}
+              tickMargin={8}
+            />
+            <YAxis
+              domain={[0, 100]}
+              ticks={[0, 50, 100]}
+              tickFormatter={(v: number) => `${v}%`}
+              tickLine={false}
+              axisLine={false}
+              width={44}
+            />
+            <ReferenceLine y={average} stroke="var(--muted-foreground)" strokeOpacity={0.5} />
+            <Tooltip
+              cursor={{ stroke: "var(--border)" }}
+              content={<PassRateTooltip showTrend={showTrend} />}
+            />
+            {showTrend ? (
+              <>
+                <Line
+                  dataKey="rate"
+                  stroke="none"
+                  dot={{ r: 2, fill: "var(--chart-point)", stroke: "none" }}
+                  activeDot={{ r: 4.5, fill: "var(--foreground)", stroke: "var(--background)", strokeWidth: 2 }}
+                  isAnimationActive={false}
+                />
+                <Line
+                  dataKey="trend"
+                  type="monotone"
+                  stroke="var(--primary)"
+                  strokeWidth={2}
+                  dot={false}
+                  activeDot={false}
+                  isAnimationActive={false}
+                />
+              </>
+            ) : (
+              <Line
+                dataKey="rate"
+                stroke="var(--primary)"
+                strokeWidth={2}
+                dot={{ r: 3, fill: "var(--primary)", stroke: "var(--background)", strokeWidth: 2 }}
+                activeDot={{ r: 5, fill: "var(--primary)", stroke: "var(--background)", strokeWidth: 2 }}
+                isAnimationActive={false}
+              />
+            )}
+          </ComposedChart>
+        </ResponsiveContainer>
+      </div>
+
+      <ul className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
+        {showTrend && (
+          <>
+            <li className="flex items-center gap-1.5">
+              <span aria-hidden className="size-1.5 rounded-full bg-chart-point" />
+              Tentatillfälle
+            </li>
+            <li className="flex items-center gap-1.5">
+              <span aria-hidden className="h-0.5 w-3 rounded-full bg-primary" />
+              Trend ({TREND_WINDOW} senaste)
+            </li>
+          </>
+        )}
+        <li className="flex items-center gap-1.5">
+          <span aria-hidden className="h-px w-3 bg-muted-foreground/50" />
+          Snitt {Math.round(average)}%
+        </li>
+      </ul>
+
+      <details className="text-xs">
+        <summary className="cursor-pointer text-muted-foreground select-none hover:text-foreground">
+          Visa som tabell
+        </summary>
+        <div className="mt-2 max-h-64 overflow-y-auto rounded-md border">
+          <table className="w-full text-left tabular-nums">
+            <caption className="sr-only">Andel godkända per tentatillfälle</caption>
+            <thead className="sticky top-0 bg-muted text-muted-foreground">
+              <tr>
+                <th scope="col" className="px-2.5 py-1.5 font-medium">Datum</th>
+                <th scope="col" className="px-2.5 py-1.5 text-right font-medium">Godkända</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y">
+              {[...data].reverse().map((point) => (
+                <tr key={point.date}>
+                  <td className="px-2.5 py-1.5">{point.date}</td>
+                  <td className="px-2.5 py-1.5 text-right">{point.rate.toFixed(1)}%</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </details>
+    </div>
   );
 }
 
 function PassRateTooltip({
   active,
   payload,
+  showTrend,
 }: {
   active?: boolean;
   payload?: { payload: ChartPoint }[];
+  showTrend: boolean;
 }) {
   const point = payload?.[0]?.payload;
   if (!active || !point) return null;
@@ -150,11 +216,12 @@ function PassRateTooltip({
         {dateFormatter.format(new Date(point.timestamp))}
       </div>
       <div className="mt-1.5 flex items-baseline gap-1.5">
-        <span className={cn("text-lg leading-none font-semibold", passRateClass(point.rate))}>
-          {point.rate.toFixed(1)}%
-        </span>
+        <span className="text-lg leading-none font-semibold">{point.rate.toFixed(1)}%</span>
         <span className="text-muted-foreground">godkända</span>
       </div>
+      {showTrend && point.trend !== undefined && (
+        <div className="mt-1 text-muted-foreground">Trend {point.trend.toFixed(1)}%</div>
+      )}
       <div className="mt-1.5 text-muted-foreground">{point.names.join(" · ")}</div>
       {point.students > 0 && (
         <div className="text-muted-foreground">

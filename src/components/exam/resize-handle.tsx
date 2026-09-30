@@ -13,7 +13,11 @@ interface ResizeHandleProps {
  * Vertical drag handle. Owns the drag lifecycle so only the handle re-renders
  * (for its highlight) at start and end; `onResize` runs outside React state.
  */
-export function ResizeHandle({ onResize, onResizeStart, onResizeEnd }: ResizeHandleProps) {
+export function ResizeHandle({
+  onResize,
+  onResizeStart,
+  onResizeEnd,
+}: ResizeHandleProps) {
   const [isResizing, setIsResizing] = useState(false);
 
   function start(event: MouseEvent) {
@@ -52,12 +56,17 @@ export function ResizeHandle({ onResize, onResizeStart, onResizeEnd }: ResizeHan
       />
       <div
         className={cn(
-          "relative flex h-8 w-4 items-center justify-center rounded-sm border bg-background shadow-md transition-colors duration-200 dark:bg-muted",
-          isResizing ? "scale-110 border-primary" : "group-hover:border-primary/50",
+          "relative flex h-8 w-4 items-center justify-center rounded-[6px] border bg-background shadow-md transition-colors duration-200 dark:bg-muted",
+          isResizing
+            ? "scale-110 border-primary"
+            : "group-hover:border-primary/50",
         )}
       >
         <GripVerticalIcon
-          className={cn("size-3.5", isResizing ? "text-primary" : "text-muted-foreground")}
+          className={cn(
+            "size-3.5",
+            isResizing ? "text-primary" : "text-muted-foreground",
+          )}
         />
       </div>
     </div>

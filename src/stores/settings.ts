@@ -18,6 +18,8 @@ interface SettingsState {
   quizDifficulty: QuizDifficulty;
   /** The learning chat's conversation sidebar, on wide screens. */
   chatSidebarOpen: boolean;
+  /** Its width in px, set by dragging its edge. */
+  chatSidebarWidth: number;
   setLayoutMode: (mode: LayoutMode) => void;
   setShowExplainPopover: (value: boolean) => void;
   setBlurFacitUntilHover: (value: boolean) => void;
@@ -25,6 +27,7 @@ interface SettingsState {
   setAvatarColor: (color: string) => void;
   setQuizDifficulty: (difficulty: QuizDifficulty) => void;
   setChatSidebarOpen: (value: boolean) => void;
+  setChatSidebarWidth: (value: number) => void;
 }
 
 /** Rarely-changing user preferences, persisted to localStorage. */
@@ -38,6 +41,7 @@ export const useSettingsStore = create<SettingsState>()(
       avatarColor: randomAvatarColor(),
       quizDifficulty: DEFAULT_QUIZ_DIFFICULTY,
       chatSidebarOpen: true,
+      chatSidebarWidth: 256,
       setLayoutMode: (layoutMode) => set({ layoutMode }),
       setShowExplainPopover: (showExplainPopover) => set({ showExplainPopover }),
       setBlurFacitUntilHover: (blurFacitUntilHover) =>
@@ -46,6 +50,7 @@ export const useSettingsStore = create<SettingsState>()(
       setAvatarColor: (avatarColor) => set({ avatarColor }),
       setQuizDifficulty: (quizDifficulty) => set({ quizDifficulty }),
       setChatSidebarOpen: (chatSidebarOpen) => set({ chatSidebarOpen }),
+      setChatSidebarWidth: (chatSidebarWidth) => set({ chatSidebarWidth }),
     }),
     { name: "liutentor-settings", version: 1 },
   ),

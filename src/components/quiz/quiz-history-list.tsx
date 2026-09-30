@@ -1,16 +1,6 @@
+import { ConfirmationDialog, IconButton } from "@primer/react";
 import { CheckIcon, Trash2Icon } from "lucide-react";
 import { useState } from "react";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import { Button } from "@/components/ui/button";
 import { QUIZ_DIFFICULTY_INFO } from "@/lib/quiz";
 import { cn } from "@/lib/utils";
 import type { StoredQuizItem } from "@/types/quiz";
@@ -65,43 +55,34 @@ export function QuizHistoryList({ history, signedIn, activeQuizId, onLoad, onDel
                   </span>
                   {item.id === activeQuizId && <CheckIcon className="size-4 shrink-0 text-primary" />}
                 </button>
-                <Button
-                  variant="ghost"
-                  size="icon-sm"
-                  className="shrink-0 text-muted-foreground/40 opacity-0 transition-opacity group-hover:opacity-100 hover:text-destructive focus-visible:opacity-100"
+                <IconButton
+                  icon={Trash2Icon}
+                  variant="invisible"
+                  size="small"
+                  className="shrink-0 opacity-0 transition-opacity group-hover:opacity-100 focus-visible:opacity-100"
                   aria-label={`Ta bort quiz från ${dateLabel(item.createdAt)}`}
                   onClick={() => setPendingDelete(item)}
-                >
-                  <Trash2Icon />
-                </Button>
+                />
               </div>
             );
           })}
         </div>
       )}
 
-      <AlertDialog open={!!pendingDelete} onOpenChange={(open) => !open && setPendingDelete(null)}>
-        <AlertDialogContent className="data-[size=default]:sm:max-w-md">
-          <AlertDialogHeader>
-            <AlertDialogTitle>Ta bort quizet?</AlertDialogTitle>
-            <AlertDialogDescription>
-              Quizet från {pendingDelete && dateLabel(pendingDelete.createdAt)} tas bort permanent. Det går inte att ångra.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Avbryt</AlertDialogCancel>
-            <AlertDialogAction
-              variant="destructive"
-              onClick={() => {
-                if (pendingDelete) onDelete(pendingDelete);
-                setPendingDelete(null);
-              }}
-            >
-              Ta bort
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      {pendingDelete && (
+        <ConfirmationDialog
+          title="Ta bort quizet?"
+          cancelButtonContent="Avbryt"
+          confirmButtonContent="Ta bort"
+          confirmButtonType="danger"
+          onClose={(gesture) => {
+            if (gesture === "confirm") onDelete(pendingDelete);
+            setPendingDelete(null);
+          }}
+        >
+          Quizet från {dateLabel(pendingDelete.createdAt)} tas bort permanent. Det går inte att ångra.
+        </ConfirmationDialog>
+      )}
     </section>
   );
 }

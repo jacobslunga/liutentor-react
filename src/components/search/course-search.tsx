@@ -1,34 +1,24 @@
-import { Command as CommandPrimitive } from "cmdk";
+import { TextInput } from "@primer/react";
+import { KeybindingHint } from "@primer/react/experimental";
 import { SearchIcon } from "lucide-react";
 import {
   useEffect,
+  useId,
   useRef,
   useState,
   type KeyboardEvent,
   type ReactNode,
 } from "react";
-import {
-  InputGroup,
-  InputGroupAddon,
-  InputGroupInput,
-} from "@/components/ui/input-group";
-import { Kbd } from "@/components/ui/kbd";
-import {
-  Popover,
-  PopoverAnchor,
-  PopoverContent,
-} from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 import { useTypingPlaceholder } from "@/hooks/use-typing-placeholder";
 import { CourseSearchResults } from "./course-search-results";
-import { useCourseSearch } from "./use-course-search";
+import { resultOptionId, useCourseSearch } from "./use-course-search";
 
 /**
- * Wires a text input to a cmdk result list shown in a popover under it. The
- * list renders in a portal, outside the cmdk root, so cmdk's own DOM-based
- * keyboard handling can't reach it: we drive the highlight ourselves and feed
- * it back as the controlled value. Enter takes the highlighted course, which
- * starts on the first result, so a typed course code needs no selection.
+ * Wires a text input to a Primer ActionList listbox shown under it, as a
+ * combobox. Focus never leaves the input: we drive the highlight ourselves
+ * and point aria-activedescendant at it. Enter takes the highlighted course,
+ * which starts on the first result, so a typed course code needs no selection.
  */
 function CourseSearchBase({
   className,
@@ -36,6 +26,11 @@ function CourseSearchBase({
 }: {
   className?: string;
   renderInput: (props: {
+    role: "combobox";
+    "aria-expanded": boolean;
+    "aria-controls": string;
+    "aria-autocomplete": "list";
+    "aria-activedescendant": string | undefined;
     value: string;
     onChange: (value: string) => void;
     onFocus: () => void;
@@ -43,6 +38,7 @@ function CourseSearchBase({
     onKeyDown: (e: KeyboardEvent<HTMLInputElement>) => void;
   }) => ReactNode;
 }) {
+  const listId = useId();
   const { query, setQuery, items, goToCourse } = useCourseSearch();
   const [focused, setFocused] = useState(false);
   const [active, setActive] = useState("");
@@ -80,36 +76,36 @@ function CourseSearchBase({
   }
 
   return (
-    <CommandPrimitive
-      shouldFilter={false}
-      loop
-      value={active}
-      onValueChange={setActive}
-      className={cn("relative w-full", className)}
-    >
-      <Popover open={open}>
-        <PopoverAnchor asChild>
-          <div>
-            {renderInput({
-              value: query,
-              onChange: setQuery,
-              onFocus: () => setFocused(true),
-              onBlur: () => setFocused(false),
-              onKeyDown,
-            })}
-          </div>
-        </PopoverAnchor>
-        <PopoverContent
-          align="start"
-          className="w-(--radix-popover-trigger-width) p-0"
-          onOpenAutoFocus={(e) => e.preventDefault()}
+    <div className={cn("relative w-full", className)}>
+      {renderInput({
+        role: "combobox",
+        "aria-expanded": open,
+        "aria-controls": listId,
+        "aria-autocomplete": "list",
+        "aria-activedescendant":
+          open && active ? resultOptionId(listId, active) : undefined,
+        value: query,
+        onChange: setQuery,
+        onFocus: () => setFocused(true),
+        onBlur: () => setFocused(false),
+        onKeyDown,
+      })}
+      {open && (
+        <div
+          className="absolute inset-x-0 top-full z-50 mt-1 overflow-hidden rounded-lg border bg-popover shadow-lg"
           // Keep focus in the input so clicking a result doesn't close the list first.
           onMouseDown={(e) => e.preventDefault()}
         >
-          <CourseSearchResults query={query} items={items} onSelect={select} />
-        </PopoverContent>
-      </Popover>
-    </CommandPrimitive>
+          <CourseSearchResults
+            id={listId}
+            query={query}
+            items={items}
+            active={active}
+            onSelect={select}
+          />
+        </div>
+      )}
+    </div>
   );
 }
 
@@ -162,25 +158,24 @@ export function HeaderCourseSearch({ className }: { className?: string }) {
     <CourseSearchBase
       className={className}
       renderInput={({ value, onChange, ...handlers }) => (
-        <InputGroup className="h-9">
-          <InputGroupAddon>
-            <SearchIcon />
-          </InputGroupAddon>
-          <InputGroupInput
-            ref={inputRef}
-            value={value}
-            onChange={(e) => onChange(e.target.value)}
-            placeholder="Sök kurskod..."
-            aria-label="Sök kurskod"
-            autoComplete="off"
-            spellCheck={false}
-            className="uppercase placeholder:normal-case"
-            {...handlers}
-          />
-          <InputGroupAddon align="inline-end" className="hidden sm:flex">
-            <Kbd>/</Kbd>
-          </InputGroupAddon>
-        </InputGroup>
+        <TextInput
+          ref={inputRef}
+          block
+          leadingVisual={SearchIcon}
+          trailingVisual={
+            <span className="hidden sm:inline-flex">
+              <KeybindingHint keys="/" size="small" />
+            </span>
+          }
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          placeholder="Sök kurskod..."
+          aria-label="Sök kurskod"
+          autoComplete="off"
+          spellCheck={false}
+          className="[&_input]:uppercase [&_input]:placeholder:normal-case"
+          {...handlers}
+        />
       )}
     />
   );

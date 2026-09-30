@@ -16,7 +16,7 @@ import {
 } from "react";
 import { toast } from "sonner";
 import { useShallow } from "zustand/react/shallow";
-import { Button } from "@/components/ui/button";
+import { Button, LinkButton } from "@primer/react";
 import { useChatMarkdownReady } from "@/hooks/use-chat-markdown";
 import {
   renderCachedChatMarkdown,
@@ -370,23 +370,18 @@ const MessageRow = memo(function MessageRow({
             source.type === "file" ? (
               <FileSourceChip key={source.fileId} source={source} />
             ) : (
-              <Button
+              <LinkButton
                 key={source.url}
-                asChild
-                variant="outline"
-                size="xs"
+                href={source.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                title={source.title}
+                size="small"
                 className="max-w-56"
+                leadingVisual={GlobeIcon}
               >
-                <a
-                  href={source.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  title={source.title}
-                >
-                  <GlobeIcon data-icon="inline-start" />
-                  <span className="truncate">{sourceLabel(source)}</span>
-                </a>
-              </Button>
+                <span className="truncate">{sourceLabel(source)}</span>
+              </LinkButton>
             ),
           )}
         </div>
@@ -431,18 +426,14 @@ function FileSourceChip({
 
   return (
     <Button
-      variant="outline"
-      size="xs"
+      size="small"
       className="max-w-56"
       title={source.title}
-      aria-busy={opening}
+      loading={opening}
+      loadingAnnouncement="Öppnar fil"
+      leadingVisual={FileTextIcon}
       onClick={() => void open()}
     >
-      {opening ? (
-        <LoaderCircleIcon data-icon="inline-start" className="animate-spin" />
-      ) : (
-        <FileTextIcon data-icon="inline-start" />
-      )}
       <span className="truncate">{source.title}</span>
     </Button>
   );

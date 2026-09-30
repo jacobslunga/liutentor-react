@@ -1,19 +1,9 @@
+import { ActionList, ActionMenu, IconButton } from "@primer/react";
+import { KeybindingHint } from "@primer/react/experimental";
 import { MonitorIcon, MoonIcon, SettingsIcon, SunIcon } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useState } from "react";
 import { SettingsDialog } from "@/components/settings/settings-dialog";
-import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuRadioGroup,
-  DropdownMenuRadioItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Kbd } from "@/components/ui/kbd";
 import type { ChatModelId } from "@/lib/chat-models";
 import { useSelectedModel, useSettingsStore } from "@/stores/settings";
 
@@ -26,7 +16,7 @@ const THEMES = [
 const TIPS: { text: string; keys?: string[] }[] = [
   { text: "Välj en kurs att prata om, t.ex. @TATA41", keys: ["@"] },
   { text: "Skicka meddelande", keys: ["Enter"] },
-  { text: "Ny rad", keys: ["Shift", "Enter"] },
+  { text: "Ny rad", keys: ["Shift+Enter"] },
   { text: "Dra in eller klistra in bilder och PDF:er" },
   { text: "Markera text i ett svar för att fråga om den" },
 ];
@@ -43,96 +33,90 @@ export function ChatSettingsMenu() {
 
   return (
     <>
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button
-            variant="ghost"
-            size="icon"
+      <ActionMenu>
+        <ActionMenu.Anchor>
+          <IconButton
+            icon={SettingsIcon}
+            variant="invisible"
             className="shrink-0"
             aria-label="Inställningar"
-          >
-            <SettingsIcon />
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent
-          side="right"
-          align="end"
-          sideOffset={8}
-          className="flex max-h-[min(22rem,var(--radix-dropdown-menu-content-available-height))] w-64 flex-col overflow-hidden p-0"
-        >
-          <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain p-1">
-            <DropdownMenuLabel className="text-xs font-normal text-muted-foreground">
-              Tema
-            </DropdownMenuLabel>
-            <DropdownMenuRadioGroup value={theme} onValueChange={setTheme}>
-              {THEMES.map(({ value, label, Icon }) => (
-                <DropdownMenuRadioItem
-                  key={value}
-                  value={value}
-                  // Keep the menu open so the change is visible in place.
-                  onSelect={(e) => e.preventDefault()}
-                >
-                  <Icon />
-                  {label}
-                </DropdownMenuRadioItem>
-              ))}
-            </DropdownMenuRadioGroup>
-
-            <DropdownMenuSeparator />
-            <DropdownMenuLabel className="text-xs font-normal text-muted-foreground">
-              Tankenivå
-            </DropdownMenuLabel>
-            <DropdownMenuRadioGroup
-              value={selectedModelId}
-              onValueChange={(v) => setSelectedModelId(v as ChatModelId)}
-            >
-              {availableModels.map((model) => (
-                <DropdownMenuRadioItem
-                  key={model.id}
-                  value={model.id}
-                  onSelect={(e) => e.preventDefault()}
-                >
-                  <span className="flex flex-col">
-                    <span>{model.label}</span>
-                    <span className="text-xs text-muted-foreground">
+          />
+        </ActionMenu.Anchor>
+        <ActionMenu.Overlay side="outside-right" align="end" width="medium">
+          <div className="max-h-88 overflow-y-auto overscroll-contain">
+            <ActionList>
+              <ActionList.Group selectionVariant="single">
+                <ActionList.GroupHeading>Tema</ActionList.GroupHeading>
+                {THEMES.map(({ value, label, Icon }) => (
+                  <ActionList.Item
+                    key={value}
+                    selected={theme === value}
+                    onSelect={(e) => {
+                      // Keep the menu open so the change is visible in place.
+                      e.preventDefault();
+                      setTheme(value);
+                    }}
+                  >
+                    <ActionList.LeadingVisual>
+                      <Icon />
+                    </ActionList.LeadingVisual>
+                    {label}
+                  </ActionList.Item>
+                ))}
+              </ActionList.Group>
+              <ActionList.Divider />
+              <ActionList.Group selectionVariant="single">
+                <ActionList.GroupHeading>Tankenivå</ActionList.GroupHeading>
+                {availableModels.map((model) => (
+                  <ActionList.Item
+                    key={model.id}
+                    selected={selectedModelId === model.id}
+                    onSelect={(e) => {
+                      e.preventDefault();
+                      setSelectedModelId(model.id as ChatModelId);
+                    }}
+                  >
+                    {model.label}
+                    <ActionList.Description variant="block">
                       {model.hint}
-                    </span>
-                  </span>
-                </DropdownMenuRadioItem>
-              ))}
-            </DropdownMenuRadioGroup>
-
-            <DropdownMenuSeparator />
-            <DropdownMenuLabel className="text-xs font-normal text-muted-foreground">
-              Tips
-            </DropdownMenuLabel>
-            <ul className="space-y-1.5 px-2 pb-1.5">
-              {TIPS.map(({ keys, text }) => (
-                <li
-                  key={text}
-                  className="flex items-center justify-between gap-3 text-xs text-muted-foreground"
-                >
-                  <span>{text}</span>
-                  {keys && (
-                    <span className="flex shrink-0 gap-1">
-                      {keys.map((key) => (
-                        <Kbd key={key}>{key}</Kbd>
-                      ))}
-                    </span>
-                  )}
-                </li>
-              ))}
-            </ul>
-
+                    </ActionList.Description>
+                  </ActionList.Item>
+                ))}
+              </ActionList.Group>
+            </ActionList>
+            <div className="border-t px-4 pt-2 pb-3">
+              <p className="pb-2 text-xs font-semibold text-muted-foreground">
+                Tips
+              </p>
+              <ul className="space-y-1.5">
+                {TIPS.map(({ keys, text }) => (
+                  <li
+                    key={text}
+                    className="flex items-center justify-between gap-3 text-xs text-muted-foreground"
+                  >
+                    <span>{text}</span>
+                    {keys && (
+                      <span className="flex shrink-0 gap-1">
+                        {keys.map((key) => (
+                          <KeybindingHint key={key} keys={key} size="small" />
+                        ))}
+                      </span>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            </div>
           </div>
-          <div className="shrink-0 border-t p-1">
-            <DropdownMenuItem onSelect={() => setDialogOpen(true)}>
-              <SettingsIcon />
+          <ActionList className="border-t">
+            <ActionList.Item onSelect={() => setDialogOpen(true)}>
+              <ActionList.LeadingVisual>
+                <SettingsIcon />
+              </ActionList.LeadingVisual>
               Alla inställningar
-            </DropdownMenuItem>
-          </div>
-        </DropdownMenuContent>
-      </DropdownMenu>
+            </ActionList.Item>
+          </ActionList>
+        </ActionMenu.Overlay>
+      </ActionMenu>
       <SettingsDialog open={dialogOpen} onOpenChange={setDialogOpen} />
     </>
   );
