@@ -1,5 +1,13 @@
 @import "katex/dist/katex.min.css";
 
+/*
+ * The transcript and prompt column. Grows with the chat's container (both
+ * chats are @container), from 42rem on laptops up to 54rem on big screens.
+ */
+.chat-column {
+  max-width: clamp(42rem, 62cqi, 54rem);
+}
+
 /* Rendered assistant markdown. Colors map Tailwind Typography onto the app's color tokens. */
 .chat-prose {
   --tw-prose-body: var(--foreground);

@@ -379,7 +379,7 @@ export default function ChatWindow({
         )}
         <ChatInput
           ref={inputRef}
-          className="pointer-events-auto mx-auto max-w-2xl"
+          className="pointer-events-auto"
           initialText={initialDraft.text}
           initialAttachments={initialDraft.attachments}
           selectionContext={selectionContext}

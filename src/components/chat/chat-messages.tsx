@@ -244,7 +244,7 @@ export function ChatMessages({
       <div
         ref={rootRef}
         className={cn(
-          "mx-auto flex w-full max-w-2xl min-w-0 flex-col gap-1 px-2.5 [&>*:last-child]:min-h-(--last-message-height)",
+          "chat-column mx-auto flex w-full min-w-0 flex-col gap-1 px-4 sm:px-5 [&>*:last-child]:min-h-(--last-message-height)",
           className,
         )}
         onMouseUp={onMouseUp}
@@ -311,7 +311,7 @@ const MessageRow = memo(function MessageRow({
         data-recent={isRecent || undefined}
         className="chat-row flex min-w-0 scroll-mt-20 justify-end py-2"
       >
-        <div className="flex max-w-[85%] min-w-0 flex-col items-start gap-2 rounded-2xl bg-muted px-4 py-3 shadow-xs sm:max-w-[75%]">
+        <div className="flex max-w-[85%] min-w-0 flex-col items-start gap-2 rounded-2xl bg-muted px-4 py-3 shadow-xs sm:max-w-[75%] @4xl:px-5">
           {message.selectionContext && (
             <div className="line-clamp-3 border-l-2 border-foreground/30 pl-3 text-sm text-muted-foreground">
               "<SelectionQuote text={message.selectionContext} />"
@@ -325,7 +325,7 @@ const MessageRow = memo(function MessageRow({
             </div>
           )}
           {message.content && (
-            <p className="text-sm leading-relaxed whitespace-pre-wrap sm:text-[0.9375rem]">
+            <p className="text-sm leading-relaxed whitespace-pre-wrap sm:text-[0.9375rem] @4xl:text-base">
               <UserText text={message.content} />
             </p>
           )}

@@ -355,7 +355,6 @@ export function LearnChat({
           : "Fråga något, eller skriv @ för att välja kurs"
       }
       courseMentions
-      wide
       showDisclaimer={false}
       selectionContext={selectionContext}
       onSend={handleSend}
@@ -414,7 +413,7 @@ export function LearnChat({
           <ChatMessages
             ref={transcriptRef}
             scrollRef={scrollRef}
-            className="max-w-3xl pt-16 pb-36 sm:pb-44"
+            className="pt-16 pb-36 sm:pb-44"
             onReplyToSelection={replyToSelection}
           />
         </div>
