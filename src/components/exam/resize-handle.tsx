@@ -3,16 +3,11 @@ import { useState, type MouseEvent } from "react";
 import { cn } from "@/lib/utils";
 
 interface ResizeHandleProps {
-  /** Called on every pointer move with the pointer's x; should write styles directly. */
   onResize: (clientX: number) => void;
   onResizeStart?: () => void;
   onResizeEnd?: () => void;
 }
 
-/**
- * Vertical drag handle. Owns the drag lifecycle so only the handle re-renders
- * (for its highlight) at start and end; `onResize` runs outside React state.
- */
 export function ResizeHandle({
   onResize,
   onResizeStart,

@@ -14,11 +14,6 @@ function proximity(e: MouseEvent) {
   return Math.min(Math.max((e.clientX - start) / (w - start), 0), 1);
 }
 
-/**
- * The "Facit" tab glowing on the right edge in exam-only mode; it grows as the
- * pointer approaches. Tracks the pointer and springs its styles itself, so the
- * page never re-renders while the mouse moves.
- */
 export function FacitEdge({ label = "Facit" }: { label?: string }) {
   const glowRef = useRef<HTMLDivElement>(null);
   const tabRef = useRef<HTMLDivElement>(null);
@@ -49,7 +44,8 @@ export function FacitEdge({ label = "Facit" }: { label?: string }) {
         tab.style.transform = `translate(${(10 - v * 27).toFixed(1)}px, -50%)`;
         tab.style.borderColor = `color-mix(in oklab, var(--brand) ${(28 + v * 42).toFixed(0)}%, var(--border))`;
       }
-      if (iconRef.current) iconRef.current.style.transform = `translateX(${(-v * 3).toFixed(1)}px)`;
+      if (iconRef.current)
+        iconRef.current.style.transform = `translateX(${(-v * 3).toFixed(1)}px)`;
     };
 
     const step = () => {
@@ -92,7 +88,10 @@ export function FacitEdge({ label = "Facit" }: { label?: string }) {
         ref={tabRef}
         className="absolute top-1/2 right-0 flex h-10 items-center gap-2 pr-4 whitespace-nowrap will-change-[transform,opacity]"
       >
-        <ChevronLeftIcon ref={iconRef} className="size-4 shrink-0 text-brand will-change-transform" />
+        <ChevronLeftIcon
+          ref={iconRef}
+          className="size-4 shrink-0 text-brand will-change-transform"
+        />
         <span className="text-xs font-semibold text-brand">{label}</span>
       </div>
     </div>

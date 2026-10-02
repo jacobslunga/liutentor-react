@@ -24,7 +24,8 @@ const PdfRenderer = lazy(() =>
     default: m.PdfRenderer,
   })),
 );
-const ChatWindow = lazy(() => import("@/components/chat/chat-window"));
+const loadChatWindow = () => import("@/components/chat/chat-window");
+const ChatWindow = lazy(loadChatWindow);
 
 const SPLIT_MIN = 20;
 const SPLIT_MAX = 80;
@@ -131,6 +132,26 @@ export function DesktopExamView({
   useEffect(() => {
     useExamViewStore.getState().setSolutionBlurred(blurFacitUntilHover);
   }, [blurFacitUntilHover]);
+
+  // Load the chat in the background and mount it hidden, so the first open
+  // slides in a ready panel. Otherwise the panel would mount already visible
+  // and slide in a loading spinner, with the content popping in at the end.
+  useEffect(() => {
+    let cancelled = false;
+    const warm = () =>
+      void loadChatWindow().then(() => {
+        if (!cancelled) useExamViewStore.getState().markChatOpened();
+      });
+    const idle = "requestIdleCallback" in window;
+    const handle = idle
+      ? window.requestIdleCallback(warm, { timeout: 4000 })
+      : window.setTimeout(warm, 1500);
+    return () => {
+      cancelled = true;
+      if (idle) window.cancelIdleCallback(handle);
+      else window.clearTimeout(handle);
+    };
+  }, [examId]);
 
   // Opening the chat hides the facit overlay and mounts the chat for good.
   useEffect(() => {
@@ -259,105 +280,74 @@ export function DesktopExamView({
   return (
     <div
       ref={rootRef}
-      className="relative flex h-dvh w-full flex-row overflow-hidden bg-background"
+      className="relative flex h-dvh w-full flex-col overflow-hidden bg-background"
     >
-      {/* The exam area: header and the exam/facit split. The chat dock beside
-          it takes its width, so the PDFs shrink and refit, like a side panel in
-          an editor. */}
-      <div className="relative flex h-full min-w-0 flex-1 flex-col">
-        {isHeaderMounted && (
-          <div className="absolute inset-x-0 top-0 z-30 animate-in duration-200 fade-in-0 slide-in-from-top-2">
-            <ExamHeader
-              exams={exams}
-              examId={examId}
-              courseCode={courseCode}
-              examPdfUrl={examPdfUrl}
-              examDate={examDate}
-              solutionPdfUrl={solutionPdfUrl}
-            />
-          </div>
-        )}
-
-        <div
-          ref={splitRowRef}
-          className="relative flex h-full min-h-0 flex-1 flex-row overflow-hidden"
-        >
-          <div
-            className="relative isolate h-full min-w-0 overflow-hidden bg-background"
-            style={{ width: isExamOnly ? "100%" : "var(--exam-split)" }}
-          >
-            <Suspense fallback={<PaneSpinner />}>
-              <PdfRenderer
-                pdfUrl={examPdfUrl}
-                layoutMode={layoutMode}
-                explainEnabled={showExplain}
-                onExplain={explain}
-              />
-            </Suspense>
-            {isExamOnly && hasFacit && !isFacitVisible && !chatOpen && (
-              <FacitEdge />
-            )}
-          </div>
-
-          {!isExamOnly && (
-            <>
-              <div className="relative z-20 w-0 shrink-0">
-                <ResizeHandle
-                  onResizeStart={() => {
-                    // The row can't change size mid-drag, so measure it once.
-                    const rect = splitRowRef.current?.getBoundingClientRect();
-                    splitRowWidth.current = {
-                      left: rect?.left ?? 0,
-                      width: rect?.width || window.innerWidth,
-                    };
-                  }}
-                  onResize={(x) => {
-                    const { left, width } = splitRowWidth.current;
-                    applySplit(((x - left) / width) * 100);
-                  }}
-                />
-              </div>
-              <div className="relative isolate h-full min-w-0 flex-1 overflow-hidden bg-background">
-                {solutionPdfUrl ? (
-                  <SolutionPane
-                    pdfUrl={solutionPdfUrl}
-                    explainEnabled={showExplain}
-                    onExplain={explain}
-                  />
-                ) : (
-                  <NoSolution />
-                )}
-              </div>
-            </>
-          )}
+      {isHeaderMounted && (
+        <div className="absolute inset-x-0 top-0 z-30 animate-in duration-200 fade-in-0 slide-in-from-top-2">
+          <ExamHeader
+            exams={exams}
+            examId={examId}
+            courseCode={courseCode}
+            examPdfUrl={examPdfUrl}
+            examDate={examDate}
+            solutionPdfUrl={solutionPdfUrl}
+          />
         </div>
-      </div>
+      )}
 
-      {chatHasBeenOpened && (
-        <ChatDock
-          open={chatOpen}
-          onResize={applyOverlayWidth}
-          onResizeStart={() => {
-            isOverlayResizing.current = true;
-            rootRef.current?.setAttribute("data-resizing", "");
-          }}
-          onResizeEnd={() => {
-            isOverlayResizing.current = false;
-            rootRef.current?.removeAttribute("data-resizing");
-          }}
+      <div
+        ref={splitRowRef}
+        className="relative flex h-full min-h-0 flex-1 flex-row overflow-hidden"
+      >
+        <div
+          className="relative isolate h-full min-w-0 overflow-hidden bg-background"
+          style={{ width: isExamOnly ? "100%" : "var(--exam-split)" }}
         >
           <Suspense fallback={<PaneSpinner />}>
-            <ChatWindow
-              key={examId}
-              examId={examId}
-              courseCode={courseCode}
-              examUrl={examPdfUrl}
-              solutionUrl={solutionPdfUrl}
-              onClose={() => examChatStore.getState().close()}
+            <PdfRenderer
+              pdfUrl={examPdfUrl}
+              layoutMode={layoutMode}
+              explainEnabled={showExplain}
+              onExplain={explain}
             />
           </Suspense>
-        </ChatDock>
-      )}
+          {isExamOnly && hasFacit && !isFacitVisible && !chatOpen && (
+            <FacitEdge />
+          )}
+        </div>
+
+        {!isExamOnly && (
+          <>
+            <div className="relative z-20 w-0 shrink-0">
+              <ResizeHandle
+                onResizeStart={() => {
+                  // The row can't change size mid-drag, so measure it once.
+                  const rect = splitRowRef.current?.getBoundingClientRect();
+                  splitRowWidth.current = {
+                    left: rect?.left ?? 0,
+                    width: rect?.width || window.innerWidth,
+                  };
+                }}
+                onResize={(x) => {
+                  const { left, width } = splitRowWidth.current;
+                  applySplit(((x - left) / width) * 100);
+                }}
+              />
+            </div>
+            <div className="relative isolate h-full min-w-0 flex-1 overflow-hidden bg-background">
+              {solutionPdfUrl ? (
+                <SolutionPane
+                  pdfUrl={solutionPdfUrl}
+                  explainEnabled={showExplain}
+                  onExplain={explain}
+                />
+              ) : (
+                <NoSolution />
+              )}
+            </div>
+          </>
+        )}
+      </div>
 
       {isExamOnly && solutionPdfUrl && (
         <SideOverlay
@@ -377,49 +367,27 @@ export function DesktopExamView({
           </Suspense>
         </SideOverlay>
       )}
-    </div>
-  );
-}
 
-/**
- * The chat's docked column at the right edge. Its width animates between 0
- * and the shared overlay width, pushing the exam area aside. The panel inside
- * keeps its full width, pinned right, so the chat slides in without reflowing.
- * Stays mounted while closed so the conversation keeps its state.
- */
-function ChatDock({
-  open,
-  children,
-  onResize,
-  onResizeStart,
-  onResizeEnd,
-}: {
-  open: boolean;
-  children: ReactNode;
-  onResize: (width: number) => void;
-  onResizeStart: () => void;
-  onResizeEnd: () => void;
-}) {
-  return (
-    <div
-      aria-hidden={!open}
-      inert={!open}
-      className="relative h-full shrink-0 overflow-hidden transition-[width] duration-200 ease-out-quick in-data-resizing:transition-none motion-reduce:transition-none"
-      style={{ width: open ? "var(--exam-overlay-width)" : 0 }}
-    >
-      <div
-        className="absolute inset-y-0 right-0 flex border-l bg-background"
-        style={{ width: "var(--exam-overlay-width)" }}
-      >
-        <div className="relative z-10 w-0 shrink-0">
-          <ResizeHandle
-            onResize={(x) => onResize(window.innerWidth - x)}
-            onResizeStart={onResizeStart}
-            onResizeEnd={onResizeEnd}
-          />
-        </div>
-        <div className="min-w-0 flex-1 overflow-hidden">{children}</div>
-      </div>
+      {chatHasBeenOpened && (
+        <SideOverlay
+          visible={chatOpen}
+          zIndex="z-40"
+          onResize={applyOverlayWidth}
+          onResizeStart={() => (isOverlayResizing.current = true)}
+          onResizeEnd={() => (isOverlayResizing.current = false)}
+        >
+          <Suspense fallback={<PaneSpinner />}>
+            <ChatWindow
+              key={examId}
+              examId={examId}
+              courseCode={courseCode}
+              examUrl={examPdfUrl}
+              solutionUrl={solutionPdfUrl}
+              onClose={() => examChatStore.getState().close()}
+            />
+          </Suspense>
+        </SideOverlay>
+      )}
     </div>
   );
 }

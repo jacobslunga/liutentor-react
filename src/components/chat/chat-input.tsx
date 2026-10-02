@@ -341,7 +341,9 @@ export function ChatInput({
   };
 
   useImperativeHandle(ref, () => ({
-    focus: () => textareaRef.current?.focus(),
+    // preventScroll: the panel may still be sliding in; scrolling to the
+    // input mid-transition would jerk the layout.
+    focus: () => textareaRef.current?.focus({ preventScroll: true }),
     getText: () => textareaRef.current?.value ?? "",
     setText,
     getAttachments: () => [...attachmentsRef.current],

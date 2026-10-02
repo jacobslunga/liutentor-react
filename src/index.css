@@ -6,11 +6,6 @@
 
 @custom-variant dark (&:is(.dark *));
 
-/*
- * Elevation and motion. Raised controls (buttons, later cards and inputs)
- * share these: a soft drop shadow that grows on hover, a 1px top highlight,
- * and a fast ease-out with a hint of overshoot.
- */
 @theme {
   --ease-snap: cubic-bezier(0.25, 1.3, 0.5, 1);
   --ease-out-quick: cubic-bezier(0.2, 0.8, 0.2, 1);
@@ -22,20 +17,15 @@
   --shadow-raised-pressed: 0 0 1px 0 var(--shadow-color);
   /* Menus, popovers, dialogs: larger and softer than controls. */
   --shadow-overlay:
-    0 12px 32px -8px var(--shadow-color), 0 4px 10px -4px var(--shadow-color-soft);
+    0 12px 32px -8px var(--shadow-color),
+    0 4px 10px -4px var(--shadow-color-soft);
 
   --inset-shadow-highlight: inset 0 1px 0 0 var(--highlight-color);
-  /* Text fields sit slightly recessed, the opposite of raised controls. */
   --inset-shadow-field: inset 0 1px 2px 0 var(--shadow-color-soft);
-  /* Filled controls: a faint top sheen and a darker bottom lip. */
   --inset-shadow-sheen:
     inset 0 1px 0 0 oklch(1 0 0 / 0.22), inset 0 -1px 0 0 oklch(0 0 0 / 0.18);
 }
 
-/*
- * Soft mesh gradient for feature announcements (the chat intro dialog).
- * Fixed colors on purpose: it is an illustration, the same in both themes.
- */
 .intro-mesh {
   position: relative;
   overflow: hidden;
@@ -48,7 +38,6 @@
     radial-gradient(70% 95% at 100% 25%, #cddffb 0%, transparent 72%), #e2e5fa;
 }
 
-/* A second, blurred copy that drifts, so the colors slowly breathe. */
 .intro-mesh::before {
   content: "";
   position: absolute;
@@ -77,9 +66,7 @@
     animation: none;
   }
 }
-/*
- ---break---
- */
+
 @theme inline {
   --font-heading: var(--font-sans);
   --color-brand: var(--brand);
