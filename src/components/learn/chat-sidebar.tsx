@@ -122,15 +122,26 @@ function InlineSidebar({ open }: { open: boolean }) {
   return (
     <aside
       aria-label="Chattar"
+      aria-hidden={!open}
+      inert={!open}
       style={{ width: open ? width : 0 }}
       className={cn(
-        "relative shrink-0 overflow-hidden border-r bg-muted/30",
-        // Animate opening and closing, but follow the pointer 1:1 while dragging.
-        !dragging && "transition-[width] duration-200 ease-out",
-        !open && "border-r-0",
+        "relative z-30 shrink-0",
+        !open && "pointer-events-none",
       )}
     >
-      <div className="h-full" style={{ width }}>
+      <div
+        className={cn(
+          "h-full border-r bg-muted/30 will-change-transform",
+          // Changing the layout width on every animation frame makes a long
+          // transcript reflow repeatedly (especially expensive in Safari).
+          // The layout now snaps once while only this surface slides.
+          !dragging &&
+            "transition-transform duration-200 ease-out motion-reduce:transition-none",
+          open ? "translate-x-0" : "-translate-x-full",
+        )}
+        style={{ width }}
+      >
         <SidebarContent />
       </div>
       {open && (
