@@ -23,4 +23,5 @@ export function ButtonLink({
 }
 
 /** shadcn-styled button that navigates with TanStack Router (typed `to`/`params`). */
+// oxlint-disable-next-line react/only-export-components -- createLink returns a React component.
 export const RouterLinkButton = createLink(ButtonLink);
