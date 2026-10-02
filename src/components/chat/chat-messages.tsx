@@ -17,6 +17,7 @@ import {
 import { toast } from "sonner";
 import { useShallow } from "zustand/react/shallow";
 import { useChatMarkdownReady } from "@/hooks/use-chat-markdown";
+import { RowTracker } from "./row-tracker";
 import {
   renderCachedChatMarkdown,
   renderChatMarkdown,
@@ -92,6 +93,17 @@ export function ChatMessages({
 }: ChatMessagesProps) {
   const chatStore = useChatStoreApi();
   const ids = useChatStore(useShallow((s) => s.messages.map((m) => m.id)));
+  const [tracker] = useState(() => new RowTracker(scrollRef));
+  // A restored scroll offset needs every row at its real height to land on
+  // the same content, so then rows render up front instead of on approach.
+  const [eager] = useState(
+    () => chatStore.getState().savedScrollPosition !== null,
+  );
+
+  useEffect(() => {
+    tracker.connect();
+    return () => tracker.disconnect();
+  }, [tracker]);
   const mdReady = useChatMarkdownReady();
   const rootRef = useRef<HTMLDivElement>(null);
   const [popover, setPopover] = useState<{
@@ -256,8 +268,11 @@ export function ChatMessages({
           <MessageRow
             key={id}
             id={id}
+            index={i}
             isLast={i === ids.length - 1}
             isRecent={i >= ids.length - 2}
+            startsNear={eager || i >= ids.length - INITIAL_ROWS}
+            tracker={tracker}
           />
         ))}
       </div>
@@ -272,21 +287,58 @@ function randomLoadingPhrase() {
   return LOADING_PHRASES[Math.floor(Math.random() * LOADING_PHRASES.length)];
 }
 
+/** Rows rendered right away when a conversation opens (it opens at the end). */
+const INITIAL_ROWS = 8;
+/** Placeholder height for a row that has never been rendered. */
+const ESTIMATED_ROW_HEIGHT = 240;
+
 const MessageRow = memo(function MessageRow({
   id,
+  index,
   isLast,
   isRecent,
+  startsNear,
+  tracker,
 }: {
   id: string;
+  /** Position in the list, for an O(1) lookup instead of a search per update. */
+  index: number;
   isLast: boolean;
   /** The newest question and reply: streamed into and measured by scrolling. */
   isRecent: boolean;
+  /** Render on mount rather than waiting to come near the viewport. */
+  startsNear: boolean;
+  tracker: RowTracker;
 }) {
-  const message = useChatStore((s) => s.messages.find((m) => m.id === id));
+  const message = useChatStore((s) => {
+    const atIndex = s.messages[index];
+    return atIndex?.id === id ? atIndex : s.messages.find((m) => m.id === id);
+  });
   // A new assistant row mounts per turn, so each turn gets its own phrase.
   const [loadingPhrase] = useState(randomLoadingPhrase);
   const isStreaming = useChatStore((s) => isLast && s.isLoading);
   const rowRef = useRef<HTMLDivElement>(null);
+
+  // Far from the viewport, a row keeps only its box: a spacer at the height it
+  // last had (or an estimate if it has never rendered). The tracker keeps the
+  // scroll position steady when that height turns out different.
+  const [view, setView] = useState<{ near: boolean; height: number | null }>({
+    near: startsNear,
+    height: null,
+  });
+  useEffect(() => {
+    const el = rowRef.current;
+    if (!el) return;
+    return tracker.observe(el, (near) =>
+      setView((v) =>
+        near
+          ? v.near
+            ? v
+            : { ...v, near }
+          : { near, height: el.offsetHeight },
+      ),
+    );
+  }, [tracker]);
 
   // Let the row lay out once at full size before it may be skipped offscreen,
   // so the browser remembers its real height instead of the placeholder.
@@ -304,6 +356,17 @@ const MessageRow = memo(function MessageRow({
   }, []);
 
   if (!message) return null;
+
+  if (!view.near && !isRecent && !isStreaming) {
+    return (
+      <div
+        ref={rowRef}
+        data-role={message.role}
+        className="chat-row"
+        style={{ height: view.height ?? ESTIMATED_ROW_HEIGHT }}
+      />
+    );
+  }
 
   if (message.role === "user") {
     return (
