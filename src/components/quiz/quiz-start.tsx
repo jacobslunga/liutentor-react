@@ -1,8 +1,8 @@
-import { SegmentedControl } from "@primer/react";
 import { useSettingsStore } from "@/stores/settings";
 import { QUIZ_DIFFICULTY_INFO } from "@/lib/quiz";
 import { QUIZ_DIFFICULTIES } from "@/types/quiz";
 import { Button } from "@/components/ui/button";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 
 export function QuizStart({
   canStart,
@@ -25,21 +25,23 @@ export function QuizStart({
           <p className="text-xs font-medium text-muted-foreground">
             Svårighetsgrad
           </p>
-          <SegmentedControl
+          <ToggleGroup
+            type="single"
+            variant="outline"
             aria-label="Svårighetsgrad"
-            fullWidth
-            className="mt-2"
-            onChange={(i) => setDifficulty(QUIZ_DIFFICULTIES[i])}
+            className="mt-2 w-full"
+            value={difficulty}
+            onValueChange={(value) =>
+              value &&
+              setDifficulty(value as (typeof QUIZ_DIFFICULTIES)[number])
+            }
           >
             {QUIZ_DIFFICULTIES.map((level) => (
-              <SegmentedControl.Button
-                key={level}
-                selected={level === difficulty}
-              >
+              <ToggleGroupItem key={level} value={level} className="flex-1">
                 {QUIZ_DIFFICULTY_INFO[level].label}
-              </SegmentedControl.Button>
+              </ToggleGroupItem>
             ))}
-          </SegmentedControl>
+          </ToggleGroup>
           <p className="mt-2 text-center text-xs leading-relaxed text-muted-foreground">
             {QUIZ_DIFFICULTY_INFO[difficulty].hint}
           </p>

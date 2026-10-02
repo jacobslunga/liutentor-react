@@ -13,7 +13,20 @@ import { sortExams, useExamSortPreference } from "@/stores/exam-sort";
 import type { Exam } from "@/types/exam";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuLabel,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 function hasPassRate(exam: Exam) {
   return Number.isFinite(Number(exam.pass_rate)) && Number(exam.pass_rate) > 0;
@@ -73,7 +86,12 @@ export function ExamPicker({
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <Button variant="outline" size={triggerSize} aria-label="Byt tenta" className={triggerClassName}>
+        <Button
+          variant="outline"
+          size={triggerSize}
+          aria-label="Byt tenta"
+          className={triggerClassName}
+        >
           {children}
           <ChevronDownIcon
             className={cn(
@@ -84,102 +102,112 @@ export function ExamPicker({
         </Button>
       </PopoverTrigger>
       <PopoverContent align={align} className="w-auto gap-0 p-0">
-      <div className="flex items-center justify-between gap-3 border-b px-3 py-2">
-        <span className="text-xs font-semibold">Alla tentor</span>
-        <div className="flex items-center gap-1.5">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="sm" aria-label="Sortera tentor">
-                <DirectionIcon />
-                {sortBy === "date" ? "Datum" : "Godkänd"}
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="min-w-48">
-              <DropdownMenuLabel>Sortera efter</DropdownMenuLabel>
-              <DropdownMenuRadioGroup
-                value={sortBy}
-                onValueChange={(value) => setSortBy(value as typeof sortBy)}
-              >
-                <DropdownMenuRadioItem value="date">Datum</DropdownMenuRadioItem>
-                <DropdownMenuRadioItem value="pass-rate">Godkänd</DropdownMenuRadioItem>
-              </DropdownMenuRadioGroup>
-              <DropdownMenuSeparator />
-              <DropdownMenuLabel>Ordning</DropdownMenuLabel>
-              <DropdownMenuRadioGroup
-                value={sortDirection}
-                onValueChange={(value) => setSortDirection(value as typeof sortDirection)}
-              >
-                <DropdownMenuRadioItem value="desc">Fallande</DropdownMenuRadioItem>
-                <DropdownMenuRadioItem value="asc">Stigande</DropdownMenuRadioItem>
-              </DropdownMenuRadioGroup>
-            </DropdownMenuContent>
-          </DropdownMenu>
-          <span className="rounded-sm bg-muted px-2 py-0.5 font-mono text-xs font-medium text-muted-foreground">
-            {sorted.length} st
-          </span>
-        </div>
-      </div>
-
-      {/* The padding sits inside the scroller, so rows clip flush against
-          the header instead of peeking through a gap above them. */}
-      <div
-        ref={listRef}
-        className="max-h-[min(20rem,60dvh)] max-w-[calc(100vw-2rem)] overflow-y-auto"
-      >
-        <div className="space-y-0.5 p-1.5">
-          {sorted.map((exam) => {
-            const current = String(exam.id) === examId;
-            return (
-              <button
-                key={exam.id}
-                type="button"
-                data-current={current}
-                className={cn(
-                  "grid w-full grid-cols-[3.25rem_6.75rem_3.75rem_3.5rem_1rem] items-center gap-x-2 rounded-sm px-3 py-2 text-left transition-colors duration-150",
-                  current
-                    ? "bg-accent font-semibold"
-                    : "text-foreground/90 hover:bg-muted hover:text-foreground",
-                )}
-                onClick={() => pick(exam)}
-              >
-                <span className="truncate text-sm font-normal">
-                  {getExamPrefix(exam)}
-                </span>
-                <span className="text-sm font-semibold tabular-nums">
-                  {exam.exam_date}
-                </span>
-                {exam.has_solution ? (
-                  <Badge
-                    variant="secondary"
-                    className="col-start-3 justify-self-start"
-                  >
-                    Facit
-                  </Badge>
-                ) : (
-                  <span />
-                )}
-                <span
-                  className={cn(
-                    "col-start-4 justify-self-end font-mono text-xs tabular-nums",
-                    hasPassRate(exam)
-                      ? passRateClass(exam.pass_rate)
-                      : "text-muted-foreground/50",
-                  )}
+        <div className="flex items-center justify-between gap-3 border-b px-3 py-2">
+          <span className="text-xs font-semibold">Alla tentor</span>
+          <div className="flex items-center gap-1.5">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm" aria-label="Sortera tentor">
+                  <DirectionIcon />
+                  {sortBy === "date" ? "Datum" : "Godkänd"}
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="min-w-48">
+                <DropdownMenuLabel>Sortera efter</DropdownMenuLabel>
+                <DropdownMenuRadioGroup
+                  value={sortBy}
+                  onValueChange={(value) => setSortBy(value as typeof sortBy)}
                 >
-                  {hasPassRate(exam)
-                    ? `${Number(exam.pass_rate).toFixed(1)}%`
-                    : "–"}
-                </span>
-                {current ? (
-                  <CheckIcon className="col-start-5 size-4 text-primary" />
-                ) : (
-                  <span className="col-start-5 size-4" aria-hidden />
-                )}
-              </button>
-            );
-          })}
+                  <DropdownMenuRadioItem value="date">
+                    Datum
+                  </DropdownMenuRadioItem>
+                  <DropdownMenuRadioItem value="pass-rate">
+                    Godkänd
+                  </DropdownMenuRadioItem>
+                </DropdownMenuRadioGroup>
+                <DropdownMenuSeparator />
+                <DropdownMenuLabel>Ordning</DropdownMenuLabel>
+                <DropdownMenuRadioGroup
+                  value={sortDirection}
+                  onValueChange={(value) =>
+                    setSortDirection(value as typeof sortDirection)
+                  }
+                >
+                  <DropdownMenuRadioItem value="desc">
+                    Fallande
+                  </DropdownMenuRadioItem>
+                  <DropdownMenuRadioItem value="asc">
+                    Stigande
+                  </DropdownMenuRadioItem>
+                </DropdownMenuRadioGroup>
+              </DropdownMenuContent>
+            </DropdownMenu>
+            <span className="rounded-sm bg-muted px-2 py-0.5 font-mono text-xs font-medium text-muted-foreground">
+              {sorted.length} st
+            </span>
+          </div>
         </div>
-      </div>
+
+        {/* The padding sits inside the scroller, so rows clip flush against
+          the header instead of peeking through a gap above them. */}
+        <div
+          ref={listRef}
+          className="max-h-[min(20rem,60dvh)] max-w-[calc(100vw-2rem)] overflow-y-auto"
+        >
+          <div className="space-y-0.5 p-1.5">
+            {sorted.map((exam) => {
+              const current = String(exam.id) === examId;
+              return (
+                <button
+                  key={exam.id}
+                  type="button"
+                  data-current={current}
+                  className={cn(
+                    "grid w-full grid-cols-[3.25rem_6.75rem_3.75rem_3.5rem_1rem] items-center gap-x-2 rounded-sm px-3 py-2 text-left transition-colors duration-150",
+                    current
+                      ? "bg-accent font-semibold"
+                      : "text-foreground/90 hover:bg-muted hover:text-foreground",
+                  )}
+                  onClick={() => pick(exam)}
+                >
+                  <span className="truncate text-sm font-normal">
+                    {getExamPrefix(exam)}
+                  </span>
+                  <span className="text-sm font-semibold tabular-nums">
+                    {exam.exam_date}
+                  </span>
+                  {exam.has_solution ? (
+                    <Badge
+                      variant="secondary"
+                      className="col-start-3 justify-self-start"
+                    >
+                      Facit
+                    </Badge>
+                  ) : (
+                    <span />
+                  )}
+                  <span
+                    className={cn(
+                      "col-start-4 justify-self-end font-mono text-xs tabular-nums",
+                      hasPassRate(exam)
+                        ? passRateClass(exam.pass_rate)
+                        : "text-muted-foreground/50",
+                    )}
+                  >
+                    {hasPassRate(exam)
+                      ? `${Number(exam.pass_rate).toFixed(1)}%`
+                      : "–"}
+                  </span>
+                  {current ? (
+                    <CheckIcon className="col-start-5 size-4 text-primary" />
+                  ) : (
+                    <span className="col-start-5 size-4" aria-hidden />
+                  )}
+                </button>
+              );
+            })}
+          </div>
+        </div>
       </PopoverContent>
     </Popover>
   );

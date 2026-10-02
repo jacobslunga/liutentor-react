@@ -31,17 +31,19 @@
 }
 
 :root {
-  --grade-low: oklch(from var(--primary) 0.755 0.155 h);
-  --grade-mid: oklch(from var(--primary) 0.6 0.145 h);
-  --grade-high: oklch(from var(--primary) 0.46 0.11 h);
+  /* Grade and pass-rate ramps keep the old brand hue until the design system
+     defines chart colors. */
+  --grade-low: oklch(0.755 0.155 172.06);
+  --grade-mid: oklch(0.6 0.145 172.06);
+  --grade-high: oklch(0.46 0.11 172.06);
   --grade-fail: var(--destructive);
 
   /* Pass-rate ramp for exam charts: 1 = palest, 5 = strongest. */
-  --rate-1: oklch(from var(--primary) 0.911 0.0453 h);
-  --rate-2: oklch(from var(--primary) 0.8072 0.1109 h);
-  --rate-3: oklch(from var(--primary) 0.7521 0.1557 h);
-  --rate-4: oklch(from var(--primary) 0.6506 0.138 h);
-  --rate-5: oklch(from var(--primary) 0.5382 0.1159 h);
+  --rate-1: oklch(0.911 0.0453 172.06);
+  --rate-2: oklch(0.8072 0.1109 172.06);
+  --rate-3: oklch(0.7521 0.1557 172.06);
+  --rate-4: oklch(0.6506 0.138 172.06);
+  --rate-5: oklch(0.5382 0.1159 172.06);
 
   /* Individual points behind a trend line: >= 3:1 on the surface, and far
      enough in lightness from --primary to read as a separate series. */
@@ -49,16 +51,16 @@
 }
 
 .dark {
-  --grade-low: oklch(from var(--primary) 0.55 0.12 h);
-  --grade-mid: oklch(from var(--primary) 0.68 0.145 h);
-  --grade-high: oklch(from var(--primary) 0.83 0.13 h);
+  --grade-low: oklch(0.55 0.12 144.73);
+  --grade-mid: oklch(0.68 0.145 144.73);
+  --grade-high: oklch(0.83 0.13 144.73);
 
   /* Dark ramp runs dim → bright so "stronger = higher" holds in both themes. */
-  --rate-1: oklch(from var(--primary) 0.42 0.05 h);
-  --rate-2: oklch(from var(--primary) 0.53 0.07 h);
-  --rate-3: oklch(from var(--primary) 0.65 0.085 h);
-  --rate-4: oklch(from var(--primary) 0.75 0.09 h);
-  --rate-5: oklch(from var(--primary) 0.86 0.085 h);
+  --rate-1: oklch(0.42 0.05 144.73);
+  --rate-2: oklch(0.53 0.07 144.73);
+  --rate-3: oklch(0.65 0.085 144.73);
+  --rate-4: oklch(0.75 0.09 144.73);
+  --rate-5: oklch(0.86 0.085 144.73);
 
   --chart-point: oklch(0.6 0.005 144.73);
 }

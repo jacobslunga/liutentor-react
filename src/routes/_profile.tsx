@@ -41,7 +41,12 @@ function ProfileLayout() {
       <header className="sticky top-0 z-40 w-full">
         <div className="absolute inset-0 -z-10 bg-background/80 mask-[linear-gradient(to_bottom,black,transparent)] backdrop-blur-sm" />
         <div className="mx-auto flex h-16 max-w-3xl items-center justify-between px-4 sm:px-8">
-          <Button variant="ghost" size="sm" onClick={() => router.history.back()}><ArrowLeftIcon />
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => router.history.back()}
+          >
+            <ArrowLeftIcon />
             Tillbaka
           </Button>
           <Link

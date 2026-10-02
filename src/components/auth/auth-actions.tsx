@@ -27,7 +27,11 @@ export function AuthActions({
       <RouterLinkButton variant="outline" to="/logga-in" size={size}>
         Logga in
       </RouterLinkButton>
-      <RouterLinkButton to="/logga-in" search={{ tab: "skapa-konto" }} size={size}>
+      <RouterLinkButton
+        to="/logga-in"
+        search={{ tab: "skapa-konto" }}
+        size={size}
+      >
         Skapa konto
       </RouterLinkButton>
     </div>

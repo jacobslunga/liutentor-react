@@ -79,7 +79,12 @@ function CopyrightPolicyPage() {
             title="Begär borttagning"
             body="Anser du att vi publicerat material som kränker din upphovsrätt eller dina personuppgifter? Kontakta oss så hanterar vi ditt ärende inom 48 timmar."
           >
-            <ButtonLink variant="outline" href="mailto:liutentor@gmail.com?subject=Begäran om borttagning av material" size="sm"><MailIcon />
+            <ButtonLink
+              variant="outline"
+              href="mailto:liutentor@gmail.com?subject=Begäran om borttagning av material"
+              size="sm"
+            >
+              <MailIcon />
               Skicka borttagningsbegäran
             </ButtonLink>
           </DocContact>

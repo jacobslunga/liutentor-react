@@ -30,7 +30,24 @@ import { Button } from "@/components/ui/button";
 import { IconButton } from "@/components/shared/icon-button";
 import { ButtonGroup } from "@/components/ui/button-group";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuSeparator,
+  DropdownMenuShortcut,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 interface ExamHeaderProps {
   exams: Exam[];
@@ -64,11 +81,7 @@ export const ExamHeader = memo(function ExamHeader({
         >
           <ArrowLeftIcon />
         </IconButton>
-        <ExamPicker
-          exams={exams}
-          examId={examId}
-          courseCode={courseCode}
-        >
+        <ExamPicker exams={exams} examId={examId} courseCode={courseCode}>
           <span className="font-semibold">{examDate}</span>
         </ExamPicker>
       </ButtonGroup>
@@ -91,11 +104,7 @@ function ChatToggle() {
   const isOpen = useChatStore((s) => s.isOpen);
   const toggle = useChatStore((s) => s.toggle);
 
-  return (
-    <Button onClick={toggle}>
-      {isOpen ? "Stäng" : "Chatt"}
-    </Button>
-  );
+  return <Button onClick={toggle}>{isOpen ? "Stäng" : "Chatt"}</Button>;
 }
 
 const LAYOUT_TABS = [
@@ -173,79 +182,79 @@ function ActionsMenu({
           </IconButton>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-64">
-            <DropdownMenuItem onSelect={toggleFocusMode}>
-              {focusMode ? <MinimizeIcon /> : <MaximizeIcon />}
-              {focusMode ? "Avsluta fokusläge" : "Fokusläge"}
-              <DropdownMenuShortcut>F</DropdownMenuShortcut>
-            </DropdownMenuItem>
-            <DropdownMenuSub>
-              <DropdownMenuSubTrigger>
-                <ThemeIcon />
-                Tema
-              </DropdownMenuSubTrigger>
-              <DropdownMenuSubContent className="min-w-40">
-                <DropdownMenuRadioGroup value={theme} onValueChange={setTheme}>
-                  {THEMES.map(({ value, label }) => (
-                    <DropdownMenuRadioItem key={value} value={value}>
-                      {label}
-                    </DropdownMenuRadioItem>
-                  ))}
-                </DropdownMenuRadioGroup>
-              </DropdownMenuSubContent>
-            </DropdownMenuSub>
-            <DropdownMenuItem onSelect={() => setSettingsOpen(true)}>
-              <SettingsIcon />
-              Inställningar
-            </DropdownMenuItem>
-            <DropdownMenuItem onSelect={() => openUploadModal(courseCode)}>
-              <UploadIcon />
-              Ladda upp tenta/facit
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuSub>
-              <DropdownMenuSubTrigger>
-                <DownloadIcon />
-                Ladda ned
-              </DropdownMenuSubTrigger>
-              <DropdownMenuSubContent className="min-w-48">
-                  <DropdownMenuItem
-                    onSelect={() =>
-                      void downloadFile(
-                        examPdfUrl,
-                        `${courseCode}_${examDate}_EXAM.pdf`,
-                      )
-                    }
-                  >
-                    <FileTextIcon />
-                    Tenta
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    disabled={!solutionPdfUrl}
-                    onSelect={() =>
-                      solutionPdfUrl &&
-                      void downloadFile(
-                        solutionPdfUrl,
-                        `${courseCode}_${examDate}_SOLUTION.pdf`,
-                      )
-                    }
-                  >
-                    <BookOpenCheckIcon />
-                    Facit
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem
-                    disabled={!solutionPdfUrl}
-                    onSelect={() =>
-                      solutionPdfUrl &&
-                      downloadBoth(courseCode, examDate, examPdfUrl, solutionPdfUrl)
-                    }
-                  >
-                    <FileArchiveIcon />
-                    Tenta och facit
-                    <DropdownMenuShortcut>.zip</DropdownMenuShortcut>
-                  </DropdownMenuItem>
-              </DropdownMenuSubContent>
-            </DropdownMenuSub>
+          <DropdownMenuItem onSelect={toggleFocusMode}>
+            {focusMode ? <MinimizeIcon /> : <MaximizeIcon />}
+            {focusMode ? "Avsluta fokusläge" : "Fokusläge"}
+            <DropdownMenuShortcut>F</DropdownMenuShortcut>
+          </DropdownMenuItem>
+          <DropdownMenuSub>
+            <DropdownMenuSubTrigger>
+              <ThemeIcon />
+              Tema
+            </DropdownMenuSubTrigger>
+            <DropdownMenuSubContent className="min-w-40">
+              <DropdownMenuRadioGroup value={theme} onValueChange={setTheme}>
+                {THEMES.map(({ value, label }) => (
+                  <DropdownMenuRadioItem key={value} value={value}>
+                    {label}
+                  </DropdownMenuRadioItem>
+                ))}
+              </DropdownMenuRadioGroup>
+            </DropdownMenuSubContent>
+          </DropdownMenuSub>
+          <DropdownMenuItem onSelect={() => setSettingsOpen(true)}>
+            <SettingsIcon />
+            Inställningar
+          </DropdownMenuItem>
+          <DropdownMenuItem onSelect={() => openUploadModal(courseCode)}>
+            <UploadIcon />
+            Ladda upp tenta/facit
+          </DropdownMenuItem>
+          <DropdownMenuSeparator />
+          <DropdownMenuSub>
+            <DropdownMenuSubTrigger>
+              <DownloadIcon />
+              Ladda ned
+            </DropdownMenuSubTrigger>
+            <DropdownMenuSubContent className="min-w-48">
+              <DropdownMenuItem
+                onSelect={() =>
+                  void downloadFile(
+                    examPdfUrl,
+                    `${courseCode}_${examDate}_EXAM.pdf`,
+                  )
+                }
+              >
+                <FileTextIcon />
+                Tenta
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                disabled={!solutionPdfUrl}
+                onSelect={() =>
+                  solutionPdfUrl &&
+                  void downloadFile(
+                    solutionPdfUrl,
+                    `${courseCode}_${examDate}_SOLUTION.pdf`,
+                  )
+                }
+              >
+                <BookOpenCheckIcon />
+                Facit
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                disabled={!solutionPdfUrl}
+                onSelect={() =>
+                  solutionPdfUrl &&
+                  downloadBoth(courseCode, examDate, examPdfUrl, solutionPdfUrl)
+                }
+              >
+                <FileArchiveIcon />
+                Tenta och facit
+                <DropdownMenuShortcut>.zip</DropdownMenuShortcut>
+              </DropdownMenuItem>
+            </DropdownMenuSubContent>
+          </DropdownMenuSub>
         </DropdownMenuContent>
       </DropdownMenu>
     </>

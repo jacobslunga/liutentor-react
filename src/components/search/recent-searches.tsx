@@ -9,9 +9,15 @@ export function RecentSearches() {
   return (
     <div className="flex flex-wrap items-center justify-center gap-1.5">
       {latest.map((s) => (
-        <RouterLinkButton key={s.courseCode} to="/search/$courseCode" params={{ courseCode: s.courseCode }} variant="ghost">
+        <RouterLinkButton
+          key={s.courseCode}
+          to="/search/$courseCode"
+          params={{ courseCode: s.courseCode }}
+          variant="ghost"
+        >
           {s.courseCode}
-        <ArrowUpRightIcon /></RouterLinkButton>
+          <ArrowUpRightIcon />
+        </RouterLinkButton>
       ))}
     </div>
   );

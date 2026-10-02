@@ -1,6 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { UploadIcon } from "lucide-react";
-import { DocBlock, DocHeading, DocParagraph } from "@/components/info/doc-layout";
+import {
+  DocBlock,
+  DocHeading,
+  DocParagraph,
+} from "@/components/info/doc-layout";
 import { PageIntro } from "@/components/info/page-intro";
 import { RouterLinkButton } from "@/components/shared/router-link";
 import { useDocumentTitle } from "@/hooks/use-document-title";
@@ -64,7 +68,11 @@ function AboutPage() {
 
       <div className="mx-auto max-w-6xl px-5 sm:px-8">
         {story.map((block, i) => (
-          <DocBlock key={block.heading} heading={<DocHeading>{block.heading}</DocHeading>} className={cn(i > 0 && "border-t")}>
+          <DocBlock
+            key={block.heading}
+            heading={<DocHeading>{block.heading}</DocHeading>}
+            className={cn(i > 0 && "border-t")}
+          >
             <div className="space-y-4">
               {block.paragraphs.map((paragraph, j) => (
                 <DocParagraph key={j}>{paragraph}</DocParagraph>
@@ -74,27 +82,37 @@ function AboutPage() {
         ))}
 
         <section className="border-t py-14 lg:py-20">
-          <p className="text-sm font-medium text-muted-foreground">Tre saker vi står för</p>
+          <p className="text-sm font-medium text-muted-foreground">
+            Tre saker vi står för
+          </p>
           <div className="mt-10 grid gap-10 sm:grid-cols-3 sm:gap-8">
             {principles.map((principle, i) => (
               <div key={principle.title}>
                 <span className="text-3xl leading-none font-medium text-primary">
                   {String(i + 1).padStart(2, "0")}
                 </span>
-                <h3 className="mt-4 text-base font-medium">{principle.title}</h3>
-                <p className="mt-2 max-w-xs text-sm leading-relaxed text-muted-foreground">{principle.body}</p>
+                <h3 className="mt-4 text-base font-medium">
+                  {principle.title}
+                </h3>
+                <p className="mt-2 max-w-xs text-sm leading-relaxed text-muted-foreground">
+                  {principle.body}
+                </p>
               </div>
             ))}
           </div>
         </section>
 
-        <DocBlock heading={<DocHeading>Hjälp till</DocHeading>} className="border-t py-14 lg:py-20">
+        <DocBlock
+          heading={<DocHeading>Hjälp till</DocHeading>}
+          className="border-t py-14 lg:py-20"
+        >
           <DocParagraph>
-            Arkivet växer när studenter delar med sig. Ligger det tentor på din dator som saknas här, tar
-            uppladdningen under en minut.
+            Arkivet växer när studenter delar med sig. Ligger det tentor på din
+            dator som saknas här, tar uppladdningen under en minut.
           </DocParagraph>
           <div className="mt-7 flex flex-wrap items-center gap-3">
-            <Button size="sm" onClick={() => openUploadModal()}><UploadIcon />
+            <Button size="sm" onClick={() => openUploadModal()}>
+              <UploadIcon />
               Ladda upp tenta
             </Button>
             <RouterLinkButton variant="outline" to="/feedback" size="sm">

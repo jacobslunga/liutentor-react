@@ -1,10 +1,12 @@
 import { useNavigate, useRouterState } from "@tanstack/react-router";
-import { ArrowRightIcon, AtSignIcon, FolderIcon, QuoteIcon } from "lucide-react";
-import { useEffect, useState } from "react";
 import {
-  ANALYTICS_CONSENT_EVENT,
-  getAnalyticsConsent,
-} from "@/lib/analytics";
+  ArrowRightIcon,
+  AtSignIcon,
+  FolderIcon,
+  QuoteIcon,
+} from "lucide-react";
+import { useEffect, useState } from "react";
+import { ANALYTICS_CONSENT_EVENT, getAnalyticsConsent } from "@/lib/analytics";
 import { hasSeenChatIntro, markChatIntroSeen } from "@/lib/chat-intro";
 import { LogoIcon } from "./logo-icon";
 import { AppDialog } from "@/components/shared/app-dialog";

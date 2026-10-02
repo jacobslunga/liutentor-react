@@ -21,12 +21,17 @@ export function SelectionPopover({
       }}
     >
       <div className="animate-in duration-150 fade-in-0 zoom-in-95">
-        <Button variant="outline" className="font-medium" onMouseDown={(e) => {
+        <Button
+          variant="outline"
+          className="font-medium"
+          onMouseDown={(e) => {
             // Keep the selection alive until we've read it.
             e.preventDefault();
             e.stopPropagation();
             onReply();
-          }}><QuoteIcon fill="currentColor" />
+          }}
+        >
+          <QuoteIcon fill="currentColor" />
           Fråga
         </Button>
       </div>

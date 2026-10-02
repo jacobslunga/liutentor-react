@@ -12,7 +12,11 @@ interface PdfSelectionMenuProps {
   onExplain: (text: string) => void;
 }
 
-export function PdfSelectionMenu({ documentId, above, onExplain }: PdfSelectionMenuProps) {
+export function PdfSelectionMenu({
+  documentId,
+  above,
+  onExplain,
+}: PdfSelectionMenuProps) {
   const { provides: selection } = useSelectionCapability();
   const [isResolving, setIsResolving] = useState(false);
 
@@ -33,14 +37,22 @@ export function PdfSelectionMenu({ documentId, above, onExplain }: PdfSelectionM
   }
 
   return (
-    <Button variant="outline" size="sm" disabled={isResolving} className={cn(
+    <Button
+      variant="outline"
+      size="sm"
+      disabled={isResolving}
+      className={cn(
         "pointer-events-auto absolute left-1/2 -translate-x-1/2 animate-in whitespace-nowrap shadow-sm duration-150 fade-in-0 select-none",
         above ? "bottom-full mb-2" : "top-full mt-2",
-      )} onPointerDown={(e) => e.stopPropagation()} onClick={(e) => {
+      )}
+      onPointerDown={(e) => e.stopPropagation()}
+      onClick={(e) => {
         e.stopPropagation();
         void explain();
-      }}>
+      }}
+    >
       Förklara
-    <ArrowUpRightIcon /></Button>
+      <ArrowUpRightIcon />
+    </Button>
   );
 }

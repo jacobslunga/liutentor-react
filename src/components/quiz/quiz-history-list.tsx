@@ -7,7 +7,12 @@ import { IconButton } from "@/components/shared/icon-button";
 import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 
 const dateLabel = (value: string) =>
-  new Date(value).toLocaleString("sv-SE", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" });
+  new Date(value).toLocaleString("sv-SE", {
+    month: "short",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
 
 interface QuizHistoryListProps {
   history: StoredQuizItem[];
@@ -17,22 +22,38 @@ interface QuizHistoryListProps {
   onDelete: (item: StoredQuizItem) => void;
 }
 
-export function QuizHistoryList({ history, signedIn, activeQuizId, onLoad, onDelete }: QuizHistoryListProps) {
-  const [pendingDelete, setPendingDelete] = useState<StoredQuizItem | null>(null);
+export function QuizHistoryList({
+  history,
+  signedIn,
+  activeQuizId,
+  onLoad,
+  onDelete,
+}: QuizHistoryListProps) {
+  const [pendingDelete, setPendingDelete] = useState<StoredQuizItem | null>(
+    null,
+  );
 
   return (
     <section className="mt-10 w-full">
       <div className="flex items-center justify-between border-b pb-2">
-        <p className="text-xs font-medium text-muted-foreground">Tidigare quiz</p>
+        <p className="text-xs font-medium text-muted-foreground">
+          Tidigare quiz
+        </p>
         {signedIn && history.length > 0 && (
-          <span className="text-xs text-muted-foreground/60 tabular-nums">{history.length}</span>
+          <span className="text-xs text-muted-foreground/60 tabular-nums">
+            {history.length}
+          </span>
         )}
       </div>
 
       {!signedIn ? (
-        <p className="pt-4 text-sm text-muted-foreground">Logga in för att se tidigare quiz.</p>
+        <p className="pt-4 text-sm text-muted-foreground">
+          Logga in för att se tidigare quiz.
+        </p>
       ) : history.length === 0 ? (
-        <p className="pt-4 text-sm text-muted-foreground">Inga sparade quiz än.</p>
+        <p className="pt-4 text-sm text-muted-foreground">
+          Inga sparade quiz än.
+        </p>
       ) : (
         <div className="flex flex-col">
           {history.map((item) => {
@@ -41,22 +62,38 @@ export function QuizHistoryList({ history, signedIn, activeQuizId, onLoad, onDel
             return (
               <div
                 key={item.id}
-                className={cn("group flex items-center gap-2 border-b last:border-b-0", item.id === activeQuizId && "bg-muted/40")}
+                className={cn(
+                  "group flex items-center gap-2 border-b last:border-b-0",
+                  item.id === activeQuizId && "bg-muted/40",
+                )}
               >
                 <button
                   type="button"
                   className="flex min-w-0 flex-1 items-center gap-2 px-2 py-3 text-left"
                   onClick={() => onLoad(item)}
                 >
-                  <span className="min-w-0 flex-1 truncate text-sm font-medium">{dateLabel(item.createdAt)}</span>
+                  <span className="min-w-0 flex-1 truncate text-sm font-medium">
+                    {dateLabel(item.createdAt)}
+                  </span>
                   <span className="shrink-0 text-xs text-muted-foreground">
-                    {difficulty && `${QUIZ_DIFFICULTY_INFO[difficulty].label} · `}
+                    {difficulty &&
+                      `${QUIZ_DIFFICULTY_INFO[difficulty].label} · `}
                     {item.data.quiz.questions.length} frågor
                     {sourceCount > 0 && ` · ${sourceCount} tentor`}
                   </span>
-                  {item.id === activeQuizId && <CheckIcon className="size-4 shrink-0 text-primary" />}
+                  {item.id === activeQuizId && (
+                    <CheckIcon className="size-4 shrink-0 text-primary" />
+                  )}
                 </button>
-                <IconButton variant="ghost" size="icon-sm" className="shrink-0 opacity-0 transition-opacity group-hover:opacity-100 focus-visible:opacity-100" aria-label={`Ta bort quiz från ${dateLabel(item.createdAt)}`} onClick={() => setPendingDelete(item)}><Trash2Icon /></IconButton>
+                <IconButton
+                  variant="ghost"
+                  size="icon-sm"
+                  className="shrink-0 opacity-0 transition-opacity group-hover:opacity-100 focus-visible:opacity-100"
+                  aria-label={`Ta bort quiz från ${dateLabel(item.createdAt)}`}
+                  onClick={() => setPendingDelete(item)}
+                >
+                  <Trash2Icon />
+                </IconButton>
               </div>
             );
           })}
@@ -73,7 +110,8 @@ export function QuizHistoryList({ history, signedIn, activeQuizId, onLoad, onDel
           }}
           onCancel={() => setPendingDelete(null)}
         >
-          Quizet från {dateLabel(pendingDelete.createdAt)} tas bort permanent. Det går inte att ångra.
+          Quizet från {dateLabel(pendingDelete.createdAt)} tas bort permanent.
+          Det går inte att ångra.
         </ConfirmDialog>
       )}
     </section>

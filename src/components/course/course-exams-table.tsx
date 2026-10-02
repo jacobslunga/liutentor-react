@@ -5,7 +5,11 @@ import { memo, useMemo, useState } from "react";
 import { getExamPrefix } from "@/lib/exams";
 import { cn } from "@/lib/utils";
 import { examDetailQuery } from "@/queries/exams";
-import { sortExams, type ExamSortBy, type ExamSortDirection } from "@/stores/exam-sort";
+import {
+  sortExams,
+  type ExamSortBy,
+  type ExamSortDirection,
+} from "@/stores/exam-sort";
 import type { Exam } from "@/types/exam";
 import { ExamStatsDialog } from "./exam-stats-dialog";
 import { Button } from "@/components/ui/button";
@@ -20,7 +24,12 @@ interface CourseExamsTableProps {
   sortDirection: ExamSortDirection;
 }
 
-export function CourseExamsTable({ courseCode, exams, sortBy, sortDirection }: CourseExamsTableProps) {
+export function CourseExamsTable({
+  courseCode,
+  exams,
+  sortBy,
+  sortDirection,
+}: CourseExamsTableProps) {
   const [activeFilters, setActiveFilters] = useState<Set<string>>(new Set());
 
   const prefixes = useMemo(
@@ -49,7 +58,12 @@ export function CourseExamsTable({ courseCode, exams, sortBy, sortDirection }: C
       {prefixes.length > 1 && (
         <div className="flex w-full flex-wrap gap-2">
           {prefixes.map((prefix) => (
-            <Button key={prefix} size="sm" variant={activeFilters.has(prefix) ? "default" : "outline"} onClick={() => toggleFilter(prefix)}>
+            <Button
+              key={prefix}
+              size="sm"
+              variant={activeFilters.has(prefix) ? "default" : "outline"}
+              onClick={() => toggleFilter(prefix)}
+            >
               {prefix}
             </Button>
           ))}
@@ -61,8 +75,12 @@ export function CourseExamsTable({ courseCode, exams, sortBy, sortDirection }: C
           <div className={cn(GRID_COLS, "border-b bg-muted/30 py-3")}>
             <div className="text-xs text-muted-foreground">Tentamen</div>
             <div className="text-xs text-muted-foreground">Typ</div>
-            <div className="text-center text-xs text-muted-foreground">Facit</div>
-            <div className="text-right text-xs text-muted-foreground">Godkänd</div>
+            <div className="text-center text-xs text-muted-foreground">
+              Facit
+            </div>
+            <div className="text-right text-xs text-muted-foreground">
+              Godkänd
+            </div>
           </div>
 
           {visibleExams.map((exam) => (
@@ -74,7 +92,13 @@ export function CourseExamsTable({ courseCode, exams, sortBy, sortDirection }: C
   );
 }
 
-const ExamRow = memo(function ExamRow({ courseCode, exam }: { courseCode: string; exam: Exam }) {
+const ExamRow = memo(function ExamRow({
+  courseCode,
+  exam,
+}: {
+  courseCode: string;
+  exam: Exam;
+}) {
   const navigate = useNavigate();
   const router = useRouter();
   const queryClient = useQueryClient();

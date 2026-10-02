@@ -1,12 +1,12 @@
 import { ArrowLeftIcon, ArrowRightIcon, CircleCheckIcon } from "lucide-react";
 import { useState } from "react";
-import { ButtonGroup, ProgressBar } from "@primer/react";
 import { cn } from "@/lib/utils";
 import { useQuizStore } from "@/stores/quiz";
 import type { QuizQuestion } from "@/types/quiz";
 import { QuizMarkdown } from "./quiz-markdown";
 import { Button } from "@/components/ui/button";
 import { ConfirmDialog } from "@/components/shared/confirm-dialog";
+import { Progress } from "@/components/ui/progress";
 
 export function QuizAnswering({ questions }: { questions: QuizQuestion[] }) {
   const currentIndex = useQuizStore((s) => s.currentIndex);
@@ -27,7 +27,12 @@ export function QuizAnswering({ questions }: { questions: QuizQuestion[] }) {
   return (
     <div className="w-full">
       <div className="mb-6 flex items-center">
-        <Button variant="ghost" size="sm" onClick={() => (answeredCount > 0 ? setConfirmExit(true) : reset())}><ArrowLeftIcon />
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => (answeredCount > 0 ? setConfirmExit(true) : reset())}
+        >
+          <ArrowLeftIcon />
           Avsluta
         </Button>
       </div>
@@ -45,8 +50,8 @@ export function QuizAnswering({ questions }: { questions: QuizQuestion[] }) {
             {answeredCount}/{count} besvarade
           </span>
         </div>
-        <ProgressBar
-          progress={Math.round(((currentIndex + 1) / count) * 100)}
+        <Progress
+          value={Math.round(((currentIndex + 1) / count) * 100)}
           aria-label="Quizförlopp"
         />
       </div>
@@ -66,20 +71,33 @@ export function QuizAnswering({ questions }: { questions: QuizQuestion[] }) {
             Svara för att fortsätta
           </span>
         )}
-        <ButtonGroup>
-          <Button variant="outline" size="sm" disabled={currentIndex === 0} onClick={previous}><ArrowLeftIcon />
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={currentIndex === 0}
+            onClick={previous}
+          >
+            <ArrowLeftIcon />
             Förra
           </Button>
           {isLast ? (
-            <Button size="sm" disabled={!canSubmit} onClick={complete}><CircleCheckIcon />
+            <Button size="sm" disabled={!canSubmit} onClick={complete}>
+              <CircleCheckIcon />
               Rätta quiz
             </Button>
           ) : (
-            <Button variant="outline" size="sm" disabled={!answeredCurrent} onClick={next}>
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={!answeredCurrent}
+              onClick={next}
+            >
               Nästa
-            <ArrowRightIcon /></Button>
+              <ArrowRightIcon />
+            </Button>
           )}
-        </ButtonGroup>
+        </div>
       </div>
 
       {confirmExit && (

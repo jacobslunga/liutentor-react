@@ -34,16 +34,25 @@ export function ConfirmDialog({
   onCancel: () => void;
 }) {
   return (
-    <AlertDialog open onOpenChange={(open) => !open && !isPending && onCancel()}>
+    <AlertDialog
+      open
+      onOpenChange={(open) => !open && !isPending && onCancel()}
+    >
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>{title}</AlertDialogTitle>
           <AlertDialogDescription>{children}</AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel disabled={isPending}>{cancelLabel}</AlertDialogCancel>
+          <AlertDialogCancel disabled={isPending}>
+            {cancelLabel}
+          </AlertDialogCancel>
           {/* Not AlertDialogAction: that closes the dialog before the work is done. */}
-          <Button variant="destructive" disabled={isPending} onClick={onConfirm}>
+          <Button
+            variant="destructive"
+            disabled={isPending}
+            onClick={onConfirm}
+          >
             {isPending && <Spinner />}
             {confirmLabel}
           </Button>

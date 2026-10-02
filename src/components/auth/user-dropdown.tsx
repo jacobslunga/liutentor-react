@@ -17,6 +17,18 @@ import { SettingsDialog } from "@/components/settings/settings-dialog";
 import { signOut } from "@/lib/auth";
 import { useProfile } from "@/queries/profile";
 import { UserAvatar } from "./user-avatar";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuSeparator,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 const THEMES = [
   { value: "light", label: "Ljust", Icon: SunIcon },
@@ -59,51 +71,53 @@ export function UserDropdown() {
               </p>
             </div>
           </div>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem onSelect={() => void navigate({ to: "/me" })}>
-              <UserIcon />
-              Profil
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem onSelect={() => setSettingsOpen(true)}>
-              <SettingsIcon />
-              Inställningar
-            </DropdownMenuItem>
-            <DropdownMenuSub>
-              <DropdownMenuSubTrigger>
-                <PaletteIcon />
-                Utseende
-                <span className="ml-auto text-xs text-muted-foreground">{themeLabel}</span>
-              </DropdownMenuSubTrigger>
-              <DropdownMenuSubContent className="min-w-40">
-                <DropdownMenuRadioGroup value={theme} onValueChange={setTheme}>
-                  {THEMES.map(({ value, label, Icon }) => (
-                    <DropdownMenuRadioItem key={value} value={value}>
-                      <Icon />
-                      {label}
-                    </DropdownMenuRadioItem>
-                  ))}
-                </DropdownMenuRadioGroup>
-              </DropdownMenuSubContent>
-            </DropdownMenuSub>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem onSelect={() => void navigate({ to: "/faq" })}>
-              <CircleHelpIcon />
-              Vanliga frågor
-            </DropdownMenuItem>
-            <DropdownMenuItem onSelect={() => void navigate({ to: "/feedback" })}>
-              <MessageSquareIcon />
-              Skicka feedback
-            </DropdownMenuItem>
-            <DropdownMenuItem onSelect={() => void navigate({ to: "/om-oss" })}>
-              <InfoIcon />
-              Om LiU Tentor
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem onSelect={() => void signOut()}>
-              <LogOutIcon />
-              Logga ut
-            </DropdownMenuItem>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem onSelect={() => void navigate({ to: "/me" })}>
+            <UserIcon />
+            Profil
+          </DropdownMenuItem>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem onSelect={() => setSettingsOpen(true)}>
+            <SettingsIcon />
+            Inställningar
+          </DropdownMenuItem>
+          <DropdownMenuSub>
+            <DropdownMenuSubTrigger>
+              <PaletteIcon />
+              Utseende
+              <span className="ml-auto text-xs text-muted-foreground">
+                {themeLabel}
+              </span>
+            </DropdownMenuSubTrigger>
+            <DropdownMenuSubContent className="min-w-40">
+              <DropdownMenuRadioGroup value={theme} onValueChange={setTheme}>
+                {THEMES.map(({ value, label, Icon }) => (
+                  <DropdownMenuRadioItem key={value} value={value}>
+                    <Icon />
+                    {label}
+                  </DropdownMenuRadioItem>
+                ))}
+              </DropdownMenuRadioGroup>
+            </DropdownMenuSubContent>
+          </DropdownMenuSub>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem onSelect={() => void navigate({ to: "/faq" })}>
+            <CircleHelpIcon />
+            Vanliga frågor
+          </DropdownMenuItem>
+          <DropdownMenuItem onSelect={() => void navigate({ to: "/feedback" })}>
+            <MessageSquareIcon />
+            Skicka feedback
+          </DropdownMenuItem>
+          <DropdownMenuItem onSelect={() => void navigate({ to: "/om-oss" })}>
+            <InfoIcon />
+            Om LiU Tentor
+          </DropdownMenuItem>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem onSelect={() => void signOut()}>
+            <LogOutIcon />
+            Logga ut
+          </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
       <SettingsDialog open={settingsOpen} onOpenChange={setSettingsOpen} />

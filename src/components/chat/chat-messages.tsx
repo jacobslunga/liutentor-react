@@ -372,7 +372,17 @@ const MessageRow = memo(function MessageRow({
             source.type === "file" ? (
               <FileSourceChip key={source.fileId} source={source} />
             ) : (
-              <ButtonLink variant="outline" key={source.url} href={source.url} target="_blank" rel="noopener noreferrer" title={source.title} size="sm" className="max-w-56"><GlobeIcon />
+              <ButtonLink
+                variant="outline"
+                key={source.url}
+                href={source.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                title={source.title}
+                size="sm"
+                className="max-w-56"
+              >
+                <GlobeIcon />
                 <span className="truncate">{sourceLabel(source)}</span>
               </ButtonLink>
             ),
@@ -418,7 +428,16 @@ function FileSourceChip({
   }
 
   return (
-    <Button variant="outline" size="sm" className="max-w-56" title={source.title} onClick={() => void open()} disabled={opening}>{opening && <Spinner />}<FileTextIcon />
+    <Button
+      variant="outline"
+      size="sm"
+      className="max-w-56"
+      title={source.title}
+      onClick={() => void open()}
+      disabled={opening}
+    >
+      {opening && <Spinner />}
+      <FileTextIcon />
       <span className="truncate">{source.title}</span>
     </Button>
   );

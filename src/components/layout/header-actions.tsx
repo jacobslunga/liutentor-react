@@ -16,13 +16,26 @@ export function HeaderActions({ className }: { className?: string }) {
     <div className={cn("flex shrink-0 items-center gap-2", className)}>
       {/* Phones get an icon-only chat link and no upload, so the row fits. */}
       <div className="sm:hidden">
-        <RouterLinkButton to="/chatt" size="icon-sm" variant="ghost" aria-label="Chatt"><MessageCircleIcon /></RouterLinkButton>
+        <RouterLinkButton
+          to="/chatt"
+          size="icon-sm"
+          variant="ghost"
+          aria-label="Chatt"
+        >
+          <MessageCircleIcon />
+        </RouterLinkButton>
       </div>
       <div className="hidden items-center gap-2 sm:flex">
-        <RouterLinkButton to="/chatt" size="sm" variant="ghost"><MessageCircleIcon />
+        <RouterLinkButton to="/chatt" size="sm" variant="ghost">
+          <MessageCircleIcon />
           Chatt
         </RouterLinkButton>
-        <Button size="sm" variant="ghost" onClick={() => openUploadModal(courseCode)}><UploadIcon />
+        <Button
+          size="sm"
+          variant="ghost"
+          onClick={() => openUploadModal(courseCode)}
+        >
+          <UploadIcon />
           Ladda upp
         </Button>
       </div>

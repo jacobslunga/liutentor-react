@@ -22,18 +22,25 @@ interface ExamStatsDialogProps {
   passRate: number;
 }
 
-export function ExamStatsDialog({ statistics, date, passRate }: ExamStatsDialogProps) {
+export function ExamStatsDialog({
+  statistics,
+  date,
+  passRate,
+}: ExamStatsDialogProps) {
   const [open, setOpen] = useState(false);
   const stats = statistics ?? {};
   const total = Object.values(stats).reduce((a, b) => a + b, 0);
 
-  if (total === 0) return <MinusIcon className="size-4 text-muted-foreground/30" />;
+  if (total === 0)
+    return <MinusIcon className="size-4 text-muted-foreground/30" />;
 
-  const chartData = GRADE_ORDER.filter((g) => (stats[g] ?? 0) > 0).map((grade) => ({
-    grade,
-    count: stats[grade] ?? 0,
-    color: GRADE_COLORS[grade] ?? "var(--rate-3)",
-  }));
+  const chartData = GRADE_ORDER.filter((g) => (stats[g] ?? 0) > 0).map(
+    (grade) => ({
+      grade,
+      count: stats[grade] ?? 0,
+      color: GRADE_COLORS[grade] ?? "var(--rate-3)",
+    }),
+  );
   const maxCount = Math.max(...chartData.map((d) => d.count));
 
   // The dialog sits inside a clickable exam row. React bubbles events from
@@ -45,7 +52,12 @@ export function ExamStatsDialog({ statistics, date, passRate }: ExamStatsDialogP
       onClick={(e) => e.stopPropagation()}
       onKeyDown={(e) => e.stopPropagation()}
     >
-      <Button variant="ghost" size="sm" className={cn("tabular-nums", passRateClass(passRate))} onClick={() => setOpen(true)}>
+      <Button
+        variant="ghost"
+        size="sm"
+        className={cn("tabular-nums", passRateClass(passRate))}
+        onClick={() => setOpen(true)}
+      >
         {passRate.toFixed(1)}%
       </Button>
       {open && (
@@ -66,47 +78,65 @@ export function ExamStatsDialog({ statistics, date, passRate }: ExamStatsDialogP
                   Y-Sektionen
                 </a>
               </p>
-              <Button variant="outline" onClick={() => setOpen(false)}>Stäng</Button>
+              <Button variant="outline" onClick={() => setOpen(false)}>
+                Stäng
+              </Button>
             </div>
           }
         >
-      <div className="flex flex-col gap-4">
-        <div className="flex items-center justify-between text-sm">
-          <span className="text-muted-foreground">{total} studenter</span>
-          <span className={cn("font-mono", passRateClass(passRate))}>
-            {passRate}% godkänt
-          </span>
-        </div>
-
-        <div className="rounded-md border p-3">
-          <div className="flex h-32 items-end gap-2">
-            {chartData.map(({ grade, count, color }) => (
-              <div key={grade} className="flex flex-1 flex-col items-center gap-1">
-                <span className="text-2xs text-muted-foreground">{count}</span>
-                <div
-                  className="w-full rounded-t-sm"
-                  style={{ height: `${(count / maxCount) * 88}px`, backgroundColor: color }}
-                />
-                <span className="text-2xs text-muted-foreground">{grade}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <div className="space-y-2">
-          {chartData.map(({ grade, count, color }) => (
-            <div key={grade} className="flex items-center justify-between text-sm">
-              <div className="flex items-center gap-2">
-                <div className="size-2 rounded-md" style={{ backgroundColor: color }} />
-                <span>Betyg {grade}</span>
-              </div>
-              <span className="text-muted-foreground">
-                {count} ({((count / total) * 100).toFixed(1)}%)
+          <div className="flex flex-col gap-4">
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-muted-foreground">{total} studenter</span>
+              <span className={cn("font-mono", passRateClass(passRate))}>
+                {passRate}% godkänt
               </span>
             </div>
-          ))}
-        </div>
-      </div>
+
+            <div className="rounded-md border p-3">
+              <div className="flex h-32 items-end gap-2">
+                {chartData.map(({ grade, count, color }) => (
+                  <div
+                    key={grade}
+                    className="flex flex-1 flex-col items-center gap-1"
+                  >
+                    <span className="text-2xs text-muted-foreground">
+                      {count}
+                    </span>
+                    <div
+                      className="w-full rounded-t-sm"
+                      style={{
+                        height: `${(count / maxCount) * 88}px`,
+                        backgroundColor: color,
+                      }}
+                    />
+                    <span className="text-2xs text-muted-foreground">
+                      {grade}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              {chartData.map(({ grade, count, color }) => (
+                <div
+                  key={grade}
+                  className="flex items-center justify-between text-sm"
+                >
+                  <div className="flex items-center gap-2">
+                    <div
+                      className="size-2 rounded-md"
+                      style={{ backgroundColor: color }}
+                    />
+                    <span>Betyg {grade}</span>
+                  </div>
+                  <span className="text-muted-foreground">
+                    {count} ({((count / total) * 100).toFixed(1)}%)
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
         </AppDialog>
       )}
     </span>

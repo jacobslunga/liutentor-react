@@ -1,5 +1,3 @@
-import { Spinner } from "@primer/react";
-import { UnderlinePanels } from "@primer/react/experimental";
 import { Link } from "@tanstack/react-router";
 import { FolderIcon, Trash2Icon } from "lucide-react";
 import { useState, type ReactNode } from "react";
@@ -11,6 +9,8 @@ import { useStudyCourse } from "@/queries/study-courses";
 import { CourseMaterial } from "./course-material";
 import { IconButton } from "@/components/shared/icon-button";
 import { ConfirmDialog } from "@/components/shared/confirm-dialog";
+import { Spinner } from "@/components/ui/spinner";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 /**
  * A study course's page: its name, a prompt that starts a chat in the course,
@@ -32,7 +32,7 @@ export function CourseHome({
         role="status"
         className="flex flex-1 items-center justify-center gap-2 text-sm text-muted-foreground"
       >
-        <Spinner size="small" srText={null} />
+        <Spinner />
         <span>Laddar kursen...</span>
       </div>
     );
@@ -44,7 +44,9 @@ export function CourseHome({
         <p className="text-sm text-muted-foreground">
           Kursen finns inte, eller så har den raderats.
         </p>
-        <RouterLinkButton variant="outline" to="/chatt">Till chatten</RouterLinkButton>
+        <RouterLinkButton variant="outline" to="/chatt">
+          Till chatten
+        </RouterLinkButton>
       </div>
     );
   }
@@ -59,16 +61,18 @@ export function CourseHome({
 
         {input}
 
-        <UnderlinePanels aria-label="Kursens innehåll" className="px-3">
-          <UnderlinePanels.Tab>Chattar</UnderlinePanels.Tab>
-          <UnderlinePanels.Tab>Material</UnderlinePanels.Tab>
-          <UnderlinePanels.Panel className="pt-3">
+        <Tabs defaultValue="chats" className="px-3">
+          <TabsList variant="line" aria-label="Kursens innehåll">
+            <TabsTrigger value="chats">Chattar</TabsTrigger>
+            <TabsTrigger value="material">Material</TabsTrigger>
+          </TabsList>
+          <TabsContent value="chats" className="pt-3">
             <CourseChats courseId={courseId} />
-          </UnderlinePanels.Panel>
-          <UnderlinePanels.Panel className="pt-3">
+          </TabsContent>
+          <TabsContent value="material" className="pt-3">
             <CourseMaterial courseId={courseId} />
-          </UnderlinePanels.Panel>
-        </UnderlinePanels>
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   );
@@ -130,7 +134,15 @@ function CourseChats({ courseId }: { courseId: string }) {
                 })}
               </span>
             </Link>
-            <IconButton variant="ghost" size="icon-sm" className="absolute right-1.5 md:opacity-0 md:group-hover:opacity-100 md:focus-visible:opacity-100" aria-label={`Radera ${chat.title}`} onClick={() => setPendingDelete(chat)}><Trash2Icon /></IconButton>
+            <IconButton
+              variant="ghost"
+              size="icon-sm"
+              className="absolute right-1.5 md:opacity-0 md:group-hover:opacity-100 md:focus-visible:opacity-100"
+              aria-label={`Radera ${chat.title}`}
+              onClick={() => setPendingDelete(chat)}
+            >
+              <Trash2Icon />
+            </IconButton>
           </li>
         ))}
       </ul>

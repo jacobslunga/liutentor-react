@@ -1,5 +1,10 @@
-import { Banner, } from "@primer/react";
-import { BookIcon, FileTextIcon, UploadIcon, XIcon } from "lucide-react";
+import {
+  BookIcon,
+  FileTextIcon,
+  InfoIcon,
+  UploadIcon,
+  XIcon,
+} from "lucide-react";
 import { useRef, useState, type DragEvent } from "react";
 import { useTypingPlaceholder } from "@/hooks/use-typing-placeholder";
 import { uploadExams } from "@/lib/upload";
@@ -8,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { IconButton } from "@/components/shared/icon-button";
 import { Spinner } from "@/components/ui/spinner";
 import { AppDialog } from "@/components/shared/app-dialog";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 interface ExamUploadFormProps {
   initialCourseCode?: string;
@@ -15,18 +21,27 @@ interface ExamUploadFormProps {
   fixedCourseCode?: boolean;
 }
 
-export function ExamUploadForm({ initialCourseCode = "", fixedCourseCode = false }: ExamUploadFormProps) {
+export function ExamUploadForm({
+  initialCourseCode = "",
+  fixedCourseCode = false,
+}: ExamUploadFormProps) {
   const [courseCode, setCourseCode] = useState(initialCourseCode.toUpperCase());
   const [files, setFiles] = useState<File[]>([]);
   const [loading, setLoading] = useState(false);
   const [isOver, setIsOver] = useState(false);
-  const [result, setResult] = useState<{ ok: boolean; message?: string } | null>(null);
+  const [result, setResult] = useState<{
+    ok: boolean;
+    message?: string;
+  } | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const codeInputRef = useRef<HTMLInputElement>(null);
   useTypingPlaceholder(codeInputRef, "", !fixedCourseCode);
 
   const addFiles = (incoming: File[]) =>
-    setFiles((current) => [...current, ...incoming.filter((f) => f.type === "application/pdf")]);
+    setFiles((current) => [
+      ...current,
+      ...incoming.filter((f) => f.type === "application/pdf"),
+    ]);
 
   function onDrop(e: DragEvent) {
     e.preventDefault();
@@ -43,7 +58,10 @@ export function ExamUploadForm({ initialCourseCode = "", fixedCourseCode = false
       setFiles([]);
       if (!fixedCourseCode) setCourseCode("");
     } catch (error) {
-      setResult({ ok: false, message: error instanceof Error ? error.message : "Okänt fel" });
+      setResult({
+        ok: false,
+        message: error instanceof Error ? error.message : "Okänt fel",
+      });
     } finally {
       setLoading(false);
     }
@@ -61,7 +79,10 @@ export function ExamUploadForm({ initialCourseCode = "", fixedCourseCode = false
         </div>
       ) : (
         <div className="space-y-2">
-          <label htmlFor="upload-course-code" className="block text-sm font-medium text-muted-foreground">
+          <label
+            htmlFor="upload-course-code"
+            className="block text-sm font-medium text-muted-foreground"
+          >
             Kurskod
           </label>
           <input
@@ -82,11 +103,15 @@ export function ExamUploadForm({ initialCourseCode = "", fixedCourseCode = false
         tabIndex={0}
         className={cn(
           "relative rounded-lg border-2 border-dashed p-8 text-center transition-all duration-150",
-          isOver ? "scale-[1.02] border-primary bg-primary/5" : "hover:border-primary/50",
+          isOver
+            ? "scale-[1.02] border-primary bg-primary/5"
+            : "hover:border-primary/50",
           loading && "pointer-events-none opacity-50",
         )}
         onClick={() => fileInputRef.current?.click()}
-        onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && fileInputRef.current?.click()}
+        onKeyDown={(e) =>
+          (e.key === "Enter" || e.key === " ") && fileInputRef.current?.click()
+        }
         onDragOver={(e) => {
           e.preventDefault();
           setIsOver(true);
@@ -107,7 +132,9 @@ export function ExamUploadForm({ initialCourseCode = "", fixedCourseCode = false
         />
         <div className="flex flex-col items-center justify-center gap-2 text-muted-foreground">
           <UploadIcon className="size-8" />
-          <p className="font-medium">Dra och släpp PDF-filer här, eller klicka för att välja</p>
+          <p className="font-medium">
+            Dra och släpp PDF-filer här, eller klicka för att välja
+          </p>
         </div>
       </div>
 
@@ -123,23 +150,38 @@ export function ExamUploadForm({ initialCourseCode = "", fixedCourseCode = false
                   <FileTextIcon className="size-4 shrink-0 text-muted-foreground" />
                   <span className="truncate">{file.name}</span>
                 </div>
-                <IconButton variant="ghost" size="icon-sm" aria-label={`Ta bort ${file.name}`} onClick={() => setFiles((current) => current.filter((_, i) => i !== index))}><XIcon /></IconButton>
+                <IconButton
+                  variant="ghost"
+                  size="icon-sm"
+                  aria-label={`Ta bort ${file.name}`}
+                  onClick={() =>
+                    setFiles((current) => current.filter((_, i) => i !== index))
+                  }
+                >
+                  <XIcon />
+                </IconButton>
               </div>
             ))}
           </div>
-          <Button size="lg" className="w-full" disabled={loading || !courseCode} onClick={() => void upload()}>{loading && <Spinner />}
+          <Button
+            size="lg"
+            className="w-full"
+            disabled={loading || !courseCode}
+            onClick={() => void upload()}
+          >
+            {loading && <Spinner />}
             Ladda upp
           </Button>
         </div>
       )}
 
-      <Banner
-        variant="info"
-        layout="compact"
-        title="Granskning"
-        hideTitle
-        description="Uppladdade tentor granskas innan de blir tillgängliga för andra studenter."
-      />
+      <Alert>
+        <InfoIcon />
+        <AlertDescription>
+          Uppladdade tentor granskas innan de blir tillgängliga för andra
+          studenter.
+        </AlertDescription>
+      </Alert>
 
       {result && (
         <AppDialog

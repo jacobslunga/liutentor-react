@@ -11,7 +11,13 @@ const MAX_ZOOM = 10;
 const EPSILON = 0.001;
 
 /** Desktop zoom/rotate pill. Faint until the PDF is hovered. */
-export function PdfPageControls({ documentId, className }: { documentId: string; className?: string }) {
+export function PdfPageControls({
+  documentId,
+  className,
+}: {
+  documentId: string;
+  className?: string;
+}) {
   const { state, provides: zoom } = useZoom(documentId);
   const { provides: rotate } = useRotate(documentId);
   const resetZoom = useContext(ResetZoomContext);
@@ -46,7 +52,15 @@ export function PdfPageControls({ documentId, className }: { documentId: string;
         className,
       )}
     >
-      <IconButton variant="ghost" className="rounded-full" aria-label="Zooma ut" disabled={!canZoomOut} onClick={() => zoom?.zoomOut()}><MinusIcon /></IconButton>
+      <IconButton
+        variant="ghost"
+        className="rounded-full"
+        aria-label="Zooma ut"
+        disabled={!canZoomOut}
+        onClick={() => zoom?.zoomOut()}
+      >
+        <MinusIcon />
+      </IconButton>
 
       <input
         ref={inputRef}
@@ -71,17 +85,38 @@ export function PdfPageControls({ documentId, className }: { documentId: string;
         }}
       />
 
-      <IconButton variant="ghost" className="rounded-full" aria-label="Zooma in" disabled={!canZoomIn} onClick={() => zoom?.zoomIn()}><PlusIcon /></IconButton>
+      <IconButton
+        variant="ghost"
+        className="rounded-full"
+        aria-label="Zooma in"
+        disabled={!canZoomIn}
+        onClick={() => zoom?.zoomIn()}
+      >
+        <PlusIcon />
+      </IconButton>
 
       <div aria-hidden className="mx-0.5 h-5 w-px bg-border" />
 
-      <IconButton variant="ghost" className="rounded-full" aria-label="Rotera medurs" onClick={() => rotate?.rotateForward()}><RotateCwIcon /></IconButton>
+      <IconButton
+        variant="ghost"
+        className="rounded-full"
+        aria-label="Rotera medurs"
+        onClick={() => rotate?.rotateForward()}
+      >
+        <RotateCwIcon />
+      </IconButton>
     </div>
   );
 }
 
 /** Mobile zoom/rotate bar. */
-export function PdfZoomControls({ documentId, className }: { documentId: string; className?: string }) {
+export function PdfZoomControls({
+  documentId,
+  className,
+}: {
+  documentId: string;
+  className?: string;
+}) {
   const { state, provides: zoom } = useZoom(documentId);
   const { provides: rotate } = useRotate(documentId);
 
@@ -94,11 +129,38 @@ export function PdfZoomControls({ documentId, className }: { documentId: string;
         className,
       )}
     >
-      <IconButton variant="ghost" size="icon-lg" className="size-10 rounded-none" aria-label="Zooma in" disabled={currentZoom >= MAX_ZOOM - EPSILON} onClick={() => zoom?.zoomIn()}><PlusIcon /></IconButton>
+      <IconButton
+        variant="ghost"
+        size="icon-lg"
+        className="size-10 rounded-none"
+        aria-label="Zooma in"
+        disabled={currentZoom >= MAX_ZOOM - EPSILON}
+        onClick={() => zoom?.zoomIn()}
+      >
+        <PlusIcon />
+      </IconButton>
       <div aria-hidden className="h-5 w-px bg-border" />
-      <IconButton variant="ghost" size="icon-lg" className="size-10 rounded-none" aria-label="Zooma ut" disabled={currentZoom <= MIN_ZOOM + EPSILON} onClick={() => zoom?.zoomOut()}><MinusIcon /></IconButton>
+      <IconButton
+        variant="ghost"
+        size="icon-lg"
+        className="size-10 rounded-none"
+        aria-label="Zooma ut"
+        disabled={currentZoom <= MIN_ZOOM + EPSILON}
+        onClick={() => zoom?.zoomOut()}
+      >
+        <MinusIcon />
+      </IconButton>
       <div aria-hidden className="h-5 w-px bg-border" />
-      <IconButton variant="ghost" size="icon-lg" className="size-10 rounded-none" aria-label="Rotera medurs" disabled={!rotate} onClick={() => rotate?.rotateForward()}><RotateCwIcon /></IconButton>
+      <IconButton
+        variant="ghost"
+        size="icon-lg"
+        className="size-10 rounded-none"
+        aria-label="Rotera medurs"
+        disabled={!rotate}
+        onClick={() => rotate?.rotateForward()}
+      >
+        <RotateCwIcon />
+      </IconButton>
     </div>
   );
 }

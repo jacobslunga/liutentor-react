@@ -1,4 +1,3 @@
-import { ActionList, ActionMenu, } from "@primer/react";
 import { useQueryClient } from "@tanstack/react-query";
 import { Link, useNavigate, useParams } from "@tanstack/react-router";
 import {
@@ -8,7 +7,6 @@ import {
   PlusIcon,
   Trash2Icon,
 } from "lucide-react";
-import { HoverCard } from "radix-ui";
 import { useState, type ReactNode } from "react";
 import { toast } from "sonner";
 import {
@@ -24,6 +22,17 @@ import { useChatStore } from "@/stores/chat";
 import { CourseNameDialog } from "./course-name-dialog";
 import { IconButton } from "@/components/shared/icon-button";
 import { ConfirmDialog } from "@/components/shared/confirm-dialog";
+import {
+  HoverCard,
+  HoverCardContent,
+  HoverCardTrigger,
+} from "@/components/ui/hover-card";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 /** "Kurser" in the chat sidebar: the user's study courses, or a sign-in nudge. */
 export function SidebarCourses({ onNavigate }: { onNavigate: () => void }) {
@@ -105,7 +114,14 @@ export function SidebarCourses({ onNavigate }: { onNavigate: () => void }) {
       <div className="flex items-center justify-between pr-1 pb-1 pl-3">
         <h3 className="text-xs text-muted-foreground/70">Kurser</h3>
         {user && (
-          <IconButton variant="ghost" size="icon-sm" aria-label="Ny kurs" onClick={() => setCreating(true)}><PlusIcon /></IconButton>
+          <IconButton
+            variant="ghost"
+            size="icon-sm"
+            aria-label="Ny kurs"
+            onClick={() => setCreating(true)}
+          >
+            <PlusIcon />
+          </IconButton>
         )}
       </div>
 
@@ -154,20 +170,28 @@ export function SidebarCourses({ onNavigate }: { onNavigate: () => void }) {
                 </Link>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <IconButton variant="ghost" size="icon-sm" aria-label={`Alternativ för ${course.name}`} hideTooltip className="absolute right-1 opacity-100 group-hover:opacity-100 aria-expanded:opacity-100 md:opacity-0"><EllipsisIcon /></IconButton>
+                    <IconButton
+                      variant="ghost"
+                      size="icon-sm"
+                      aria-label={`Alternativ för ${course.name}`}
+                      hideTooltip
+                      className="absolute right-1 opacity-100 group-hover:opacity-100 aria-expanded:opacity-100 md:opacity-0"
+                    >
+                      <EllipsisIcon />
+                    </IconButton>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="start" className="min-w-48">
-                      <DropdownMenuItem onSelect={() => setRenaming(course)}>
-                        <PencilIcon />
-                        Byt namn
-                      </DropdownMenuItem>
-                      <DropdownMenuItem
-                        variant="destructive"
-                        onSelect={() => setPendingDelete(course)}
-                      >
-                        <Trash2Icon />
-                        Ta bort
-                      </DropdownMenuItem>
+                    <DropdownMenuItem onSelect={() => setRenaming(course)}>
+                      <PencilIcon />
+                      Byt namn
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      variant="destructive"
+                      onSelect={() => setPendingDelete(course)}
+                    >
+                      <Trash2Icon />
+                      Ta bort
+                    </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
               </li>
@@ -221,34 +245,32 @@ function CourseHoverList({
   const [open, setOpen] = useState(false);
 
   return (
-    <HoverCard.Root
+    <HoverCard
       open={open}
       onOpenChange={setOpen}
       openDelay={250}
       closeDelay={150}
     >
-      <HoverCard.Trigger asChild>{children}</HoverCard.Trigger>
-      <HoverCard.Portal>
-        <HoverCard.Content
-          side="right"
-          align="start"
-          sideOffset={10}
-          collisionPadding={12}
-          className="z-50 flex max-h-[min(24rem,var(--radix-hover-card-content-available-height))] w-72 origin-(--radix-hover-card-content-transform-origin) flex-col overflow-hidden rounded-xl bg-popover text-popover-foreground shadow-lg ring-1 ring-foreground/10 duration-150 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95 data-[state=open]:slide-in-from-left-1"
-        >
-          {/* Only fetched while open, and cached for the next hover. */}
-          {open && (
-            <CourseChatList
-              course={course}
-              onNavigate={() => {
-                setOpen(false);
-                onNavigate();
-              }}
-            />
-          )}
-        </HoverCard.Content>
-      </HoverCard.Portal>
-    </HoverCard.Root>
+      <HoverCardTrigger asChild>{children}</HoverCardTrigger>
+      <HoverCardContent
+        side="right"
+        align="start"
+        sideOffset={10}
+        collisionPadding={12}
+        className="z-50 flex max-h-[min(24rem,var(--radix-hover-card-content-available-height))] w-72 origin-(--radix-hover-card-content-transform-origin) flex-col overflow-hidden rounded-xl bg-popover text-popover-foreground shadow-lg ring-1 ring-foreground/10 duration-150 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95 data-[state=open]:slide-in-from-left-1"
+      >
+        {/* Only fetched while open, and cached for the next hover. */}
+        {open && (
+          <CourseChatList
+            course={course}
+            onNavigate={() => {
+              setOpen(false);
+              onNavigate();
+            }}
+          />
+        )}
+      </HoverCardContent>
+    </HoverCard>
   );
 }
 

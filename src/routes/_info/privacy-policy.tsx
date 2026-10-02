@@ -107,7 +107,12 @@ function PrivacyPolicyPage() {
             title="Kontakta oss"
             body="Har du frågor om din data eller vill utöva dina rättigheter, till exempel radera ditt konto? Hör av dig så hjälper vi dig."
           >
-            <ButtonLink variant="outline" href="mailto:liutentor@gmail.com" size="sm"><MailIcon />
+            <ButtonLink
+              variant="outline"
+              href="mailto:liutentor@gmail.com"
+              size="sm"
+            >
+              <MailIcon />
               liutentor@gmail.com
             </ButtonLink>
           </DocContact>

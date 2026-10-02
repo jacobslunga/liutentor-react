@@ -17,7 +17,11 @@ export function ExamUploadDialog() {
       description="Hjälp andra studenter på Linköpings Universitet genom att dela gamla tentor och lösningar."
       onClose={close}
     >
-      <ExamUploadForm key={courseCode} initialCourseCode={courseCode} fixedCourseCode={!!courseCode} />
+      <ExamUploadForm
+        key={courseCode}
+        initialCourseCode={courseCode}
+        fixedCourseCode={!!courseCode}
+      />
     </AppDialog>
   );
 }

@@ -1,4 +1,3 @@
-import { ActionList, ActionMenu, } from "@primer/react";
 import { Link, useNavigate, useParams } from "@tanstack/react-router";
 import {
   EllipsisIcon,
@@ -28,6 +27,13 @@ import { SidebarCourses } from "./sidebar-courses";
 import { SIDEBAR_SHORTCUT } from "./sidebar-shortcut";
 import { IconButton } from "@/components/shared/icon-button";
 import { ConfirmDialog } from "@/components/shared/confirm-dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 /**
  * The learning chat's conversation list. Sits beside the chat on wide screens
@@ -148,7 +154,9 @@ function InlineSidebar({ open }: { open: boolean }) {
           onPointerMove={(e) => {
             if (!drag.current) return;
             setDragWidth(
-              clampWidth(drag.current.startWidth + e.clientX - drag.current.startX),
+              clampWidth(
+                drag.current.startWidth + e.clientX - drag.current.startX,
+              ),
             );
           }}
           onPointerUp={endDrag}
@@ -156,7 +164,11 @@ function InlineSidebar({ open }: { open: boolean }) {
           onDoubleClick={() => setStoredWidth(DEFAULT_WIDTH)}
           onKeyDown={(e) => {
             const delta =
-              e.key === "ArrowLeft" ? -KEY_STEP : e.key === "ArrowRight" ? KEY_STEP : 0;
+              e.key === "ArrowLeft"
+                ? -KEY_STEP
+                : e.key === "ArrowRight"
+                  ? KEY_STEP
+                  : 0;
             if (!delta) return;
             e.preventDefault();
             setStoredWidth(clampWidth(storedWidth + delta));
@@ -250,16 +262,24 @@ function SidebarContent() {
                   </Link>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <IconButton variant="ghost" size="icon-sm" aria-label={`Alternativ för ${item.title}`} hideTooltip className="absolute right-1 opacity-100 group-hover:opacity-100 aria-expanded:opacity-100 md:opacity-0"><EllipsisIcon /></IconButton>
+                      <IconButton
+                        variant="ghost"
+                        size="icon-sm"
+                        aria-label={`Alternativ för ${item.title}`}
+                        hideTooltip
+                        className="absolute right-1 opacity-100 group-hover:opacity-100 aria-expanded:opacity-100 md:opacity-0"
+                      >
+                        <EllipsisIcon />
+                      </IconButton>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="start" className="min-w-48">
-                        <DropdownMenuItem
-                          variant="destructive"
-                          onSelect={() => setPendingDelete(item)}
-                        >
-                          <Trash2Icon />
-                          Ta bort
-                        </DropdownMenuItem>
+                      <DropdownMenuItem
+                        variant="destructive"
+                        onSelect={() => setPendingDelete(item)}
+                      >
+                        <Trash2Icon />
+                        Ta bort
+                      </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </li>
@@ -283,11 +303,24 @@ function SidebarContent() {
             LiU Tentor
           </span>
         </Link>
-        <IconButton variant="ghost" aria-label="Stäng sidopanelen" shortcut={SIDEBAR_SHORTCUT} onClick={() => setOpen(false)}><PanelLeftIcon /></IconButton>
+        <IconButton
+          variant="ghost"
+          aria-label="Stäng sidopanelen"
+          shortcut={SIDEBAR_SHORTCUT}
+          onClick={() => setOpen(false)}
+        >
+          <PanelLeftIcon />
+        </IconButton>
       </div>
 
       <div className="shrink-0 px-2 pb-3">
-        <RouterLinkButton to="/chatt" variant="ghost" className="w-full justify-start" onClick={closeDrawer}><SquarePenIcon />
+        <RouterLinkButton
+          to="/chatt"
+          variant="ghost"
+          className="w-full justify-start"
+          onClick={closeDrawer}
+        >
+          <SquarePenIcon />
           Ny chatt
         </RouterLinkButton>
       </div>
@@ -364,7 +397,10 @@ function AccountRow() {
             className="flex min-w-0 flex-1 items-center gap-2.5 rounded-lg px-2 py-1.5 text-left transition-colors outline-none hover:bg-accent/60 focus-visible:ring-3 focus-visible:ring-ring/50 aria-expanded:bg-accent/60"
             aria-label="Kontomeny"
           >
-            <UserAvatar className="size-7 shrink-0" fallbackClassName="text-xs" />
+            <UserAvatar
+              className="size-7 shrink-0"
+              fallbackClassName="text-xs"
+            />
             <span className="min-w-0 flex-1">
               <span className="block truncate text-sm text-foreground">
                 {name}
@@ -378,15 +414,18 @@ function AccountRow() {
           </button>
         </DropdownMenuTrigger>
         <DropdownMenuContent side="top" align="start" className="w-64">
-            <DropdownMenuItem onSelect={() => void navigate({ to: "/me" })}>
-              <UserIcon />
-              Profil
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem variant="destructive" onSelect={() => void signOut()}>
-              <LogOutIcon />
-              Logga ut
-            </DropdownMenuItem>
+          <DropdownMenuItem onSelect={() => void navigate({ to: "/me" })}>
+            <UserIcon />
+            Profil
+          </DropdownMenuItem>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem
+            variant="destructive"
+            onSelect={() => void signOut()}
+          >
+            <LogOutIcon />
+            Logga ut
+          </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
       <ChatSettingsMenu />

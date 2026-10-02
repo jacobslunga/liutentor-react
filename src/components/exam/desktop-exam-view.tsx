@@ -478,7 +478,8 @@ function NoSolution() {
                 tenta.
               </p>
             </div>
-            <RouterLinkButton variant="outline" to="/upload-exams" size="sm"><UploadIcon />
+            <RouterLinkButton variant="outline" to="/upload-exams" size="sm">
+              <UploadIcon />
               Ladda upp
             </RouterLinkButton>
           </div>

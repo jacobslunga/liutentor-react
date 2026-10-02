@@ -6,6 +6,16 @@ import type { ChatModelId } from "@/lib/chat-models";
 import { useSelectedModel, useSettingsStore } from "@/stores/settings";
 import { IconButton } from "@/components/shared/icon-button";
 import { KeyHint } from "@/components/shared/key-hint";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 const THEMES = [
   { value: "light", label: "Ljust", Icon: SunIcon },
@@ -60,7 +70,9 @@ export function ChatSettingsMenu() {
             <DropdownMenuLabel>Tankenivå</DropdownMenuLabel>
             <DropdownMenuRadioGroup
               value={selectedModelId}
-              onValueChange={(value) => setSelectedModelId(value as ChatModelId)}
+              onValueChange={(value) =>
+                setSelectedModelId(value as ChatModelId)
+              }
             >
               {availableModels.map((model) => (
                 <DropdownMenuRadioItem
@@ -70,7 +82,9 @@ export function ChatSettingsMenu() {
                 >
                   <div className="flex flex-col">
                     <span>{model.label}</span>
-                    <span className="text-xs text-muted-foreground">{model.hint}</span>
+                    <span className="text-xs text-muted-foreground">
+                      {model.hint}
+                    </span>
                   </div>
                 </DropdownMenuRadioItem>
               ))}
@@ -100,7 +114,7 @@ export function ChatSettingsMenu() {
           </div>
           <DropdownMenuSeparator />
           <DropdownMenuItem onSelect={() => setDialogOpen(true)}>
-              <SettingsIcon />
+            <SettingsIcon />
             Alla inställningar
           </DropdownMenuItem>
         </DropdownMenuContent>

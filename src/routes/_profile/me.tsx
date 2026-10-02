@@ -1,4 +1,3 @@
-import { FormControl, Label, SkeletonBox, TextInput } from "@primer/react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import {
@@ -23,6 +22,10 @@ import {
 import { useSettingsStore } from "@/stores/settings";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
+import { Field, FieldLabel } from "@/components/ui/field";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export const Route = createFileRoute("/_profile/me")({
   component: ProfilePage,
@@ -86,7 +89,7 @@ function ProfilePage() {
                 </p>
                 <p className="flex items-center justify-between gap-3">
                   <span className="text-muted-foreground">Kontostatus</span>
-                  <Label variant="success">Aktiv</Label>
+                  <Badge variant="secondary">Aktiv</Badge>
                 </p>
               </div>
             </div>
@@ -102,12 +105,12 @@ function ProfilePage() {
 function ProfileSkeleton() {
   return (
     <section className="relative overflow-hidden rounded-3xl bg-muted/40 p-8">
-      <SkeletonBox className="mx-auto h-8 w-40" />
-      <SkeletonBox className="mx-auto mt-5 size-28 rounded-full" />
-      <SkeletonBox className="mx-auto mt-4 h-4 w-56" />
+      <Skeleton className="mx-auto h-8 w-40" />
+      <Skeleton className="mx-auto mt-5 size-28 rounded-full" />
+      <Skeleton className="mx-auto mt-4 h-4 w-56" />
       <div className="mt-6 grid grid-cols-3 gap-3">
         {[0, 1, 2].map((i) => (
-          <SkeletonBox key={i} className="h-18" />
+          <Skeleton key={i} className="h-18" />
         ))}
       </div>
     </section>
@@ -274,27 +277,33 @@ function NameForm() {
     <div className="rounded-md border bg-muted/40 p-5">
       <p className="mb-3 text-sm font-medium">Namn</p>
       <div className="space-y-3">
-        <FormControl>
-          <FormControl.Label>Förnamn</FormControl.Label>
-          <TextInput
-            block
+        <Field>
+          <FieldLabel htmlFor="profile-fornamn">Förnamn</FieldLabel>
+          <Input
+            id="profile-fornamn"
             placeholder="Ditt förnamn"
             value={first}
             onChange={(e) => setFirst(e.target.value)}
           />
-        </FormControl>
-        <FormControl>
-          <FormControl.Label>Efternamn</FormControl.Label>
-          <TextInput
-            block
+        </Field>
+        <Field>
+          <FieldLabel htmlFor="profile-efternamn">Efternamn</FieldLabel>
+          <Input
+            id="profile-efternamn"
             placeholder="Ditt efternamn"
             value={last}
             onChange={(e) => setLast(e.target.value)}
           />
-        </FormControl>
+        </Field>
       </div>
       <div className="mt-4 flex justify-end">
-        <Button size="sm" disabled={update.isPending || !hasChanges} onClick={save}>{update.isPending && <Spinner />}{saved && <CheckIcon />}
+        <Button
+          size="sm"
+          disabled={update.isPending || !hasChanges}
+          onClick={save}
+        >
+          {update.isPending && <Spinner />}
+          {saved && <CheckIcon />}
           {saved ? "Sparat!" : "Spara"}
         </Button>
       </div>
@@ -347,11 +356,18 @@ function SignOutRow() {
           Avsluta din nuvarande session
         </p>
       </div>
-      <Button variant="outline" size="sm" onClick={async () => {
+      <Button
+        variant="outline"
+        size="sm"
+        onClick={async () => {
           setLoading(true);
           await signOut();
           void navigate({ to: "/", replace: true });
-        }} disabled={loading}>{loading && <Spinner />}<LogOutIcon />
+        }}
+        disabled={loading}
+      >
+        {loading && <Spinner />}
+        <LogOutIcon />
         Logga ut
       </Button>
     </div>

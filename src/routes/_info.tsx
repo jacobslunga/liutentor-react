@@ -47,7 +47,8 @@ function InfoLayout() {
             </span>
           </Link>
 
-          <Button variant="outline" size="sm" onClick={() => openUploadModal()}><UploadIcon />
+          <Button variant="outline" size="sm" onClick={() => openUploadModal()}>
+            <UploadIcon />
             <span className="hidden sm:inline">Ladda upp tenta</span>
             <span className="sm:hidden">Ladda upp</span>
           </Button>

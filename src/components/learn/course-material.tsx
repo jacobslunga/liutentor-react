@@ -1,4 +1,3 @@
-import { ProgressBar } from "@primer/react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   AlertCircleIcon,
@@ -22,6 +21,7 @@ import { useUser } from "@/stores/auth";
 import { Button } from "@/components/ui/button";
 import { IconButton } from "@/components/shared/icon-button";
 import { ConfirmDialog } from "@/components/shared/confirm-dialog";
+import { Progress } from "@/components/ui/progress";
 
 interface PendingUpload {
   id: string;
@@ -40,9 +40,11 @@ export function CourseMaterial({ courseId }: { courseId: string }) {
   const user = useUser();
   const queryClient = useQueryClient();
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const { data: files = [], isPending, isError } = useQuery(
-    courseFilesQuery(courseId),
-  );
+  const {
+    data: files = [],
+    isPending,
+    isError,
+  } = useQuery(courseFilesQuery(courseId));
   const [uploads, setUploads] = useState<PendingUpload[]>([]);
   const [isOver, setIsOver] = useState(false);
   const [pendingDelete, setPendingDelete] = useState<CourseFile | null>(null);
@@ -130,7 +132,8 @@ export function CourseMaterial({ courseId }: { courseId: string }) {
           if (e.dataTransfer.types.includes("Files")) e.preventDefault();
         }}
         onDragLeave={(e) => {
-          if (!e.currentTarget.contains(e.relatedTarget as Node)) setIsOver(false);
+          if (!e.currentTarget.contains(e.relatedTarget as Node))
+            setIsOver(false);
         }}
         onDrop={(e) => {
           e.preventDefault();
@@ -140,7 +143,9 @@ export function CourseMaterial({ courseId }: { courseId: string }) {
       >
         <UploadIcon className="size-5 text-muted-foreground" />
         <div className="space-y-1">
-          <p className="text-sm">Dra hit föreläsningar eller annat kursmaterial</p>
+          <p className="text-sm">
+            Dra hit föreläsningar eller annat kursmaterial
+          </p>
           <p className="text-xs text-muted-foreground">
             PDF, högst 100 MB totalt per kurs
           </p>
@@ -156,7 +161,12 @@ export function CourseMaterial({ courseId }: { courseId: string }) {
             e.target.value = "";
           }}
         />
-        <Button variant="outline" size="sm" disabled={usedBytes >= COURSE_QUOTA_BYTES} onClick={() => fileInputRef.current?.click()}>
+        <Button
+          variant="outline"
+          size="sm"
+          disabled={usedBytes >= COURSE_QUOTA_BYTES}
+          onClick={() => fileInputRef.current?.click()}
+        >
           Välj filer
         </Button>
       </div>
@@ -168,8 +178,8 @@ export function CourseMaterial({ courseId }: { courseId: string }) {
             {usedBytes ? formatFileSize(usedBytes) : "0 MB"} av 100 MB
           </span>
         </div>
-        <ProgressBar
-          progress={Math.min(100, (usedBytes / COURSE_QUOTA_BYTES) * 100)}
+        <Progress
+          value={Math.min(100, (usedBytes / COURSE_QUOTA_BYTES) * 100)}
           aria-label="Använt utrymme"
         />
       </div>
@@ -265,7 +275,15 @@ function FileRow({
         </p>
       </div>
       {onDelete && (
-        <IconButton variant="ghost" size="icon-sm" className="shrink-0 md:opacity-0 md:group-hover:opacity-100 md:focus-visible:opacity-100" aria-label={`Ta bort ${name}`} onClick={onDelete}><Trash2Icon /></IconButton>
+        <IconButton
+          variant="ghost"
+          size="icon-sm"
+          className="shrink-0 md:opacity-0 md:group-hover:opacity-100 md:focus-visible:opacity-100"
+          aria-label={`Ta bort ${name}`}
+          onClick={onDelete}
+        >
+          <Trash2Icon />
+        </IconButton>
       )}
     </li>
   );

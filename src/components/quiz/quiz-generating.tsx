@@ -3,7 +3,12 @@ import { cn } from "@/lib/utils";
 import { useQuizStore } from "@/stores/quiz";
 import { Button } from "@/components/ui/button";
 
-const STEP_ORDER = ["fetching_exams", "downloading_pdfs", "generating", "finalizing"];
+const STEP_ORDER = [
+  "fetching_exams",
+  "downloading_pdfs",
+  "generating",
+  "finalizing",
+];
 
 export function QuizGenerating() {
   const status = useQuizStore((s) => s.generationStatus);
@@ -28,17 +33,28 @@ export function QuizGenerating() {
           ))}
         </div>
 
-        <p className="shimmer-text text-sm font-medium">{status?.message ?? "Förbereder quiz..."}</p>
+        <p className="shimmer-text text-sm font-medium">
+          {status?.message ?? "Förbereder quiz..."}
+        </p>
 
         {error ? (
           <div className="animate-in text-center duration-200 fade-in-0 slide-in-from-bottom-1">
-            <p className="text-sm text-destructive">Kunde inte generera quizet.</p>
-            <Button variant="outline" size="sm" className="mt-3" onClick={reset}><RotateCwIcon />
+            <p className="text-sm text-destructive">
+              Kunde inte generera quizet.
+            </p>
+            <Button
+              variant="outline"
+              size="sm"
+              className="mt-3"
+              onClick={reset}
+            >
+              <RotateCwIcon />
               Försök igen
             </Button>
           </div>
         ) : (
-          <Button variant="ghost" size="sm" onClick={reset}><XIcon />
+          <Button variant="ghost" size="sm" onClick={reset}>
+            <XIcon />
             Avbryt
           </Button>
         )}

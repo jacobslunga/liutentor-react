@@ -1,4 +1,3 @@
-import { Spinner } from "@primer/react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import {
   ArrowDownIcon,
@@ -29,6 +28,7 @@ import { CourseHome } from "./course-home";
 import { SIDEBAR_SHORTCUT } from "./sidebar-shortcut";
 import { useSelectedModel } from "@/stores/settings";
 import { IconButton } from "@/components/shared/icon-button";
+import { Spinner } from "@/components/ui/spinner";
 
 const PENDING_REPLY_ID = "pending-reply";
 /**
@@ -371,7 +371,7 @@ export function LearnChat({
         role="status"
         className="flex flex-1 items-center justify-center gap-2 text-sm text-muted-foreground"
       >
-        <Spinner size="small" srText={null} />
+        <Spinner />
         <span>Laddar konversation...</span>
       </div>
     );
@@ -383,7 +383,9 @@ export function LearnChat({
             ? "Chatten finns inte, eller så har den raderats."
             : "Kunde inte öppna chatten."}
         </p>
-        <RouterLinkButton variant="outline" to="/chatt">Starta en ny chatt</RouterLinkButton>
+        <RouterLinkButton variant="outline" to="/chatt">
+          Starta en ny chatt
+        </RouterLinkButton>
       </div>
     );
   } else if (!hasMessages && courseId) {
@@ -420,7 +422,14 @@ export function LearnChat({
         </div>
         <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 flex flex-col items-center bg-linear-to-t from-background to-transparent pt-10 pb-3 sm:pb-4">
           {showScrollBottom && (
-            <IconButton variant="outline" className="pointer-events-auto mb-2.5 animate-in rounded-full shadow-md duration-150 fade-in-0" aria-label="Scrolla längst ned" onClick={scrollToLatest}><ArrowDownIcon /></IconButton>
+            <IconButton
+              variant="outline"
+              className="pointer-events-auto mb-2.5 animate-in rounded-full shadow-md duration-150 fade-in-0"
+              aria-label="Scrolla längst ned"
+              onClick={scrollToLatest}
+            >
+              <ArrowDownIcon />
+            </IconButton>
           )}
           {input}
         </div>
@@ -489,7 +498,15 @@ function HeaderButton({
   onClick: () => void;
 }) {
   return (
-    <IconButton variant="ghost" className="pointer-events-auto" aria-label={label} shortcut={shortcut} onClick={onClick}><Icon /></IconButton>
+    <IconButton
+      variant="ghost"
+      className="pointer-events-auto"
+      aria-label={label}
+      shortcut={shortcut}
+      onClick={onClick}
+    >
+      <Icon />
+    </IconButton>
   );
 }
 

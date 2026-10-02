@@ -7,7 +7,6 @@ import { initAnalytics, trackPageView } from "@/lib/analytics";
 import { queryClient } from "@/lib/query-client";
 import { router } from "@/router";
 import { initAuth } from "@/stores/auth";
-import "@fontsource-variable/inter";
 import "./index.css";
 
 void initAuth();

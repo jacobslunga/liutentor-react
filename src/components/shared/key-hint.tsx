@@ -1,7 +1,8 @@
 import { Kbd, KbdGroup } from "@/components/ui/kbd";
 
 const isMac =
-  typeof navigator !== "undefined" && /Mac|iPhone|iPad/.test(navigator.platform);
+  typeof navigator !== "undefined" &&
+  /Mac|iPhone|iPad/.test(navigator.platform);
 
 // Key names (as in KeyboardEvent.key, plus "Mod") drawn as symbols.
 const SYMBOLS: Record<string, string> = {
@@ -20,7 +21,13 @@ const SYMBOLS: Record<string, string> = {
 };
 
 /** A shortcut such as "Mod+." or "Shift+Enter" as shadcn Kbd keys. */
-export function KeyHint({ keys, className }: { keys: string; className?: string }) {
+export function KeyHint({
+  keys,
+  className,
+}: {
+  keys: string;
+  className?: string;
+}) {
   const parts = keys.split(/\+(?!$)/);
   return (
     <KbdGroup className={className}>

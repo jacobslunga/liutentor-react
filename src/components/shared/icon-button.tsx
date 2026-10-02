@@ -1,6 +1,10 @@
 import type { ComponentProps } from "react";
 import { Button } from "@/components/ui/button";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { KeyHint } from "./key-hint";
 
 type IconButtonProps = Omit<ComponentProps<typeof Button>, "aria-label"> & {

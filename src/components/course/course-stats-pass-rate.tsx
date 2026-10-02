@@ -54,7 +54,9 @@ export function CourseStatsPassRate({
   const data = useMemo(
     () =>
       points
-        .filter((p): p is PassRatePoint & { rate: number } => p.rate !== undefined)
+        .filter(
+          (p): p is PassRatePoint & { rate: number } => p.rate !== undefined,
+        )
         .map((p, index): ChartPoint => ({ ...p, index })),
     [points],
   );
@@ -77,7 +79,9 @@ export function CourseStatsPassRate({
         label={summary(recent)}
         tickFormatter={(i) => {
           const point = recent.find((p) => p.index === i);
-          return point ? shortDateFormatter.format(new Date(point.timestamp)) : "";
+          return point
+            ? shortDateFormatter.format(new Date(point.timestamp))
+            : "";
         }}
         showValues
         className={className}
@@ -86,7 +90,12 @@ export function CourseStatsPassRate({
       <AverageLegend average={average} />
 
       {data.length > recent.length && (
-        <Button variant="outline" size="sm" className="self-start" onClick={() => setOpen(true)}>
+        <Button
+          variant="outline"
+          size="sm"
+          className="self-start"
+          onClick={() => setOpen(true)}
+        >
           Visa alla {data.length} tillfällen
         </Button>
       )}
@@ -110,16 +119,25 @@ export function CourseStatsPassRate({
   );
 }
 
-function AllSittings({ data, average }: { data: ChartPoint[]; average: number }) {
+function AllSittings({
+  data,
+  average,
+}: {
+  data: ChartPoint[];
+  average: number;
+}) {
   const yearLabels = useMemo(() => {
     // First sitting of each year, thinned so labels never collide.
     const yearStarts: { index: number; year: string }[] = [];
     for (const point of data) {
       const year = String(new Date(point.timestamp).getFullYear());
-      if (yearStarts.at(-1)?.year !== year) yearStarts.push({ index: point.index, year });
+      if (yearStarts.at(-1)?.year !== year)
+        yearStarts.push({ index: point.index, year });
     }
     const step = Math.ceil(yearStarts.length / MAX_YEAR_LABELS);
-    return new Map(yearStarts.filter((_, i) => i % step === 0).map((y) => [y.index, y.year]));
+    return new Map(
+      yearStarts.filter((_, i) => i % step === 0).map((y) => [y.index, y.year]),
+    );
   }, [data]);
 
   return (
@@ -136,12 +154,20 @@ function AllSittings({ data, average }: { data: ChartPoint[]; average: number })
 
       <div className="max-h-72 overflow-y-auto rounded-md border text-xs">
         <table className="w-full text-left tabular-nums">
-          <caption className="sr-only">Andel godkända per tentatillfälle</caption>
+          <caption className="sr-only">
+            Andel godkända per tentatillfälle
+          </caption>
           <thead className="sticky top-0 bg-muted text-muted-foreground">
             <tr>
-              <th scope="col" className="px-2.5 py-1.5 font-medium">Datum</th>
-              <th scope="col" className="px-2.5 py-1.5 text-right font-medium">Studenter</th>
-              <th scope="col" className="px-2.5 py-1.5 text-right font-medium">Godkända</th>
+              <th scope="col" className="px-2.5 py-1.5 font-medium">
+                Datum
+              </th>
+              <th scope="col" className="px-2.5 py-1.5 text-right font-medium">
+                Studenter
+              </th>
+              <th scope="col" className="px-2.5 py-1.5 text-right font-medium">
+                Godkända
+              </th>
             </tr>
           </thead>
           <tbody className="divide-y">
@@ -149,9 +175,13 @@ function AllSittings({ data, average }: { data: ChartPoint[]; average: number })
               <tr key={point.date}>
                 <td className="px-2.5 py-1.5">{point.date}</td>
                 <td className="px-2.5 py-1.5 text-right text-muted-foreground">
-                  {point.students > 0 ? point.students.toLocaleString("sv-SE") : "–"}
+                  {point.students > 0
+                    ? point.students.toLocaleString("sv-SE")
+                    : "–"}
                 </td>
-                <td className="px-2.5 py-1.5 text-right">{point.rate.toFixed(1)}%</td>
+                <td className="px-2.5 py-1.5 text-right">
+                  {point.rate.toFixed(1)}%
+                </td>
               </tr>
             ))}
           </tbody>
@@ -193,7 +223,11 @@ function PassRateBars({
           margin={{ top: showValues ? 18 : 8, right: 8, bottom: 0, left: 0 }}
           barCategoryGap={data.length > 20 ? 1 : "20%"}
         >
-          <CartesianGrid vertical={false} stroke="var(--border)" strokeOpacity={0.6} />
+          <CartesianGrid
+            vertical={false}
+            stroke="var(--border)"
+            strokeOpacity={0.6}
+          />
           <XAxis
             dataKey="index"
             ticks={ticks}
@@ -211,7 +245,10 @@ function PassRateBars({
             axisLine={false}
             width={44}
           />
-          <Tooltip cursor={{ fill: "var(--muted)", opacity: 0.6 }} content={<PassRateTooltip />} />
+          <Tooltip
+            cursor={{ fill: "var(--muted)", opacity: 0.6 }}
+            content={<PassRateTooltip />}
+          />
           <Bar
             dataKey="rate"
             fill="var(--primary)"
@@ -244,7 +281,10 @@ function PassRateBars({
 function AverageLegend({ average }: { average: number }) {
   return (
     <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-      <span aria-hidden className="w-3 border-t border-dashed border-muted-foreground" />
+      <span
+        aria-hidden
+        className="w-3 border-t border-dashed border-muted-foreground"
+      />
       Snitt {Math.round(average)}%
     </div>
   );
@@ -266,10 +306,14 @@ function PassRateTooltip({
         {dateFormatter.format(new Date(point.timestamp))}
       </div>
       <div className="mt-1.5 flex items-baseline gap-1.5">
-        <span className="text-lg leading-none font-semibold">{point.rate.toFixed(1)}%</span>
+        <span className="text-lg leading-none font-semibold">
+          {point.rate.toFixed(1)}%
+        </span>
         <span className="text-muted-foreground">godkända</span>
       </div>
-      <div className="mt-1.5 text-muted-foreground">{point.names.join(" · ")}</div>
+      <div className="mt-1.5 text-muted-foreground">
+        {point.names.join(" · ")}
+      </div>
       {point.students > 0 && (
         <div className="text-muted-foreground">
           {point.students.toLocaleString("sv-SE")} studenter
