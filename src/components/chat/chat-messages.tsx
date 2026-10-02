@@ -106,6 +106,7 @@ export function ChatMessages({
   }, [tracker]);
   const mdReady = useChatMarkdownReady();
   const rootRef = useRef<HTMLDivElement>(null);
+  const scrollAnimationRef = useRef<number | null>(null);
   const [popover, setPopover] = useState<{
     x: number;
     y: number;
@@ -116,10 +117,47 @@ export function ChatMessages({
     (behavior: ScrollBehavior = "smooth") => {
       const el = scrollRef.current;
       if (!el) return;
-      if (behavior === "auto") el.scrollTop = el.scrollHeight;
-      else el.scrollTo({ top: el.scrollHeight, behavior: "smooth" });
+      if (scrollAnimationRef.current !== null) {
+        cancelAnimationFrame(scrollAnimationRef.current);
+        scrollAnimationRef.current = null;
+      }
+      if (
+        behavior === "auto" ||
+        window.matchMedia("(prefers-reduced-motion: reduce)").matches
+      ) {
+        el.scrollTop = el.scrollHeight;
+        return;
+      }
+
+      // Windowed rows can change the document height as the scroll passes them.
+      // Native smooth scrolling keeps its original target and can therefore stop
+      // early. Recalculate the bottom throughout the animation instead.
+      const startTop = el.scrollTop;
+      const startedAt = performance.now();
+      const duration = 400;
+      const animate = (now: number) => {
+        const progress = Math.min((now - startedAt) / duration, 1);
+        const eased = 1 - (1 - progress) ** 3;
+        const bottom = Math.max(el.scrollHeight - el.clientHeight, 0);
+        el.scrollTop = startTop + (bottom - startTop) * eased;
+        if (progress < 1) {
+          scrollAnimationRef.current = requestAnimationFrame(animate);
+        } else {
+          el.scrollTop = el.scrollHeight;
+          scrollAnimationRef.current = null;
+        }
+      };
+      scrollAnimationRef.current = requestAnimationFrame(animate);
     },
     [scrollRef],
+  );
+
+  useEffect(
+    () => () => {
+      if (scrollAnimationRef.current !== null)
+        cancelAnimationFrame(scrollAnimationRef.current);
+    },
+    [],
   );
 
   const restoreScroll = useCallback(() => {
