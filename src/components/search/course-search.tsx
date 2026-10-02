@@ -123,7 +123,7 @@ export function HeroCourseSearch() {
   return (
     <CourseSearchBase
       renderInput={({ value, onChange, ...handlers }) => (
-        <div className="relative flex w-full items-center rounded-full border-2 border-foreground/15 bg-background text-sm transition-colors duration-200 hover:border-foreground/40 focus-within:border-brand focus-within:hover:border-brand">
+        <div className="relative flex w-full items-center rounded-full border border-foreground/20 bg-background text-sm transition-colors duration-200 hover:border-foreground/40 focus-within:border-brand focus-within:ring-1 focus-within:ring-brand focus-within:hover:border-brand">
           <SearchIcon className="pointer-events-none absolute left-5 size-6 text-muted-foreground" />
           <input
             ref={inputRef}
