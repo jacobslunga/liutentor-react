@@ -34,7 +34,7 @@ export function FacitEdge({ label = "Facit" }: { label?: string }) {
       // Dark backgrounds need a softer glow.
       const s = document.documentElement.classList.contains("dark") ? 0.6 : 1;
       const mix = (percent: number) =>
-        `color-mix(in oklab, var(--primary) ${(percent * s).toFixed(1)}%, transparent)`;
+        `color-mix(in oklab, var(--brand) ${(percent * s).toFixed(1)}%, transparent)`;
 
       const glow = glowRef.current;
       if (glow) {
@@ -47,7 +47,7 @@ export function FacitEdge({ label = "Facit" }: { label?: string }) {
       if (tab) {
         tab.style.opacity = String(0.68 + v * 0.32);
         tab.style.transform = `translate(${(10 - v * 27).toFixed(1)}px, -50%)`;
-        tab.style.borderColor = `color-mix(in oklab, var(--primary) ${(28 + v * 42).toFixed(0)}%, var(--border))`;
+        tab.style.borderColor = `color-mix(in oklab, var(--brand) ${(28 + v * 42).toFixed(0)}%, var(--border))`;
       }
       if (iconRef.current) iconRef.current.style.transform = `translateX(${(-v * 3).toFixed(1)}px)`;
     };
@@ -92,8 +92,8 @@ export function FacitEdge({ label = "Facit" }: { label?: string }) {
         ref={tabRef}
         className="absolute top-1/2 right-0 flex h-10 items-center gap-2 pr-4 whitespace-nowrap will-change-[transform,opacity]"
       >
-        <ChevronLeftIcon ref={iconRef} className="size-4 shrink-0 text-primary will-change-transform" />
-        <span className="text-xs font-semibold text-primary">{label}</span>
+        <ChevronLeftIcon ref={iconRef} className="size-4 shrink-0 text-brand will-change-transform" />
+        <span className="text-xs font-semibold text-brand">{label}</span>
       </div>
     </div>
   );
