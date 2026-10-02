@@ -44,7 +44,9 @@ export function SegmentedControl<T extends string>({
     const track = trackRef.current;
     if (!track) return;
     const measure = () => {
-      const active = track.querySelector<HTMLElement>('[data-state="on"]');
+      // aria-checked, not data-state: a TooltipTrigger around an option
+      // overwrites data-state with its own open/closed value.
+      const active = track.querySelector<HTMLElement>('[aria-checked="true"]');
       if (!active) return setPill(null);
       setPill({ left: active.offsetLeft, width: active.offsetWidth });
     };
@@ -87,7 +89,7 @@ export function SegmentedControl<T extends string>({
             key={optionValue}
             value={optionValue}
             aria-label={iconOnly ? label : undefined}
-            className="inline-flex h-full items-center justify-center gap-1.5 rounded-md px-2.5 text-sm font-medium text-muted-foreground transition-colors duration-150 ease-out-quick outline-none hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/50 data-[state=on]:text-foreground [&_svg]:size-4 [&_svg]:shrink-0"
+            className="inline-flex h-full items-center justify-center gap-1.5 rounded-md px-2.5 text-sm font-medium text-muted-foreground transition-colors duration-150 ease-out-quick outline-none hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/50 aria-checked:text-foreground [&_svg]:size-4 [&_svg]:shrink-0"
           >
             {Icon && <Icon />}
             {!iconOnly && label}
