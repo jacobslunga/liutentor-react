@@ -16,6 +16,12 @@
   will-change: transform;
 }
 
+/* Light mode: multiply the page onto the background, so the paper takes the
+   page color while the ink stays as dark as printed. */
+.pdf-render-surface {
+  mix-blend-mode: multiply;
+}
+
 /* Dark mode: invert the rendered page instead of re-rendering it. */
 .dark .pdf-render-surface {
   filter: invert(1) hue-rotate(180deg) brightness(0.92);

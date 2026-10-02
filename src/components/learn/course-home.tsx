@@ -55,7 +55,7 @@ export function CourseHome({
     <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
       <div className="mx-auto flex w-full max-w-2xl flex-col gap-6 px-1 pt-20 pb-16">
         <div className="flex items-center gap-3 px-3">
-          <FolderIcon className="size-6 shrink-0 fill-primary text-primary" />
+          <FolderIcon className="size-6 shrink-0 fill-brand text-brand" />
           <h1 className="truncate text-2xl sm:text-3xl">{course.name}</h1>
         </div>
 

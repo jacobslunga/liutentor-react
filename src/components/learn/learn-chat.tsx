@@ -545,7 +545,7 @@ function CourseCrumb() {
       params={{ courseId: course.id }}
       className="pointer-events-auto flex max-w-[min(12rem,30vw)] shrink-0 items-center gap-1 rounded-full px-2 py-0.5 text-sm text-muted-foreground transition-colors hover:bg-accent/70 hover:text-foreground"
     >
-      <FolderIcon className="size-3.5 shrink-0 fill-primary text-primary" />
+      <FolderIcon className="size-3.5 shrink-0 fill-brand text-brand" />
       <span className="truncate">{course.name}</span>
       <ChevronRightIcon className="size-3.5 shrink-0" />
     </Link>

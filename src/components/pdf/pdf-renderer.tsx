@@ -248,7 +248,8 @@ function PdfPage({ documentId, page, isMobile, onExplain }: PdfPageProps) {
         <Rotate
           documentId={documentId}
           pageIndex={page.pageIndex}
-          // Dark: the inverted page is screen-blended onto the dark background.
+          // The page is blended onto the background: multiplied in light mode,
+          // inverted and screened in dark (pdf.css).
           className="bg-background"
           style={{ width: page.width, height: page.height }}
         >

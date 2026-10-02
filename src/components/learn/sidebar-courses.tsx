@@ -165,7 +165,7 @@ export function SidebarCourses({ onNavigate }: { onNavigate: () => void }) {
                   className="flex min-w-0 flex-1 items-center gap-2 py-1.5 pr-8 pl-3"
                   onClick={onNavigate}
                 >
-                  <FolderIcon className="size-4 shrink-0 fill-primary text-primary" />
+                  <FolderIcon className="size-4 shrink-0 fill-brand text-brand" />
                   <span className="truncate text-sm">{course.name}</span>
                 </Link>
                 <DropdownMenu>

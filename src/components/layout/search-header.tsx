@@ -8,7 +8,7 @@ export function SearchHeader() {
     // z-40 lifts the whole header (and the search results under it) above the
     // page's sticky bars; the centered search's transform would otherwise
     // trap its dropdown at the page's base layer.
-    <header className="relative z-40 w-full border-b bg-secondary pt-[env(safe-area-inset-top,0px)]">
+    <header className="relative z-40 w-full border-b bg-background pt-[env(safe-area-inset-top,0px)]">
       <div className="relative flex min-h-16 w-full flex-wrap items-center justify-between gap-y-4 px-4 py-3 md:px-10 lg:px-20 xl:flex-nowrap">
         <Link
           to="/"

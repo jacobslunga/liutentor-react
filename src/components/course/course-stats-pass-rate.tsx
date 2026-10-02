@@ -251,7 +251,7 @@ function PassRateBars({
           />
           <Bar
             dataKey="rate"
-            fill="var(--primary)"
+            fill="var(--brand)"
             radius={[4, 4, 0, 0]}
             maxBarSize={40}
             isAnimationActive={false}
