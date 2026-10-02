@@ -6,12 +6,13 @@ import {
   useEffect,
   useLayoutEffect,
   useRef,
+  useState,
   type ReactNode,
 } from "react";
 import { ExamHeader } from "@/components/exam/exam-header";
 import { FacitEdge } from "@/components/exam/facit-edge";
 import { ResizeHandle } from "@/components/exam/resize-handle";
-import { RouterLinkButton } from "@/components/primer/router-link-button";
+import { RouterLinkButton } from "@/components/shared/router-link";
 import { useLatest } from "@/hooks/use-latest";
 import { cn } from "@/lib/utils";
 import { examChatStore, useChatStore } from "@/stores/chat";
@@ -24,7 +25,8 @@ const PdfRenderer = lazy(() =>
     default: m.PdfRenderer,
   })),
 );
-const ChatWindow = lazy(() => import("@/components/chat/chat-window"));
+const loadChatWindow = () => import("@/components/chat/chat-window");
+const ChatWindow = lazy(loadChatWindow);
 
 const SPLIT_MIN = 20;
 const SPLIT_MAX = 80;
@@ -131,6 +133,26 @@ export function DesktopExamView({
   useEffect(() => {
     useExamViewStore.getState().setSolutionBlurred(blurFacitUntilHover);
   }, [blurFacitUntilHover]);
+
+  // Load the chat in the background and mount it hidden, so the first open
+  // slides in a ready panel. Otherwise the panel would mount already visible
+  // and slide in a loading spinner, with the content popping in at the end.
+  useEffect(() => {
+    let cancelled = false;
+    const warm = () =>
+      void loadChatWindow().then(() => {
+        if (!cancelled) useExamViewStore.getState().markChatOpened();
+      });
+    const idle = "requestIdleCallback" in window;
+    const handle = idle
+      ? window.requestIdleCallback(warm, { timeout: 4000 })
+      : window.setTimeout(warm, 1500);
+    return () => {
+      cancelled = true;
+      if (idle) window.cancelIdleCallback(handle);
+      else window.clearTimeout(handle);
+    };
+  }, [examId]);
 
   // Opening the chat hides the facit overlay and mounts the chat for good.
   useEffect(() => {
@@ -390,16 +412,27 @@ function SideOverlay({
   onResizeStart: () => void;
   onResizeEnd: () => void;
 }) {
+  // Mount in the hidden position and reveal two frames later, so even an
+  // overlay that mounts open slides in. (@starting-style can't do this
+  // reliably: Safari won't transition the translate set via a CSS variable.)
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    let frame = requestAnimationFrame(() => {
+      frame = requestAnimationFrame(() => setMounted(true));
+    });
+    return () => cancelAnimationFrame(frame);
+  }, []);
+  const shown = visible && mounted;
+
   return (
     <div
-      aria-hidden={!visible}
-      inert={!visible}
+      aria-hidden={!shown}
+      inert={!shown}
       className={cn(
         "fixed right-0 bottom-0 flex h-dvh border-l bg-background shadow-xl transition-[translate,opacity,filter] duration-200 ease-spring dark:shadow-none",
         zIndex,
-        // `starting:` animates the first open too, when the overlay mounts already visible.
-        visible
-          ? "translate-x-0 opacity-100 starting:translate-x-full starting:opacity-0"
+        shown
+          ? "translate-x-0 opacity-100"
           : "pointer-events-none translate-x-full opacity-0 blur-sm",
       )}
       style={{ width: "var(--exam-overlay-width)" }}
@@ -478,7 +511,8 @@ function NoSolution() {
                 tenta.
               </p>
             </div>
-            <RouterLinkButton to="/upload-exams" size="small" leadingVisual={UploadIcon}>
+            <RouterLinkButton variant="outline" to="/upload-exams" size="sm">
+              <UploadIcon />
               Ladda upp
             </RouterLinkButton>
           </div>

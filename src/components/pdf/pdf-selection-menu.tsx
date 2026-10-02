@@ -1,8 +1,8 @@
 import { useSelectionCapability } from "@embedpdf/plugin-selection/react";
 import { ArrowUpRightIcon } from "lucide-react";
 import { useState } from "react";
-import { Button } from "@primer/react";
 import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 
 const MAX_SELECTION_LENGTH = 4000;
 
@@ -12,7 +12,11 @@ interface PdfSelectionMenuProps {
   onExplain: (text: string) => void;
 }
 
-export function PdfSelectionMenu({ documentId, above, onExplain }: PdfSelectionMenuProps) {
+export function PdfSelectionMenu({
+  documentId,
+  above,
+  onExplain,
+}: PdfSelectionMenuProps) {
   const { provides: selection } = useSelectionCapability();
   const [isResolving, setIsResolving] = useState(false);
 
@@ -34,8 +38,8 @@ export function PdfSelectionMenu({ documentId, above, onExplain }: PdfSelectionM
 
   return (
     <Button
-      size="small"
-      trailingVisual={ArrowUpRightIcon}
+      variant="outline"
+      size="sm"
       disabled={isResolving}
       className={cn(
         "pointer-events-auto absolute left-1/2 -translate-x-1/2 animate-in whitespace-nowrap shadow-sm duration-150 fade-in-0 select-none",
@@ -48,6 +52,7 @@ export function PdfSelectionMenu({ documentId, above, onExplain }: PdfSelectionM
       }}
     >
       Förklara
+      <ArrowUpRightIcon />
     </Button>
   );
 }

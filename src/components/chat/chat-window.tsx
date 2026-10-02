@@ -1,4 +1,3 @@
-import { IconButton } from "@primer/react";
 import { Link } from "@tanstack/react-router";
 import {
   ArrowDownIcon,
@@ -22,6 +21,7 @@ import { ChatMascot } from "./chat-mascot";
 import { ChatMessages, type ChatTranscriptApi } from "./chat-messages";
 import { ConversationTitle } from "./conversation-title";
 import "./chat.css";
+import { IconButton } from "@/components/shared/icon-button";
 
 export interface ChatWindowProps {
   examId: string;
@@ -371,11 +371,13 @@ export default function ChatWindow({
       <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 flex flex-col items-center bg-linear-to-t from-background to-transparent pt-10 pb-3 sm:pb-4">
         {showScrollBottom && hasMessages && (
           <IconButton
-            icon={ArrowDownIcon}
+            variant="outline"
             className="pointer-events-auto mb-2.5 animate-in rounded-full shadow-md duration-150 fade-in-0"
             aria-label="Scrolla längst ned"
             onClick={scrollToLatest}
-          />
+          >
+            <ArrowDownIcon />
+          </IconButton>
         )}
         <ChatInput
           ref={inputRef}
@@ -395,7 +397,7 @@ export default function ChatWindow({
 }
 
 function HeaderButton({
-  icon,
+  icon: Icon,
   label,
   onClick,
 }: {
@@ -405,11 +407,12 @@ function HeaderButton({
 }) {
   return (
     <IconButton
-      icon={icon}
-      variant="invisible"
+      variant="ghost"
       className="pointer-events-auto"
       aria-label={label}
       onClick={onClick}
-    />
+    >
+      <Icon />
+    </IconButton>
   );
 }

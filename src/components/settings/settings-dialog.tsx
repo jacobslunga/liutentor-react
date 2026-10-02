@@ -1,11 +1,3 @@
-import {
-  Button,
-  Dialog,
-  IconButton,
-  Select,
-  ToggleSwitch,
-} from "@primer/react";
-import { KeybindingHint } from "@primer/react/experimental";
 import { Link } from "@tanstack/react-router";
 import { SettingsIcon } from "lucide-react";
 import { useTheme } from "next-themes";
@@ -18,6 +10,18 @@ import {
   useSettingsStore,
   type LayoutMode,
 } from "@/stores/settings";
+import { Button } from "@/components/ui/button";
+import { IconButton } from "@/components/shared/icon-button";
+import { AppDialog } from "@/components/shared/app-dialog";
+import { KeyHint } from "@/components/shared/key-hint";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
 
 const SHORTCUT_GROUPS = [
   {
@@ -32,7 +36,10 @@ const SHORTCUT_GROUPS = [
   {
     label: "Layout",
     shortcuts: [
-      { action: "Flytta delningslinjen i delad vy", keys: ["ArrowLeft", "ArrowRight"] },
+      {
+        action: "Flytta delningslinjen i delad vy",
+        keys: ["ArrowLeft", "ArrowRight"],
+      },
     ],
   },
   {
@@ -73,21 +80,21 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
     <>
       {!controlled && (
         <IconButton
-          icon={SettingsIcon}
-          variant="invisible"
+          variant="ghost"
           aria-label="Inställningar"
           onClick={() => setOpen(true)}
-        />
+        >
+          <SettingsIcon />
+        </IconButton>
       )}
       {isOpen && (
-        <Dialog
-          width="large"
+        <AppDialog
           title="Inställningar"
-          subtitle="Anpassa hur LiU Tentor beter sig."
+          description="Anpassa hur LiU Tentor beter sig."
           onClose={() => setOpen(false)}
         >
           <SettingsContent />
-        </Dialog>
+        </AppDialog>
       )}
     </>
   );
@@ -113,15 +120,15 @@ function SettingsContent() {
           label="Tema"
           description="System följer inställningen i din enhet."
         >
-          <Select
-            size="small"
-            aria-label="Tema"
-            value={theme}
-            onChange={(e) => setTheme(e.target.value)}
-          >
-            <Select.Option value="light">Ljust</Select.Option>
-            <Select.Option value="dark">Mörkt</Select.Option>
-            <Select.Option value="system">System</Select.Option>
+          <Select value={theme} onValueChange={setTheme}>
+            <SelectTrigger size="sm" className="w-44" aria-label="Tema">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="light">Ljust</SelectItem>
+              <SelectItem value="dark">Mörkt</SelectItem>
+              <SelectItem value="system">System</SelectItem>
+            </SelectContent>
           </Select>
         </Row>
       </Section>
@@ -132,13 +139,16 @@ function SettingsContent() {
           description="Hur en tenta öppnas. Du kan alltid byta i tentavyn."
         >
           <Select
-            size="small"
-            aria-label="Standardvy"
             value={layoutMode}
-            onChange={(e) => setLayoutMode(e.target.value as LayoutMode)}
+            onValueChange={(value) => setLayoutMode(value as LayoutMode)}
           >
-            <Select.Option value="exam-with-facit">Tenta och facit</Select.Option>
-            <Select.Option value="exam-only">Endast tenta</Select.Option>
+            <SelectTrigger size="sm" className="w-44" aria-label="Standardvy">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="exam-with-facit">Tenta och facit</SelectItem>
+              <SelectItem value="exam-only">Endast tenta</SelectItem>
+            </SelectContent>
           </Select>
         </Row>
         <Row
@@ -146,12 +156,9 @@ function SettingsContent() {
           label="Dölj facit tills du pekar på det"
           description="Gäller delad vy. Med detta av ligger facit framme direkt."
         >
-          <ToggleSwitch
-            size="small"
-            buttonLabelOn="På"
-            buttonLabelOff="Av"
+          <Switch
             checked={blurFacit}
-            onChange={setBlurFacit}
+            onCheckedChange={setBlurFacit}
             aria-labelledby="setting-blur-facit"
           />
         </Row>
@@ -160,12 +167,9 @@ function SettingsContent() {
           label='Visa "Förklara" vid markering'
           description="Knappen som dyker upp när du markerar text i en tenta."
         >
-          <ToggleSwitch
-            size="small"
-            buttonLabelOn="På"
-            buttonLabelOff="Av"
+          <Switch
             checked={showExplain}
-            onChange={setShowExplain}
+            onCheckedChange={setShowExplain}
             aria-labelledby="setting-show-explain"
           />
         </Row>
@@ -177,16 +181,19 @@ function SettingsContent() {
           description="Hur mycket chatten tänker innan den svarar."
         >
           <Select
-            size="small"
-            aria-label="Tankenivå"
             value={selectedModelId}
-            onChange={(e) => setSelectedModelId(e.target.value as ChatModelId)}
+            onValueChange={(value) => setSelectedModelId(value as ChatModelId)}
           >
-            {availableModels.map((model) => (
-              <Select.Option key={model.id} value={model.id}>
-                {model.label}
-              </Select.Option>
-            ))}
+            <SelectTrigger size="sm" className="w-44" aria-label="Tankenivå">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {availableModels.map((model) => (
+                <SelectItem key={model.id} value={model.id}>
+                  {model.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
           </Select>
         </Row>
         <p className="pt-3.5 text-xs leading-relaxed text-muted-foreground">
@@ -218,7 +225,7 @@ function SettingsContent() {
                   <span className="min-w-0 text-sm">{shortcut.action}</span>
                   <span className="flex shrink-0 items-center gap-1">
                     {shortcut.keys.map((key) => (
-                      <KeybindingHint key={key} keys={key} size="small" />
+                      <KeyHint key={key} keys={key} />
                     ))}
                   </span>
                 </div>
@@ -254,7 +261,8 @@ function SettingsContent() {
           }
         >
           <Button
-            size="small"
+            variant="outline"
+            size="sm"
             disabled={!recentSearches.length}
             onClick={() => {
               clearRecentSearches();

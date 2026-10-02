@@ -1,9 +1,3 @@
-import {
-  ActionList,
-  ActionMenu,
-  ConfirmationDialog,
-  IconButton,
-} from "@primer/react";
 import { Link, useNavigate, useParams } from "@tanstack/react-router";
 import {
   EllipsisIcon,
@@ -19,7 +13,7 @@ import { AuthActions } from "@/components/auth/auth-actions";
 import { UserAvatar } from "@/components/auth/user-avatar";
 import { TypedTitle } from "@/components/chat/conversation-title";
 import { LogoIcon } from "@/components/layout/logo-icon";
-import { RouterLinkButton } from "@/components/primer/router-link-button";
+import { RouterLinkButton } from "@/components/shared/router-link";
 import { useConversationList } from "@/hooks/use-conversation-list";
 import { signOut } from "@/lib/auth";
 import { cn } from "@/lib/utils";
@@ -31,6 +25,15 @@ import { useSettingsStore } from "@/stores/settings";
 import { ChatSettingsMenu } from "./chat-settings-menu";
 import { SidebarCourses } from "./sidebar-courses";
 import { SIDEBAR_SHORTCUT } from "./sidebar-shortcut";
+import { IconButton } from "@/components/shared/icon-button";
+import { ConfirmDialog } from "@/components/shared/confirm-dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 /**
  * The learning chat's conversation list. Sits beside the chat on wide screens
@@ -151,7 +154,9 @@ function InlineSidebar({ open }: { open: boolean }) {
           onPointerMove={(e) => {
             if (!drag.current) return;
             setDragWidth(
-              clampWidth(drag.current.startWidth + e.clientX - drag.current.startX),
+              clampWidth(
+                drag.current.startWidth + e.clientX - drag.current.startX,
+              ),
             );
           }}
           onPointerUp={endDrag}
@@ -159,7 +164,11 @@ function InlineSidebar({ open }: { open: boolean }) {
           onDoubleClick={() => setStoredWidth(DEFAULT_WIDTH)}
           onKeyDown={(e) => {
             const delta =
-              e.key === "ArrowLeft" ? -KEY_STEP : e.key === "ArrowRight" ? KEY_STEP : 0;
+              e.key === "ArrowLeft"
+                ? -KEY_STEP
+                : e.key === "ArrowRight"
+                  ? KEY_STEP
+                  : 0;
             if (!delta) return;
             e.preventDefault();
             setStoredWidth(clampWidth(storedWidth + delta));
@@ -251,31 +260,28 @@ function SidebarContent() {
                       </p>
                     )}
                   </Link>
-                  <ActionMenu>
-                    <ActionMenu.Anchor>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
                       <IconButton
-                        icon={EllipsisIcon}
-                        variant="invisible"
-                        size="small"
+                        variant="ghost"
+                        size="icon-sm"
                         aria-label={`Alternativ för ${item.title}`}
-                        unsafeDisableTooltip
+                        hideTooltip
                         className="absolute right-1 opacity-100 group-hover:opacity-100 aria-expanded:opacity-100 md:opacity-0"
-                      />
-                    </ActionMenu.Anchor>
-                    <ActionMenu.Overlay align="start" width="small">
-                      <ActionList>
-                        <ActionList.Item
-                          variant="danger"
-                          onSelect={() => setPendingDelete(item)}
-                        >
-                          <ActionList.LeadingVisual>
-                            <Trash2Icon />
-                          </ActionList.LeadingVisual>
-                          Ta bort
-                        </ActionList.Item>
-                      </ActionList>
-                    </ActionMenu.Overlay>
-                  </ActionMenu>
+                      >
+                        <EllipsisIcon />
+                      </IconButton>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="start" className="min-w-48">
+                      <DropdownMenuItem
+                        variant="destructive"
+                        onSelect={() => setPendingDelete(item)}
+                      >
+                        <Trash2Icon />
+                        Ta bort
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </li>
               ))}
             </ul>
@@ -298,23 +304,23 @@ function SidebarContent() {
           </span>
         </Link>
         <IconButton
-          icon={PanelLeftIcon}
-          variant="invisible"
+          variant="ghost"
           aria-label="Stäng sidopanelen"
-          keybindingHint={SIDEBAR_SHORTCUT}
+          shortcut={SIDEBAR_SHORTCUT}
           onClick={() => setOpen(false)}
-        />
+        >
+          <PanelLeftIcon />
+        </IconButton>
       </div>
 
       <div className="shrink-0 px-2 pb-3">
         <RouterLinkButton
           to="/chatt"
-          variant="invisible"
-          block
-          alignContent="start"
-          leadingVisual={SquarePenIcon}
+          variant="ghost"
+          className="w-full justify-start"
           onClick={closeDrawer}
         >
+          <SquarePenIcon />
           Ny chatt
         </RouterLinkButton>
       </div>
@@ -345,20 +351,15 @@ function SidebarContent() {
       </div>
 
       {pendingDelete && (
-        <ConfirmationDialog
+        <ConfirmDialog
           title="Radera chatten?"
-          cancelButtonContent="Avbryt"
-          confirmButtonContent="Radera"
-          confirmButtonType="danger"
-          confirmButtonLoading={deleting}
-          onClose={(gesture) => {
-            if (deleting) return;
-            if (gesture === "confirm") void confirmDelete();
-            else setPendingDelete(null);
-          }}
+          confirmLabel="Radera"
+          isPending={deleting}
+          onConfirm={() => void confirmDelete()}
+          onCancel={() => setPendingDelete(null)}
         >
           "{pendingDelete.title}" raderas permanent och kan inte ångras.
-        </ConfirmationDialog>
+        </ConfirmDialog>
       )}
     </div>
   );
@@ -389,14 +390,17 @@ function AccountRow() {
 
   return (
     <div className="flex items-center gap-1">
-      <ActionMenu>
-        <ActionMenu.Anchor>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
           <button
             type="button"
             className="flex min-w-0 flex-1 items-center gap-2.5 rounded-lg px-2 py-1.5 text-left transition-colors outline-none hover:bg-accent/60 focus-visible:ring-3 focus-visible:ring-ring/50 aria-expanded:bg-accent/60"
             aria-label="Kontomeny"
           >
-            <UserAvatar className="size-7 shrink-0" fallbackClassName="text-xs" />
+            <UserAvatar
+              className="size-7 shrink-0"
+              fallbackClassName="text-xs"
+            />
             <span className="min-w-0 flex-1">
               <span className="block truncate text-sm text-foreground">
                 {name}
@@ -408,25 +412,22 @@ function AccountRow() {
               )}
             </span>
           </button>
-        </ActionMenu.Anchor>
-        <ActionMenu.Overlay side="outside-top" align="start" width="medium">
-          <ActionList>
-            <ActionList.Item onSelect={() => void navigate({ to: "/me" })}>
-              <ActionList.LeadingVisual>
-                <UserIcon />
-              </ActionList.LeadingVisual>
-              Profil
-            </ActionList.Item>
-            <ActionList.Divider />
-            <ActionList.Item variant="danger" onSelect={() => void signOut()}>
-              <ActionList.LeadingVisual>
-                <LogOutIcon />
-              </ActionList.LeadingVisual>
-              Logga ut
-            </ActionList.Item>
-          </ActionList>
-        </ActionMenu.Overlay>
-      </ActionMenu>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent side="top" align="start" className="w-64">
+          <DropdownMenuItem onSelect={() => void navigate({ to: "/me" })}>
+            <UserIcon />
+            Profil
+          </DropdownMenuItem>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem
+            variant="destructive"
+            onSelect={() => void signOut()}
+          >
+            <LogOutIcon />
+            Logga ut
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
       <ChatSettingsMenu />
     </div>
   );

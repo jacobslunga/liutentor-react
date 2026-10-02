@@ -158,7 +158,7 @@ export function AppLoadingBar() {
       ref={barRef}
       aria-hidden
       className="pointer-events-none fixed top-0 left-0 z-[999999] h-0.5 w-0 opacity-0 transition-[width,opacity] duration-100 ease-linear motion-reduce:transition-opacity"
-      style={{ background: failed ? "var(--destructive)" : "var(--primary)" }}
+      style={{ background: failed ? "var(--destructive)" : "var(--brand)" }}
     />
   );
 }

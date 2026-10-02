@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="sv" data-color-mode="light" data-light-theme="light" data-dark-theme="dark">
+<html lang="sv">
   <head>
     <meta charset="UTF-8" />
     <meta
@@ -24,11 +24,8 @@
     <meta name="twitter:title" content="Sök tentor | LiU Tentor" />
     <meta name="twitter:description" content="Hitta och plugga på gamla tentor från Linköpings universitet" />
     <link rel="canonical" href="https://liutentor.se/" />
-    <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
-    <meta name="theme-color" content="#0f110f" media="(prefers-color-scheme: dark)" />
-    <!-- Cascade layer order: Primer components sit above Tailwind's preflight
-         and below its utilities. Must come before any stylesheet. -->
-    <style>@layer theme, base, primer, components, utilities;</style>
+    <meta name="theme-color" content="#fafafa" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#141414" media="(prefers-color-scheme: dark)" />
     <link rel="manifest" href="/site.webmanifest" />
     <link id="favicon" rel="icon" type="image/svg+xml" href="/favicon-light.svg" />
     <script>
@@ -45,7 +42,6 @@
             (pref === "system" &&
               window.matchMedia("(prefers-color-scheme: dark)").matches);
           if (dark) document.documentElement.classList.add("dark");
-          document.documentElement.dataset.colorMode = dark ? "dark" : "light";
           document.getElementById("favicon").href = dark
             ? "/favicon-dark.svg"
             : "/favicon-light.svg";

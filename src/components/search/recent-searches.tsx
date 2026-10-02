@@ -1,5 +1,5 @@
 import { ArrowUpRightIcon } from "lucide-react";
-import { RouterLinkButton } from "@/components/primer/router-link-button";
+import { RouterLinkButton } from "@/components/shared/router-link";
 import { useRecentSearches } from "@/stores/recent-searches";
 
 export function RecentSearches() {
@@ -13,10 +13,10 @@ export function RecentSearches() {
           key={s.courseCode}
           to="/search/$courseCode"
           params={{ courseCode: s.courseCode }}
-          variant="invisible"
-          trailingVisual={ArrowUpRightIcon}
+          variant="ghost"
         >
           {s.courseCode}
+          <ArrowUpRightIcon />
         </RouterLinkButton>
       ))}
     </div>

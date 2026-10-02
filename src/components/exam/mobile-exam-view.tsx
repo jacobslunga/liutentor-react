@@ -1,4 +1,3 @@
-import { ActionList, ActionMenu, Button, IconButton } from "@primer/react";
 import {
   ArrowLeftIcon,
   BookIcon,
@@ -8,19 +7,31 @@ import {
   XIcon,
 } from "lucide-react";
 import { lazy, Suspense, useEffect, useState, type ReactNode } from "react";
-import { RouterLinkIconButton } from "@/components/primer/router-link-button";
+import { RouterLinkButton } from "@/components/shared/router-link";
 import { downloadBoth, downloadFile } from "@/lib/download";
 import { cn } from "@/lib/utils";
 import type { Exam } from "@/types/exam";
 import { ExamPicker } from "./exam-picker";
+import { Button } from "@/components/ui/button";
+import { IconButton } from "@/components/shared/icon-button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 const PdfRenderer = lazy(() =>
-  import("@/components/pdf/pdf-renderer").then((m) => ({ default: m.PdfRenderer })),
+  import("@/components/pdf/pdf-renderer").then((m) => ({
+    default: m.PdfRenderer,
+  })),
 );
 
 /** Header height plus its bottom border. */
 const HEADER_HEIGHT = 57;
-const PDF_BOX_STYLE = { paddingTop: `calc(${HEADER_HEIGHT}px + env(safe-area-inset-top, 0px))` };
+const PDF_BOX_STYLE = {
+  paddingTop: `calc(${HEADER_HEIGHT}px + env(safe-area-inset-top, 0px))`,
+};
 
 interface MobileExamViewProps {
   exams: Exam[];
@@ -42,7 +53,9 @@ function Spinner() {
 function MobileHeader({ children }: { children: ReactNode }) {
   return (
     <div className="absolute inset-x-0 top-0 z-10 border-b bg-background pt-[env(safe-area-inset-top,0px)]">
-      <div className="flex h-14 shrink-0 items-center gap-3 px-3">{children}</div>
+      <div className="flex h-14 shrink-0 items-center gap-3 px-3">
+        {children}
+      </div>
     </div>
   );
 }
@@ -98,15 +111,22 @@ export function MobileExamView({
   return (
     <div className="relative h-dvh w-full overflow-hidden bg-background">
       <MobileHeader>
-        <RouterLinkIconButton
+        <RouterLinkButton
+          variant="outline"
           to="/search/$courseCode"
           params={{ courseCode }}
-          icon={ArrowLeftIcon}
           aria-label="Gå tillbaka"
-        />
+          size="icon"
+        >
+          <ArrowLeftIcon />
+        </RouterLinkButton>
         <div className="min-w-0 flex-1">
-          <p className="truncate text-sm leading-tight font-semibold">{courseCode}</p>
-          <p className="truncate text-xs leading-tight text-muted-foreground">{examDate}</p>
+          <p className="truncate text-sm leading-tight font-semibold">
+            {courseCode}
+          </p>
+          <p className="truncate text-xs leading-tight text-muted-foreground">
+            {examDate}
+          </p>
         </div>
         {exams.length > 0 && (
           <div className="hidden shrink-0 md:block">
@@ -114,59 +134,58 @@ export function MobileExamView({
               exams={exams}
               examId={examId}
               courseCode={courseCode}
-              triggerSize="small"
+              triggerSize="sm"
             >
               {examDate}
             </ExamPicker>
           </div>
         )}
-        <ActionMenu>
-          <ActionMenu.Anchor>
-            <IconButton icon={DownloadIcon} size="small" aria-label="Ladda ned" />
-          </ActionMenu.Anchor>
-          <ActionMenu.Overlay align="end">
-            <ActionList>
-              <ActionList.Item
-                onSelect={() => void downloadFile(examPdfUrl, `${courseCode}_${examDate}_EXAM.pdf`)}
-              >
-                <ActionList.LeadingVisual>
-                  <DownloadIcon />
-                </ActionList.LeadingVisual>
-                Ladda ned tenta
-              </ActionList.Item>
-              <ActionList.Item
-                disabled={!solutionPdfUrl}
-                onSelect={() =>
-                  solutionPdfUrl &&
-                  void downloadFile(solutionPdfUrl, `${courseCode}_${examDate}_SOLUTION.pdf`)
-                }
-              >
-                <ActionList.LeadingVisual>
-                  <DownloadIcon />
-                </ActionList.LeadingVisual>
-                Ladda ned facit
-              </ActionList.Item>
-              <ActionList.Item
-                disabled={!solutionPdfUrl}
-                onSelect={() =>
-                  solutionPdfUrl &&
-                  downloadBoth(courseCode, examDate, examPdfUrl, solutionPdfUrl)
-                }
-              >
-                <ActionList.LeadingVisual>
-                  <FileArchiveIcon />
-                </ActionList.LeadingVisual>
-                Ladda ned båda (.zip)
-              </ActionList.Item>
-            </ActionList>
-          </ActionMenu.Overlay>
-        </ActionMenu>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <IconButton variant="outline" size="icon-sm" aria-label="Ladda ned">
+              <DownloadIcon />
+            </IconButton>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem
+              onSelect={() =>
+                void downloadFile(
+                  examPdfUrl,
+                  `${courseCode}_${examDate}_EXAM.pdf`,
+                )
+              }
+            >
+              <DownloadIcon />
+              Ladda ned tenta
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              disabled={!solutionPdfUrl}
+              onSelect={() =>
+                solutionPdfUrl &&
+                void downloadFile(
+                  solutionPdfUrl,
+                  `${courseCode}_${examDate}_SOLUTION.pdf`,
+                )
+              }
+            >
+              <DownloadIcon />
+              Ladda ned facit
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              disabled={!solutionPdfUrl}
+              onSelect={() =>
+                solutionPdfUrl &&
+                downloadBoth(courseCode, examDate, examPdfUrl, solutionPdfUrl)
+              }
+            >
+              <FileArchiveIcon />
+              Ladda ned båda (.zip)
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
         {solutionPdfUrl && (
-          <Button
-            size="small"
-            leadingVisual={<BookIcon className="text-primary" />}
-            onClick={openSolution}
-          >
+          <Button variant="outline" size="sm" onClick={openSolution}>
+            <BookIcon className="text-primary" />
             Facit
           </Button>
         )}
@@ -187,22 +206,28 @@ export function MobileExamView({
           inert={!showSolution}
           className={cn(
             "fixed inset-0 z-40 h-dvh w-screen overflow-hidden bg-background transition-[translate,opacity,scale] duration-200 ease-(--ease-spring)",
-            showSolution ? "translate-y-0 scale-100 opacity-100" : "pointer-events-none translate-y-4 scale-[0.99] opacity-0",
+            showSolution
+              ? "translate-y-0 scale-100 opacity-100"
+              : "pointer-events-none translate-y-4 scale-[0.99] opacity-0",
           )}
         >
           <MobileHeader>
             <div className="min-w-0 flex-1">
-              <p className="truncate text-sm leading-tight font-semibold">Facit</p>
+              <p className="truncate text-sm leading-tight font-semibold">
+                Facit
+              </p>
               <p className="truncate text-xs leading-tight text-muted-foreground">
                 {courseCode} - {examDate}
               </p>
             </div>
             <IconButton
-              icon={XIcon}
-              size="small"
+              variant="outline"
+              size="icon-sm"
               aria-label="Stäng"
               onClick={() => setShowSolution(false)}
-            />
+            >
+              <XIcon />
+            </IconButton>
           </MobileHeader>
           <div className="h-full w-full overflow-hidden" style={PDF_BOX_STYLE}>
             <Suspense fallback={<Spinner />}>

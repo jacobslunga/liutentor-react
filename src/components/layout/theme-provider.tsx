@@ -1,6 +1,6 @@
-import { ThemeProvider as PrimerThemeProvider } from "@primer/react";
 import { ThemeProvider as NextThemesProvider, useTheme } from "next-themes";
 import { useEffect, type ReactNode } from "react";
+import { TooltipProvider } from "@/components/ui/tooltip";
 
 function FaviconSync() {
   const { resolvedTheme } = useTheme();
@@ -13,27 +13,6 @@ function FaviconSync() {
   }, [resolvedTheme]);
 
   return null;
-}
-
-// Primer's tokens are keyed on data-color-mode. They live on <html> (not only
-// Primer's own wrapper) so Radix portals rendered into <body> get them too.
-function PrimerThemeBridge({ children }: { children: ReactNode }) {
-  const { resolvedTheme } = useTheme();
-  const colorMode = resolvedTheme === "dark" ? "dark" : "light";
-
-  useEffect(() => {
-    document.documentElement.dataset.colorMode = colorMode;
-  }, [colorMode]);
-
-  return (
-    <PrimerThemeProvider
-      colorMode={colorMode}
-      dayScheme="light"
-      nightScheme="dark"
-    >
-      {children}
-    </PrimerThemeProvider>
-  );
 }
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
@@ -49,7 +28,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
       scriptProps={{ type: "application/json" }}
     >
       <FaviconSync />
-      <PrimerThemeBridge>{children}</PrimerThemeBridge>
+      <TooltipProvider delayDuration={500}>{children}</TooltipProvider>
     </NextThemesProvider>
   );
 }

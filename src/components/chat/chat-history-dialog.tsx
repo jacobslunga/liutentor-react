@@ -1,4 +1,3 @@
-import { ConfirmationDialog, Dialog, IconButton, Spinner, TextInput } from "@primer/react";
 import { SearchIcon, Trash2Icon } from "lucide-react";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
@@ -10,6 +9,20 @@ import {
 import { cn } from "@/lib/utils";
 import type { Conversation } from "@/queries/conversations";
 import { useChatStore, useChatStoreApi } from "@/stores/chat";
+import { IconButton } from "@/components/shared/icon-button";
+import { ConfirmDialog } from "@/components/shared/confirm-dialog";
+import { AppDialog } from "@/components/shared/app-dialog";
+import {
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+} from "@/components/ui/input-group";
+import { Spinner } from "@/components/ui/spinner";
 
 interface ChatHistoryDialogProps {
   onSelect: () => void;
@@ -24,20 +37,27 @@ export function ChatHistoryDialog({ onSelect }: ChatHistoryDialogProps) {
   const open = useChatStore((s) => s.isHistoryOpen);
   const setOpen = useChatStore((s) => s.setHistoryOpen);
   const currentId = useChatStore((s) => s.currentConversationId);
-  const { conversations, isPending, isError, isSignedIn, remove } = useConversationList("exam", {
-    enabled: open,
-  });
+  const { conversations, isPending, isError, isSignedIn, remove } =
+    useConversationList("exam", {
+      enabled: open,
+    });
 
   const [search, setSearch] = useState("");
   const [openingId, setOpeningId] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
-  const [pendingDelete, setPendingDelete] = useState<Conversation | "all" | null>(null);
+  const [pendingDelete, setPendingDelete] = useState<
+    Conversation | "all" | null
+  >(null);
   const [deleting, setDeleting] = useState(false);
 
   const groups = useMemo(() => {
     const q = search.trim().toLowerCase();
     const filtered = q
-      ? conversations.filter((c) => c.title.toLowerCase().includes(q) || c.meta.toLowerCase().includes(q))
+      ? conversations.filter(
+          (c) =>
+            c.title.toLowerCase().includes(q) ||
+            c.meta.toLowerCase().includes(q),
+        )
       : conversations;
     return groupConversations(filtered);
   }, [conversations, search]);
@@ -74,7 +94,10 @@ export function ChatHistoryDialog({ onSelect }: ChatHistoryDialogProps) {
 
   async function confirmDelete() {
     if (!pendingDelete || deleting) return;
-    const ids = pendingDelete === "all" ? conversations.map((c) => c.id) : [pendingDelete.id];
+    const ids =
+      pendingDelete === "all"
+        ? conversations.map((c) => c.id)
+        : [pendingDelete.id];
     setDeleting(true);
     setActionError(null);
     try {
@@ -91,22 +114,42 @@ export function ChatHistoryDialog({ onSelect }: ChatHistoryDialogProps) {
           isLoading: false,
         });
       }
-      toast.success(pendingDelete === "all" ? "Alla chattar raderades" : "Chatten raderades");
+      toast.success(
+        pendingDelete === "all"
+          ? "Alla chattar raderades"
+          : "Chatten raderades",
+      );
       setPendingDelete(null);
     } catch {
-      setActionError(pendingDelete === "all" ? "Kunde inte radera alla chattar." : "Kunde inte radera chatten.");
+      setActionError(
+        pendingDelete === "all"
+          ? "Kunde inte radera alla chattar."
+          : "Kunde inte radera chatten.",
+      );
     } finally {
       setDeleting(false);
     }
   }
 
   let body;
-  if (isPending) body = <p className="px-2 py-4 text-sm text-muted-foreground">Hämtar historik...</p>;
-  else if (isError) body = <p className="px-2 py-4 text-sm text-destructive">Kunde inte hämta konversationshistorik.</p>;
+  if (isPending)
+    body = (
+      <p className="px-2 py-4 text-sm text-muted-foreground">
+        Hämtar historik...
+      </p>
+    );
+  else if (isError)
+    body = (
+      <p className="px-2 py-4 text-sm text-destructive">
+        Kunde inte hämta konversationshistorik.
+      </p>
+    );
   else if (!groups.length)
     body = (
       <p className="px-2 py-4 text-sm text-muted-foreground">
-        {search.trim() ? `Inga chattar matchar "${search.trim()}".` : "Inga chattar hittades."}
+        {search.trim()
+          ? `Inga chattar matchar "${search.trim()}".`
+          : "Inga chattar hittades."}
       </p>
     );
   else
@@ -114,7 +157,9 @@ export function ChatHistoryDialog({ onSelect }: ChatHistoryDialogProps) {
       <div className="space-y-4">
         {groups.map((group) => (
           <section key={group.label}>
-            <h3 className="px-3 pb-1.5 text-sm text-muted-foreground/60">{group.label}</h3>
+            <h3 className="px-3 pb-1.5 text-sm text-muted-foreground/60">
+              {group.label}
+            </h3>
             <div className="space-y-0.5">
               {group.items.map((item) => (
                 <div
@@ -131,25 +176,35 @@ export function ChatHistoryDialog({ onSelect }: ChatHistoryDialogProps) {
                     aria-busy={openingId === item.id}
                     onClick={() => void openConversation(item)}
                   >
-                    <p className={cn("truncate text-sm text-foreground/90", item.id === currentId && "font-medium")}>
+                    <p
+                      className={cn(
+                        "truncate text-sm text-foreground/90",
+                        item.id === currentId && "font-medium",
+                      )}
+                    >
                       {item.title}
                     </p>
-                    {item.meta && <p className="truncate text-xs text-muted-foreground/70">{item.meta}</p>}
+                    {item.meta && (
+                      <p className="truncate text-xs text-muted-foreground/70">
+                        {item.meta}
+                      </p>
+                    )}
                   </button>
                   {openingId === item.id && (
                     <span className="flex size-7 shrink-0 items-center justify-center">
-                      <Spinner size="small" srText="Laddar konversation..." />
+                      <Spinner aria-label="Laddar konversation..." />
                     </span>
                   )}
                   <IconButton
-                    icon={Trash2Icon}
-                    variant="invisible"
-                    size="small"
+                    variant="ghost"
+                    size="icon-sm"
                     className="shrink-0 transition-opacity sm:pointer-events-none sm:opacity-0 sm:group-hover:pointer-events-auto sm:group-hover:opacity-100"
                     disabled={deleting}
                     aria-label="Radera chatt"
                     onClick={() => setPendingDelete(item)}
-                  />
+                  >
+                    <Trash2Icon />
+                  </IconButton>
                 </div>
               ))}
             </div>
@@ -166,67 +221,64 @@ export function ChatHistoryDialog({ onSelect }: ChatHistoryDialogProps) {
   return (
     <>
       {open && (
-        <Dialog
-          width="large"
-          height="large"
+        <AppDialog
+          className="h-[min(85dvh,720px)]"
           onClose={close}
-          renderHeader={({ dialogLabelId, dialogDescriptionId }) => (
-            <Dialog.Header>
-              <div className="flex items-start gap-2">
-                <div className="min-w-0 flex-1">
-                  <Dialog.Title id={dialogLabelId}>Chatthistorik</Dialog.Title>
-                  <Dialog.Subtitle id={dialogDescriptionId}>
-                    {isSignedIn
-                      ? "Sök och öppna tidigare chattar"
-                      : "Sparas bara i den här webbläsaren. Logga in för att spara dem på ditt konto."}
-                  </Dialog.Subtitle>
-                </div>
-                <Dialog.CloseButton onClose={close} />
-              </div>
+          header={
+            <DialogHeader>
+              <DialogTitle>Chatthistorik</DialogTitle>
+              <DialogDescription>
+                {isSignedIn
+                  ? "Sök och öppna tidigare chattar"
+                  : "Sparas bara i den här webbläsaren. Logga in för att spara dem på ditt konto."}
+              </DialogDescription>
               <div className="mt-3 flex items-center gap-2">
-                <TextInput
-                  block
-                  leadingVisual={SearchIcon}
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  placeholder="Sök bland chattar..."
-                  aria-label="Sök bland chattar"
-                />
+                <InputGroup>
+                  <InputGroupAddon>
+                    <SearchIcon />
+                  </InputGroupAddon>
+                  <InputGroupInput
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    placeholder="Sök bland chattar..."
+                    aria-label="Sök bland chattar"
+                  />
+                </InputGroup>
                 {conversations.length > 0 && (
                   <IconButton
-                    icon={Trash2Icon}
-                    variant="danger"
+                    variant="destructive"
                     disabled={deleting}
                     aria-label="Radera alla chattar"
                     onClick={() => setPendingDelete("all")}
-                  />
+                  >
+                    <Trash2Icon />
+                  </IconButton>
                 )}
               </div>
-              {actionError && <p className="pt-2 text-sm text-destructive">{actionError}</p>}
-            </Dialog.Header>
-          )}
+              {actionError && (
+                <p className="pt-2 text-sm text-destructive">{actionError}</p>
+              )}
+            </DialogHeader>
+          }
         >
           {body}
-        </Dialog>
+        </AppDialog>
       )}
 
       {pendingDelete && (
-        <ConfirmationDialog
-          title={pendingDelete === "all" ? "Radera all historik?" : "Är du säker?"}
-          cancelButtonContent="Avbryt"
-          confirmButtonContent={pendingDelete === "all" ? "Radera alla" : "Radera"}
-          confirmButtonType="danger"
-          confirmButtonLoading={deleting}
-          onClose={(gesture) => {
-            if (deleting) return;
-            if (gesture === "confirm") void confirmDelete();
-            else setPendingDelete(null);
-          }}
+        <ConfirmDialog
+          title={
+            pendingDelete === "all" ? "Radera all historik?" : "Är du säker?"
+          }
+          confirmLabel={pendingDelete === "all" ? "Radera alla" : "Radera"}
+          isPending={deleting}
+          onConfirm={() => void confirmDelete()}
+          onCancel={() => setPendingDelete(null)}
         >
           {pendingDelete === "all"
             ? `Alla ${conversations.length} chattar kommer att raderas permanent. Det går inte att ångra.`
             : "Den här chatten kommer att raderas permanent och kan inte ångras."}
-        </ConfirmationDialog>
+        </ConfirmDialog>
       )}
     </>
   );

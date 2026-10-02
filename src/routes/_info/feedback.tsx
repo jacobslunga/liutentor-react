@@ -1,10 +1,19 @@
-import { Button, FormControl, Textarea, TextInput } from "@primer/react";
 import { createFileRoute } from "@tanstack/react-router";
 import { CheckIcon, TriangleAlertIcon } from "lucide-react";
 import { useState, type FormEvent } from "react";
 import { PageIntro } from "@/components/info/page-intro";
-import { RouterLinkButton } from "@/components/primer/router-link-button";
+import { RouterLinkButton } from "@/components/shared/router-link";
 import { useDocumentTitle } from "@/hooks/use-document-title";
+import { Button } from "@/components/ui/button";
+import { Spinner } from "@/components/ui/spinner";
+import {
+  Field,
+  FieldDescription,
+  FieldError,
+  FieldLabel,
+} from "@/components/ui/field";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 
 export const Route = createFileRoute("/_info/feedback")({
   component: FeedbackPage,
@@ -81,7 +90,7 @@ function FeedbackPage() {
                 title="Tack!"
                 body="Vi har tagit emot din feedback och återkommer om det behövs."
                 action={
-                  <RouterLinkButton to="/" size="small">
+                  <RouterLinkButton variant="outline" to="/" size="sm">
                     Tillbaka till startsidan
                   </RouterLinkButton>
                 }
@@ -94,7 +103,8 @@ function FeedbackPage() {
                 body="Försök igen eller kontakta oss direkt på liutentor@gmail.com"
                 action={
                   <Button
-                    size="small"
+                    variant="outline"
+                    size="sm"
                     onClick={() => setStatus("idle")}
                   >
                     Försök igen
@@ -104,72 +114,74 @@ function FeedbackPage() {
             ) : (
               <form onSubmit={submit} noValidate>
                 <div className="flex flex-col gap-6">
-                  <FormControl>
-                    <FormControl.Label>Namn</FormControl.Label>
-                    <TextInput
-                      block
+                  <Field>
+                    <FieldLabel htmlFor="feedback-namn">Namn</FieldLabel>
+                    <Input
+                      id="feedback-namn"
                       placeholder="Ditt namn"
                       value={form.name}
                       onChange={update("name")}
                     />
-                  </FormControl>
-                  <FormControl required>
-                    <FormControl.Label>LiU-mail</FormControl.Label>
-                    <TextInput
-                      block
+                  </Field>
+                  <Field data-invalid={!!errors.liuMail}>
+                    <FieldLabel htmlFor="feedback-liu-mail">
+                      LiU-mail
+                    </FieldLabel>
+                    <Input
+                      id="feedback-liu-mail"
+                      aria-invalid={!!errors.liuMail}
                       type="email"
                       placeholder="liuid123@student.liu.se"
-                      validationStatus={errors.liuMail ? "error" : undefined}
                       value={form.liuMail}
                       onChange={update("liuMail")}
                     />
                     {errors.liuMail ? (
-                      <FormControl.Validation variant="error">
-                        {errors.liuMail}
-                      </FormControl.Validation>
+                      <FieldError>{errors.liuMail}</FieldError>
                     ) : (
-                      <FormControl.Caption>
+                      <FieldDescription>
                         Format: liuid123@student.liu.se
-                      </FormControl.Caption>
+                      </FieldDescription>
                     )}
-                  </FormControl>
-                  <FormControl>
-                    <FormControl.Label>Del av hemsidan</FormControl.Label>
-                    <TextInput
-                      block
+                  </Field>
+                  <Field>
+                    <FieldLabel htmlFor="feedback-del-av-hemsidan">
+                      Del av hemsidan
+                    </FieldLabel>
+                    <Input
+                      id="feedback-del-av-hemsidan"
                       placeholder="t.ex. Söksidan, PDF-visaren..."
                       value={form.partOfWebsite}
                       onChange={update("partOfWebsite")}
                     />
-                  </FormControl>
-                  <FormControl required>
-                    <FormControl.Label>Meddelande</FormControl.Label>
+                  </Field>
+                  <Field data-invalid={!!errors.message}>
+                    <FieldLabel htmlFor="feedback-meddelande">
+                      Meddelande
+                    </FieldLabel>
                     <Textarea
-                      block
+                      id="feedback-meddelande"
+                      aria-invalid={!!errors.message}
                       rows={6}
                       placeholder="Berätta vad du tänker..."
-                      validationStatus={errors.message ? "error" : undefined}
                       value={form.message}
                       onChange={update("message")}
                     />
                     {errors.message ? (
-                      <FormControl.Validation variant="error">
-                        {errors.message}
-                      </FormControl.Validation>
+                      <FieldError>{errors.message}</FieldError>
                     ) : (
-                      <FormControl.Caption>Minst 10 tecken</FormControl.Caption>
+                      <FieldDescription>Minst 10 tecken</FieldDescription>
                     )}
-                  </FormControl>
+                  </Field>
                   <div className="flex items-center justify-between gap-4 border-t pt-6">
                     <p className="text-xs text-muted-foreground">
                       Vi använder din mail bara för att kunna svara.
                     </p>
                     <Button
                       type="submit"
-                      size="small"
-                      variant="primary"
-                      loading={status === "sending"}
+                      size="sm"
+                      disabled={status === "sending"}
                     >
+                      {status === "sending" && <Spinner />}
                       Skicka
                     </Button>
                   </div>

@@ -1,4 +1,3 @@
-import { Link as PrimerLink, SkeletonBox } from "@primer/react";
 import {
   BookOpenCheckIcon,
   CalendarIcon,
@@ -7,13 +6,20 @@ import {
   UsersIcon,
 } from "lucide-react";
 import { lazy, Suspense, useMemo, type ReactNode } from "react";
-import { computeCourseStats, passRateClass, type GradeEntry } from "@/lib/course-stats";
+import {
+  computeCourseStats,
+  passRateClass,
+  type GradeEntry,
+} from "@/lib/course-stats";
 import { cn } from "@/lib/utils";
 import type { Exam } from "@/types/exam";
+import { Skeleton } from "@/components/ui/skeleton";
 
 // recharts stays out of the course page chunk until the sidebar needs it.
 const CourseStatsPassRate = lazy(() =>
-  import("./course-stats-pass-rate").then((m) => ({ default: m.CourseStatsPassRate })),
+  import("./course-stats-pass-rate").then((m) => ({
+    default: m.CourseStatsPassRate,
+  })),
 );
 
 /**
@@ -21,12 +27,23 @@ const CourseStatsPassRate = lazy(() =>
  * repository page: key facts, the grade distribution as a stacked bar (like
  * the repo's language bar), and pass rates over time.
  */
-export function CourseSidebar({ exams, className }: { exams: Exam[]; className?: string }) {
+export function CourseSidebar({
+  exams,
+  className,
+}: {
+  exams: Exam[];
+  className?: string;
+}) {
   const stats = useMemo(() => computeCourseStats(exams), [exams]);
   const withSolutions = exams.filter((e) => e.has_solution).length;
-  const years = exams.map((e) => e.exam_date.slice(0, 4)).filter(Boolean).sort();
+  const years = exams
+    .map((e) => e.exam_date.slice(0, 4))
+    .filter(Boolean)
+    .sort();
   const yearSpan =
-    years.length && years[0] !== years.at(-1) ? `${years[0]}–${years.at(-1)}` : years[0];
+    years.length && years[0] !== years.at(-1)
+      ? `${years[0]}–${years.at(-1)}`
+      : years[0];
 
   return (
     <aside className={cn("flex flex-col divide-y text-sm", className)}>
@@ -36,7 +53,8 @@ export function CourseSidebar({ exams, className }: { exams: Exam[]; className?:
             <strong className="text-foreground">{exams.length}</strong> tentor
           </Fact>
           <Fact icon={BookOpenCheckIcon}>
-            <strong className="text-foreground">{withSolutions}</strong> med facit
+            <strong className="text-foreground">{withSolutions}</strong> med
+            facit
           </Fact>
           {yearSpan && <Fact icon={CalendarIcon}>{yearSpan}</Fact>}
           {stats.totalStudents > 0 && (
@@ -66,7 +84,7 @@ export function CourseSidebar({ exams, className }: { exams: Exam[]; className?:
 
       {stats.hasPassRateData && (
         <Section title="Godkända över tid">
-          <Suspense fallback={<SkeletonBox className="h-44 w-full" />}>
+          <Suspense fallback={<Skeleton className="h-44 w-full" />}>
             <CourseStatsPassRate
               points={stats.series}
               average={stats.overallPassRate ?? 0}
@@ -79,9 +97,14 @@ export function CourseSidebar({ exams, className }: { exams: Exam[]; className?:
       <Section title="Källa">
         <p className="text-muted-foreground">
           Statistiken kommer från{" "}
-          <PrimerLink href="https://ysektionen.se/student/tentastatistik/" target="_blank" rel="noreferrer">
+          <a
+            href="https://ysektionen.se/student/tentastatistik/"
+            target="_blank"
+            rel="noreferrer"
+            className="font-medium text-foreground underline underline-offset-4"
+          >
             Y-Sektionen
-          </PrimerLink>
+          </a>
           {stats.hasAnyData ? "." : " och saknas för den här kursen."}
         </p>
       </Section>
@@ -89,7 +112,15 @@ export function CourseSidebar({ exams, className }: { exams: Exam[]; className?:
   );
 }
 
-function Section({ title, first, children }: { title: string; first?: boolean; children: ReactNode }) {
+function Section({
+  title,
+  first,
+  children,
+}: {
+  title: string;
+  first?: boolean;
+  children: ReactNode;
+}) {
   return (
     <section className={first ? "pb-6" : "py-6"}>
       <h2 className="mb-3 text-base font-semibold">{title}</h2>
@@ -98,7 +129,13 @@ function Section({ title, first, children }: { title: string; first?: boolean; c
   );
 }
 
-function Fact({ icon: Icon, children }: { icon: React.ElementType; children: ReactNode }) {
+function Fact({
+  icon: Icon,
+  children,
+}: {
+  icon: React.ElementType;
+  children: ReactNode;
+}) {
   return (
     <li className="flex items-center gap-2">
       <Icon className="size-4 shrink-0" />
@@ -116,7 +153,10 @@ function GradeBar({ grades }: { grades: GradeEntry[] }) {
           <span
             key={grade.key}
             className="h-full not-last:mr-0.5"
-            style={{ width: `${grade.pct}%`, background: `var(--${grade.token})` }}
+            style={{
+              width: `${grade.pct}%`,
+              background: `var(--${grade.token})`,
+            }}
           />
         ))}
       </div>
@@ -128,7 +168,9 @@ function GradeBar({ grades }: { grades: GradeEntry[] }) {
               style={{ background: `var(--${grade.token})` }}
             />
             <span className="font-semibold">{grade.key}</span>
-            <span className="text-muted-foreground tabular-nums">{grade.pct.toFixed(1)}%</span>
+            <span className="text-muted-foreground tabular-nums">
+              {grade.pct.toFixed(1)}%
+            </span>
           </li>
         ))}
       </ul>

@@ -1,15 +1,12 @@
 import { ArrowLeftIcon, ArrowRightIcon, CircleCheckIcon } from "lucide-react";
 import { useState } from "react";
-import {
-  Button,
-  ButtonGroup,
-  ConfirmationDialog,
-  ProgressBar,
-} from "@primer/react";
 import { cn } from "@/lib/utils";
 import { useQuizStore } from "@/stores/quiz";
 import type { QuizQuestion } from "@/types/quiz";
 import { QuizMarkdown } from "./quiz-markdown";
+import { Button } from "@/components/ui/button";
+import { ConfirmDialog } from "@/components/shared/confirm-dialog";
+import { Progress } from "@/components/ui/progress";
 
 export function QuizAnswering({ questions }: { questions: QuizQuestion[] }) {
   const currentIndex = useQuizStore((s) => s.currentIndex);
@@ -31,11 +28,11 @@ export function QuizAnswering({ questions }: { questions: QuizQuestion[] }) {
     <div className="w-full">
       <div className="mb-6 flex items-center">
         <Button
-          variant="invisible"
-          size="small"
-          leadingVisual={ArrowLeftIcon}
+          variant="ghost"
+          size="sm"
           onClick={() => (answeredCount > 0 ? setConfirmExit(true) : reset())}
         >
+          <ArrowLeftIcon />
           Avsluta
         </Button>
       </div>
@@ -53,8 +50,8 @@ export function QuizAnswering({ questions }: { questions: QuizQuestion[] }) {
             {answeredCount}/{count} besvarade
           </span>
         </div>
-        <ProgressBar
-          progress={Math.round(((currentIndex + 1) / count) * 100)}
+        <Progress
+          value={Math.round(((currentIndex + 1) / count) * 100)}
           aria-label="Quizförlopp"
         />
       </div>
@@ -74,52 +71,49 @@ export function QuizAnswering({ questions }: { questions: QuizQuestion[] }) {
             Svara för att fortsätta
           </span>
         )}
-        <ButtonGroup>
+        <div className="flex items-center gap-2">
           <Button
-            size="small"
-            leadingVisual={ArrowLeftIcon}
+            variant="outline"
+            size="sm"
             disabled={currentIndex === 0}
             onClick={previous}
           >
+            <ArrowLeftIcon />
             Förra
           </Button>
           {isLast ? (
-            <Button
-              size="small"
-              variant="primary"
-              leadingVisual={CircleCheckIcon}
-              disabled={!canSubmit}
-              onClick={complete}
-            >
+            <Button size="sm" disabled={!canSubmit} onClick={complete}>
+              <CircleCheckIcon />
               Rätta quiz
             </Button>
           ) : (
             <Button
-              size="small"
-              trailingVisual={ArrowRightIcon}
+              variant="outline"
+              size="sm"
               disabled={!answeredCurrent}
               onClick={next}
             >
               Nästa
+              <ArrowRightIcon />
             </Button>
           )}
-        </ButtonGroup>
+        </div>
       </div>
 
       {confirmExit && (
-        <ConfirmationDialog
+        <ConfirmDialog
           title="Avsluta quizet?"
-          cancelButtonContent="Fortsätt quizet"
-          confirmButtonContent="Avsluta"
-          confirmButtonType="danger"
-          onClose={(gesture) => {
+          confirmLabel="Avsluta"
+          cancelLabel="Fortsätt quizet"
+          onConfirm={() => {
             setConfirmExit(false);
-            if (gesture === "confirm") reset();
+            reset();
           }}
+          onCancel={() => setConfirmExit(false)}
         >
           Du har svarat på {answeredCount} av {count} frågor. Dina svar
           försvinner.
-        </ConfirmationDialog>
+        </ConfirmDialog>
       )}
     </div>
   );

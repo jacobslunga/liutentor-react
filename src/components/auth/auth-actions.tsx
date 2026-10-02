@@ -1,4 +1,4 @@
-import { RouterLinkButton } from "@/components/primer/router-link-button";
+import { RouterLinkButton } from "@/components/shared/router-link";
 import { useAuthStore } from "@/stores/auth";
 import { SettingsDialog } from "@/components/settings/settings-dialog";
 import { UserDropdown } from "./user-dropdown";
@@ -12,7 +12,7 @@ export function AuthActions({
 }) {
   const ready = useAuthStore((s) => s.ready);
   const signedIn = useAuthStore((s) => !!s.user);
-  const size = largerOnDesktop ? "medium" : "small";
+  const size = largerOnDesktop ? "default" : "sm";
 
   if (!ready) return null;
 
@@ -24,14 +24,13 @@ export function AuthActions({
   return (
     <div className="flex items-center gap-2">
       {settings}
-      <RouterLinkButton to="/logga-in" size={size}>
+      <RouterLinkButton variant="outline" to="/logga-in" size={size}>
         Logga in
       </RouterLinkButton>
       <RouterLinkButton
         to="/logga-in"
         search={{ tab: "skapa-konto" }}
         size={size}
-        variant="primary"
       >
         Skapa konto
       </RouterLinkButton>

@@ -2,13 +2,17 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useNavigate, useRouter } from "@tanstack/react-router";
 import { CheckIcon, MinusIcon } from "lucide-react";
 import { memo, useMemo, useState } from "react";
-import { Button } from "@primer/react";
 import { getExamPrefix } from "@/lib/exams";
 import { cn } from "@/lib/utils";
 import { examDetailQuery } from "@/queries/exams";
-import { sortExams, type ExamSortBy, type ExamSortDirection } from "@/stores/exam-sort";
+import {
+  sortExams,
+  type ExamSortBy,
+  type ExamSortDirection,
+} from "@/stores/exam-sort";
 import type { Exam } from "@/types/exam";
 import { ExamStatsDialog } from "./exam-stats-dialog";
+import { Button } from "@/components/ui/button";
 
 const GRID_COLS =
   "grid grid-cols-[minmax(max-content,1fr)_max-content_max-content_max-content] items-center gap-x-4 px-4 sm:grid-cols-[minmax(0,3fr)_minmax(80px,1fr)_minmax(64px,1fr)_minmax(88px,1fr)]";
@@ -20,7 +24,12 @@ interface CourseExamsTableProps {
   sortDirection: ExamSortDirection;
 }
 
-export function CourseExamsTable({ courseCode, exams, sortBy, sortDirection }: CourseExamsTableProps) {
+export function CourseExamsTable({
+  courseCode,
+  exams,
+  sortBy,
+  sortDirection,
+}: CourseExamsTableProps) {
   const [activeFilters, setActiveFilters] = useState<Set<string>>(new Set());
 
   const prefixes = useMemo(
@@ -51,8 +60,8 @@ export function CourseExamsTable({ courseCode, exams, sortBy, sortDirection }: C
           {prefixes.map((prefix) => (
             <Button
               key={prefix}
-              size="small"
-              variant={activeFilters.has(prefix) ? "primary" : "default"}
+              size="sm"
+              variant={activeFilters.has(prefix) ? "default" : "outline"}
               onClick={() => toggleFilter(prefix)}
             >
               {prefix}
@@ -66,8 +75,12 @@ export function CourseExamsTable({ courseCode, exams, sortBy, sortDirection }: C
           <div className={cn(GRID_COLS, "border-b bg-muted/30 py-3")}>
             <div className="text-xs text-muted-foreground">Tentamen</div>
             <div className="text-xs text-muted-foreground">Typ</div>
-            <div className="text-center text-xs text-muted-foreground">Facit</div>
-            <div className="text-right text-xs text-muted-foreground">Godkänd</div>
+            <div className="text-center text-xs text-muted-foreground">
+              Facit
+            </div>
+            <div className="text-right text-xs text-muted-foreground">
+              Godkänd
+            </div>
           </div>
 
           {visibleExams.map((exam) => (
@@ -79,7 +92,13 @@ export function CourseExamsTable({ courseCode, exams, sortBy, sortDirection }: C
   );
 }
 
-const ExamRow = memo(function ExamRow({ courseCode, exam }: { courseCode: string; exam: Exam }) {
+const ExamRow = memo(function ExamRow({
+  courseCode,
+  exam,
+}: {
+  courseCode: string;
+  exam: Exam;
+}) {
   const navigate = useNavigate();
   const router = useRouter();
   const queryClient = useQueryClient();

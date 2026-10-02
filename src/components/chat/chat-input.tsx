@@ -1,6 +1,6 @@
-import { ActionList, ActionMenu, IconButton } from "@primer/react";
 import {
   ArrowUpIcon,
+  ChevronDownIcon,
   CornerDownLeftIcon,
   FileTextIcon,
   ImageIcon,
@@ -46,6 +46,15 @@ import {
   type CourseMentionMenuApi,
 } from "./course-mention-menu";
 import { SelectionQuote } from "./selection-quote";
+import { IconButton } from "@/components/shared/icon-button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Button } from "@/components/ui/button";
 
 const MAX_LENGTH = 4000;
 /**
@@ -332,7 +341,9 @@ export function ChatInput({
   };
 
   useImperativeHandle(ref, () => ({
-    focus: () => textareaRef.current?.focus(),
+    // preventScroll: the panel may still be sliding in; scrolling to the
+    // input mid-transition would jerk the layout.
+    focus: () => textareaRef.current?.focus({ preventScroll: true }),
     getText: () => textareaRef.current?.value ?? "",
     setText,
     getAttachments: () => [...attachmentsRef.current],
@@ -443,12 +454,13 @@ export function ChatInput({
                     "<SelectionQuote text={selectionContext} />"
                   </span>
                   <IconButton
-                    icon={XIcon}
-                    variant="invisible"
-                    size="small"
+                    variant="ghost"
+                    size="icon-sm"
                     aria-label="Ta bort citatet"
                     onClick={onClearSelectionContext}
-                  />
+                  >
+                    <XIcon />
+                  </IconButton>
                 </div>
               )}
               {attachments.length > 0 && (
@@ -476,12 +488,13 @@ export function ChatInput({
                         {formatFileSize(a.size)}
                       </span>
                       <IconButton
-                        icon={XIcon}
-                        variant="invisible"
-                        size="small"
+                        variant="ghost"
+                        size="icon-sm"
                         aria-label={`Ta bort ${a.name}`}
                         onClick={() => removeAttachment(a.id)}
-                      />
+                      >
+                        <XIcon />
+                      </IconButton>
                     </div>
                   ))}
                 </div>
@@ -553,13 +566,14 @@ export function ChatInput({
               }}
             />
             <IconButton
-              icon={PlusIcon}
-              variant="invisible"
+              variant="ghost"
               className="rounded-full"
               aria-label="Bifoga filer"
               disabled={isLoading || capacityReached}
               onClick={() => fileInputRef.current?.click()}
-            />
+            >
+              <PlusIcon />
+            </IconButton>
           </div>
 
           <div
@@ -580,14 +594,15 @@ export function ChatInput({
               </span>
             )}
             <IconButton
-              icon={isLoading ? StopIcon : ArrowUpIcon}
-              variant="primary"
+              variant="default"
               className="rounded-full"
               aria-label={isLoading ? "Avbryt svar" : "Skicka meddelande"}
-              unsafeDisableTooltip
+              hideTooltip
               disabled={!isLoading && !canSend}
               onClick={() => (isLoading ? onCancel() : submit())}
-            />
+            >
+              {isLoading ? <StopIcon /> : <ArrowUpIcon />}
+            </IconButton>
           </div>
         </div>
 
@@ -630,23 +645,25 @@ function ModelPicker() {
     availableModels[0].label;
 
   return (
-    <ActionMenu>
-      <ActionMenu.Button variant="invisible" size="small" aria-label="Tankenivå">
-        {label}
-      </ActionMenu.Button>
-      <ActionMenu.Overlay side="outside-top" align="end" width="small">
-        <ActionList selectionVariant="single">
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="ghost" size="sm" aria-label="Tankenivå">
+          {label}
+          <ChevronDownIcon />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent side="top" align="end" className="min-w-48">
+        <DropdownMenuRadioGroup
+          value={selectedModelId}
+          onValueChange={(value) => setSelectedModelId(value as ChatModelId)}
+        >
           {availableModels.map((model) => (
-            <ActionList.Item
-              key={model.id}
-              selected={model.id === selectedModelId}
-              onSelect={() => setSelectedModelId(model.id as ChatModelId)}
-            >
+            <DropdownMenuRadioItem key={model.id} value={model.id}>
               {model.label}
-            </ActionList.Item>
+            </DropdownMenuRadioItem>
           ))}
-        </ActionList>
-      </ActionMenu.Overlay>
-    </ActionMenu>
+        </DropdownMenuRadioGroup>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }

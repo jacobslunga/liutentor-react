@@ -2,9 +2,9 @@ import { createFileRoute } from "@tanstack/react-router";
 import { MailIcon } from "lucide-react";
 import { DocContact, LegalDocument } from "@/components/info/doc-layout";
 import { PageIntro } from "@/components/info/page-intro";
-import { LinkButton } from "@primer/react";
 import { useDocumentTitle } from "@/hooks/use-document-title";
 import type { DocSection } from "@/types/doc";
+import { ButtonLink } from "@/components/shared/router-link";
 
 export const Route = createFileRoute("/_info/privacy-policy")({
   component: PrivacyPolicyPage,
@@ -107,9 +107,14 @@ function PrivacyPolicyPage() {
             title="Kontakta oss"
             body="Har du frågor om din data eller vill utöva dina rättigheter, till exempel radera ditt konto? Hör av dig så hjälper vi dig."
           >
-            <LinkButton href="mailto:liutentor@gmail.com" size="small" leadingVisual={MailIcon}>
+            <ButtonLink
+              variant="outline"
+              href="mailto:liutentor@gmail.com"
+              size="sm"
+            >
+              <MailIcon />
               liutentor@gmail.com
-            </LinkButton>
+            </ButtonLink>
           </DocContact>
         }
       />

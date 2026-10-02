@@ -1,4 +1,3 @@
-import { ActionList, ActionMenu } from "@primer/react";
 import { useNavigate } from "@tanstack/react-router";
 import {
   CircleHelpIcon,
@@ -18,6 +17,18 @@ import { SettingsDialog } from "@/components/settings/settings-dialog";
 import { signOut } from "@/lib/auth";
 import { useProfile } from "@/queries/profile";
 import { UserAvatar } from "./user-avatar";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuSeparator,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 const THEMES = [
   { value: "light", label: "Ljust", Icon: SunIcon },
@@ -38,8 +49,8 @@ export function UserDropdown() {
 
   return (
     <>
-      <ActionMenu>
-        <ActionMenu.Anchor>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
           <button
             type="button"
             className="rounded-full transition-opacity hover:opacity-80"
@@ -47,8 +58,8 @@ export function UserDropdown() {
           >
             <UserAvatar className="size-10" />
           </button>
-        </ActionMenu.Anchor>
-        <ActionMenu.Overlay align="end" width="medium">
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end" className="w-64">
           <div className="flex items-center gap-3 px-4 pt-4 pb-2">
             <UserAvatar className="size-10 shrink-0" />
             <div className="min-w-0">
@@ -60,77 +71,55 @@ export function UserDropdown() {
               </p>
             </div>
           </div>
-          <ActionList>
-            <ActionList.Divider />
-            <ActionList.Item onSelect={() => void navigate({ to: "/me" })}>
-              <ActionList.LeadingVisual>
-                <UserIcon />
-              </ActionList.LeadingVisual>
-              Profil
-            </ActionList.Item>
-            <ActionList.Divider />
-            <ActionList.Item onSelect={() => setSettingsOpen(true)}>
-              <ActionList.LeadingVisual>
-                <SettingsIcon />
-              </ActionList.LeadingVisual>
-              Inställningar
-            </ActionList.Item>
-            <ActionMenu>
-              <ActionMenu.Anchor>
-                <ActionList.Item>
-                  <ActionList.LeadingVisual>
-                    <PaletteIcon />
-                  </ActionList.LeadingVisual>
-                  Utseende
-                  <ActionList.TrailingVisual>{themeLabel}</ActionList.TrailingVisual>
-                </ActionList.Item>
-              </ActionMenu.Anchor>
-              <ActionMenu.Overlay width="small">
-                <ActionList selectionVariant="single">
-                  {THEMES.map(({ value, label, Icon }) => (
-                    <ActionList.Item
-                      key={value}
-                      selected={theme === value}
-                      onSelect={() => setTheme(value)}
-                    >
-                      <ActionList.LeadingVisual>
-                        <Icon />
-                      </ActionList.LeadingVisual>
-                      {label}
-                    </ActionList.Item>
-                  ))}
-                </ActionList>
-              </ActionMenu.Overlay>
-            </ActionMenu>
-            <ActionList.Divider />
-            <ActionList.Item onSelect={() => void navigate({ to: "/faq" })}>
-              <ActionList.LeadingVisual>
-                <CircleHelpIcon />
-              </ActionList.LeadingVisual>
-              Vanliga frågor
-            </ActionList.Item>
-            <ActionList.Item onSelect={() => void navigate({ to: "/feedback" })}>
-              <ActionList.LeadingVisual>
-                <MessageSquareIcon />
-              </ActionList.LeadingVisual>
-              Skicka feedback
-            </ActionList.Item>
-            <ActionList.Item onSelect={() => void navigate({ to: "/om-oss" })}>
-              <ActionList.LeadingVisual>
-                <InfoIcon />
-              </ActionList.LeadingVisual>
-              Om LiU Tentor
-            </ActionList.Item>
-            <ActionList.Divider />
-            <ActionList.Item onSelect={() => void signOut()}>
-              <ActionList.LeadingVisual>
-                <LogOutIcon />
-              </ActionList.LeadingVisual>
-              Logga ut
-            </ActionList.Item>
-          </ActionList>
-        </ActionMenu.Overlay>
-      </ActionMenu>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem onSelect={() => void navigate({ to: "/me" })}>
+            <UserIcon />
+            Profil
+          </DropdownMenuItem>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem onSelect={() => setSettingsOpen(true)}>
+            <SettingsIcon />
+            Inställningar
+          </DropdownMenuItem>
+          <DropdownMenuSub>
+            <DropdownMenuSubTrigger>
+              <PaletteIcon />
+              Utseende
+              <span className="ml-auto text-xs text-muted-foreground">
+                {themeLabel}
+              </span>
+            </DropdownMenuSubTrigger>
+            <DropdownMenuSubContent className="min-w-40">
+              <DropdownMenuRadioGroup value={theme} onValueChange={setTheme}>
+                {THEMES.map(({ value, label, Icon }) => (
+                  <DropdownMenuRadioItem key={value} value={value}>
+                    <Icon />
+                    {label}
+                  </DropdownMenuRadioItem>
+                ))}
+              </DropdownMenuRadioGroup>
+            </DropdownMenuSubContent>
+          </DropdownMenuSub>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem onSelect={() => void navigate({ to: "/faq" })}>
+            <CircleHelpIcon />
+            Vanliga frågor
+          </DropdownMenuItem>
+          <DropdownMenuItem onSelect={() => void navigate({ to: "/feedback" })}>
+            <MessageSquareIcon />
+            Skicka feedback
+          </DropdownMenuItem>
+          <DropdownMenuItem onSelect={() => void navigate({ to: "/om-oss" })}>
+            <InfoIcon />
+            Om LiU Tentor
+          </DropdownMenuItem>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem onSelect={() => void signOut()}>
+            <LogOutIcon />
+            Logga ut
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
       <SettingsDialog open={settingsOpen} onOpenChange={setSettingsOpen} />
     </>
   );

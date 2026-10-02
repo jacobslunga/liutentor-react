@@ -1,6 +1,9 @@
-import { Dialog, TextInput } from "@primer/react";
 import { useId, useState } from "react";
 import { COURSE_NAME_MAX } from "@/lib/study-courses";
+import { AppDialog } from "@/components/shared/app-dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Spinner } from "@/components/ui/spinner";
 
 interface CourseNameDialogProps {
   open: boolean;
@@ -63,26 +66,25 @@ function CourseNameForm({
   }
 
   return (
-    <Dialog
-      width="large"
+    <AppDialog
       title={renaming ? "Byt namn på kursen" : "Ny kurs"}
-      subtitle={
+      description={
         renaming
           ? "Namnet syns bara för dig."
           : "Samla föreläsningar och chattar för en kurs. Chattar i kursen använder materialet du laddar upp."
       }
       onClose={onCancel}
-      footerButtons={[
-        { content: "Avbryt", onClick: onCancel },
-        {
-          content: renaming ? "Spara" : "Skapa kurs",
-          buttonType: "primary",
-          type: "submit",
-          form: formId,
-          disabled: !canSave,
-          loading: saving,
-        },
-      ]}
+      footer={
+        <>
+          <Button variant="outline" onClick={onCancel}>
+            Avbryt
+          </Button>
+          <Button type="submit" form={formId} disabled={!canSave || saving}>
+            {saving && <Spinner />}
+            {renaming ? "Spara" : "Skapa kurs"}
+          </Button>
+        </>
+      }
     >
       <form
         id={formId}
@@ -91,8 +93,7 @@ function CourseNameForm({
           void save();
         }}
       >
-        <TextInput
-          block
+        <Input
           autoFocus
           value={name}
           maxLength={COURSE_NAME_MAX}
@@ -101,6 +102,6 @@ function CourseNameForm({
           onChange={(e) => setName(e.target.value)}
         />
       </form>
-    </Dialog>
+    </AppDialog>
   );
 }

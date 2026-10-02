@@ -1,13 +1,10 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { CheckIcon, LoaderCircleIcon, MailIcon } from "lucide-react";
 import {
-  Banner,
-  Button,
-  FormControl,
-  Link as PrimerLink,
-  SegmentedControl,
-  TextInput,
-} from "@primer/react";
+  CheckIcon,
+  LoaderCircleIcon,
+  MailIcon,
+  TriangleAlertIcon,
+} from "lucide-react";
 import { useState, type FormEvent } from "react";
 import { PasswordInput } from "@/components/auth/password-input";
 import { LogoIcon } from "@/components/layout/logo-icon";
@@ -18,6 +15,17 @@ import {
   validatePassword,
 } from "@/lib/auth-validation";
 import { supabase } from "@/lib/supabase";
+import { Button } from "@/components/ui/button";
+import { Spinner } from "@/components/ui/spinner";
+import {
+  Field,
+  FieldDescription,
+  FieldError,
+  FieldLabel,
+} from "@/components/ui/field";
+import { Input } from "@/components/ui/input";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export type AuthTab = "logga-in" | "skapa-konto";
 
@@ -34,7 +42,10 @@ function AuthPage() {
 
   useSeo({
     title: tab === "logga-in" ? "Logga in" : "Skapa konto",
-    description: tab === "logga-in" ? "Logga in till LiU Tentor." : "Skapa ett konto på LiU Tentor.",
+    description:
+      tab === "logga-in"
+        ? "Logga in till LiU Tentor."
+        : "Skapa ett konto på LiU Tentor.",
     path: "/logga-in",
     robots: "noindex, nofollow",
   });
@@ -49,27 +60,22 @@ function AuthPage() {
         <span className="font-logo text-xl tracking-tighter">LiU Tentor</span>
       </Link>
 
-      <div className="w-full">
-        <SegmentedControl
-          aria-label="Konto"
-          fullWidth
-          onChange={(i) => setTab(i === 0 ? "logga-in" : "skapa-konto")}
-        >
-          <SegmentedControl.Button selected={tab === "logga-in"}>
-            Logga in
-          </SegmentedControl.Button>
-          <SegmentedControl.Button selected={tab === "skapa-konto"}>
-            Skapa konto
-          </SegmentedControl.Button>
-        </SegmentedControl>
-        <div className="pt-4">
-          {tab === "logga-in" ? (
-            <LoginForm onSwitch={() => setTab("skapa-konto")} />
-          ) : (
-            <SignupForm onSwitch={() => setTab("logga-in")} />
-          )}
-        </div>
-      </div>
+      <Tabs
+        value={tab}
+        onValueChange={(value) => setTab(value as typeof tab)}
+        className="w-full"
+      >
+        <TabsList aria-label="Konto" className="w-full">
+          <TabsTrigger value="logga-in">Logga in</TabsTrigger>
+          <TabsTrigger value="skapa-konto">Skapa konto</TabsTrigger>
+        </TabsList>
+        <TabsContent value="logga-in" className="pt-4">
+          <LoginForm onSwitch={() => setTab("skapa-konto")} />
+        </TabsContent>
+        <TabsContent value="skapa-konto" className="pt-4">
+          <SignupForm onSwitch={() => setTab("logga-in")} />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
@@ -131,55 +137,51 @@ function LoginForm({ onSwitch }: { onSwitch: () => void }) {
   return (
     <form onSubmit={submit} noValidate>
       <div className="flex flex-col gap-5">
-        <FormControl>
-          <FormControl.Label>LiU mail</FormControl.Label>
-          <TextInput
-            block
+        <Field data-invalid={!!errors.email}>
+          <FieldLabel htmlFor="auth-liu-mail">LiU mail</FieldLabel>
+          <Input
+            id="auth-liu-mail"
+            aria-invalid={!!errors.email}
             type="email"
             placeholder="abcde123@student.liu.se"
             autoComplete="email"
-            validationStatus={errors.email ? "error" : undefined}
             value={email}
             onChange={(e) => setEmail(e.target.value)}
           />
-          {errors.email && (
-            <FormControl.Validation variant="error">
-              {errors.email}
-            </FormControl.Validation>
-          )}
-        </FormControl>
-        <FormControl>
-          <FormControl.Label>Lösenord</FormControl.Label>
+          {errors.email && <FieldError>{errors.email}</FieldError>}
+        </Field>
+        <Field data-invalid={!!errors.password}>
+          <FieldLabel htmlFor="auth-losenord">Lösenord</FieldLabel>
           <PasswordInput
+            id="auth-losenord"
+            aria-invalid={!!errors.password}
             autoComplete="current-password"
-            validationStatus={errors.password ? "error" : undefined}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
           />
-          {errors.password && (
-            <FormControl.Validation variant="error">
-              {errors.password}
-            </FormControl.Validation>
-          )}
-        </FormControl>
+          {errors.password && <FieldError>{errors.password}</FieldError>}
+        </Field>
         {errors.general && (
-          <Banner
-            variant="critical"
-            layout="compact"
-            title="Fel"
-            hideTitle
-            description={errors.general}
-          />
+          <Alert variant="destructive">
+            <TriangleAlertIcon />
+            <AlertDescription>{errors.general}</AlertDescription>
+          </Alert>
         )}
         <div className="flex flex-col gap-3">
-          <Button type="submit" variant="primary" block loading={loading}>
+          <Button type="submit" className="w-full" disabled={loading}>
+            {loading && <Spinner />}
             Logga in
           </Button>
           <p className="text-center text-sm text-muted-foreground">
             Inget konto?{" "}
-            <PrimerLink as="button" type="button" inline onClick={onSwitch}>
+            <Button
+              variant="link"
+              type="button"
+              className="h-auto p-0"
+              onClick={onSwitch}
+            >
               Skapa ett här
-            </PrimerLink>
+            </Button>
           </p>
         </div>
       </div>
@@ -278,7 +280,8 @@ function SignupForm({ onSwitch }: { onSwitch: () => void }) {
           Kontrollera din inkorg.
         </p>
         <Button
-          size="small"
+          variant="outline"
+          size="sm"
           className="mt-2"
           onClick={() => {
             setSuccess(false);
@@ -295,108 +298,101 @@ function SignupForm({ onSwitch }: { onSwitch: () => void }) {
     <form onSubmit={submit} noValidate>
       <div className="flex flex-col gap-5">
         <div className="flex gap-3">
-          <FormControl className="flex-1">
-            <FormControl.Label>Förnamn</FormControl.Label>
-            <TextInput
-              block
+          <Field data-invalid={!!errors.firstName} className="flex-1">
+            <FieldLabel htmlFor="auth-fornamn">Förnamn</FieldLabel>
+            <Input
+              id="auth-fornamn"
+              aria-invalid={!!errors.firstName}
               placeholder="Förnamn"
               autoComplete="given-name"
-              validationStatus={errors.firstName ? "error" : undefined}
               value={form.firstName}
               onChange={update("firstName")}
             />
-            {errors.firstName && (
-              <FormControl.Validation variant="error">
-                {errors.firstName}
-              </FormControl.Validation>
-            )}
-          </FormControl>
-          <FormControl className="flex-1">
-            <FormControl.Label>Efternamn</FormControl.Label>
-            <TextInput
-              block
+            {errors.firstName && <FieldError>{errors.firstName}</FieldError>}
+          </Field>
+          <Field data-invalid={!!errors.lastName} className="flex-1">
+            <FieldLabel htmlFor="auth-efternamn">Efternamn</FieldLabel>
+            <Input
+              id="auth-efternamn"
+              aria-invalid={!!errors.lastName}
               placeholder="Efternamn"
               autoComplete="family-name"
-              validationStatus={errors.lastName ? "error" : undefined}
               value={form.lastName}
               onChange={update("lastName")}
             />
-            {errors.lastName && (
-              <FormControl.Validation variant="error">
-                {errors.lastName}
-              </FormControl.Validation>
-            )}
-          </FormControl>
+            {errors.lastName && <FieldError>{errors.lastName}</FieldError>}
+          </Field>
         </div>
-        <FormControl>
-          <FormControl.Label>LiU mail</FormControl.Label>
-          <TextInput
-            block
+        <Field data-invalid={!!errors.email}>
+          <FieldLabel htmlFor="auth-liu-mail-2">LiU mail</FieldLabel>
+          <Input
+            id="auth-liu-mail-2"
+            aria-invalid={!!errors.email}
             type="email"
             placeholder="abcde123@student.liu.se"
             autoComplete="email"
-            validationStatus={errors.email ? "error" : undefined}
             value={form.email}
             onChange={update("email")}
           />
           {errors.email ? (
-            <FormControl.Validation variant="error">
-              {errors.email}
-            </FormControl.Validation>
+            <FieldError>{errors.email}</FieldError>
           ) : (
-            <FormControl.Caption>
+            <FieldDescription>
               Måste vara din LiU mail (t.ex. abcde123@student.liu.se)
-            </FormControl.Caption>
+            </FieldDescription>
           )}
-        </FormControl>
-        <FormControl>
-          <FormControl.Label>Lösenord</FormControl.Label>
+        </Field>
+        <Field data-invalid={!!errors.password}>
+          <FieldLabel htmlFor="auth-losenord-2">Lösenord</FieldLabel>
           <PasswordInput
+            id="auth-losenord-2"
+            aria-invalid={!!errors.password}
             autoComplete="new-password"
-            validationStatus={errors.password ? "error" : undefined}
             value={form.password}
             onChange={update("password")}
           />
           {errors.password ? (
-            <FormControl.Validation variant="error">
-              {errors.password}
-            </FormControl.Validation>
+            <FieldError>{errors.password}</FieldError>
           ) : (
-            <FormControl.Caption>Minst 8 tecken</FormControl.Caption>
+            <FieldDescription>Minst 8 tecken</FieldDescription>
           )}
-        </FormControl>
-        <FormControl>
-          <FormControl.Label>Bekräfta lösenord</FormControl.Label>
+        </Field>
+        <Field data-invalid={!!errors.confirmPassword}>
+          <FieldLabel htmlFor="auth-bekrafta-losenord">
+            Bekräfta lösenord
+          </FieldLabel>
           <PasswordInput
+            id="auth-bekrafta-losenord"
+            aria-invalid={!!errors.confirmPassword}
             autoComplete="new-password"
-            validationStatus={errors.confirmPassword ? "error" : undefined}
             value={form.confirmPassword}
             onChange={update("confirmPassword")}
           />
           {errors.confirmPassword && (
-            <FormControl.Validation variant="error">
-              {errors.confirmPassword}
-            </FormControl.Validation>
+            <FieldError>{errors.confirmPassword}</FieldError>
           )}
-        </FormControl>
+        </Field>
         {errors.general && (
-          <Banner
-            variant="critical"
-            layout="compact"
-            title="Fel"
-            hideTitle
-            description={errors.general}
-          />
+          <Alert variant="destructive">
+            <TriangleAlertIcon />
+            <AlertDescription>{errors.general}</AlertDescription>
+          </Alert>
         )}
         <div className="flex flex-col gap-3">
-          <Button type="submit" variant="primary" block loading={loading}>
+          <Button type="submit" className="w-full" disabled={loading}>
+            {loading && <Spinner />}
             Skapa konto
           </Button>
           <p className="text-center text-sm text-muted-foreground">
             Har du redan ett konto?{" "}
-            <PrimerLink as="button" type="button" inline onClick={onSwitch}>
+            <Button
+              variant="link"
+              type="button"
+              className="h-auto p-0"
+              onClick={onSwitch}
+            >
               Logga in
-            </PrimerLink>
+            </Button>
           </p>
         </div>
       </div>

@@ -1,12 +1,16 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { UploadIcon } from "lucide-react";
-import { DocBlock, DocHeading, DocParagraph } from "@/components/info/doc-layout";
+import {
+  DocBlock,
+  DocHeading,
+  DocParagraph,
+} from "@/components/info/doc-layout";
 import { PageIntro } from "@/components/info/page-intro";
-import { Button } from "@primer/react";
-import { RouterLinkButton } from "@/components/primer/router-link-button";
+import { RouterLinkButton } from "@/components/shared/router-link";
 import { useDocumentTitle } from "@/hooks/use-document-title";
 import { cn } from "@/lib/utils";
 import { useUploadModal } from "@/stores/upload-modal";
+import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/_info/faq")({
   component: FaqPage,
@@ -78,7 +82,10 @@ function FaqPage() {
         {groups.map((group, i) => (
           <section
             key={group.label}
-            className={cn("grid gap-x-12 gap-y-2 py-8 lg:grid-cols-[13rem_minmax(0,1fr)] lg:py-10", i > 0 && "border-t")}
+            className={cn(
+              "grid gap-x-12 gap-y-2 py-8 lg:grid-cols-[13rem_minmax(0,1fr)] lg:py-10",
+              i > 0 && "border-t",
+            )}
           >
             <p className="pt-6 text-sm font-medium text-muted-foreground lg:sticky lg:top-24 lg:self-start">
               {group.label}
@@ -87,22 +94,33 @@ function FaqPage() {
               {group.faqs.map((faq) => (
                 <div key={faq.q} className="border-b py-6 last:border-b-0">
                   <dt className="text-base font-medium">{faq.q}</dt>
-                  <dd className="mt-2 text-[0.9375rem] leading-[1.75] text-foreground/70">{faq.a}</dd>
+                  <dd className="mt-2 text-[0.9375rem] leading-[1.75] text-foreground/70">
+                    {faq.a}
+                  </dd>
                 </div>
               ))}
             </dl>
           </section>
         ))}
 
-        <DocBlock heading={<DocHeading>Hittade du inte svaret?</DocHeading>} className="border-t py-14 lg:py-20">
+        <DocBlock
+          heading={<DocHeading>Hittade du inte svaret?</DocHeading>}
+          className="border-t py-14 lg:py-20"
+        >
           <DocParagraph>
-            Skicka en rad till oss så svarar vi – eller fyll luckan direkt genom att ladda upp tentor som saknas.
+            Skicka en rad till oss så svarar vi – eller fyll luckan direkt genom
+            att ladda upp tentor som saknas.
           </DocParagraph>
           <div className="mt-7 flex flex-wrap items-center gap-3">
-            <RouterLinkButton to="/feedback" size="small">
+            <RouterLinkButton variant="outline" to="/feedback" size="sm">
               Skicka feedback
             </RouterLinkButton>
-            <Button size="small" leadingVisual={UploadIcon} onClick={() => openUploadModal()}>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => openUploadModal()}
+            >
+              <UploadIcon />
               Ladda upp tenta
             </Button>
           </div>

@@ -1,5 +1,3 @@
-import { TextInput } from "@primer/react";
-import { KeybindingHint } from "@primer/react/experimental";
 import { SearchIcon } from "lucide-react";
 import {
   useEffect,
@@ -13,9 +11,15 @@ import { cn } from "@/lib/utils";
 import { useTypingPlaceholder } from "@/hooks/use-typing-placeholder";
 import { CourseSearchResults } from "./course-search-results";
 import { resultOptionId, useCourseSearch } from "./use-course-search";
+import { KeyHint } from "@/components/shared/key-hint";
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+} from "@/components/ui/input-group";
 
 /**
- * Wires a text input to a Primer ActionList listbox shown under it, as a
+ * Wires a text input to a listbox shown under it, as a
  * combobox. Focus never leaves the input: we drive the highlight ourselves
  * and point aria-activedescendant at it. Enter takes the highlighted course,
  * which starts on the first result, so a typed course code needs no selection.
@@ -119,7 +123,7 @@ export function HeroCourseSearch() {
   return (
     <CourseSearchBase
       renderInput={({ value, onChange, ...handlers }) => (
-        <div className="relative flex w-full items-center rounded-full border border-foreground/20 bg-background text-sm transition-colors duration-200 hover:border-foreground/40 focus-within:border-primary focus-within:ring-1 focus-within:ring-primary focus-within:hover:border-primary">
+        <div className="relative flex w-full items-center rounded-full border border-foreground/20 bg-background text-sm transition-colors duration-200 hover:border-foreground/40 focus-within:border-brand focus-within:ring-1 focus-within:ring-brand focus-within:hover:border-brand">
           <SearchIcon className="pointer-events-none absolute left-5 size-6 text-muted-foreground" />
           <input
             ref={inputRef}
@@ -158,24 +162,25 @@ export function HeaderCourseSearch({ className }: { className?: string }) {
     <CourseSearchBase
       className={className}
       renderInput={({ value, onChange, ...handlers }) => (
-        <TextInput
-          ref={inputRef}
-          block
-          leadingVisual={SearchIcon}
-          trailingVisual={
-            <span className="hidden sm:inline-flex">
-              <KeybindingHint keys="/" size="small" />
-            </span>
-          }
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          placeholder="Sök kurskod..."
-          aria-label="Sök kurskod"
-          autoComplete="off"
-          spellCheck={false}
-          className="[&_input]:uppercase [&_input]:placeholder:normal-case"
-          {...handlers}
-        />
+        <InputGroup>
+          <InputGroupAddon>
+            <SearchIcon />
+          </InputGroupAddon>
+          <InputGroupInput
+            ref={inputRef}
+            value={value}
+            onChange={(e) => onChange(e.target.value)}
+            placeholder="Sök kurskod..."
+            aria-label="Sök kurskod"
+            autoComplete="off"
+            spellCheck={false}
+            className="uppercase placeholder:normal-case"
+            {...handlers}
+          />
+          <InputGroupAddon align="inline-end" className="hidden sm:flex">
+            <KeyHint keys="/" />
+          </InputGroupAddon>
+        </InputGroup>
       )}
     />
   );

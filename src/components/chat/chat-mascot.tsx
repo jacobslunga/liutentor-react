@@ -77,7 +77,7 @@ export function ChatMascot({ className }: { className?: string }) {
   return (
     <svg
       ref={svgRef}
-      className={cn("group/mascot text-primary", className)}
+      className={cn("group/mascot text-brand", className)}
       viewBox="0 0 100 100"
       aria-hidden
       focusable="false"
@@ -93,7 +93,7 @@ export function ChatMascot({ className }: { className?: string }) {
             height="16"
             rx="1.5"
             className="origin-center transition-transform duration-150 [transform-box:fill-box] group-[.is-blinking]/mascot:scale-y-[0.12] motion-reduce:transition-none"
-            style={{ fill: "color-mix(in oklch, var(--primary) 45%, #000)" }}
+            style={{ fill: "color-mix(in oklch, var(--brand) 45%, #000)" }}
           />
         ))}
       </g>
