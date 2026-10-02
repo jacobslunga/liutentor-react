@@ -1,11 +1,12 @@
 import { ArrowLeftIcon, ArrowRightIcon, CircleCheckIcon } from "lucide-react";
 import { useState } from "react";
-import { ButtonGroup, ConfirmationDialog, ProgressBar } from "@primer/react";
+import { ButtonGroup, ProgressBar } from "@primer/react";
 import { cn } from "@/lib/utils";
 import { useQuizStore } from "@/stores/quiz";
 import type { QuizQuestion } from "@/types/quiz";
 import { QuizMarkdown } from "./quiz-markdown";
 import { Button } from "@/components/ui/button";
+import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 
 export function QuizAnswering({ questions }: { questions: QuizQuestion[] }) {
   const currentIndex = useQuizStore((s) => s.currentIndex);
@@ -82,19 +83,19 @@ export function QuizAnswering({ questions }: { questions: QuizQuestion[] }) {
       </div>
 
       {confirmExit && (
-        <ConfirmationDialog
+        <ConfirmDialog
           title="Avsluta quizet?"
-          cancelButtonContent="Fortsätt quizet"
-          confirmButtonContent="Avsluta"
-          confirmButtonType="danger"
-          onClose={(gesture) => {
+          confirmLabel="Avsluta"
+          cancelLabel="Fortsätt quizet"
+          onConfirm={() => {
             setConfirmExit(false);
-            if (gesture === "confirm") reset();
+            reset();
           }}
+          onCancel={() => setConfirmExit(false)}
         >
           Du har svarat på {answeredCount} av {count} frågor. Dina svar
           försvinner.
-        </ConfirmationDialog>
+        </ConfirmDialog>
       )}
     </div>
   );

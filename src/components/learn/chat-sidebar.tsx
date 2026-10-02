@@ -1,4 +1,4 @@
-import { ActionList, ActionMenu, ConfirmationDialog } from "@primer/react";
+import { ActionList, ActionMenu, } from "@primer/react";
 import { Link, useNavigate, useParams } from "@tanstack/react-router";
 import {
   EllipsisIcon,
@@ -27,6 +27,7 @@ import { ChatSettingsMenu } from "./chat-settings-menu";
 import { SidebarCourses } from "./sidebar-courses";
 import { SIDEBAR_SHORTCUT } from "./sidebar-shortcut";
 import { IconButton } from "@/components/shared/icon-button";
+import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 
 /**
  * The learning chat's conversation list. Sits beside the chat on wide screens
@@ -321,20 +322,15 @@ function SidebarContent() {
       </div>
 
       {pendingDelete && (
-        <ConfirmationDialog
+        <ConfirmDialog
           title="Radera chatten?"
-          cancelButtonContent="Avbryt"
-          confirmButtonContent="Radera"
-          confirmButtonType="danger"
-          confirmButtonLoading={deleting}
-          onClose={(gesture) => {
-            if (deleting) return;
-            if (gesture === "confirm") void confirmDelete();
-            else setPendingDelete(null);
-          }}
+          confirmLabel="Radera"
+          isPending={deleting}
+          onConfirm={() => void confirmDelete()}
+          onCancel={() => setPendingDelete(null)}
         >
           "{pendingDelete.title}" raderas permanent och kan inte ångras.
-        </ConfirmationDialog>
+        </ConfirmDialog>
       )}
     </div>
   );

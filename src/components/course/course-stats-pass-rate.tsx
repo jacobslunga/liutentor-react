@@ -1,4 +1,3 @@
-import { Dialog } from "@primer/react";
 import { useMemo, useState } from "react";
 import {
   Bar,
@@ -14,6 +13,7 @@ import {
 import type { PassRatePoint } from "@/lib/course-stats";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { AppDialog } from "@/components/shared/app-dialog";
 
 /** Sittings shown in the sidebar; the rest live in the dialog. */
 const RECENT_COUNT = 5;
@@ -92,19 +92,19 @@ export function CourseStatsPassRate({
       )}
 
       {open && first && last && (
-        <Dialog
+        <AppDialog
           width="xlarge"
           title="Godkända över tid"
-          subtitle={`${data.length} tentatillfällen ${new Date(first.timestamp).getFullYear()}–${new Date(last.timestamp).getFullYear()}`}
+          description={`${data.length} tentatillfällen ${new Date(first.timestamp).getFullYear()}–${new Date(last.timestamp).getFullYear()}`}
           onClose={() => setOpen(false)}
-          renderFooter={() => (
-            <Dialog.Footer>
-              <Button variant="outline" onClick={() => setOpen(false)}>Stäng</Button>
-            </Dialog.Footer>
-          )}
+          footer={
+            <Button variant="outline" onClick={() => setOpen(false)}>
+              Stäng
+            </Button>
+          }
         >
           <AllSittings data={data} average={average} />
-        </Dialog>
+        </AppDialog>
       )}
     </div>
   );

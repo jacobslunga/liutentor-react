@@ -1,4 +1,4 @@
-import { ActionList, ActionMenu, ConfirmationDialog } from "@primer/react";
+import { ActionList, ActionMenu, } from "@primer/react";
 import { useQueryClient } from "@tanstack/react-query";
 import { Link, useNavigate, useParams } from "@tanstack/react-router";
 import {
@@ -23,6 +23,7 @@ import { useConversationList } from "@/hooks/use-conversation-list";
 import { useChatStore } from "@/stores/chat";
 import { CourseNameDialog } from "./course-name-dialog";
 import { IconButton } from "@/components/shared/icon-button";
+import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 
 /** "Kurser" in the chat sidebar: the user's study courses, or a sign-in nudge. */
 export function SidebarCourses({ onNavigate }: { onNavigate: () => void }) {
@@ -194,21 +195,16 @@ export function SidebarCourses({ onNavigate }: { onNavigate: () => void }) {
       />
 
       {pendingDelete && (
-        <ConfirmationDialog
+        <ConfirmDialog
           title="Radera kursen?"
-          cancelButtonContent="Avbryt"
-          confirmButtonContent="Radera"
-          confirmButtonType="danger"
-          confirmButtonLoading={deleting}
-          onClose={(gesture) => {
-            if (deleting) return;
-            if (gesture === "confirm") void confirmDelete();
-            else setPendingDelete(null);
-          }}
+          confirmLabel="Radera"
+          isPending={deleting}
+          onConfirm={() => void confirmDelete()}
+          onCancel={() => setPendingDelete(null)}
         >
           "{pendingDelete.name}" raderas permanent, med allt material och alla
           chattar i kursen. Det går inte att ångra.
-        </ConfirmationDialog>
+        </ConfirmDialog>
       )}
     </section>
   );

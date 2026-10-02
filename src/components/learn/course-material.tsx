@@ -1,4 +1,4 @@
-import { ConfirmationDialog, ProgressBar } from "@primer/react";
+import { ProgressBar } from "@primer/react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   AlertCircleIcon,
@@ -21,6 +21,7 @@ import { courseFilesKey, courseFilesQuery } from "@/queries/study-courses";
 import { useUser } from "@/stores/auth";
 import { Button } from "@/components/ui/button";
 import { IconButton } from "@/components/shared/icon-button";
+import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 
 interface PendingUpload {
   id: string;
@@ -225,21 +226,16 @@ export function CourseMaterial({ courseId }: { courseId: string }) {
       )}
 
       {pendingDelete && (
-        <ConfirmationDialog
+        <ConfirmDialog
           title="Ta bort filen?"
-          cancelButtonContent="Avbryt"
-          confirmButtonContent="Ta bort"
-          confirmButtonType="danger"
-          confirmButtonLoading={deleting}
-          onClose={(gesture) => {
-            if (deleting) return;
-            if (gesture === "confirm") void confirmDelete();
-            else setPendingDelete(null);
-          }}
+          confirmLabel="Ta bort"
+          isPending={deleting}
+          onConfirm={() => void confirmDelete()}
+          onCancel={() => setPendingDelete(null)}
         >
           "{pendingDelete.name}" tas bort från kursen, och chattarna kan inte
           längre söka i den.
-        </ConfirmationDialog>
+        </ConfirmDialog>
       )}
     </div>
   );

@@ -1,4 +1,4 @@
-import { ConfirmationDialog, Spinner } from "@primer/react";
+import { Spinner } from "@primer/react";
 import { UnderlinePanels } from "@primer/react/experimental";
 import { Link } from "@tanstack/react-router";
 import { FolderIcon, Trash2Icon } from "lucide-react";
@@ -10,6 +10,7 @@ import type { Conversation } from "@/queries/conversations";
 import { useStudyCourse } from "@/queries/study-courses";
 import { CourseMaterial } from "./course-material";
 import { IconButton } from "@/components/shared/icon-button";
+import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 
 /**
  * A study course's page: its name, a prompt that starts a chat in the course,
@@ -135,20 +136,15 @@ function CourseChats({ courseId }: { courseId: string }) {
       </ul>
 
       {pendingDelete && (
-        <ConfirmationDialog
+        <ConfirmDialog
           title="Radera chatten?"
-          cancelButtonContent="Avbryt"
-          confirmButtonContent="Radera"
-          confirmButtonType="danger"
-          confirmButtonLoading={deleting}
-          onClose={(gesture) => {
-            if (deleting) return;
-            if (gesture === "confirm") void confirmDelete();
-            else setPendingDelete(null);
-          }}
+          confirmLabel="Radera"
+          isPending={deleting}
+          onConfirm={() => void confirmDelete()}
+          onCancel={() => setPendingDelete(null)}
         >
           "{pendingDelete.title}" raderas permanent och kan inte ångras.
-        </ConfirmationDialog>
+        </ConfirmDialog>
       )}
     </>
   );

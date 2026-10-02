@@ -1,4 +1,4 @@
-import { Banner, Dialog } from "@primer/react";
+import { Banner, } from "@primer/react";
 import { BookIcon, FileTextIcon, UploadIcon, XIcon } from "lucide-react";
 import { useRef, useState, type DragEvent } from "react";
 import { useTypingPlaceholder } from "@/hooks/use-typing-placeholder";
@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { IconButton } from "@/components/shared/icon-button";
 import { Spinner } from "@/components/ui/spinner";
+import { AppDialog } from "@/components/shared/app-dialog";
 
 interface ExamUploadFormProps {
   initialCourseCode?: string;
@@ -141,19 +142,16 @@ export function ExamUploadForm({ initialCourseCode = "", fixedCourseCode = false
       />
 
       {result && (
-        <Dialog
+        <AppDialog
           role="alertdialog"
-          width="large"
           title={result.ok ? "Uppladdning lyckades!" : "Något gick fel"}
           onClose={() => setResult(null)}
-          footerButtons={[
-            { content: "OK", buttonType: "primary", onClick: () => setResult(null) },
-          ]}
+          footer={<Button onClick={() => setResult(null)}>OK</Button>}
         >
           {result.ok
             ? "Tack! Din tenta har laddats upp och granskas inom kort."
             : result.message || "Ett fel uppstod vid uppladdningen."}
-        </Dialog>
+        </AppDialog>
       )}
     </div>
   );

@@ -1,4 +1,4 @@
-import { Dialog, Select, ToggleSwitch } from "@primer/react";
+import { Select, ToggleSwitch } from "@primer/react";
 import { KeybindingHint } from "@primer/react/experimental";
 import { Link } from "@tanstack/react-router";
 import { SettingsIcon } from "lucide-react";
@@ -14,6 +14,7 @@ import {
 } from "@/stores/settings";
 import { Button } from "@/components/ui/button";
 import { IconButton } from "@/components/shared/icon-button";
+import { AppDialog } from "@/components/shared/app-dialog";
 
 const SHORTCUT_GROUPS = [
   {
@@ -71,14 +72,13 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
         <IconButton variant="ghost" aria-label="Inställningar" onClick={() => setOpen(true)}><SettingsIcon /></IconButton>
       )}
       {isOpen && (
-        <Dialog
-          width="large"
+        <AppDialog
           title="Inställningar"
-          subtitle="Anpassa hur LiU Tentor beter sig."
+          description="Anpassa hur LiU Tentor beter sig."
           onClose={() => setOpen(false)}
         >
           <SettingsContent />
-        </Dialog>
+        </AppDialog>
       )}
     </>
   );

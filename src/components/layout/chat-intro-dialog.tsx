@@ -1,4 +1,3 @@
-import { Dialog } from "@primer/react";
 import { useNavigate, useRouterState } from "@tanstack/react-router";
 import { ArrowRightIcon, AtSignIcon, FolderIcon, QuoteIcon } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -8,6 +7,9 @@ import {
 } from "@/lib/analytics";
 import { hasSeenChatIntro, markChatIntroSeen } from "@/lib/chat-intro";
 import { LogoIcon } from "./logo-icon";
+import { AppDialog } from "@/components/shared/app-dialog";
+import { Button } from "@/components/ui/button";
+import { DialogDescription, DialogTitle } from "@/components/ui/dialog";
 
 /** Lets the page settle before the dialog asks for attention. */
 const OPEN_DELAY_MS = 900;
@@ -62,11 +64,10 @@ export function ChatIntroDialog() {
   if (!open) return null;
 
   return (
-    <Dialog
-      width="large"
+    <AppDialog
       onClose={close}
-      renderHeader={({ dialogLabelId, dialogDescriptionId }) => (
-        <div className="p-2">
+      header={
+        <div>
           <div className="intro-mesh flex aspect-16/10 items-center justify-center rounded-xl">
             <div className="flex animate-in items-center gap-3 rounded-2xl bg-white/90 px-6 py-5 text-neutral-900 shadow-xl shadow-black/10 backdrop-blur-sm duration-700 fade-in-0 zoom-in-95 slide-in-from-bottom-2">
               <LogoIcon className="size-10 shrink-0" />
@@ -76,29 +77,28 @@ export function ChatIntroDialog() {
               </div>
             </div>
           </div>
-          <div className="space-y-1.5 px-2 pt-5">
-            <h1 id={dialogLabelId} className="text-xl font-medium">
+          <div className="space-y-1.5 pt-5">
+            <DialogTitle className="text-xl font-medium">
               Nyhet: plugga med AI
-            </h1>
-            <p
-              id={dialogDescriptionId}
-              className="text-sm leading-relaxed text-muted-foreground"
-            >
+            </DialogTitle>
+            <DialogDescription className="leading-relaxed">
               En chatt som hjälper dig förstå, inte bara lösa. Ställ frågor om
               vad som helst i dina kurser.
-            </p>
+            </DialogDescription>
           </div>
         </div>
-      )}
-      footerButtons={[
-        { content: "Inte nu", buttonType: "default", onClick: close },
-        {
-          content: "Kolla in det",
-          buttonType: "primary",
-          trailingVisual: ArrowRightIcon,
-          onClick: tryIt,
-        },
-      ]}
+      }
+      footer={
+        <>
+          <Button variant="outline" onClick={close}>
+            Inte nu
+          </Button>
+          <Button onClick={tryIt}>
+            Kolla in det
+            <ArrowRightIcon />
+          </Button>
+        </>
+      }
     >
       <ul className="space-y-2">
         {HIGHLIGHTS.map(({ Icon, text }) => (
@@ -110,6 +110,6 @@ export function ChatIntroDialog() {
           </li>
         ))}
       </ul>
-    </Dialog>
+    </AppDialog>
   );
 }

@@ -1,10 +1,10 @@
-import { ConfirmationDialog } from "@primer/react";
 import { CheckIcon, Trash2Icon } from "lucide-react";
 import { useState } from "react";
 import { QUIZ_DIFFICULTY_INFO } from "@/lib/quiz";
 import { cn } from "@/lib/utils";
 import type { StoredQuizItem } from "@/types/quiz";
 import { IconButton } from "@/components/shared/icon-button";
+import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 
 const dateLabel = (value: string) =>
   new Date(value).toLocaleString("sv-SE", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" });
@@ -64,18 +64,17 @@ export function QuizHistoryList({ history, signedIn, activeQuizId, onLoad, onDel
       )}
 
       {pendingDelete && (
-        <ConfirmationDialog
+        <ConfirmDialog
           title="Ta bort quizet?"
-          cancelButtonContent="Avbryt"
-          confirmButtonContent="Ta bort"
-          confirmButtonType="danger"
-          onClose={(gesture) => {
-            if (gesture === "confirm") onDelete(pendingDelete);
+          confirmLabel="Ta bort"
+          onConfirm={() => {
+            onDelete(pendingDelete);
             setPendingDelete(null);
           }}
+          onCancel={() => setPendingDelete(null)}
         >
           Quizet från {dateLabel(pendingDelete.createdAt)} tas bort permanent. Det går inte att ångra.
-        </ConfirmationDialog>
+        </ConfirmDialog>
       )}
     </section>
   );

@@ -1,9 +1,9 @@
-import { Dialog } from "@primer/react";
 import { MinusIcon } from "lucide-react";
 import { useState } from "react";
 import { passRateClass } from "@/lib/course-stats";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { AppDialog } from "@/components/shared/app-dialog";
 
 const GRADE_ORDER = ["3", "4", "5", "G", "VG", "U"];
 
@@ -49,13 +49,12 @@ export function ExamStatsDialog({ statistics, date, passRate }: ExamStatsDialogP
         {passRate.toFixed(1)}%
       </Button>
       {open && (
-        <Dialog
-          width="large"
+        <AppDialog
           title="Tentastatistik"
-          subtitle={`Betygsfördelning ${date}`}
+          description={`Betygsfördelning ${date}`}
           onClose={() => setOpen(false)}
-          renderFooter={() => (
-            <Dialog.Footer className="justify-between">
+          footer={
+            <div className="flex w-full items-center justify-between">
               <p className="self-center text-xs text-muted-foreground">
                 Data från{" "}
                 <a
@@ -68,8 +67,8 @@ export function ExamStatsDialog({ statistics, date, passRate }: ExamStatsDialogP
                 </a>
               </p>
               <Button variant="outline" onClick={() => setOpen(false)}>Stäng</Button>
-            </Dialog.Footer>
-          )}
+            </div>
+          }
         >
       <div className="flex flex-col gap-4">
         <div className="flex items-center justify-between text-sm">
@@ -108,7 +107,7 @@ export function ExamStatsDialog({ statistics, date, passRate }: ExamStatsDialogP
           ))}
         </div>
       </div>
-        </Dialog>
+        </AppDialog>
       )}
     </span>
   );
