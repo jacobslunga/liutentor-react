@@ -111,12 +111,8 @@
   --radius-3xl: calc(var(--radius) * 2.2);
   --radius-4xl: calc(var(--radius) * 2.6);
 }
-/*
- ---break---
- */
+
 :root {
-  /* The LiU Tentor brand: a secondary accent for identity (mascot, folders,
-     charts), not for primary actions. */
   --brand: oklch(0.6193 0.1154 172.06);
   --brand-foreground: oklch(1 0 0);
   --shadow-color: oklch(0 0 0 / 0.14);

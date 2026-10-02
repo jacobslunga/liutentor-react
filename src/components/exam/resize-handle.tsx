@@ -46,21 +46,19 @@ export function ResizeHandle({
       <div
         className={cn(
           "absolute inset-y-0 w-px transition-colors duration-200 group-hover:w-0.5",
-          isResizing ? "bg-primary" : "bg-border group-hover:bg-primary/50",
+          isResizing ? "bg-brand" : "bg-border group-hover:bg-brand/50",
         )}
       />
       <div
         className={cn(
           "relative flex h-8 w-4 items-center justify-center rounded-[6px] border bg-background shadow-md transition-colors duration-200 dark:bg-muted",
-          isResizing
-            ? "scale-110 border-primary"
-            : "group-hover:border-primary/50",
+          isResizing ? "scale-110 border-brand" : "group-hover:border-brand/50",
         )}
       >
         <GripVerticalIcon
           className={cn(
             "size-3.5",
-            isResizing ? "text-primary" : "text-muted-foreground",
+            isResizing ? "text-brand" : "text-muted-foreground",
           )}
         />
       </div>

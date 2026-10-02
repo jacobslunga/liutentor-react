@@ -6,6 +6,7 @@ import {
   useEffect,
   useLayoutEffect,
   useRef,
+  useState,
   type ReactNode,
 } from "react";
 import { ExamHeader } from "@/components/exam/exam-header";
@@ -411,16 +412,27 @@ function SideOverlay({
   onResizeStart: () => void;
   onResizeEnd: () => void;
 }) {
+  // Mount in the hidden position and reveal two frames later, so even an
+  // overlay that mounts open slides in. (@starting-style can't do this
+  // reliably: Safari won't transition the translate set via a CSS variable.)
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    let frame = requestAnimationFrame(() => {
+      frame = requestAnimationFrame(() => setMounted(true));
+    });
+    return () => cancelAnimationFrame(frame);
+  }, []);
+  const shown = visible && mounted;
+
   return (
     <div
-      aria-hidden={!visible}
-      inert={!visible}
+      aria-hidden={!shown}
+      inert={!shown}
       className={cn(
         "fixed right-0 bottom-0 flex h-dvh border-l bg-background shadow-xl transition-[translate,opacity,filter] duration-200 ease-spring dark:shadow-none",
         zIndex,
-        // `starting:` animates the first open too, when the overlay mounts already visible.
-        visible
-          ? "translate-x-0 opacity-100 starting:translate-x-full starting:opacity-0"
+        shown
+          ? "translate-x-0 opacity-100"
           : "pointer-events-none translate-x-full opacity-0 blur-sm",
       )}
       style={{ width: "var(--exam-overlay-width)" }}
