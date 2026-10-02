@@ -1,14 +1,15 @@
-import { ConfirmationDialog, IconButton, Spinner } from "@primer/react";
+import { ConfirmationDialog, Spinner } from "@primer/react";
 import { UnderlinePanels } from "@primer/react/experimental";
 import { Link } from "@tanstack/react-router";
 import { FolderIcon, Trash2Icon } from "lucide-react";
 import { useState, type ReactNode } from "react";
 import { toast } from "sonner";
-import { RouterLinkButton } from "@/components/primer/router-link-button";
+import { RouterLinkButton } from "@/components/shared/router-link";
 import { useConversationList } from "@/hooks/use-conversation-list";
 import type { Conversation } from "@/queries/conversations";
 import { useStudyCourse } from "@/queries/study-courses";
 import { CourseMaterial } from "./course-material";
+import { IconButton } from "@/components/shared/icon-button";
 
 /**
  * A study course's page: its name, a prompt that starts a chat in the course,
@@ -42,7 +43,7 @@ export function CourseHome({
         <p className="text-sm text-muted-foreground">
           Kursen finns inte, eller så har den raderats.
         </p>
-        <RouterLinkButton to="/chatt">Till chatten</RouterLinkButton>
+        <RouterLinkButton variant="outline" to="/chatt">Till chatten</RouterLinkButton>
       </div>
     );
   }
@@ -128,14 +129,7 @@ function CourseChats({ courseId }: { courseId: string }) {
                 })}
               </span>
             </Link>
-            <IconButton
-              icon={Trash2Icon}
-              variant="invisible"
-              size="small"
-              className="absolute right-1.5 md:opacity-0 md:group-hover:opacity-100 md:focus-visible:opacity-100"
-              aria-label={`Radera ${chat.title}`}
-              onClick={() => setPendingDelete(chat)}
-            />
+            <IconButton variant="ghost" size="icon-sm" className="absolute right-1.5 md:opacity-0 md:group-hover:opacity-100 md:focus-visible:opacity-100" aria-label={`Radera ${chat.title}`} onClick={() => setPendingDelete(chat)}><Trash2Icon /></IconButton>
           </li>
         ))}
       </ul>

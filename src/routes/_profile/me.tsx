@@ -1,10 +1,4 @@
-import {
-  Button,
-  FormControl,
-  Label,
-  SkeletonBox,
-  TextInput,
-} from "@primer/react";
+import { FormControl, Label, SkeletonBox, TextInput } from "@primer/react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import {
@@ -27,6 +21,8 @@ import {
   type Profile,
 } from "@/queries/profile";
 import { useSettingsStore } from "@/stores/settings";
+import { Button } from "@/components/ui/button";
+import { Spinner } from "@/components/ui/spinner";
 
 export const Route = createFileRoute("/_profile/me")({
   component: ProfilePage,
@@ -298,14 +294,7 @@ function NameForm() {
         </FormControl>
       </div>
       <div className="mt-4 flex justify-end">
-        <Button
-          size="small"
-          variant="primary"
-          loading={update.isPending}
-          disabled={!hasChanges}
-          leadingVisual={saved ? CheckIcon : undefined}
-          onClick={save}
-        >
+        <Button size="sm" disabled={update.isPending || !hasChanges} onClick={save}>{update.isPending && <Spinner />}{saved && <CheckIcon />}
           {saved ? "Sparat!" : "Spara"}
         </Button>
       </div>
@@ -358,16 +347,11 @@ function SignOutRow() {
           Avsluta din nuvarande session
         </p>
       </div>
-      <Button
-        size="small"
-        loading={loading}
-        leadingVisual={LogOutIcon}
-        onClick={async () => {
+      <Button variant="outline" size="sm" onClick={async () => {
           setLoading(true);
           await signOut();
           void navigate({ to: "/", replace: true });
-        }}
-      >
+        }} disabled={loading}>{loading && <Spinner />}<LogOutIcon />
         Logga ut
       </Button>
     </div>

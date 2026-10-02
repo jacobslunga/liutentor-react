@@ -1,10 +1,4 @@
-import {
-  Button,
-  Dialog,
-  IconButton,
-  Select,
-  ToggleSwitch,
-} from "@primer/react";
+import { Dialog, Select, ToggleSwitch } from "@primer/react";
 import { KeybindingHint } from "@primer/react/experimental";
 import { Link } from "@tanstack/react-router";
 import { SettingsIcon } from "lucide-react";
@@ -18,6 +12,8 @@ import {
   useSettingsStore,
   type LayoutMode,
 } from "@/stores/settings";
+import { Button } from "@/components/ui/button";
+import { IconButton } from "@/components/shared/icon-button";
 
 const SHORTCUT_GROUPS = [
   {
@@ -72,12 +68,7 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
   return (
     <>
       {!controlled && (
-        <IconButton
-          icon={SettingsIcon}
-          variant="invisible"
-          aria-label="Inställningar"
-          onClick={() => setOpen(true)}
-        />
+        <IconButton variant="ghost" aria-label="Inställningar" onClick={() => setOpen(true)}><SettingsIcon /></IconButton>
       )}
       {isOpen && (
         <Dialog
@@ -253,14 +244,10 @@ function SettingsContent() {
               : "Inga sparade sökningar på den här enheten."
           }
         >
-          <Button
-            size="small"
-            disabled={!recentSearches.length}
-            onClick={() => {
+          <Button variant="outline" size="sm" disabled={!recentSearches.length} onClick={() => {
               clearRecentSearches();
               toast.success("Senaste sökningar rensade");
-            }}
-          >
+            }}>
             Rensa
           </Button>
         </Row>

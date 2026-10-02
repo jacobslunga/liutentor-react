@@ -1,4 +1,4 @@
-import { Button, Dialog } from "@primer/react";
+import { Dialog } from "@primer/react";
 import { useMemo, useState } from "react";
 import {
   Bar,
@@ -13,6 +13,7 @@ import {
 } from "recharts";
 import type { PassRatePoint } from "@/lib/course-stats";
 import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 
 /** Sittings shown in the sidebar; the rest live in the dialog. */
 const RECENT_COUNT = 5;
@@ -85,7 +86,7 @@ export function CourseStatsPassRate({
       <AverageLegend average={average} />
 
       {data.length > recent.length && (
-        <Button size="small" className="self-start" onClick={() => setOpen(true)}>
+        <Button variant="outline" size="sm" className="self-start" onClick={() => setOpen(true)}>
           Visa alla {data.length} tillfällen
         </Button>
       )}
@@ -98,7 +99,7 @@ export function CourseStatsPassRate({
           onClose={() => setOpen(false)}
           renderFooter={() => (
             <Dialog.Footer>
-              <Button onClick={() => setOpen(false)}>Stäng</Button>
+              <Button variant="outline" onClick={() => setOpen(false)}>Stäng</Button>
             </Dialog.Footer>
           )}
         >

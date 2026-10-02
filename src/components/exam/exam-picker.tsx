@@ -1,10 +1,4 @@
-import {
-  ActionList,
-  ActionMenu,
-  AnchoredOverlay,
-  Button,
-  Label,
-} from "@primer/react";
+import { ActionList, ActionMenu, AnchoredOverlay, Label } from "@primer/react";
 import { useNavigate } from "@tanstack/react-router";
 import {
   ArrowDownIcon,
@@ -18,6 +12,7 @@ import { getExamPrefix } from "@/lib/exams";
 import { cn } from "@/lib/utils";
 import { sortExams, useExamSortPreference } from "@/stores/exam-sort";
 import type { Exam } from "@/types/exam";
+import { Button } from "@/components/ui/button";
 
 function hasPassRate(exam: Exam) {
   return Number.isFinite(Number(exam.pass_rate)) && Number(exam.pass_rate) > 0;
@@ -82,22 +77,14 @@ export function ExamPicker({
       align={align}
       width="auto"
       renderAnchor={(anchorProps) => (
-        <Button
-          {...anchorProps}
-          size={triggerSize}
-          aria-label="Byt tenta"
-          className={triggerClassName}
-          trailingVisual={
-            <ChevronDownIcon
+        <Button variant="outline" {...anchorProps} size={triggerSize} aria-label="Byt tenta" className={triggerClassName}>
+          {children}
+        <ChevronDownIcon
               className={cn(
                 "text-muted-foreground transition-transform duration-200",
                 open && "rotate-180",
               )}
-            />
-          }
-        >
-          {children}
-        </Button>
+            /></Button>
       )}
     >
       <div className="flex items-center justify-between gap-3 border-b px-3 py-2">

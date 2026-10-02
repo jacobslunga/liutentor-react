@@ -3,8 +3,8 @@ import { Outlet, createRootRouteWithContext } from "@tanstack/react-router";
 import { AppLoadingBar } from "@/components/layout/app-loading-bar";
 import { AnalyticsConsent } from "@/components/layout/analytics-consent";
 import { ChatIntroDialog } from "@/components/layout/chat-intro-dialog";
-import { RouterLinkButton } from "@/components/primer/router-link-button";
-import { AppToaster } from "@/components/layout/app-toaster";
+import { RouterLinkButton } from "@/components/shared/router-link";
+import { Toaster } from "@/components/ui/sonner";
 import { ExamUploadDialog } from "@/components/upload/exam-upload-dialog";
 import { useSeo } from "@/hooks/use-seo";
 
@@ -25,7 +25,7 @@ function RootLayout() {
       <ExamUploadDialog />
       <AnalyticsConsent />
       <ChatIntroDialog />
-      <AppToaster position="top-center" duration={4000} />
+      <Toaster position="top-center" duration={4000} />
     </>
   );
 }
@@ -42,7 +42,7 @@ function NotFound() {
       <p className="text-sm text-muted-foreground">
         Sidan du letar efter har flyttats eller finns inte.
       </p>
-      <RouterLinkButton to="/">Till startsidan</RouterLinkButton>
+      <RouterLinkButton to="/" variant="outline">Till startsidan</RouterLinkButton>
     </div>
   );
 }

@@ -11,7 +11,7 @@ import {
 import { ExamHeader } from "@/components/exam/exam-header";
 import { FacitEdge } from "@/components/exam/facit-edge";
 import { ResizeHandle } from "@/components/exam/resize-handle";
-import { RouterLinkButton } from "@/components/primer/router-link-button";
+import { RouterLinkButton } from "@/components/shared/router-link";
 import { useLatest } from "@/hooks/use-latest";
 import { cn } from "@/lib/utils";
 import { examChatStore, useChatStore } from "@/stores/chat";
@@ -478,7 +478,7 @@ function NoSolution() {
                 tenta.
               </p>
             </div>
-            <RouterLinkButton to="/upload-exams" size="small" leadingVisual={UploadIcon}>
+            <RouterLinkButton variant="outline" to="/upload-exams" size="sm"><UploadIcon />
               Ladda upp
             </RouterLinkButton>
           </div>

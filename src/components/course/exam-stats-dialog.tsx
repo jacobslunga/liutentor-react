@@ -1,8 +1,9 @@
-import { Button, Dialog } from "@primer/react";
+import { Dialog } from "@primer/react";
 import { MinusIcon } from "lucide-react";
 import { useState } from "react";
 import { passRateClass } from "@/lib/course-stats";
 import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 
 const GRADE_ORDER = ["3", "4", "5", "G", "VG", "U"];
 
@@ -44,12 +45,7 @@ export function ExamStatsDialog({ statistics, date, passRate }: ExamStatsDialogP
       onClick={(e) => e.stopPropagation()}
       onKeyDown={(e) => e.stopPropagation()}
     >
-      <Button
-        variant="invisible"
-        size="small"
-        className={cn("tabular-nums", passRateClass(passRate))}
-        onClick={() => setOpen(true)}
-      >
+      <Button variant="ghost" size="sm" className={cn("tabular-nums", passRateClass(passRate))} onClick={() => setOpen(true)}>
         {passRate.toFixed(1)}%
       </Button>
       {open && (
@@ -71,7 +67,7 @@ export function ExamStatsDialog({ statistics, date, passRate }: ExamStatsDialogP
                   Y-Sektionen
                 </a>
               </p>
-              <Button onClick={() => setOpen(false)}>Stäng</Button>
+              <Button variant="outline" onClick={() => setOpen(false)}>Stäng</Button>
             </Dialog.Footer>
           )}
         >

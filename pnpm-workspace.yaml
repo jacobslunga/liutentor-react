@@ -1,2 +1,0 @@
-patchedDependencies:
-  '@primer/react@38.40.0': patches/@primer__react@38.40.0.patch

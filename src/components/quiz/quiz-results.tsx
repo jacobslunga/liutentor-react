@@ -1,9 +1,10 @@
 import { RotateCwIcon } from "lucide-react";
-import { Button, Label } from "@primer/react";
+import { Label } from "@primer/react";
 import { cn } from "@/lib/utils";
 import { useQuizStore } from "@/stores/quiz";
 import type { MultipleChoiceQuizResponse } from "@/types/quiz";
 import { QuizMarkdown } from "./quiz-markdown";
+import { Button } from "@/components/ui/button";
 
 const CORRECT = "border-emerald-500/30 bg-emerald-500/10";
 const WRONG = "border-destructive/30 bg-destructive/10";
@@ -37,10 +38,10 @@ export function QuizResults({ quizData }: { quizData: MultipleChoiceQuizResponse
         <p className="mb-0.5 text-sm font-medium">Nästa?</p>
         <p className="mb-4 text-xs text-muted-foreground">Gör om quizet eller skapa ett nytt med nya tentor.</p>
         <div className="flex items-center gap-2">
-          <Button size="small" leadingVisual={RotateCwIcon} onClick={retake}>
+          <Button variant="outline" size="sm" onClick={retake}><RotateCwIcon />
             Gör om
           </Button>
-          <Button size="small" variant="primary" className="ml-auto" onClick={reset}>
+          <Button size="sm" className="ml-auto" onClick={reset}>
             Nytt quiz
           </Button>
         </div>

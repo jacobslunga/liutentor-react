@@ -1,4 +1,4 @@
-import { ActionList, ActionMenu, IconButton } from "@primer/react";
+import { ActionList, ActionMenu } from "@primer/react";
 import { KeybindingHint } from "@primer/react/experimental";
 import { MonitorIcon, MoonIcon, SettingsIcon, SunIcon } from "lucide-react";
 import { useTheme } from "next-themes";
@@ -6,6 +6,7 @@ import { useState } from "react";
 import { SettingsDialog } from "@/components/settings/settings-dialog";
 import type { ChatModelId } from "@/lib/chat-models";
 import { useSelectedModel, useSettingsStore } from "@/stores/settings";
+import { IconButton } from "@/components/shared/icon-button";
 
 const THEMES = [
   { value: "light", label: "Ljust", Icon: SunIcon },
@@ -35,12 +36,7 @@ export function ChatSettingsMenu() {
     <>
       <ActionMenu>
         <ActionMenu.Anchor>
-          <IconButton
-            icon={SettingsIcon}
-            variant="invisible"
-            className="shrink-0"
-            aria-label="Inställningar"
-          />
+          <IconButton variant="ghost" className="shrink-0" aria-label="Inställningar"><SettingsIcon /></IconButton>
         </ActionMenu.Anchor>
         <ActionMenu.Overlay side="outside-right" align="end" width="medium">
           <div className="max-h-88 overflow-y-auto overscroll-contain">

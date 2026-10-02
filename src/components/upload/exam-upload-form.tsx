@@ -1,9 +1,12 @@
-import { Banner, Button, Dialog, IconButton } from "@primer/react";
+import { Banner, Dialog } from "@primer/react";
 import { BookIcon, FileTextIcon, UploadIcon, XIcon } from "lucide-react";
 import { useRef, useState, type DragEvent } from "react";
 import { useTypingPlaceholder } from "@/hooks/use-typing-placeholder";
 import { uploadExams } from "@/lib/upload";
 import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { IconButton } from "@/components/shared/icon-button";
+import { Spinner } from "@/components/ui/spinner";
 
 interface ExamUploadFormProps {
   initialCourseCode?: string;
@@ -119,24 +122,11 @@ export function ExamUploadForm({ initialCourseCode = "", fixedCourseCode = false
                   <FileTextIcon className="size-4 shrink-0 text-muted-foreground" />
                   <span className="truncate">{file.name}</span>
                 </div>
-                <IconButton
-                  icon={XIcon}
-                  variant="invisible"
-                  size="small"
-                  aria-label={`Ta bort ${file.name}`}
-                  onClick={() => setFiles((current) => current.filter((_, i) => i !== index))}
-                />
+                <IconButton variant="ghost" size="icon-sm" aria-label={`Ta bort ${file.name}`} onClick={() => setFiles((current) => current.filter((_, i) => i !== index))}><XIcon /></IconButton>
               </div>
             ))}
           </div>
-          <Button
-            size="large"
-            variant="primary"
-            block
-            loading={loading}
-            disabled={!courseCode}
-            onClick={() => void upload()}
-          >
+          <Button size="lg" className="w-full" disabled={loading || !courseCode} onClick={() => void upload()}>{loading && <Spinner />}
             Ladda upp
           </Button>
         </div>

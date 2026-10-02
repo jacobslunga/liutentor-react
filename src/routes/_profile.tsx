@@ -9,9 +9,9 @@ import {
 import { ArrowLeftIcon } from "lucide-react";
 import { useEffect } from "react";
 import { LogoIcon } from "@/components/layout/logo-icon";
-import { Button } from "@primer/react";
 import { useSeo } from "@/hooks/use-seo";
 import { getUser, useUser } from "@/stores/auth";
+import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/_profile")({
   beforeLoad: async () => {
@@ -41,12 +41,7 @@ function ProfileLayout() {
       <header className="sticky top-0 z-40 w-full">
         <div className="absolute inset-0 -z-10 bg-background/80 mask-[linear-gradient(to_bottom,black,transparent)] backdrop-blur-sm" />
         <div className="mx-auto flex h-16 max-w-3xl items-center justify-between px-4 sm:px-8">
-          <Button
-            variant="invisible"
-            size="small"
-            leadingVisual={ArrowLeftIcon}
-            onClick={() => router.history.back()}
-          >
+          <Button variant="ghost" size="sm" onClick={() => router.history.back()}><ArrowLeftIcon />
             Tillbaka
           </Button>
           <Link

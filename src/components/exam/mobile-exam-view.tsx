@@ -1,4 +1,4 @@
-import { ActionList, ActionMenu, Button, IconButton } from "@primer/react";
+import { ActionList, ActionMenu } from "@primer/react";
 import {
   ArrowLeftIcon,
   BookIcon,
@@ -8,11 +8,13 @@ import {
   XIcon,
 } from "lucide-react";
 import { lazy, Suspense, useEffect, useState, type ReactNode } from "react";
-import { RouterLinkIconButton } from "@/components/primer/router-link-button";
+import { RouterLinkButton } from "@/components/shared/router-link";
 import { downloadBoth, downloadFile } from "@/lib/download";
 import { cn } from "@/lib/utils";
 import type { Exam } from "@/types/exam";
 import { ExamPicker } from "./exam-picker";
+import { Button } from "@/components/ui/button";
+import { IconButton } from "@/components/shared/icon-button";
 
 const PdfRenderer = lazy(() =>
   import("@/components/pdf/pdf-renderer").then((m) => ({ default: m.PdfRenderer })),
@@ -98,12 +100,7 @@ export function MobileExamView({
   return (
     <div className="relative h-dvh w-full overflow-hidden bg-background">
       <MobileHeader>
-        <RouterLinkIconButton
-          to="/search/$courseCode"
-          params={{ courseCode }}
-          icon={ArrowLeftIcon}
-          aria-label="Gå tillbaka"
-        />
+        <RouterLinkButton variant="outline" to="/search/$courseCode" params={{ courseCode }} aria-label="Gå tillbaka" size="icon"><ArrowLeftIcon /></RouterLinkButton>
         <div className="min-w-0 flex-1">
           <p className="truncate text-sm leading-tight font-semibold">{courseCode}</p>
           <p className="truncate text-xs leading-tight text-muted-foreground">{examDate}</p>
@@ -122,7 +119,7 @@ export function MobileExamView({
         )}
         <ActionMenu>
           <ActionMenu.Anchor>
-            <IconButton icon={DownloadIcon} size="small" aria-label="Ladda ned" />
+            <IconButton variant="outline" size="icon-sm" aria-label="Ladda ned"><DownloadIcon /></IconButton>
           </ActionMenu.Anchor>
           <ActionMenu.Overlay align="end">
             <ActionList>
@@ -162,11 +159,7 @@ export function MobileExamView({
           </ActionMenu.Overlay>
         </ActionMenu>
         {solutionPdfUrl && (
-          <Button
-            size="small"
-            leadingVisual={<BookIcon className="text-primary" />}
-            onClick={openSolution}
-          >
+          <Button variant="outline" size="sm" onClick={openSolution}><BookIcon className="text-primary" />
             Facit
           </Button>
         )}
@@ -197,12 +190,7 @@ export function MobileExamView({
                 {courseCode} - {examDate}
               </p>
             </div>
-            <IconButton
-              icon={XIcon}
-              size="small"
-              aria-label="Stäng"
-              onClick={() => setShowSolution(false)}
-            />
+            <IconButton variant="outline" size="icon-sm" aria-label="Stäng" onClick={() => setShowSolution(false)}><XIcon /></IconButton>
           </MobileHeader>
           <div className="h-full w-full overflow-hidden" style={PDF_BOX_STYLE}>
             <Suspense fallback={<Spinner />}>

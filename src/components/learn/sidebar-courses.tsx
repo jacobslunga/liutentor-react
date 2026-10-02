@@ -1,9 +1,4 @@
-import {
-  ActionList,
-  ActionMenu,
-  ConfirmationDialog,
-  IconButton,
-} from "@primer/react";
+import { ActionList, ActionMenu, ConfirmationDialog } from "@primer/react";
 import { useQueryClient } from "@tanstack/react-query";
 import { Link, useNavigate, useParams } from "@tanstack/react-router";
 import {
@@ -27,6 +22,7 @@ import { studyCoursesKey, useStudyCourses } from "@/queries/study-courses";
 import { useConversationList } from "@/hooks/use-conversation-list";
 import { useChatStore } from "@/stores/chat";
 import { CourseNameDialog } from "./course-name-dialog";
+import { IconButton } from "@/components/shared/icon-button";
 
 /** "Kurser" in the chat sidebar: the user's study courses, or a sign-in nudge. */
 export function SidebarCourses({ onNavigate }: { onNavigate: () => void }) {
@@ -108,13 +104,7 @@ export function SidebarCourses({ onNavigate }: { onNavigate: () => void }) {
       <div className="flex items-center justify-between pr-1 pb-1 pl-3">
         <h3 className="text-xs text-muted-foreground/70">Kurser</h3>
         {user && (
-          <IconButton
-            icon={PlusIcon}
-            variant="invisible"
-            size="small"
-            aria-label="Ny kurs"
-            onClick={() => setCreating(true)}
-          />
+          <IconButton variant="ghost" size="icon-sm" aria-label="Ny kurs" onClick={() => setCreating(true)}><PlusIcon /></IconButton>
         )}
       </div>
 
@@ -163,14 +153,7 @@ export function SidebarCourses({ onNavigate }: { onNavigate: () => void }) {
                 </Link>
                 <ActionMenu>
                   <ActionMenu.Anchor>
-                    <IconButton
-                      icon={EllipsisIcon}
-                      variant="invisible"
-                      size="small"
-                      aria-label={`Alternativ för ${course.name}`}
-                      unsafeDisableTooltip
-                      className="absolute right-1 opacity-100 group-hover:opacity-100 aria-expanded:opacity-100 md:opacity-0"
-                    />
+                    <IconButton variant="ghost" size="icon-sm" aria-label={`Alternativ för ${course.name}`} hideTooltip className="absolute right-1 opacity-100 group-hover:opacity-100 aria-expanded:opacity-100 md:opacity-0"><EllipsisIcon /></IconButton>
                   </ActionMenu.Anchor>
                   <ActionMenu.Overlay align="start" width="small">
                     <ActionList>

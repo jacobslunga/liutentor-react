@@ -1,9 +1,10 @@
-import { ConfirmationDialog, IconButton } from "@primer/react";
+import { ConfirmationDialog } from "@primer/react";
 import { CheckIcon, Trash2Icon } from "lucide-react";
 import { useState } from "react";
 import { QUIZ_DIFFICULTY_INFO } from "@/lib/quiz";
 import { cn } from "@/lib/utils";
 import type { StoredQuizItem } from "@/types/quiz";
+import { IconButton } from "@/components/shared/icon-button";
 
 const dateLabel = (value: string) =>
   new Date(value).toLocaleString("sv-SE", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" });
@@ -55,14 +56,7 @@ export function QuizHistoryList({ history, signedIn, activeQuizId, onLoad, onDel
                   </span>
                   {item.id === activeQuizId && <CheckIcon className="size-4 shrink-0 text-primary" />}
                 </button>
-                <IconButton
-                  icon={Trash2Icon}
-                  variant="invisible"
-                  size="small"
-                  className="shrink-0 opacity-0 transition-opacity group-hover:opacity-100 focus-visible:opacity-100"
-                  aria-label={`Ta bort quiz från ${dateLabel(item.createdAt)}`}
-                  onClick={() => setPendingDelete(item)}
-                />
+                <IconButton variant="ghost" size="icon-sm" className="shrink-0 opacity-0 transition-opacity group-hover:opacity-100 focus-visible:opacity-100" aria-label={`Ta bort quiz från ${dateLabel(item.createdAt)}`} onClick={() => setPendingDelete(item)}><Trash2Icon /></IconButton>
               </div>
             );
           })}

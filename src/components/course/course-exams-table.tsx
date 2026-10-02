@@ -2,13 +2,13 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useNavigate, useRouter } from "@tanstack/react-router";
 import { CheckIcon, MinusIcon } from "lucide-react";
 import { memo, useMemo, useState } from "react";
-import { Button } from "@primer/react";
 import { getExamPrefix } from "@/lib/exams";
 import { cn } from "@/lib/utils";
 import { examDetailQuery } from "@/queries/exams";
 import { sortExams, type ExamSortBy, type ExamSortDirection } from "@/stores/exam-sort";
 import type { Exam } from "@/types/exam";
 import { ExamStatsDialog } from "./exam-stats-dialog";
+import { Button } from "@/components/ui/button";
 
 const GRID_COLS =
   "grid grid-cols-[minmax(max-content,1fr)_max-content_max-content_max-content] items-center gap-x-4 px-4 sm:grid-cols-[minmax(0,3fr)_minmax(80px,1fr)_minmax(64px,1fr)_minmax(88px,1fr)]";
@@ -49,12 +49,7 @@ export function CourseExamsTable({ courseCode, exams, sortBy, sortDirection }: C
       {prefixes.length > 1 && (
         <div className="flex w-full flex-wrap gap-2">
           {prefixes.map((prefix) => (
-            <Button
-              key={prefix}
-              size="small"
-              variant={activeFilters.has(prefix) ? "primary" : "default"}
-              onClick={() => toggleFilter(prefix)}
-            >
+            <Button key={prefix} size="sm" variant={activeFilters.has(prefix) ? "default" : "outline"} onClick={() => toggleFilter(prefix)}>
               {prefix}
             </Button>
           ))}

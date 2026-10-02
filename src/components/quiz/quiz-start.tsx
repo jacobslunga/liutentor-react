@@ -1,7 +1,8 @@
-import { Button, SegmentedControl } from "@primer/react";
+import { SegmentedControl } from "@primer/react";
 import { useSettingsStore } from "@/stores/settings";
 import { QUIZ_DIFFICULTY_INFO } from "@/lib/quiz";
 import { QUIZ_DIFFICULTIES } from "@/types/quiz";
+import { Button } from "@/components/ui/button";
 
 export function QuizStart({
   canStart,
@@ -49,12 +50,7 @@ export function QuizStart({
         </p>
       )}
 
-      <Button
-        variant="primary"
-        className="mt-6"
-        disabled={!canStart}
-        onClick={onStart}
-      >
+      <Button className="mt-6" disabled={!canStart} onClick={onStart}>
         Generera quiz
       </Button>
     </div>

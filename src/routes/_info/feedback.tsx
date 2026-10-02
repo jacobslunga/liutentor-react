@@ -1,10 +1,12 @@
-import { Button, FormControl, Textarea, TextInput } from "@primer/react";
+import { FormControl, Textarea, TextInput } from "@primer/react";
 import { createFileRoute } from "@tanstack/react-router";
 import { CheckIcon, TriangleAlertIcon } from "lucide-react";
 import { useState, type FormEvent } from "react";
 import { PageIntro } from "@/components/info/page-intro";
-import { RouterLinkButton } from "@/components/primer/router-link-button";
+import { RouterLinkButton } from "@/components/shared/router-link";
 import { useDocumentTitle } from "@/hooks/use-document-title";
+import { Button } from "@/components/ui/button";
+import { Spinner } from "@/components/ui/spinner";
 
 export const Route = createFileRoute("/_info/feedback")({
   component: FeedbackPage,
@@ -81,7 +83,7 @@ function FeedbackPage() {
                 title="Tack!"
                 body="Vi har tagit emot din feedback och återkommer om det behövs."
                 action={
-                  <RouterLinkButton to="/" size="small">
+                  <RouterLinkButton variant="outline" to="/" size="sm">
                     Tillbaka till startsidan
                   </RouterLinkButton>
                 }
@@ -93,10 +95,7 @@ function FeedbackPage() {
                 title="Något gick fel"
                 body="Försök igen eller kontakta oss direkt på liutentor@gmail.com"
                 action={
-                  <Button
-                    size="small"
-                    onClick={() => setStatus("idle")}
-                  >
+                  <Button variant="outline" size="sm" onClick={() => setStatus("idle")}>
                     Försök igen
                   </Button>
                 }
@@ -164,12 +163,7 @@ function FeedbackPage() {
                     <p className="text-xs text-muted-foreground">
                       Vi använder din mail bara för att kunna svara.
                     </p>
-                    <Button
-                      type="submit"
-                      size="small"
-                      variant="primary"
-                      loading={status === "sending"}
-                    >
+                    <Button type="submit" size="sm" disabled={status === "sending"}>{status === "sending" && <Spinner />}
                       Skicka
                     </Button>
                   </div>

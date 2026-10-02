@@ -3,9 +3,9 @@ import { UploadIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 import { AppFooter } from "@/components/layout/app-footer";
 import { LogoIcon } from "@/components/layout/logo-icon";
-import { Button } from "@primer/react";
 import { cn } from "@/lib/utils";
 import { useUploadModal } from "@/stores/upload-modal";
+import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/_info")({
   component: InfoLayout,
@@ -47,7 +47,7 @@ function InfoLayout() {
             </span>
           </Link>
 
-          <Button size="small" leadingVisual={UploadIcon} onClick={() => openUploadModal()}>
+          <Button variant="outline" size="sm" onClick={() => openUploadModal()}><UploadIcon />
             <span className="hidden sm:inline">Ladda upp tenta</span>
             <span className="sm:hidden">Ladda upp</span>
           </Button>

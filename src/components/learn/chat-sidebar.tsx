@@ -1,9 +1,4 @@
-import {
-  ActionList,
-  ActionMenu,
-  ConfirmationDialog,
-  IconButton,
-} from "@primer/react";
+import { ActionList, ActionMenu, ConfirmationDialog } from "@primer/react";
 import { Link, useNavigate, useParams } from "@tanstack/react-router";
 import {
   EllipsisIcon,
@@ -19,7 +14,7 @@ import { AuthActions } from "@/components/auth/auth-actions";
 import { UserAvatar } from "@/components/auth/user-avatar";
 import { TypedTitle } from "@/components/chat/conversation-title";
 import { LogoIcon } from "@/components/layout/logo-icon";
-import { RouterLinkButton } from "@/components/primer/router-link-button";
+import { RouterLinkButton } from "@/components/shared/router-link";
 import { useConversationList } from "@/hooks/use-conversation-list";
 import { signOut } from "@/lib/auth";
 import { cn } from "@/lib/utils";
@@ -31,6 +26,7 @@ import { useSettingsStore } from "@/stores/settings";
 import { ChatSettingsMenu } from "./chat-settings-menu";
 import { SidebarCourses } from "./sidebar-courses";
 import { SIDEBAR_SHORTCUT } from "./sidebar-shortcut";
+import { IconButton } from "@/components/shared/icon-button";
 
 /**
  * The learning chat's conversation list. Sits beside the chat on wide screens
@@ -253,14 +249,7 @@ function SidebarContent() {
                   </Link>
                   <ActionMenu>
                     <ActionMenu.Anchor>
-                      <IconButton
-                        icon={EllipsisIcon}
-                        variant="invisible"
-                        size="small"
-                        aria-label={`Alternativ för ${item.title}`}
-                        unsafeDisableTooltip
-                        className="absolute right-1 opacity-100 group-hover:opacity-100 aria-expanded:opacity-100 md:opacity-0"
-                      />
+                      <IconButton variant="ghost" size="icon-sm" aria-label={`Alternativ för ${item.title}`} hideTooltip className="absolute right-1 opacity-100 group-hover:opacity-100 aria-expanded:opacity-100 md:opacity-0"><EllipsisIcon /></IconButton>
                     </ActionMenu.Anchor>
                     <ActionMenu.Overlay align="start" width="small">
                       <ActionList>
@@ -297,24 +286,11 @@ function SidebarContent() {
             LiU Tentor
           </span>
         </Link>
-        <IconButton
-          icon={PanelLeftIcon}
-          variant="invisible"
-          aria-label="Stäng sidopanelen"
-          keybindingHint={SIDEBAR_SHORTCUT}
-          onClick={() => setOpen(false)}
-        />
+        <IconButton variant="ghost" aria-label="Stäng sidopanelen" shortcut={SIDEBAR_SHORTCUT} onClick={() => setOpen(false)}><PanelLeftIcon /></IconButton>
       </div>
 
       <div className="shrink-0 px-2 pb-3">
-        <RouterLinkButton
-          to="/chatt"
-          variant="invisible"
-          block
-          alignContent="start"
-          leadingVisual={SquarePenIcon}
-          onClick={closeDrawer}
-        >
+        <RouterLinkButton to="/chatt" variant="ghost" className="w-full justify-start" onClick={closeDrawer}><SquarePenIcon />
           Ny chatt
         </RouterLinkButton>
       </div>

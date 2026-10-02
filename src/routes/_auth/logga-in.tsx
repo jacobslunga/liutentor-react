@@ -1,13 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { CheckIcon, LoaderCircleIcon, MailIcon } from "lucide-react";
-import {
-  Banner,
-  Button,
-  FormControl,
-  Link as PrimerLink,
-  SegmentedControl,
-  TextInput,
-} from "@primer/react";
+import { Banner, FormControl, Link as PrimerLink, SegmentedControl, TextInput } from "@primer/react";
 import { useState, type FormEvent } from "react";
 import { PasswordInput } from "@/components/auth/password-input";
 import { LogoIcon } from "@/components/layout/logo-icon";
@@ -18,6 +11,8 @@ import {
   validatePassword,
 } from "@/lib/auth-validation";
 import { supabase } from "@/lib/supabase";
+import { Button } from "@/components/ui/button";
+import { Spinner } from "@/components/ui/spinner";
 
 export type AuthTab = "logga-in" | "skapa-konto";
 
@@ -172,7 +167,7 @@ function LoginForm({ onSwitch }: { onSwitch: () => void }) {
           />
         )}
         <div className="flex flex-col gap-3">
-          <Button type="submit" variant="primary" block loading={loading}>
+          <Button type="submit" className="w-full" disabled={loading}>{loading && <Spinner />}
             Logga in
           </Button>
           <p className="text-center text-sm text-muted-foreground">
@@ -277,14 +272,10 @@ function SignupForm({ onSwitch }: { onSwitch: () => void }) {
           <span className="font-medium text-foreground">{form.email}</span>.
           Kontrollera din inkorg.
         </p>
-        <Button
-          size="small"
-          className="mt-2"
-          onClick={() => {
+        <Button variant="outline" size="sm" className="mt-2" onClick={() => {
             setSuccess(false);
             onSwitch();
-          }}
-        >
+          }}>
           Gå till inloggning
         </Button>
       </div>
@@ -389,7 +380,7 @@ function SignupForm({ onSwitch }: { onSwitch: () => void }) {
           />
         )}
         <div className="flex flex-col gap-3">
-          <Button type="submit" variant="primary" block loading={loading}>
+          <Button type="submit" className="w-full" disabled={loading}>{loading && <Spinner />}
             Skapa konto
           </Button>
           <p className="text-center text-sm text-muted-foreground">

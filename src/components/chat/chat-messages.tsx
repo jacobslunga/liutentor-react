@@ -16,7 +16,6 @@ import {
 } from "react";
 import { toast } from "sonner";
 import { useShallow } from "zustand/react/shallow";
-import { Button, LinkButton } from "@primer/react";
 import { useChatMarkdownReady } from "@/hooks/use-chat-markdown";
 import {
   renderCachedChatMarkdown,
@@ -35,6 +34,9 @@ import {
 } from "@/stores/chat";
 import { SelectionPopover } from "./selection-popover";
 import { SelectionQuote } from "./selection-quote";
+import { Button } from "@/components/ui/button";
+import { ButtonLink } from "@/components/shared/router-link";
+import { Spinner } from "@/components/ui/spinner";
 
 const LOADING_PHRASES = [
   "Baljar...",
@@ -370,18 +372,9 @@ const MessageRow = memo(function MessageRow({
             source.type === "file" ? (
               <FileSourceChip key={source.fileId} source={source} />
             ) : (
-              <LinkButton
-                key={source.url}
-                href={source.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                title={source.title}
-                size="small"
-                className="max-w-56"
-                leadingVisual={GlobeIcon}
-              >
+              <ButtonLink variant="outline" key={source.url} href={source.url} target="_blank" rel="noopener noreferrer" title={source.title} size="sm" className="max-w-56"><GlobeIcon />
                 <span className="truncate">{sourceLabel(source)}</span>
-              </LinkButton>
+              </ButtonLink>
             ),
           )}
         </div>
@@ -425,15 +418,7 @@ function FileSourceChip({
   }
 
   return (
-    <Button
-      size="small"
-      className="max-w-56"
-      title={source.title}
-      loading={opening}
-      loadingAnnouncement="Öppnar fil"
-      leadingVisual={FileTextIcon}
-      onClick={() => void open()}
-    >
+    <Button variant="outline" size="sm" className="max-w-56" title={source.title} onClick={() => void open()} disabled={opening}>{opening && <Spinner />}<FileTextIcon />
       <span className="truncate">{source.title}</span>
     </Button>
   );

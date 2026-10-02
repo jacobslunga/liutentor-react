@@ -1,15 +1,11 @@
 import { ArrowLeftIcon, ArrowRightIcon, CircleCheckIcon } from "lucide-react";
 import { useState } from "react";
-import {
-  Button,
-  ButtonGroup,
-  ConfirmationDialog,
-  ProgressBar,
-} from "@primer/react";
+import { ButtonGroup, ConfirmationDialog, ProgressBar } from "@primer/react";
 import { cn } from "@/lib/utils";
 import { useQuizStore } from "@/stores/quiz";
 import type { QuizQuestion } from "@/types/quiz";
 import { QuizMarkdown } from "./quiz-markdown";
+import { Button } from "@/components/ui/button";
 
 export function QuizAnswering({ questions }: { questions: QuizQuestion[] }) {
   const currentIndex = useQuizStore((s) => s.currentIndex);
@@ -30,12 +26,7 @@ export function QuizAnswering({ questions }: { questions: QuizQuestion[] }) {
   return (
     <div className="w-full">
       <div className="mb-6 flex items-center">
-        <Button
-          variant="invisible"
-          size="small"
-          leadingVisual={ArrowLeftIcon}
-          onClick={() => (answeredCount > 0 ? setConfirmExit(true) : reset())}
-        >
+        <Button variant="ghost" size="sm" onClick={() => (answeredCount > 0 ? setConfirmExit(true) : reset())}><ArrowLeftIcon />
           Avsluta
         </Button>
       </div>
@@ -75,33 +66,17 @@ export function QuizAnswering({ questions }: { questions: QuizQuestion[] }) {
           </span>
         )}
         <ButtonGroup>
-          <Button
-            size="small"
-            leadingVisual={ArrowLeftIcon}
-            disabled={currentIndex === 0}
-            onClick={previous}
-          >
+          <Button variant="outline" size="sm" disabled={currentIndex === 0} onClick={previous}><ArrowLeftIcon />
             Förra
           </Button>
           {isLast ? (
-            <Button
-              size="small"
-              variant="primary"
-              leadingVisual={CircleCheckIcon}
-              disabled={!canSubmit}
-              onClick={complete}
-            >
+            <Button size="sm" disabled={!canSubmit} onClick={complete}><CircleCheckIcon />
               Rätta quiz
             </Button>
           ) : (
-            <Button
-              size="small"
-              trailingVisual={ArrowRightIcon}
-              disabled={!answeredCurrent}
-              onClick={next}
-            >
+            <Button variant="outline" size="sm" disabled={!answeredCurrent} onClick={next}>
               Nästa
-            </Button>
+            <ArrowRightIcon /></Button>
           )}
         </ButtonGroup>
       </div>

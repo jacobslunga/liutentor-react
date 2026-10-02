@@ -2,9 +2,9 @@ import { createFileRoute } from "@tanstack/react-router";
 import { MailIcon } from "lucide-react";
 import { DocContact, LegalDocument } from "@/components/info/doc-layout";
 import { PageIntro } from "@/components/info/page-intro";
-import { LinkButton } from "@primer/react";
 import { useDocumentTitle } from "@/hooks/use-document-title";
 import type { DocSection } from "@/types/doc";
+import { ButtonLink } from "@/components/shared/router-link";
 
 export const Route = createFileRoute("/_info/copyright-policy")({
   component: CopyrightPolicyPage,
@@ -79,13 +79,9 @@ function CopyrightPolicyPage() {
             title="Begär borttagning"
             body="Anser du att vi publicerat material som kränker din upphovsrätt eller dina personuppgifter? Kontakta oss så hanterar vi ditt ärende inom 48 timmar."
           >
-            <LinkButton
-              href="mailto:liutentor@gmail.com?subject=Begäran om borttagning av material"
-              size="small"
-              leadingVisual={MailIcon}
-            >
+            <ButtonLink variant="outline" href="mailto:liutentor@gmail.com?subject=Begäran om borttagning av material" size="sm"><MailIcon />
               Skicka borttagningsbegäran
-            </LinkButton>
+            </ButtonLink>
           </DocContact>
         }
       />

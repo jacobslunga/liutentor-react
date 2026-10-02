@@ -1,11 +1,4 @@
-import {
-  ActionList,
-  ActionMenu,
-  Button,
-  ButtonGroup,
-  IconButton,
-  SegmentedControl,
-} from "@primer/react";
+import { ActionList, ActionMenu, ButtonGroup, SegmentedControl } from "@primer/react";
 import { KeybindingHint } from "@primer/react/experimental";
 import { useNavigate } from "@tanstack/react-router";
 import {
@@ -35,6 +28,8 @@ import { useSettingsStore } from "@/stores/settings";
 import { useUploadModal } from "@/stores/upload-modal";
 import type { Exam } from "@/types/exam";
 import { ExamPicker } from "./exam-picker";
+import { Button } from "@/components/ui/button";
+import { IconButton } from "@/components/shared/icon-button";
 
 interface ExamHeaderProps {
   exams: Exam[];
@@ -59,13 +54,9 @@ export const ExamHeader = memo(function ExamHeader({
   return (
     <div className="pointer-events-none relative isolate flex h-12 w-full items-center justify-between px-3">
       <ButtonGroup className="pointer-events-auto">
-        <IconButton
-          icon={ArrowLeftIcon}
-          aria-label="Tillbaka till kursen"
-          onClick={() =>
+        <IconButton variant="outline" aria-label="Tillbaka till kursen" onClick={() =>
             void navigate({ to: "/search/$courseCode", params: { courseCode } })
-          }
-        />
+          }><ArrowLeftIcon /></IconButton>
         <ExamPicker
           exams={exams}
           examId={examId}
@@ -94,7 +85,7 @@ function ChatToggle() {
   const toggle = useChatStore((s) => s.toggle);
 
   return (
-    <Button variant="primary" onClick={toggle}>
+    <Button onClick={toggle}>
       {isOpen ? "Stäng" : "Chatt"}
     </Button>
   );
@@ -164,11 +155,7 @@ function ActionsMenu({
       <SettingsDialog open={settingsOpen} onOpenChange={setSettingsOpen} />
       <ActionMenu>
         <ActionMenu.Anchor>
-          <IconButton
-            icon={EllipsisIcon}
-            variant="invisible"
-            aria-label="Fler åtgärder"
-          />
+          <IconButton variant="ghost" aria-label="Fler åtgärder"><EllipsisIcon /></IconButton>
         </ActionMenu.Anchor>
         <ActionMenu.Overlay align="end" width="medium">
           <ActionList>

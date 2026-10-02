@@ -1,4 +1,4 @@
-import { Button, ConfirmationDialog, IconButton, ProgressBar } from "@primer/react";
+import { ConfirmationDialog, ProgressBar } from "@primer/react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   AlertCircleIcon,
@@ -19,6 +19,8 @@ import {
 import { cn } from "@/lib/utils";
 import { courseFilesKey, courseFilesQuery } from "@/queries/study-courses";
 import { useUser } from "@/stores/auth";
+import { Button } from "@/components/ui/button";
+import { IconButton } from "@/components/shared/icon-button";
 
 interface PendingUpload {
   id: string;
@@ -153,11 +155,7 @@ export function CourseMaterial({ courseId }: { courseId: string }) {
             e.target.value = "";
           }}
         />
-        <Button
-          size="small"
-          disabled={usedBytes >= COURSE_QUOTA_BYTES}
-          onClick={() => fileInputRef.current?.click()}
-        >
+        <Button variant="outline" size="sm" disabled={usedBytes >= COURSE_QUOTA_BYTES} onClick={() => fileInputRef.current?.click()}>
           Välj filer
         </Button>
       </div>
@@ -271,14 +269,7 @@ function FileRow({
         </p>
       </div>
       {onDelete && (
-        <IconButton
-          icon={Trash2Icon}
-          variant="invisible"
-          size="small"
-          className="shrink-0 md:opacity-0 md:group-hover:opacity-100 md:focus-visible:opacity-100"
-          aria-label={`Ta bort ${name}`}
-          onClick={onDelete}
-        />
+        <IconButton variant="ghost" size="icon-sm" className="shrink-0 md:opacity-0 md:group-hover:opacity-100 md:focus-visible:opacity-100" aria-label={`Ta bort ${name}`} onClick={onDelete}><Trash2Icon /></IconButton>
       )}
     </li>
   );

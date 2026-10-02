@@ -1,4 +1,4 @@
-import { ActionList, ActionMenu, IconButton } from "@primer/react";
+import { ActionList, ActionMenu } from "@primer/react";
 import {
   ArrowUpIcon,
   CornerDownLeftIcon,
@@ -46,6 +46,7 @@ import {
   type CourseMentionMenuApi,
 } from "./course-mention-menu";
 import { SelectionQuote } from "./selection-quote";
+import { IconButton } from "@/components/shared/icon-button";
 
 const MAX_LENGTH = 4000;
 /**
@@ -442,13 +443,7 @@ export function ChatInput({
                   <span className="line-clamp-3 min-w-0 flex-1 text-sm leading-relaxed font-normal text-foreground">
                     "<SelectionQuote text={selectionContext} />"
                   </span>
-                  <IconButton
-                    icon={XIcon}
-                    variant="invisible"
-                    size="small"
-                    aria-label="Ta bort citatet"
-                    onClick={onClearSelectionContext}
-                  />
+                  <IconButton variant="ghost" size="icon-sm" aria-label="Ta bort citatet" onClick={onClearSelectionContext}><XIcon /></IconButton>
                 </div>
               )}
               {attachments.length > 0 && (
@@ -475,13 +470,7 @@ export function ChatInput({
                       <span className="shrink-0 text-muted-foreground">
                         {formatFileSize(a.size)}
                       </span>
-                      <IconButton
-                        icon={XIcon}
-                        variant="invisible"
-                        size="small"
-                        aria-label={`Ta bort ${a.name}`}
-                        onClick={() => removeAttachment(a.id)}
-                      />
+                      <IconButton variant="ghost" size="icon-sm" aria-label={`Ta bort ${a.name}`} onClick={() => removeAttachment(a.id)}><XIcon /></IconButton>
                     </div>
                   ))}
                 </div>
@@ -552,14 +541,7 @@ export function ChatInput({
                 e.target.value = "";
               }}
             />
-            <IconButton
-              icon={PlusIcon}
-              variant="invisible"
-              className="rounded-full"
-              aria-label="Bifoga filer"
-              disabled={isLoading || capacityReached}
-              onClick={() => fileInputRef.current?.click()}
-            />
+            <IconButton variant="ghost" className="rounded-full" aria-label="Bifoga filer" disabled={isLoading || capacityReached} onClick={() => fileInputRef.current?.click()}><PlusIcon /></IconButton>
           </div>
 
           <div
@@ -579,15 +561,7 @@ export function ChatInput({
                 {longLength} / {MAX_LENGTH}
               </span>
             )}
-            <IconButton
-              icon={isLoading ? StopIcon : ArrowUpIcon}
-              variant="primary"
-              className="rounded-full"
-              aria-label={isLoading ? "Avbryt svar" : "Skicka meddelande"}
-              unsafeDisableTooltip
-              disabled={!isLoading && !canSend}
-              onClick={() => (isLoading ? onCancel() : submit())}
-            />
+            <IconButton variant="default" className="rounded-full" aria-label={isLoading ? "Avbryt svar" : "Skicka meddelande"} hideTooltip disabled={!isLoading && !canSend} onClick={() => (isLoading ? onCancel() : submit())}>{isLoading ? <StopIcon /> : <ArrowUpIcon />}</IconButton>
           </div>
         </div>
 

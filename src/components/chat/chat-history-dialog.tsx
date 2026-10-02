@@ -1,4 +1,4 @@
-import { ConfirmationDialog, Dialog, IconButton, Spinner, TextInput } from "@primer/react";
+import { ConfirmationDialog, Dialog, Spinner, TextInput } from "@primer/react";
 import { SearchIcon, Trash2Icon } from "lucide-react";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
@@ -10,6 +10,7 @@ import {
 import { cn } from "@/lib/utils";
 import type { Conversation } from "@/queries/conversations";
 import { useChatStore, useChatStoreApi } from "@/stores/chat";
+import { IconButton } from "@/components/shared/icon-button";
 
 interface ChatHistoryDialogProps {
   onSelect: () => void;
@@ -141,15 +142,7 @@ export function ChatHistoryDialog({ onSelect }: ChatHistoryDialogProps) {
                       <Spinner size="small" srText="Laddar konversation..." />
                     </span>
                   )}
-                  <IconButton
-                    icon={Trash2Icon}
-                    variant="invisible"
-                    size="small"
-                    className="shrink-0 transition-opacity sm:pointer-events-none sm:opacity-0 sm:group-hover:pointer-events-auto sm:group-hover:opacity-100"
-                    disabled={deleting}
-                    aria-label="Radera chatt"
-                    onClick={() => setPendingDelete(item)}
-                  />
+                  <IconButton variant="ghost" size="icon-sm" className="shrink-0 transition-opacity sm:pointer-events-none sm:opacity-0 sm:group-hover:pointer-events-auto sm:group-hover:opacity-100" disabled={deleting} aria-label="Radera chatt" onClick={() => setPendingDelete(item)}><Trash2Icon /></IconButton>
                 </div>
               ))}
             </div>
@@ -193,13 +186,7 @@ export function ChatHistoryDialog({ onSelect }: ChatHistoryDialogProps) {
                   aria-label="Sök bland chattar"
                 />
                 {conversations.length > 0 && (
-                  <IconButton
-                    icon={Trash2Icon}
-                    variant="danger"
-                    disabled={deleting}
-                    aria-label="Radera alla chattar"
-                    onClick={() => setPendingDelete("all")}
-                  />
+                  <IconButton variant="destructive" disabled={deleting} aria-label="Radera alla chattar" onClick={() => setPendingDelete("all")}><Trash2Icon /></IconButton>
                 )}
               </div>
               {actionError && <p className="pt-2 text-sm text-destructive">{actionError}</p>}

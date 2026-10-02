@@ -1,7 +1,7 @@
 import { RotateCwIcon, XIcon } from "lucide-react";
-import { Button } from "@primer/react";
 import { cn } from "@/lib/utils";
 import { useQuizStore } from "@/stores/quiz";
+import { Button } from "@/components/ui/button";
 
 const STEP_ORDER = ["fetching_exams", "downloading_pdfs", "generating", "finalizing"];
 
@@ -33,12 +33,12 @@ export function QuizGenerating() {
         {error ? (
           <div className="animate-in text-center duration-200 fade-in-0 slide-in-from-bottom-1">
             <p className="text-sm text-destructive">Kunde inte generera quizet.</p>
-            <Button size="small" className="mt-3" leadingVisual={RotateCwIcon} onClick={reset}>
+            <Button variant="outline" size="sm" className="mt-3" onClick={reset}><RotateCwIcon />
               Försök igen
             </Button>
           </div>
         ) : (
-          <Button variant="invisible" size="small" leadingVisual={XIcon} onClick={reset}>
+          <Button variant="ghost" size="sm" onClick={reset}><XIcon />
             Avbryt
           </Button>
         )}

@@ -1,5 +1,5 @@
 import { ArrowUpRightIcon } from "lucide-react";
-import { RouterLinkButton } from "@/components/primer/router-link-button";
+import { RouterLinkButton } from "@/components/shared/router-link";
 import { useRecentSearches } from "@/stores/recent-searches";
 
 export function RecentSearches() {
@@ -9,15 +9,9 @@ export function RecentSearches() {
   return (
     <div className="flex flex-wrap items-center justify-center gap-1.5">
       {latest.map((s) => (
-        <RouterLinkButton
-          key={s.courseCode}
-          to="/search/$courseCode"
-          params={{ courseCode: s.courseCode }}
-          variant="invisible"
-          trailingVisual={ArrowUpRightIcon}
-        >
+        <RouterLinkButton key={s.courseCode} to="/search/$courseCode" params={{ courseCode: s.courseCode }} variant="ghost">
           {s.courseCode}
-        </RouterLinkButton>
+        <ArrowUpRightIcon /></RouterLinkButton>
       ))}
     </div>
   );
