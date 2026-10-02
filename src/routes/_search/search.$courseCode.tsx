@@ -241,13 +241,22 @@ function CourseContent({
             onValueChange={(value) => setTab(value as CourseTab)}
             className="contents"
           >
-            <div className={cn(STICKY_BAR, "flex min-h-12 items-center shadow-[inset_0_-1px_var(--border)]")}>
-              <TabsList variant="line" aria-label="Kursvy">
-                <TabsTrigger value="exams">
+            {/* Tabs fill the bar's height and the active underline sits on its
+                bottom border, so the border is the bar's last edge and rows
+                scroll up against it. */}
+            <div className={cn(STICKY_BAR, "flex min-h-12 items-stretch shadow-[inset_0_-1px_var(--border)]")}>
+              <TabsList
+                variant="line"
+                aria-label="Kursvy"
+                className="self-stretch p-0 group-data-horizontal/tabs:h-auto"
+              >
+                <TabsTrigger value="exams" className="h-full px-2 group-data-horizontal/tabs:after:bottom-0">
                   Tentor
                   <Badge variant="secondary">{exams.length}</Badge>
                 </TabsTrigger>
-                <TabsTrigger value="quiz">Quiz</TabsTrigger>
+                <TabsTrigger value="quiz" className="h-full px-2 group-data-horizontal/tabs:after:bottom-0">
+                  Quiz
+                </TabsTrigger>
               </TabsList>
             </div>
             <TabsContent value="exams" className="pt-4">
