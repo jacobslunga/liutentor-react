@@ -29,12 +29,6 @@ import { ExamPicker } from "./exam-picker";
 import { Button } from "@/components/ui/button";
 import { IconButton } from "@/components/shared/icon-button";
 import { ButtonGroup } from "@/components/ui/button-group";
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -48,6 +42,7 @@ import {
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { SegmentedControl } from "@/components/shared/segmented-control";
 
 interface ExamHeaderProps {
   exams: Exam[];
@@ -122,28 +117,20 @@ function LayoutTabs() {
   const closeChat = useChatStore((s) => s.close);
 
   return (
-    <ToggleGroup
-      type="single"
-      variant="outline"
+    <SegmentedControl
       aria-label="Layout"
       value={layoutMode}
       onValueChange={(value) => {
-        if (!value) return;
-        setLayoutMode(value as (typeof LAYOUT_TABS)[number]["value"]);
+        setLayoutMode(value);
         closeChat();
       }}
-    >
-      {LAYOUT_TABS.map(({ value, icon: Icon, label }) => (
-        <Tooltip key={value}>
-          <TooltipTrigger asChild>
-            <ToggleGroupItem value={value} aria-label={label}>
-              <Icon />
-            </ToggleGroupItem>
-          </TooltipTrigger>
-          <TooltipContent>{label}</TooltipContent>
-        </Tooltip>
-      ))}
-    </ToggleGroup>
+      options={LAYOUT_TABS.map(({ value, icon, label }) => ({
+        value,
+        icon,
+        label,
+        iconOnly: true,
+      }))}
+    />
   );
 }
 

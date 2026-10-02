@@ -3,7 +3,6 @@ import {
   SignalHighIcon,
   SignalLowIcon,
   SignalMediumIcon,
-  SparklesIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -46,8 +45,7 @@ export function QuizStart({
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-base">
-          <SparklesIcon className="size-4 text-brand" />
+        <CardTitle className="text-base">
           Testa dig själv på {courseCode}
         </CardTitle>
         <CardDescription>
