@@ -7,6 +7,27 @@
 @custom-variant dark (&:is(.dark *));
 
 /*
+ * Elevation and motion. Raised controls (buttons, later cards and inputs)
+ * share these: a soft drop shadow that grows on hover, a 1px top highlight,
+ * and a fast ease-out with a hint of overshoot.
+ */
+@theme {
+  --ease-snap: cubic-bezier(0.25, 1.3, 0.5, 1);
+  --ease-out-quick: cubic-bezier(0.2, 0.8, 0.2, 1);
+
+  --shadow-raised:
+    0 1px 2px -0.5px var(--shadow-color), 0 1px 1px 0 var(--shadow-color-soft);
+  --shadow-raised-hover:
+    0 4px 10px -3px var(--shadow-color), 0 1px 2px 0 var(--shadow-color-soft);
+  --shadow-raised-pressed: 0 0 1px 0 var(--shadow-color);
+
+  --inset-shadow-highlight: inset 0 1px 0 0 var(--highlight-color);
+  /* Filled controls: a faint top sheen and a darker bottom lip. */
+  --inset-shadow-sheen:
+    inset 0 1px 0 0 oklch(1 0 0 / 0.22), inset 0 -1px 0 0 oklch(0 0 0 / 0.18);
+}
+
+/*
  * Soft mesh gradient for feature announcements (the chat intro dialog).
  * Fixed colors on purpose: it is an illustration, the same in both themes.
  */
@@ -100,6 +121,9 @@
  ---break---
  */
 :root {
+  --shadow-color: oklch(0 0 0 / 0.14);
+  --shadow-color-soft: oklch(0 0 0 / 0.05);
+  --highlight-color: oklch(1 0 0 / 0.7);
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
   --card: oklch(1 0 0);
@@ -137,6 +161,9 @@
  ---break---
  */
 .dark {
+  --shadow-color: oklch(0 0 0 / 0.5);
+  --shadow-color-soft: oklch(0 0 0 / 0.3);
+  --highlight-color: oklch(1 0 0 / 0.08);
   --background: oklch(0.145 0 0);
   --foreground: oklch(0.985 0 0);
   --card: oklch(0.205 0 0);
