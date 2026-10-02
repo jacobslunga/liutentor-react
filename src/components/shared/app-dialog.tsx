@@ -48,7 +48,7 @@ export function AppDialog({
     <Dialog open onOpenChange={(open) => !open && onClose()}>
       <DialogContent
         role={role}
-        className={cn("flex max-h-[85dvh] flex-col", WIDTHS[width], className)}
+        className={cn("flex max-h-[min(85dvh,42rem)] flex-col", WIDTHS[width], className)}
       >
         {header ??
           (title && (
