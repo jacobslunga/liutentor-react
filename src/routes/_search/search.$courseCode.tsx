@@ -1,8 +1,6 @@
-import { ActionList, ActionMenu, Label } from "@primer/react";
-import { UnderlinePanels } from "@primer/react/experimental";
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { InboxIcon, LoaderCircleIcon } from "lucide-react";
+import { ChevronDownIcon, InboxIcon, LoaderCircleIcon } from "lucide-react";
 import { lazy, Suspense, useEffect, useMemo } from "react";
 import { CourseExamsTable } from "@/components/course/course-exams-table";
 import { CourseSidebar } from "@/components/course/course-sidebar";
@@ -19,6 +17,9 @@ import {
 } from "@/stores/exam-sort";
 import { useRecentSearches } from "@/stores/recent-searches";
 import type { CourseExams } from "@/types/exam";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const CourseQuizPanel = lazy(
   () => import("@/components/quiz/course-quiz-panel"),
@@ -190,7 +191,7 @@ function CourseContent({
     <div className="flex w-full flex-col">
       <header className="flex flex-wrap items-center justify-between gap-4">
         <div className="flex flex-col min-w-0 flex-wrap items-start gap-y-2">
-          <Label size="large">{courseCode}</Label>
+          <Badge variant="secondary">{courseCode}</Badge>
           <h1 className="text-2xl md:text-4xl leading-tight font-semibold wrap-break-word">
             {course.courseName}
           </h1>
@@ -223,39 +224,44 @@ function CourseContent({
       </header>
 
       <div className="grid gap-x-8 gap-y-10 pt-6 lg:grid-cols-[minmax(0,1fr)_18.5rem]">
-        <div className="grid min-w-0 content-start grid-cols-[minmax(0,1fr)_auto] [&>[role=tabpanel]]:col-span-2">
-          <UnderlinePanels
-            aria-label="Kursvy"
+        <div className="grid min-w-0 content-start grid-cols-[minmax(0,1fr)_auto] [&_[role=tabpanel]]:col-span-2">
+          {/* `contents` lets the tab list and panels sit in this grid, beside
+              the sort bar. */}
+          <Tabs
             value={activeTab}
-            onChange={({ value }) => setTab(value as CourseTab)}
-            // Primer insets the tabs by 1rem; flush, they line up with the table.
-            className={cn(STICKY_BAR, "px-0")}
+            onValueChange={(value) => setTab(value as CourseTab)}
+            className="contents"
           >
-            <UnderlinePanels.Tab value="exams" counter={exams.length}>
-              Tentor
-            </UnderlinePanels.Tab>
-            <UnderlinePanels.Tab value="quiz">Quiz</UnderlinePanels.Tab>
-            <UnderlinePanels.Panel value="exams" className="pt-4">
+            <div className={cn(STICKY_BAR, "flex min-h-12 items-center shadow-[inset_0_-1px_var(--border)]")}>
+              <TabsList variant="line" aria-label="Kursvy">
+                <TabsTrigger value="exams">
+                  Tentor
+                  <Badge variant="secondary">{exams.length}</Badge>
+                </TabsTrigger>
+                <TabsTrigger value="quiz">Quiz</TabsTrigger>
+              </TabsList>
+            </div>
+            <TabsContent value="exams" className="pt-4">
               <CourseExamsTable
                 courseCode={courseCode}
                 exams={exams}
                 sortBy={sort.sortBy}
                 sortDirection={sort.sortDirection}
               />
-            </UnderlinePanels.Panel>
-            <UnderlinePanels.Panel value="quiz" className="pt-4">
+            </TabsContent>
+            <TabsContent value="quiz" className="pt-4">
               {/* Hidden panels stay mounted; only load the quiz once it's opened. */}
               {activeTab === "quiz" && (
                 <Suspense fallback={null}>
                   <CourseQuizPanel courseCode={courseCode} exams={exams} />
                 </Suspense>
               )}
-            </UnderlinePanels.Panel>
-          </UnderlinePanels>
+            </TabsContent>
+          </Tabs>
           <div
             className={cn(
               STICKY_BAR,
-              "col-start-2 row-start-1 flex min-h-12 items-center shadow-[inset_0_-1px_var(--borderColor-muted)]",
+              "col-start-2 row-start-1 flex min-h-12 items-center shadow-[inset_0_-1px_var(--border)]",
             )}
           >
             {activeTab === "exams" && <SortMenu {...sort} />}
@@ -291,45 +297,32 @@ function SortMenu({
   setSortDirection: (value: ExamSortDirection) => void;
 }) {
   return (
-    <ActionMenu>
-      <ActionMenu.Button size="small" aria-label="Sortera tentor">
-        {sortBy === "date" ? "Datum" : "Godkänd"}
-      </ActionMenu.Button>
-      <ActionMenu.Overlay align="end" width="small">
-        <ActionList>
-          <ActionList.Group selectionVariant="single">
-            <ActionList.GroupHeading>Sortera efter</ActionList.GroupHeading>
-            <ActionList.Item
-              selected={sortBy === "date"}
-              onSelect={() => setSortBy("date")}
-            >
-              Datum
-            </ActionList.Item>
-            <ActionList.Item
-              selected={sortBy === "pass-rate"}
-              onSelect={() => setSortBy("pass-rate")}
-            >
-              Godkänd
-            </ActionList.Item>
-          </ActionList.Group>
-          <ActionList.Divider />
-          <ActionList.Group selectionVariant="single">
-            <ActionList.GroupHeading>Ordning</ActionList.GroupHeading>
-            <ActionList.Item
-              selected={sortDirection === "desc"}
-              onSelect={() => setSortDirection("desc")}
-            >
-              Fallande
-            </ActionList.Item>
-            <ActionList.Item
-              selected={sortDirection === "asc"}
-              onSelect={() => setSortDirection("asc")}
-            >
-              Stigande
-            </ActionList.Item>
-          </ActionList.Group>
-        </ActionList>
-      </ActionMenu.Overlay>
-    </ActionMenu>
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="outline" size="sm" aria-label="Sortera tentor">
+          {sortBy === "date" ? "Datum" : "Godkänd"}
+          <ChevronDownIcon />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="min-w-48">
+        <DropdownMenuLabel>Sortera efter</DropdownMenuLabel>
+        <DropdownMenuRadioGroup
+          value={sortBy}
+          onValueChange={(value) => setSortBy(value as ExamSortBy)}
+        >
+          <DropdownMenuRadioItem value="date">Datum</DropdownMenuRadioItem>
+          <DropdownMenuRadioItem value="pass-rate">Godkänd</DropdownMenuRadioItem>
+        </DropdownMenuRadioGroup>
+        <DropdownMenuSeparator />
+        <DropdownMenuLabel>Ordning</DropdownMenuLabel>
+        <DropdownMenuRadioGroup
+          value={sortDirection}
+          onValueChange={(value) => setSortDirection(value as ExamSortDirection)}
+        >
+          <DropdownMenuRadioItem value="desc">Fallande</DropdownMenuRadioItem>
+          <DropdownMenuRadioItem value="asc">Stigande</DropdownMenuRadioItem>
+        </DropdownMenuRadioGroup>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }

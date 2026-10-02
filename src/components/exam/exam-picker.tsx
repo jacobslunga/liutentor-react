@@ -1,4 +1,3 @@
-import { ActionList, ActionMenu, AnchoredOverlay, Label } from "@primer/react";
 import { useNavigate } from "@tanstack/react-router";
 import {
   ArrowDownIcon,
@@ -13,6 +12,8 @@ import { cn } from "@/lib/utils";
 import { sortExams, useExamSortPreference } from "@/stores/exam-sort";
 import type { Exam } from "@/types/exam";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
 function hasPassRate(exam: Exam) {
   return Number.isFinite(Number(exam.pass_rate)) && Number(exam.pass_rate) > 0;
@@ -25,7 +26,7 @@ interface ExamPickerProps {
   /** Rendered as the trigger's label. */
   children: React.ReactNode;
   triggerClassName?: string;
-  triggerSize?: "small" | "medium";
+  triggerSize?: "sm" | "default";
   align?: "start" | "center" | "end";
 }
 
@@ -36,7 +37,7 @@ export function ExamPicker({
   courseCode,
   children,
   triggerClassName,
-  triggerSize = "medium",
+  triggerSize = "default",
   align = "start",
 }: ExamPickerProps) {
   const navigate = useNavigate();
@@ -70,72 +71,49 @@ export function ExamPicker({
   const DirectionIcon = sortDirection === "desc" ? ArrowDownIcon : ArrowUpIcon;
 
   return (
-    <AnchoredOverlay
-      open={open}
-      onOpen={() => setOpen(true)}
-      onClose={() => setOpen(false)}
-      align={align}
-      width="auto"
-      renderAnchor={(anchorProps) => (
-        <Button variant="outline" {...anchorProps} size={triggerSize} aria-label="Byt tenta" className={triggerClassName}>
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <Button variant="outline" size={triggerSize} aria-label="Byt tenta" className={triggerClassName}>
           {children}
-        <ChevronDownIcon
-              className={cn(
-                "text-muted-foreground transition-transform duration-200",
-                open && "rotate-180",
-              )}
-            /></Button>
-      )}
-    >
+          <ChevronDownIcon
+            className={cn(
+              "text-muted-foreground transition-transform duration-200",
+              open && "rotate-180",
+            )}
+          />
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent align={align} className="w-auto gap-0 p-0">
       <div className="flex items-center justify-between gap-3 border-b px-3 py-2">
         <span className="text-xs font-semibold">Alla tentor</span>
         <div className="flex items-center gap-1.5">
-          <ActionMenu>
-            <ActionMenu.Button
-              size="small"
-              leadingVisual={DirectionIcon}
-              aria-label="Sortera tentor"
-            >
-              {sortBy === "date" ? "Datum" : "Godkänd"}
-            </ActionMenu.Button>
-            <ActionMenu.Overlay align="end" width="small">
-              <ActionList>
-                <ActionList.Group selectionVariant="single">
-                  <ActionList.GroupHeading>
-                    Sortera efter
-                  </ActionList.GroupHeading>
-                  <ActionList.Item
-                    selected={sortBy === "date"}
-                    onSelect={() => setSortBy("date")}
-                  >
-                    Datum
-                  </ActionList.Item>
-                  <ActionList.Item
-                    selected={sortBy === "pass-rate"}
-                    onSelect={() => setSortBy("pass-rate")}
-                  >
-                    Godkänd
-                  </ActionList.Item>
-                </ActionList.Group>
-                <ActionList.Divider />
-                <ActionList.Group selectionVariant="single">
-                  <ActionList.GroupHeading>Ordning</ActionList.GroupHeading>
-                  <ActionList.Item
-                    selected={sortDirection === "desc"}
-                    onSelect={() => setSortDirection("desc")}
-                  >
-                    Fallande
-                  </ActionList.Item>
-                  <ActionList.Item
-                    selected={sortDirection === "asc"}
-                    onSelect={() => setSortDirection("asc")}
-                  >
-                    Stigande
-                  </ActionList.Item>
-                </ActionList.Group>
-              </ActionList>
-            </ActionMenu.Overlay>
-          </ActionMenu>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="sm" aria-label="Sortera tentor">
+                <DirectionIcon />
+                {sortBy === "date" ? "Datum" : "Godkänd"}
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="min-w-48">
+              <DropdownMenuLabel>Sortera efter</DropdownMenuLabel>
+              <DropdownMenuRadioGroup
+                value={sortBy}
+                onValueChange={(value) => setSortBy(value as typeof sortBy)}
+              >
+                <DropdownMenuRadioItem value="date">Datum</DropdownMenuRadioItem>
+                <DropdownMenuRadioItem value="pass-rate">Godkänd</DropdownMenuRadioItem>
+              </DropdownMenuRadioGroup>
+              <DropdownMenuSeparator />
+              <DropdownMenuLabel>Ordning</DropdownMenuLabel>
+              <DropdownMenuRadioGroup
+                value={sortDirection}
+                onValueChange={(value) => setSortDirection(value as typeof sortDirection)}
+              >
+                <DropdownMenuRadioItem value="desc">Fallande</DropdownMenuRadioItem>
+                <DropdownMenuRadioItem value="asc">Stigande</DropdownMenuRadioItem>
+              </DropdownMenuRadioGroup>
+            </DropdownMenuContent>
+          </DropdownMenu>
           <span className="rounded-sm bg-muted px-2 py-0.5 font-mono text-xs font-medium text-muted-foreground">
             {sorted.length} st
           </span>
@@ -171,12 +149,12 @@ export function ExamPicker({
                   {exam.exam_date}
                 </span>
                 {exam.has_solution ? (
-                  <Label
-                    variant="done"
+                  <Badge
+                    variant="secondary"
                     className="col-start-3 justify-self-start"
                   >
                     Facit
-                  </Label>
+                  </Badge>
                 ) : (
                   <span />
                 )}
@@ -202,6 +180,7 @@ export function ExamPicker({
           })}
         </div>
       </div>
-    </AnchoredOverlay>
+      </PopoverContent>
+    </Popover>
   );
 }

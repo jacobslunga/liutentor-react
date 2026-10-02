@@ -111,53 +111,45 @@ export function MobileExamView({
               exams={exams}
               examId={examId}
               courseCode={courseCode}
-              triggerSize="small"
+              triggerSize="sm"
             >
               {examDate}
             </ExamPicker>
           </div>
         )}
-        <ActionMenu>
-          <ActionMenu.Anchor>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
             <IconButton variant="outline" size="icon-sm" aria-label="Ladda ned"><DownloadIcon /></IconButton>
-          </ActionMenu.Anchor>
-          <ActionMenu.Overlay align="end">
-            <ActionList>
-              <ActionList.Item
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+              <DropdownMenuItem
                 onSelect={() => void downloadFile(examPdfUrl, `${courseCode}_${examDate}_EXAM.pdf`)}
               >
-                <ActionList.LeadingVisual>
-                  <DownloadIcon />
-                </ActionList.LeadingVisual>
+                <DownloadIcon />
                 Ladda ned tenta
-              </ActionList.Item>
-              <ActionList.Item
+              </DropdownMenuItem>
+              <DropdownMenuItem
                 disabled={!solutionPdfUrl}
                 onSelect={() =>
                   solutionPdfUrl &&
                   void downloadFile(solutionPdfUrl, `${courseCode}_${examDate}_SOLUTION.pdf`)
                 }
               >
-                <ActionList.LeadingVisual>
-                  <DownloadIcon />
-                </ActionList.LeadingVisual>
+                <DownloadIcon />
                 Ladda ned facit
-              </ActionList.Item>
-              <ActionList.Item
+              </DropdownMenuItem>
+              <DropdownMenuItem
                 disabled={!solutionPdfUrl}
                 onSelect={() =>
                   solutionPdfUrl &&
                   downloadBoth(courseCode, examDate, examPdfUrl, solutionPdfUrl)
                 }
               >
-                <ActionList.LeadingVisual>
-                  <FileArchiveIcon />
-                </ActionList.LeadingVisual>
+                <FileArchiveIcon />
                 Ladda ned båda (.zip)
-              </ActionList.Item>
-            </ActionList>
-          </ActionMenu.Overlay>
-        </ActionMenu>
+              </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
         {solutionPdfUrl && (
           <Button variant="outline" size="sm" onClick={openSolution}><BookIcon className="text-primary" />
             Facit

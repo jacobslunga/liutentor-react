@@ -1,5 +1,3 @@
-import { ActionList, ActionMenu } from "@primer/react";
-import { KeybindingHint } from "@primer/react/experimental";
 import { MonitorIcon, MoonIcon, SettingsIcon, SunIcon } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useState } from "react";
@@ -7,6 +5,7 @@ import { SettingsDialog } from "@/components/settings/settings-dialog";
 import type { ChatModelId } from "@/lib/chat-models";
 import { useSelectedModel, useSettingsStore } from "@/stores/settings";
 import { IconButton } from "@/components/shared/icon-button";
+import { KeyHint } from "@/components/shared/key-hint";
 
 const THEMES = [
   { value: "light", label: "Ljust", Icon: SunIcon },
@@ -34,52 +33,48 @@ export function ChatSettingsMenu() {
 
   return (
     <>
-      <ActionMenu>
-        <ActionMenu.Anchor>
-          <IconButton variant="ghost" className="shrink-0" aria-label="Inställningar"><SettingsIcon /></IconButton>
-        </ActionMenu.Anchor>
-        <ActionMenu.Overlay side="outside-right" align="end" width="medium">
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <IconButton className="shrink-0" aria-label="Inställningar">
+            <SettingsIcon />
+          </IconButton>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent side="right" align="end" className="w-64">
           <div className="max-h-88 overflow-y-auto overscroll-contain">
-            <ActionList>
-              <ActionList.Group selectionVariant="single">
-                <ActionList.GroupHeading>Tema</ActionList.GroupHeading>
-                {THEMES.map(({ value, label, Icon }) => (
-                  <ActionList.Item
-                    key={value}
-                    selected={theme === value}
-                    onSelect={(e) => {
-                      // Keep the menu open so the change is visible in place.
-                      e.preventDefault();
-                      setTheme(value);
-                    }}
-                  >
-                    <ActionList.LeadingVisual>
-                      <Icon />
-                    </ActionList.LeadingVisual>
-                    {label}
-                  </ActionList.Item>
-                ))}
-              </ActionList.Group>
-              <ActionList.Divider />
-              <ActionList.Group selectionVariant="single">
-                <ActionList.GroupHeading>Tankenivå</ActionList.GroupHeading>
-                {availableModels.map((model) => (
-                  <ActionList.Item
-                    key={model.id}
-                    selected={selectedModelId === model.id}
-                    onSelect={(e) => {
-                      e.preventDefault();
-                      setSelectedModelId(model.id as ChatModelId);
-                    }}
-                  >
-                    {model.label}
-                    <ActionList.Description variant="block">
-                      {model.hint}
-                    </ActionList.Description>
-                  </ActionList.Item>
-                ))}
-              </ActionList.Group>
-            </ActionList>
+            {/* Choices keep the menu open (preventDefault) so the change is
+                visible in place. */}
+            <DropdownMenuLabel>Tema</DropdownMenuLabel>
+            <DropdownMenuRadioGroup value={theme} onValueChange={setTheme}>
+              {THEMES.map(({ value, label, Icon }) => (
+                <DropdownMenuRadioItem
+                  key={value}
+                  value={value}
+                  onSelect={(e) => e.preventDefault()}
+                >
+                  <Icon />
+                  {label}
+                </DropdownMenuRadioItem>
+              ))}
+            </DropdownMenuRadioGroup>
+            <DropdownMenuSeparator />
+            <DropdownMenuLabel>Tankenivå</DropdownMenuLabel>
+            <DropdownMenuRadioGroup
+              value={selectedModelId}
+              onValueChange={(value) => setSelectedModelId(value as ChatModelId)}
+            >
+              {availableModels.map((model) => (
+                <DropdownMenuRadioItem
+                  key={model.id}
+                  value={model.id}
+                  onSelect={(e) => e.preventDefault()}
+                >
+                  <div className="flex flex-col">
+                    <span>{model.label}</span>
+                    <span className="text-xs text-muted-foreground">{model.hint}</span>
+                  </div>
+                </DropdownMenuRadioItem>
+              ))}
+            </DropdownMenuRadioGroup>
             <div className="border-t px-4 pt-2 pb-3">
               <p className="pb-2 text-xs font-semibold text-muted-foreground">
                 Tips
@@ -94,7 +89,7 @@ export function ChatSettingsMenu() {
                     {keys && (
                       <span className="flex shrink-0 gap-1">
                         {keys.map((key) => (
-                          <KeybindingHint key={key} keys={key} size="small" />
+                          <KeyHint key={key} keys={key} />
                         ))}
                       </span>
                     )}
@@ -103,16 +98,13 @@ export function ChatSettingsMenu() {
               </ul>
             </div>
           </div>
-          <ActionList className="border-t">
-            <ActionList.Item onSelect={() => setDialogOpen(true)}>
-              <ActionList.LeadingVisual>
-                <SettingsIcon />
-              </ActionList.LeadingVisual>
-              Alla inställningar
-            </ActionList.Item>
-          </ActionList>
-        </ActionMenu.Overlay>
-      </ActionMenu>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem onSelect={() => setDialogOpen(true)}>
+              <SettingsIcon />
+            Alla inställningar
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
       <SettingsDialog open={dialogOpen} onOpenChange={setDialogOpen} />
     </>
   );

@@ -1,5 +1,3 @@
-import { ActionList, ActionMenu, ButtonGroup, SegmentedControl } from "@primer/react";
-import { KeybindingHint } from "@primer/react/experimental";
 import { useNavigate } from "@tanstack/react-router";
 import {
   ArrowLeftIcon,
@@ -30,6 +28,9 @@ import type { Exam } from "@/types/exam";
 import { ExamPicker } from "./exam-picker";
 import { Button } from "@/components/ui/button";
 import { IconButton } from "@/components/shared/icon-button";
+import { ButtonGroup } from "@/components/ui/button-group";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface ExamHeaderProps {
   exams: Exam[];
@@ -54,9 +55,15 @@ export const ExamHeader = memo(function ExamHeader({
   return (
     <div className="pointer-events-none relative isolate flex h-12 w-full items-center justify-between px-3">
       <ButtonGroup className="pointer-events-auto">
-        <IconButton variant="outline" aria-label="Tillbaka till kursen" onClick={() =>
+        <IconButton
+          variant="outline"
+          aria-label="Tillbaka till kursen"
+          onClick={() =>
             void navigate({ to: "/search/$courseCode", params: { courseCode } })
-          }><ArrowLeftIcon /></IconButton>
+          }
+        >
+          <ArrowLeftIcon />
+        </IconButton>
         <ExamPicker
           exams={exams}
           examId={examId}
@@ -106,22 +113,28 @@ function LayoutTabs() {
   const closeChat = useChatStore((s) => s.close);
 
   return (
-    <SegmentedControl
+    <ToggleGroup
+      type="single"
+      variant="outline"
       aria-label="Layout"
-      onChange={(i) => {
-        setLayoutMode(LAYOUT_TABS[i].value);
+      value={layoutMode}
+      onValueChange={(value) => {
+        if (!value) return;
+        setLayoutMode(value as (typeof LAYOUT_TABS)[number]["value"]);
         closeChat();
       }}
     >
-      {LAYOUT_TABS.map(({ value, icon, label }) => (
-        <SegmentedControl.IconButton
-          key={value}
-          icon={icon}
-          aria-label={label}
-          selected={layoutMode === value}
-        />
+      {LAYOUT_TABS.map(({ value, icon: Icon, label }) => (
+        <Tooltip key={value}>
+          <TooltipTrigger asChild>
+            <ToggleGroupItem value={value} aria-label={label}>
+              <Icon />
+            </ToggleGroupItem>
+          </TooltipTrigger>
+          <TooltipContent>{label}</TooltipContent>
+        </Tooltip>
       ))}
-    </SegmentedControl>
+    </ToggleGroup>
   );
 }
 
@@ -153,69 +166,49 @@ function ActionsMenu({
   return (
     <>
       <SettingsDialog open={settingsOpen} onOpenChange={setSettingsOpen} />
-      <ActionMenu>
-        <ActionMenu.Anchor>
-          <IconButton variant="ghost" aria-label="Fler åtgärder"><EllipsisIcon /></IconButton>
-        </ActionMenu.Anchor>
-        <ActionMenu.Overlay align="end" width="medium">
-          <ActionList>
-            <ActionList.Item onSelect={toggleFocusMode}>
-              <ActionList.LeadingVisual>
-                {focusMode ? <MinimizeIcon /> : <MaximizeIcon />}
-              </ActionList.LeadingVisual>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <IconButton aria-label="Fler åtgärder">
+            <EllipsisIcon />
+          </IconButton>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end" className="w-64">
+            <DropdownMenuItem onSelect={toggleFocusMode}>
+              {focusMode ? <MinimizeIcon /> : <MaximizeIcon />}
               {focusMode ? "Avsluta fokusläge" : "Fokusläge"}
-              <ActionList.TrailingVisual>
-                <KeybindingHint keys="F" size="small" />
-              </ActionList.TrailingVisual>
-            </ActionList.Item>
-            <ActionMenu>
-              <ActionMenu.Anchor>
-                <ActionList.Item>
-                  <ActionList.LeadingVisual>
-                    <ThemeIcon />
-                  </ActionList.LeadingVisual>
-                  Tema
-                </ActionList.Item>
-              </ActionMenu.Anchor>
-              <ActionMenu.Overlay width="small">
-                <ActionList selectionVariant="single">
+              <DropdownMenuShortcut>F</DropdownMenuShortcut>
+            </DropdownMenuItem>
+            <DropdownMenuSub>
+              <DropdownMenuSubTrigger>
+                <ThemeIcon />
+                Tema
+              </DropdownMenuSubTrigger>
+              <DropdownMenuSubContent className="min-w-40">
+                <DropdownMenuRadioGroup value={theme} onValueChange={setTheme}>
                   {THEMES.map(({ value, label }) => (
-                    <ActionList.Item
-                      key={value}
-                      selected={theme === value}
-                      onSelect={() => setTheme(value)}
-                    >
+                    <DropdownMenuRadioItem key={value} value={value}>
                       {label}
-                    </ActionList.Item>
+                    </DropdownMenuRadioItem>
                   ))}
-                </ActionList>
-              </ActionMenu.Overlay>
-            </ActionMenu>
-            <ActionList.Item onSelect={() => setSettingsOpen(true)}>
-              <ActionList.LeadingVisual>
-                <SettingsIcon />
-              </ActionList.LeadingVisual>
+                </DropdownMenuRadioGroup>
+              </DropdownMenuSubContent>
+            </DropdownMenuSub>
+            <DropdownMenuItem onSelect={() => setSettingsOpen(true)}>
+              <SettingsIcon />
               Inställningar
-            </ActionList.Item>
-            <ActionList.Item onSelect={() => openUploadModal(courseCode)}>
-              <ActionList.LeadingVisual>
-                <UploadIcon />
-              </ActionList.LeadingVisual>
+            </DropdownMenuItem>
+            <DropdownMenuItem onSelect={() => openUploadModal(courseCode)}>
+              <UploadIcon />
               Ladda upp tenta/facit
-            </ActionList.Item>
-            <ActionList.Divider />
-            <ActionMenu>
-              <ActionMenu.Anchor>
-                <ActionList.Item>
-                  <ActionList.LeadingVisual>
-                    <DownloadIcon />
-                  </ActionList.LeadingVisual>
-                  Ladda ned
-                </ActionList.Item>
-              </ActionMenu.Anchor>
-              <ActionMenu.Overlay width="small">
-                <ActionList>
-                  <ActionList.Item
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuSub>
+              <DropdownMenuSubTrigger>
+                <DownloadIcon />
+                Ladda ned
+              </DropdownMenuSubTrigger>
+              <DropdownMenuSubContent className="min-w-48">
+                  <DropdownMenuItem
                     onSelect={() =>
                       void downloadFile(
                         examPdfUrl,
@@ -223,12 +216,10 @@ function ActionsMenu({
                       )
                     }
                   >
-                    <ActionList.LeadingVisual>
-                      <FileTextIcon />
-                    </ActionList.LeadingVisual>
+                    <FileTextIcon />
                     Tenta
-                  </ActionList.Item>
-                  <ActionList.Item
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
                     disabled={!solutionPdfUrl}
                     onSelect={() =>
                       solutionPdfUrl &&
@@ -238,31 +229,25 @@ function ActionsMenu({
                       )
                     }
                   >
-                    <ActionList.LeadingVisual>
-                      <BookOpenCheckIcon />
-                    </ActionList.LeadingVisual>
+                    <BookOpenCheckIcon />
                     Facit
-                  </ActionList.Item>
-                  <ActionList.Divider />
-                  <ActionList.Item
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem
                     disabled={!solutionPdfUrl}
                     onSelect={() =>
                       solutionPdfUrl &&
                       downloadBoth(courseCode, examDate, examPdfUrl, solutionPdfUrl)
                     }
                   >
-                    <ActionList.LeadingVisual>
-                      <FileArchiveIcon />
-                    </ActionList.LeadingVisual>
+                    <FileArchiveIcon />
                     Tenta och facit
-                    <ActionList.Description>.zip</ActionList.Description>
-                  </ActionList.Item>
-                </ActionList>
-              </ActionMenu.Overlay>
-            </ActionMenu>
-          </ActionList>
-        </ActionMenu.Overlay>
-      </ActionMenu>
+                    <DropdownMenuShortcut>.zip</DropdownMenuShortcut>
+                  </DropdownMenuItem>
+              </DropdownMenuSubContent>
+            </DropdownMenuSub>
+        </DropdownMenuContent>
+      </DropdownMenu>
     </>
   );
 }

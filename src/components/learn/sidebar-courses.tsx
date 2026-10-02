@@ -152,30 +152,24 @@ export function SidebarCourses({ onNavigate }: { onNavigate: () => void }) {
                   <FolderIcon className="size-4 shrink-0 fill-primary text-primary" />
                   <span className="truncate text-sm">{course.name}</span>
                 </Link>
-                <ActionMenu>
-                  <ActionMenu.Anchor>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
                     <IconButton variant="ghost" size="icon-sm" aria-label={`Alternativ för ${course.name}`} hideTooltip className="absolute right-1 opacity-100 group-hover:opacity-100 aria-expanded:opacity-100 md:opacity-0"><EllipsisIcon /></IconButton>
-                  </ActionMenu.Anchor>
-                  <ActionMenu.Overlay align="start" width="small">
-                    <ActionList>
-                      <ActionList.Item onSelect={() => setRenaming(course)}>
-                        <ActionList.LeadingVisual>
-                          <PencilIcon />
-                        </ActionList.LeadingVisual>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="start" className="min-w-48">
+                      <DropdownMenuItem onSelect={() => setRenaming(course)}>
+                        <PencilIcon />
                         Byt namn
-                      </ActionList.Item>
-                      <ActionList.Item
-                        variant="danger"
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        variant="destructive"
                         onSelect={() => setPendingDelete(course)}
                       >
-                        <ActionList.LeadingVisual>
-                          <Trash2Icon />
-                        </ActionList.LeadingVisual>
+                        <Trash2Icon />
                         Ta bort
-                      </ActionList.Item>
-                    </ActionList>
-                  </ActionMenu.Overlay>
-                </ActionMenu>
+                      </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </li>
             </CourseHoverList>
           ))}

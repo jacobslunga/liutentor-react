@@ -248,24 +248,20 @@ function SidebarContent() {
                       </p>
                     )}
                   </Link>
-                  <ActionMenu>
-                    <ActionMenu.Anchor>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
                       <IconButton variant="ghost" size="icon-sm" aria-label={`Alternativ för ${item.title}`} hideTooltip className="absolute right-1 opacity-100 group-hover:opacity-100 aria-expanded:opacity-100 md:opacity-0"><EllipsisIcon /></IconButton>
-                    </ActionMenu.Anchor>
-                    <ActionMenu.Overlay align="start" width="small">
-                      <ActionList>
-                        <ActionList.Item
-                          variant="danger"
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="start" className="min-w-48">
+                        <DropdownMenuItem
+                          variant="destructive"
                           onSelect={() => setPendingDelete(item)}
                         >
-                          <ActionList.LeadingVisual>
-                            <Trash2Icon />
-                          </ActionList.LeadingVisual>
+                          <Trash2Icon />
                           Ta bort
-                        </ActionList.Item>
-                      </ActionList>
-                    </ActionMenu.Overlay>
-                  </ActionMenu>
+                        </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </li>
               ))}
             </ul>
@@ -361,8 +357,8 @@ function AccountRow() {
 
   return (
     <div className="flex items-center gap-1">
-      <ActionMenu>
-        <ActionMenu.Anchor>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
           <button
             type="button"
             className="flex min-w-0 flex-1 items-center gap-2.5 rounded-lg px-2 py-1.5 text-left transition-colors outline-none hover:bg-accent/60 focus-visible:ring-3 focus-visible:ring-ring/50 aria-expanded:bg-accent/60"
@@ -380,25 +376,19 @@ function AccountRow() {
               )}
             </span>
           </button>
-        </ActionMenu.Anchor>
-        <ActionMenu.Overlay side="outside-top" align="start" width="medium">
-          <ActionList>
-            <ActionList.Item onSelect={() => void navigate({ to: "/me" })}>
-              <ActionList.LeadingVisual>
-                <UserIcon />
-              </ActionList.LeadingVisual>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent side="top" align="start" className="w-64">
+            <DropdownMenuItem onSelect={() => void navigate({ to: "/me" })}>
+              <UserIcon />
               Profil
-            </ActionList.Item>
-            <ActionList.Divider />
-            <ActionList.Item variant="danger" onSelect={() => void signOut()}>
-              <ActionList.LeadingVisual>
-                <LogOutIcon />
-              </ActionList.LeadingVisual>
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem variant="destructive" onSelect={() => void signOut()}>
+              <LogOutIcon />
               Logga ut
-            </ActionList.Item>
-          </ActionList>
-        </ActionMenu.Overlay>
-      </ActionMenu>
+            </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
       <ChatSettingsMenu />
     </div>
   );

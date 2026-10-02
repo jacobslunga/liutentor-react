@@ -1,6 +1,6 @@
-import { ActionList, ActionMenu } from "@primer/react";
 import {
   ArrowUpIcon,
+  ChevronDownIcon,
   CornerDownLeftIcon,
   FileTextIcon,
   ImageIcon,
@@ -604,23 +604,25 @@ function ModelPicker() {
     availableModels[0].label;
 
   return (
-    <ActionMenu>
-      <ActionMenu.Button variant="invisible" size="small" aria-label="Tankenivå">
-        {label}
-      </ActionMenu.Button>
-      <ActionMenu.Overlay side="outside-top" align="end" width="small">
-        <ActionList selectionVariant="single">
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="ghost" size="sm" aria-label="Tankenivå">
+          {label}
+          <ChevronDownIcon />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent side="top" align="end" className="min-w-48">
+        <DropdownMenuRadioGroup
+          value={selectedModelId}
+          onValueChange={(value) => setSelectedModelId(value as ChatModelId)}
+        >
           {availableModels.map((model) => (
-            <ActionList.Item
-              key={model.id}
-              selected={model.id === selectedModelId}
-              onSelect={() => setSelectedModelId(model.id as ChatModelId)}
-            >
+            <DropdownMenuRadioItem key={model.id} value={model.id}>
               {model.label}
-            </ActionList.Item>
+            </DropdownMenuRadioItem>
           ))}
-        </ActionList>
-      </ActionMenu.Overlay>
-    </ActionMenu>
+        </DropdownMenuRadioGroup>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }
