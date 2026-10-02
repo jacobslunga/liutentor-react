@@ -77,8 +77,8 @@ export default function CourseQuizPanel({ courseCode, exams }: { courseCode: str
   return (
     <div className="w-full">
       {stage === "setup" && (
-        <div className="animate-in duration-200 fade-in-0">
-          <QuizStart canStart={examPool.length > 0} onStart={start} />
+        <div className="flex animate-in flex-col gap-10 duration-200 fade-in-0">
+          <QuizStart courseCode={courseCode} poolSize={examPool.length} onStart={start} />
           <QuizHistoryList
             history={history}
             signedIn={!!user}

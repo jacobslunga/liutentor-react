@@ -1,4 +1,5 @@
-import { CheckIcon, Trash2Icon } from "lucide-react";
+import { CheckIcon, ChevronRightIcon, Trash2Icon } from "lucide-react";
+import { Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { QUIZ_DIFFICULTY_INFO } from "@/lib/quiz";
 import { cn } from "@/lib/utils";
@@ -34,28 +35,32 @@ export function QuizHistoryList({
   );
 
   return (
-    <section className="mt-10 w-full">
-      <div className="flex items-center justify-between border-b pb-2">
-        <p className="text-xs font-medium text-muted-foreground">
-          Tidigare quiz
-        </p>
+    <section className="w-full">
+      <div className="flex items-baseline justify-between pb-2">
+        <h3 className="text-sm font-medium">Tidigare quiz</h3>
         {signedIn && history.length > 0 && (
-          <span className="text-xs text-muted-foreground/60 tabular-nums">
+          <span className="text-xs text-muted-foreground tabular-nums">
             {history.length}
           </span>
         )}
       </div>
 
       {!signedIn ? (
-        <p className="pt-4 text-sm text-muted-foreground">
-          Logga in för att se tidigare quiz.
+        <p className="text-sm text-muted-foreground">
+          <Link
+            to="/logga-in"
+            className="font-medium text-foreground underline underline-offset-4"
+          >
+            Logga in
+          </Link>{" "}
+          för att spara dina quiz och kunna göra om dem senare.
         </p>
       ) : history.length === 0 ? (
-        <p className="pt-4 text-sm text-muted-foreground">
-          Inga sparade quiz än.
+        <p className="text-sm text-muted-foreground">
+          Quiz du gör sparas här, så att du kan göra om dem senare.
         </p>
       ) : (
-        <div className="flex flex-col">
+        <div className="flex flex-col gap-0.5">
           {history.map((item) => {
             const difficulty = item.data.meta?.difficulty;
             const sourceCount = item.data.meta?.sourceCount ?? 0;
@@ -63,13 +68,13 @@ export function QuizHistoryList({
               <div
                 key={item.id}
                 className={cn(
-                  "group flex items-center gap-2 border-b last:border-b-0",
-                  item.id === activeQuizId && "bg-muted/40",
+                  "group flex items-center gap-1 rounded-lg pr-1 transition-colors hover:bg-muted/60",
+                  item.id === activeQuizId && "bg-muted/60",
                 )}
               >
                 <button
                   type="button"
-                  className="flex min-w-0 flex-1 items-center gap-2 px-2 py-3 text-left"
+                  className="flex min-w-0 flex-1 items-center gap-3 px-3 py-2.5 text-left"
                   onClick={() => onLoad(item)}
                 >
                   <span className="min-w-0 flex-1 truncate text-sm font-medium">
@@ -81,8 +86,10 @@ export function QuizHistoryList({
                     {item.data.quiz.questions.length} frågor
                     {sourceCount > 0 && ` · ${sourceCount} tentor`}
                   </span>
-                  {item.id === activeQuizId && (
-                    <CheckIcon className="size-4 shrink-0 text-primary" />
+                  {item.id === activeQuizId ? (
+                    <CheckIcon className="size-4 shrink-0 text-brand" />
+                  ) : (
+                    <ChevronRightIcon className="size-4 shrink-0 text-muted-foreground/60 transition-transform group-hover:translate-x-0.5" />
                   )}
                 </button>
                 <IconButton
