@@ -24,10 +24,6 @@ const LEVEL_ICONS: Record<QuizDifficulty, typeof SignalLowIcon> = {
   hard: SignalHighIcon,
 };
 
-
-
-
-
 export function QuizStart({
   courseCode,
   poolSize,
@@ -106,8 +102,8 @@ export function QuizStart({
       ) : (
         <CardContent>
           <p className="text-sm text-muted-foreground">
-            Den här kursen har inga tentor med PDF än, så det går inte att
-            skapa ett quiz.
+            Den här kursen har inga tentor med PDF än, så det går inte att skapa
+            ett quiz.
           </p>
         </CardContent>
       )}

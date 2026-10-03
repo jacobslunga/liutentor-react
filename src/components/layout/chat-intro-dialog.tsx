@@ -13,7 +13,6 @@ import { AppDialog } from "@/components/shared/app-dialog";
 import { Button } from "@/components/ui/button";
 import { DialogDescription, DialogTitle } from "@/components/ui/dialog";
 
-
 const OPEN_DELAY_MS = 900;
 
 const HIGHLIGHTS = [
@@ -21,10 +20,6 @@ const HIGHLIGHTS = [
   { Icon: FolderIcon, text: "Samla föreläsningar i egna kurser" },
   { Icon: QuoteIcon, text: "Få svar med källor ur ditt material" },
 ];
-
-
-
-
 
 export function ChatIntroDialog() {
   const navigate = useNavigate();
@@ -41,7 +36,6 @@ export function ChatIntroDialog() {
     window.addEventListener(ANALYTICS_CONSENT_EVENT, onConsent);
     return () => window.removeEventListener(ANALYTICS_CONSENT_EVENT, onConsent);
   }, [consentAnswered]);
-
 
   useEffect(() => {
     if (onChat) markChatIntroSeen();

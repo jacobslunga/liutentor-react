@@ -1,6 +1,16 @@
 import { createContext, useContext } from "react";
 import { create, useStore } from "zustand";
+import type { VirtualItem } from "@tanstack/react-virtual";
 
+export interface ChatScrollPosition {
+  offset: number;
+  anchorId: string | null;
+  anchorOffset: number;
+  measurements: VirtualItem[];
+  width: number;
+  reserve: number;
+  firstMessageId: string;
+}
 
 export type MessageSource =
   | { type?: "web"; title: string; url: string }
@@ -23,16 +33,12 @@ export interface ChatAttachment {
 }
 
 export interface Message {
-
   id: string;
   role: "user" | "assistant";
   content: string;
   context?: string;
   selectionContext?: string;
   attachments?: ChatAttachment[];
-
-
-
 
   status?: MessageStatus | null;
   sources?: MessageSource[];
@@ -50,7 +56,7 @@ export interface ChatState {
   isLoading: boolean;
   isHistoryOpen: boolean;
   messages: Message[];
-  savedScrollPosition: number | null;
+  savedScrollPosition: ChatScrollPosition | null;
   draftInput: string;
   draftAttachments: ChatAttachment[];
   currentExamId: string | null;
@@ -60,13 +66,7 @@ export interface ChatState {
   currentConversationTitle: string | null;
   isConversationTitleReady: boolean;
 
-
-
-
   titleTypingStartedAt: number | null;
-
-
-
 
   titleTypesInSidebar: boolean;
   pendingSelection: PendingSelection | null;
@@ -87,20 +87,15 @@ export interface ChatState {
 }
 
 let nextMessageId = 0;
-export const createMessageId = () => `m${Date.now().toString(36)}-${nextMessageId++}`;
+export const createMessageId = () =>
+  `m${Date.now().toString(36)}-${nextMessageId++}`;
 
 function revokePreviews(attachments: ChatAttachment[]) {
-  const urls = new Set(attachments.map((a) => a.previewUrl).filter((u): u is string => !!u));
+  const urls = new Set(
+    attachments.map((a) => a.previewUrl).filter((u): u is string => !!u),
+  );
   for (const url of urls) URL.revokeObjectURL(url);
 }
-
-
-
-
-
-
-
-
 
 export const createChatStore = () =>
   create<ChatState>((set, get) => ({
@@ -141,7 +136,9 @@ export const createChatStore = () =>
       })),
 
     getActiveAttachments: () =>
-      get().messages.flatMap((m) => (m.attachments ?? []).filter((a) => a.active && a.file)),
+      get().messages.flatMap((m) =>
+        (m.attachments ?? []).filter((a) => a.active && a.file),
+      ),
 
     deactivateAttachment: (id) =>
       set((s) => ({
@@ -152,7 +149,14 @@ export const createChatStore = () =>
           return {
             ...m,
             attachments: m.attachments!.map((a) =>
-              a.id === id ? { ...a, active: false, file: undefined, previewUrl: undefined } : a,
+              a.id === id
+                ? {
+                    ...a,
+                    active: false,
+                    file: undefined,
+                    previewUrl: undefined,
+                  }
+                : a,
             ),
           };
         }),
@@ -188,11 +192,9 @@ export const createChatStore = () =>
 
 export type ChatStore = ReturnType<typeof createChatStore>;
 
-
 export const examChatStore = createChatStore();
 
 export const learnChatStore = createChatStore();
-
 
 export const ChatStoreContext = createContext<ChatStore>(examChatStore);
 

@@ -43,7 +43,6 @@ interface ExamPickerProps {
   align?: "start" | "center" | "end";
 }
 
-
 export function ExamPicker({
   exams,
   examId,
@@ -147,8 +146,6 @@ export function ExamPicker({
             </span>
           </div>
         </div>
-
-
 
         <div
           ref={listRef}

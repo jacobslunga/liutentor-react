@@ -1,11 +1,10 @@
 import { ToggleGroup as ToggleGroupPrimitive } from "radix-ui";
+import { useLayoutEffect, useRef, useState, type ElementType } from "react";
 import {
-  useLayoutEffect,
-  useRef,
-  useState,
-  type ElementType,
-} from "react";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 
 export type SegmentedOption<T extends string> = {
@@ -16,11 +15,6 @@ export type SegmentedOption<T extends string> = {
 
   iconOnly?: boolean;
 };
-
-
-
-
-
 
 export function SegmentedControl<T extends string>({
   value,
@@ -36,7 +30,9 @@ export function SegmentedControl<T extends string>({
   className?: string;
 }) {
   const trackRef = useRef<HTMLDivElement>(null);
-  const [pill, setPill] = useState<{ left: number; width: number } | null>(null);
+  const [pill, setPill] = useState<{ left: number; width: number } | null>(
+    null,
+  );
 
   const [ready, setReady] = useState(false);
 
@@ -44,8 +40,6 @@ export function SegmentedControl<T extends string>({
     const track = trackRef.current;
     if (!track) return;
     const measure = () => {
-
-
       const active = track.querySelector<HTMLElement>('[aria-checked="true"]');
       if (!active) return setPill(null);
       setPill({ left: active.offsetLeft, width: active.offsetWidth });

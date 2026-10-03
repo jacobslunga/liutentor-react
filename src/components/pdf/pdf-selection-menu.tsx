@@ -30,7 +30,6 @@ export function PdfSelectionMenu({
       onExplain(text.slice(0, MAX_SELECTION_LENGTH));
       selection.clear(documentId);
     } catch {
-
     } finally {
       setIsResolving(false);
     }

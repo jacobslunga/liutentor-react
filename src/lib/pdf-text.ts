@@ -1,7 +1,3 @@
-
-
-
-
 export function normalizePdfText(text: string) {
   return text
     .replace(/(?:\u00A8|\u0308)([aAoO])/gu, "$1\u0308")

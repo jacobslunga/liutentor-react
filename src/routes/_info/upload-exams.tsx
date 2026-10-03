@@ -19,7 +19,9 @@ function UploadExamsPage() {
       />
       <div className="mx-auto max-w-6xl px-5 sm:px-8">
         <div className="grid gap-x-12 gap-y-8 py-12 lg:grid-cols-[13rem_minmax(0,1fr)] lg:py-16">
-          <p className="text-sm font-medium text-muted-foreground lg:sticky lg:top-24 lg:self-start">Uppladdning</p>
+          <p className="text-sm font-medium text-muted-foreground lg:sticky lg:top-24 lg:self-start">
+            Uppladdning
+          </p>
           <div className="max-w-2xl">
             <ExamUploadForm />
           </div>

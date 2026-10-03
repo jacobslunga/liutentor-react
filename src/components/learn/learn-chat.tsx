@@ -1,4 +1,5 @@
 import { Link, useNavigate } from "@tanstack/react-router";
+import { m, useTransform } from "framer-motion";
 import {
   ArrowDownIcon,
   ChevronRightIcon,
@@ -23,7 +24,11 @@ import { normalizeClipboardFile } from "@/lib/chat-attachments";
 import { cn } from "@/lib/utils";
 import { useChatStore, useChatStoreApi, type Message } from "@/stores/chat";
 import { useStudyCourse } from "@/queries/study-courses";
-import { useLearnSidebar } from "@/stores/learn-sidebar";
+import {
+  sidebarWidth,
+  useLearnSidebar,
+  useSidebarProgress,
+} from "@/stores/learn-sidebar";
 import { CourseHome } from "./course-home";
 import { SIDEBAR_SHORTCUT } from "./sidebar-shortcut";
 import { useSelectedModel } from "@/stores/settings";
@@ -32,16 +37,11 @@ import { Spinner } from "@/components/ui/spinner";
 
 const PENDING_REPLY_ID = "pending-reply";
 
-
-
-
-
 const MIN_LOAD_MS = 200;
 const REPLY_POLL_MS = 2500;
 const REPLY_POLL_ATTEMPTS = 60;
 
 const REPLY_WINDOW_MS = 3 * 60 * 1000;
-
 
 function isAwaitingReply(messages: Message[]): boolean {
   const last = messages.at(-1);
@@ -55,10 +55,6 @@ const pendingReply = (): Message => ({
   content: "",
   status: { step: "pending", message: "Svaret skrivs fortfarande..." },
 });
-
-
-
-
 
 export function LearnChat({
   conversationId,
@@ -81,7 +77,23 @@ export function LearnChat({
   const { selectedModelId } = useSelectedModel();
   const { send, cancelGeneration } = useLearnChat();
   const sidebar = useLearnSidebar();
-
+  const sidebarProgress = useSidebarProgress(sidebar.inline && sidebar.open);
+  const headerX = useTransform(
+    () => sidebarProgress.get() * sidebarWidth.get(),
+  );
+  const bodyX = useTransform(
+    () => (sidebarProgress.get() * sidebarWidth.get()) / 2,
+  );
+  const bodyWidth = useTransform(() => `calc(100% - ${sidebarWidth.get()}px)`);
+  // The body is narrowed and centered, so stretch scrollers over the space to
+  // its right to keep their scrollbar at the window edge.
+  const gutter = useTransform(
+    () => ((1 - sidebarProgress.get()) * sidebarWidth.get()) / 2,
+  );
+  const negativeGutter = useTransform(() => -gutter.get());
+  const scrollerStyle = sidebar.inline
+    ? { marginRight: negativeGutter, paddingRight: gutter }
+    : undefined;
 
   const [selection, setSelection] = useState({ id: conversationId, text: "" });
   const selectionContext = selection.id === currentId ? selection.text : "";
@@ -92,7 +104,6 @@ export function LearnChat({
   );
   const [isOverDrop, setIsOverDrop] = useState(false);
   const [showScrollBottom, setShowScrollBottom] = useState(false);
-
 
   const [transcriptKey, setTranscriptKey] = useState(0);
   const [loadFailure, setLoadFailure] = useState<{
@@ -107,15 +118,20 @@ export function LearnChat({
         ? loadFailure.reason
         : "loading";
 
-
+  const pinFrame = useRef<number | null>(null);
   const pinToBottom = useCallback(() => {
-    for (const delay of [0, 30, 80, 160, 300]) {
-      setTimeout(() => transcriptRef.current?.scrollToBottom("auto"), delay);
-    }
+    if (pinFrame.current !== null) cancelAnimationFrame(pinFrame.current);
+    pinFrame.current = requestAnimationFrame(() => {
+      pinFrame.current = null;
+      transcriptRef.current?.scrollToBottom("auto");
+    });
   }, []);
-
-
-
+  useEffect(
+    () => () => {
+      if (pinFrame.current !== null) cancelAnimationFrame(pinFrame.current);
+    },
+    [],
+  );
 
   useEffect(() => {
     const state = chatStore.getState();
@@ -134,8 +150,6 @@ export function LearnChat({
     }
 
     let cancelled = false;
-
-
 
     const pollForReply = async () => {
       for (let attempt = 0; attempt < REPLY_POLL_ATTEMPTS; attempt++) {
@@ -176,7 +190,6 @@ export function LearnChat({
           currentConversationTitle: conversation.title,
           isConversationTitleReady: true,
 
-
           titleTypingStartedAt: performance.now(),
           titleTypesInSidebar: false,
           savedScrollPosition: null,
@@ -197,7 +210,6 @@ export function LearnChat({
   useEffect(() => {
     onCourseHomeRef.current = !!courseId && !hasMessages;
   });
-
 
   const conversationIdRef = useRef(conversationId);
   useEffect(() => {
@@ -267,7 +279,6 @@ export function LearnChat({
     [setSelectionContext],
   );
 
-
   useEffect(() => {
     const root = rootRef.current;
     if (!root) return;
@@ -315,35 +326,18 @@ export function LearnChat({
     };
   }, []);
 
-
-
-  const autoScrolling = useRef(false);
-  const autoScrollTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
-
   function scrollToLatest() {
-    setShowScrollBottom(false);
-    autoScrolling.current = true;
-    clearTimeout(autoScrollTimer.current);
-    autoScrollTimer.current = setTimeout(
-      () => (autoScrolling.current = false),
-      1000,
-    );
     transcriptRef.current?.scrollToBottom("smooth");
   }
 
-  function onScroll(e: React.UIEvent<HTMLDivElement>) {
-    const el = e.currentTarget;
-    const distance = el.scrollHeight - (el.scrollTop + el.clientHeight);
-    if (autoScrolling.current) {
-      if (distance < 80) {
-        autoScrolling.current = false;
-        clearTimeout(autoScrollTimer.current);
-      }
-      return;
-    }
-
+  const updateScrollDistance = useCallback((distance: number) => {
     if (distance > 160) setShowScrollBottom(true);
     else if (distance < 80) setShowScrollBottom(false);
+  }, []);
+
+  function onScroll(e: React.UIEvent<HTMLDivElement>) {
+    const el = e.currentTarget;
+    updateScrollDistance(el.scrollHeight - (el.scrollTop + el.clientHeight));
   }
 
   const input = (
@@ -389,7 +383,13 @@ export function LearnChat({
       </div>
     );
   } else if (!hasMessages && courseId) {
-    body = <CourseHome courseId={courseId} input={input} />;
+    body = (
+      <CourseHome
+        courseId={courseId}
+        input={input}
+        scrollerStyle={scrollerStyle}
+      />
+    );
   } else if (!hasMessages) {
     body = (
       <div className="flex min-h-0 flex-1 flex-col items-center justify-center gap-6 px-1 pb-[12vh]">
@@ -407,10 +407,11 @@ export function LearnChat({
   } else {
     body = (
       <>
-        <div
+        <m.div
           key={transcriptKey}
           ref={scrollRef}
           className="relative flex min-h-0 min-w-0 flex-1 flex-col overflow-x-hidden overflow-y-auto overscroll-y-contain"
+          style={scrollerStyle}
           onScroll={onScroll}
         >
           <ChatMessages
@@ -418,8 +419,9 @@ export function LearnChat({
             scrollRef={scrollRef}
             className="pt-16 pb-36 sm:pb-44"
             onReplyToSelection={replyToSelection}
+            onScrollDistanceChange={updateScrollDistance}
           />
-        </div>
+        </m.div>
         <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 flex flex-col items-center bg-linear-to-t from-background to-transparent pt-10 pb-3 sm:pb-4">
           {showScrollBottom && (
             <IconButton
@@ -440,14 +442,17 @@ export function LearnChat({
   return (
     <div
       ref={rootRef}
-      className="@container relative flex h-full w-full flex-col overflow-hidden bg-background"
+      className="learn-chat relative flex h-full w-full flex-col overflow-hidden bg-background"
     >
       {isOverDrop && <ChatDropOverlay />}
 
       <div className="pointer-events-none absolute inset-x-0 top-0 z-20">
         <div className="pointer-events-none relative isolate flex h-14 items-center justify-between gap-2 px-3">
           <div className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-20 bg-linear-to-b from-background via-background/90 to-transparent" />
-          <div className="flex min-w-0 items-center gap-1">
+          <m.div
+            style={{ x: headerX }}
+            className="flex min-w-0 items-center gap-1"
+          >
             {!sidebar.open && (
               <HeaderButton
                 icon={PanelLeftIcon}
@@ -457,14 +462,13 @@ export function LearnChat({
               />
             )}
             {loadState === "ready" && <TitlePill showCrumb={!courseId} />}
-          </div>
+          </m.div>
           {(!sidebar.open || !sidebar.inline) && (
             <div className="pointer-events-auto flex shrink-0 items-center gap-1">
               <HeaderButton
                 icon={SquarePenIcon}
                 label="Ny chatt"
                 onClick={() => {
-
                   const course = chatStore.getState().currentCourseId;
                   void navigate(
                     course
@@ -481,7 +485,12 @@ export function LearnChat({
         </div>
       </div>
 
-      {body}
+      <m.div
+        className="relative mx-auto flex min-h-0 flex-1 flex-col"
+        style={{ x: bodyX, width: sidebar.inline ? bodyWidth : "100%" }}
+      >
+        {body}
+      </m.div>
     </div>
   );
 }
@@ -510,10 +519,6 @@ function HeaderButton({
   );
 }
 
-
-
-
-
 function TitlePill({ showCrumb }: { showCrumb: boolean }) {
   const hasTitle = useChatStore(
     (s) => s.isConversationTitleReady && !!s.currentConversationTitle,
@@ -533,7 +538,6 @@ function TitlePill({ showCrumb }: { showCrumb: boolean }) {
     </div>
   );
 }
-
 
 function CourseCrumb() {
   const courseId = useChatStore((s) => s.currentCourseId);

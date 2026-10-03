@@ -1,12 +1,6 @@
 import { AI_API_BASE } from "@/lib/chat-api";
 import { getAuthHeaders, supabase } from "@/lib/supabase";
 
-
-
-
-
-
-
 export const MATERIAL_BUCKET = "study-materials";
 
 export const COURSE_QUOTA_BYTES = 100 * 1024 * 1024;
@@ -30,7 +24,6 @@ export interface CourseFile {
 }
 
 const COURSES_URL = `${AI_API_BASE}/study-courses`;
-
 
 async function api<T>(path: string, init: RequestInit = {}): Promise<T> {
   const response = await fetch(`${COURSES_URL}${path}`, {
@@ -86,7 +79,6 @@ export async function renameStudyCourse(id: string, name: string) {
   if (error) throw error;
 }
 
-
 export function deleteStudyCourse(id: string) {
   return api<null>(`/${id}`, { method: "DELETE" });
 }
@@ -94,10 +86,6 @@ export function deleteStudyCourse(id: string) {
 export function listCourseFiles(courseId: string) {
   return api<CourseFile[]>(`/${courseId}/files`);
 }
-
-
-
-
 
 export async function uploadCourseFile(
   userId: string,
@@ -119,11 +107,9 @@ export function deleteCourseFile(courseId: string, fileId: string) {
   return api<null>(`/${courseId}/files/${fileId}`, { method: "DELETE" });
 }
 
-
-
-
-
-export async function courseFileUrl(openaiFileId: string): Promise<string | null> {
+export async function courseFileUrl(
+  openaiFileId: string,
+): Promise<string | null> {
   const { data } = await supabase
     .from("study_course_files")
     .select("storage_path")

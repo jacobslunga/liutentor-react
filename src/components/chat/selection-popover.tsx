@@ -25,7 +25,6 @@ export function SelectionPopover({
           variant="outline"
           className="font-medium"
           onMouseDown={(e) => {
-
             e.preventDefault();
             e.stopPropagation();
             onReply();

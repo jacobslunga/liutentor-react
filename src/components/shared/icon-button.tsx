@@ -8,14 +8,12 @@ import {
 import { KeyHint } from "./key-hint";
 
 type IconButtonProps = Omit<ComponentProps<typeof Button>, "aria-label"> & {
-
   "aria-label": string;
 
   shortcut?: string;
 
   hideTooltip?: boolean;
 };
-
 
 export function IconButton({
   shortcut,

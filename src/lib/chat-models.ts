@@ -1,8 +1,3 @@
-
-
-
-
-
 export const CHAT_MODELS = [
   {
     id: "gemini-flash-lite-minimal",

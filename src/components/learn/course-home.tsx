@@ -1,4 +1,5 @@
 import { Link } from "@tanstack/react-router";
+import { m, type MotionStyle } from "framer-motion";
 import { FolderIcon, Trash2Icon } from "lucide-react";
 import { useState, type ReactNode } from "react";
 import { toast } from "sonner";
@@ -12,17 +13,14 @@ import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 import { Spinner } from "@/components/ui/spinner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-
-
-
-
-
 export function CourseHome({
   courseId,
   input,
+  scrollerStyle,
 }: {
   courseId: string;
   input: ReactNode;
+  scrollerStyle?: MotionStyle;
 }) {
   const { course, isPending } = useStudyCourse(courseId);
 
@@ -52,7 +50,10 @@ export function CourseHome({
   }
 
   return (
-    <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
+    <m.div
+      className="min-h-0 flex-1 overflow-y-auto overscroll-contain"
+      style={scrollerStyle}
+    >
       <div className="mx-auto flex w-full max-w-2xl flex-col gap-6 px-1 pt-20 pb-16">
         <div className="flex items-center gap-3 px-3">
           <FolderIcon className="size-6 shrink-0 fill-brand text-brand" />
@@ -74,7 +75,7 @@ export function CourseHome({
           </TabsContent>
         </Tabs>
       </div>
-    </div>
+    </m.div>
   );
 }
 

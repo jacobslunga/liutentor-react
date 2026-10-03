@@ -8,8 +8,6 @@ import { netlifyFunctionsDev } from "./netlify-functions-dev.ts";
 const DEFAULT_GO_API_URL =
   "https://liutentor-go-687405545415.europe-west1.run.app";
 
-
-
 const PRELOAD_FONTS = [
   /basier-circle-(?:regular|semibold)-(?!italic-)[\w-]+\.woff2$/,
 ];
@@ -37,10 +35,6 @@ function fontPreload(): Plugin {
   };
 }
 
-
-
-
-
 function primerCssLayer(): Plugin {
   return {
     name: "primer-css-layer",
@@ -56,8 +50,6 @@ export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), "");
 
   for (const [key, value] of Object.entries(env)) process.env[key] ??= value;
-
-
 
   const goApiProxy = {
     "/api/go": {
@@ -83,7 +75,6 @@ export default defineConfig(({ mode }) => {
       alias: { "@": path.resolve(import.meta.dirname, "./src") },
     },
 
-
     optimizeDeps: {
       include: [
         "recharts",
@@ -106,8 +97,6 @@ export default defineConfig(({ mode }) => {
     server: { proxy: goApiProxy },
     preview: { proxy: goApiProxy },
     build: {
-
-
       chunkSizeWarningLimit: 1000,
     },
   };

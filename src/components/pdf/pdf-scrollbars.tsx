@@ -1,5 +1,11 @@
 import { useViewportElement } from "@embedpdf/plugin-viewport/react";
-import { useEffect, useRef, useState, type KeyboardEvent, type PointerEvent } from "react";
+import {
+  useEffect,
+  useRef,
+  useState,
+  type KeyboardEvent,
+  type PointerEvent,
+} from "react";
 
 interface Metrics {
   scrollLeft: number;
@@ -8,14 +14,12 @@ interface Metrics {
   trackWidth: number;
 }
 
-
-
-
-
 export function PdfScrollbars() {
   const viewportRef = useViewportElement();
   const trackRef = useRef<HTMLDivElement>(null);
-  const drag = useRef<{ pointerId: number; x: number; scroll: number } | null>(null);
+  const drag = useRef<{ pointerId: number; x: number; scroll: number } | null>(
+    null,
+  );
   const [m, setMetrics] = useState<Metrics>({
     scrollLeft: 0,
     scrollWidth: 0,
@@ -62,7 +66,12 @@ export function PdfScrollbars() {
       update();
     };
     const mutations = new MutationObserver(observeContent);
-    mutations.observe(el, { childList: true, subtree: true, attributes: true, attributeFilter: ["style"] });
+    mutations.observe(el, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      attributeFilter: ["style"],
+    });
     el.addEventListener("scroll", update, { passive: true });
     observeContent();
 
@@ -82,17 +91,28 @@ export function PdfScrollbars() {
     event.preventDefault();
     if (event.target === track) {
       const x = event.clientX - track.getBoundingClientRect().left;
-      el.scrollTo({ left: Math.max(0, Math.min(1, (x - thumbWidth / 2) / (travel || 1))) * maximum });
+      el.scrollTo({
+        left:
+          Math.max(0, Math.min(1, (x - thumbWidth / 2) / (travel || 1))) *
+          maximum,
+      });
     }
-    drag.current = { pointerId: event.pointerId, x: event.clientX, scroll: el.scrollLeft };
+    drag.current = {
+      pointerId: event.pointerId,
+      x: event.clientX,
+      scroll: el.scrollLeft,
+    };
     track.setPointerCapture(event.pointerId);
   }
 
   function moveDrag(event: PointerEvent<HTMLDivElement>) {
     const el = viewportRef?.current;
-    if (!drag.current || drag.current.pointerId !== event.pointerId || !el) return;
+    if (!drag.current || drag.current.pointerId !== event.pointerId || !el)
+      return;
     el.scrollTo({
-      left: drag.current.scroll + ((event.clientX - drag.current.x) / (travel || 1)) * maximum,
+      left:
+        drag.current.scroll +
+        ((event.clientX - drag.current.x) / (travel || 1)) * maximum,
     });
   }
 

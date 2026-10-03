@@ -1,5 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { DocBlock, DocHeading, DocParagraph, LegalDocument } from "@/components/info/doc-layout";
+import {
+  DocBlock,
+  DocHeading,
+  DocParagraph,
+  LegalDocument,
+} from "@/components/info/doc-layout";
 import { PageIntro } from "@/components/info/page-intro";
 import { useDocumentTitle } from "@/hooks/use-document-title";
 import type { DocSection } from "@/types/doc";
@@ -63,10 +68,14 @@ function AiPolicyPage() {
       <LegalDocument
         sections={sections}
         footer={
-          <DocBlock heading={<DocHeading>Använd AI med omdöme</DocHeading>} className="border-t py-14 lg:py-20">
+          <DocBlock
+            heading={<DocHeading>Använd AI med omdöme</DocHeading>}
+            className="border-t py-14 lg:py-20"
+          >
             <DocParagraph>
-              AI:n är en assistent, inte en ersättare för ditt eget kritiska tänkande. Genom att använda LiU
-              Tentor godkänner du att du förstår teknikens begränsningar.
+              AI:n är en assistent, inte en ersättare för ditt eget kritiska
+              tänkande. Genom att använda LiU Tentor godkänner du att du förstår
+              teknikens begränsningar.
             </DocParagraph>
             <p className="mt-6 text-sm text-muted-foreground">
               Har du sett AI:n svara ovanligt märkligt?{" "}

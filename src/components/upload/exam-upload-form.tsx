@@ -92,7 +92,7 @@ export function ExamUploadForm({
             disabled={loading}
             autoComplete="off"
             spellCheck={false}
-            className="w-full border-0 border-b-2 border-foreground/20 bg-transparent p-2 text-center text-4xl font-medium outline-none transition-colors placeholder:text-muted-foreground/40 focus:border-brand"
+            className="w-full border-0 border-b-2 border-foreground/20 bg-transparent p-2 text-center text-4xl font-medium transition-colors outline-none placeholder:text-muted-foreground/40 focus:border-brand"
             onChange={(e) => setCourseCode(e.target.value.toUpperCase())}
           />
         </div>

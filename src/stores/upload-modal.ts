@@ -10,6 +10,7 @@ interface UploadModalState {
 export const useUploadModal = create<UploadModalState>((set) => ({
   isOpen: false,
   prefilledCourseCode: "",
-  open: (courseCode = "") => set({ isOpen: true, prefilledCourseCode: courseCode }),
+  open: (courseCode = "") =>
+    set({ isOpen: true, prefilledCourseCode: courseCode }),
   close: () => set({ isOpen: false }),
 }));

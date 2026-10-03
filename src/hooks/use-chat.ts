@@ -41,7 +41,6 @@ function truncateTitle(title: string, maxLength: number): string {
     : `${title.slice(0, maxLength - 1).trimEnd()}…`;
 }
 
-
 function persistLocalConversation(store: ChatStore, transport: ChatTransport) {
   const { currentConversationId, currentConversationTitle, messages } =
     store.getState();
@@ -56,10 +55,6 @@ function persistLocalConversation(store: ChatStore, transport: ChatTransport) {
   void queryClient.invalidateQueries({ queryKey: ["conversations", "local"] });
 }
 
-
-
-
-
 async function cancelTurnOnServer(turnId: string) {
   try {
     await fetch(`${AI_API_BASE}/chat/turns/${turnId}/cancel`, {
@@ -69,11 +64,8 @@ async function cancelTurnOnServer(turnId: string) {
         ...(await getAuthHeaders()),
       },
     });
-  } catch {
-
-  }
+  } catch {}
 }
-
 
 export interface ChatTransport {
   kind: ConversationKind;
@@ -103,7 +95,6 @@ export interface CancelledTurn {
   attachments: ChatAttachment[];
 }
 
-
 export function useExamChat(ctx: ChatContext) {
   const store = useChatStoreApi();
   return useChat(store, () => ({
@@ -117,10 +108,6 @@ export function useExamChat(ctx: ChatContext) {
     meta: ctx.courseCode,
   }));
 }
-
-
-
-
 
 export function useLearnChat() {
   const store = useChatStoreApi();
@@ -141,14 +128,6 @@ export function useLearnChat() {
   });
 }
 
-
-
-
-
-
-
-
-
 export function useChat(
   store: ChatStore,
   transport: (messages: Message[]) => ChatTransport,
@@ -164,9 +143,6 @@ export function useChat(
     () => transportRef.current(store.getState().messages),
     [store],
   );
-
-
-
 
   const cancelGeneration = useCallback((): CancelledTurn | null => {
     if (turnIdRef.current) void cancelTurnOnServer(turnIdRef.current);
@@ -184,10 +160,8 @@ export function useChat(
       if (!last.content.trim()) {
         const userMsg = msgs.at(-2);
         if (msgs.length === 2) {
-
           next = [...msgs.slice(0, -1), { ...last, content: CANCELLED_NOTE }];
         } else {
-
           if (userMsg?.role === "user") {
             cancelled = {
               content: userMsg.content,
@@ -238,7 +212,6 @@ export function useChat(
         });
       }
 
-
       const userId = useAuthStore.getState().user?.id;
       if (userId && !store.getState().currentConversationId) {
         const title = fallbackTitle(50);
@@ -284,8 +257,6 @@ export function useChat(
         });
       }
 
-
-
       const turnConversationId = store.getState().currentConversationId;
       const isShown = () =>
         store.getState().currentConversationId === turnConversationId;
@@ -317,7 +288,6 @@ export function useChat(
 
       persistLocalConversation(store, transportAtSend);
 
-
       const turnMessages = store.getState().messages;
       let turnReply: Partial<Message> = {};
       let turnTitle = store.getState().currentConversationTitle || "Ny chatt";
@@ -328,7 +298,6 @@ export function useChat(
         turnReply = { ...turnReply, ...p };
         if (isShown()) store.getState().updateMessage(assistantId, p);
       };
-
 
       const persistTurn = () => {
         if (!isLocalConversationId(turnConversationId)) return;

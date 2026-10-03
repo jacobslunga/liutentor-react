@@ -27,7 +27,6 @@ const PdfRenderer = lazy(() =>
   })),
 );
 
-
 const HEADER_HEIGHT = 57;
 const PDF_BOX_STYLE = {
   paddingTop: `calc(${HEADER_HEIGHT}px + env(safe-area-inset-top, 0px))`,
@@ -60,10 +59,6 @@ function MobileHeader({ children }: { children: ReactNode }) {
   );
 }
 
-
-
-
-
 export function MobileExamView({
   exams,
   examId,
@@ -74,7 +69,6 @@ export function MobileExamView({
 }: MobileExamViewProps) {
   const [showSolution, setShowSolution] = useState(false);
   const [solutionMounted, setSolutionMounted] = useState(false);
-
 
   useEffect(() => {
     function onKeyDown(e: KeyboardEvent) {

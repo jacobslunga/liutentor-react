@@ -31,10 +31,6 @@ const TIPS: { text: string; keys?: string[] }[] = [
   { text: "Markera text i ett svar för att fråga om den" },
 ];
 
-
-
-
-
 export function ChatSettingsMenu() {
   const { theme = "system", setTheme } = useTheme();
   const { selectedModelId, availableModels } = useSelectedModel();
@@ -51,8 +47,6 @@ export function ChatSettingsMenu() {
         </DropdownMenuTrigger>
         <DropdownMenuContent side="right" align="end" className="w-64">
           <div className="max-h-88 overflow-y-auto overscroll-contain">
-
-
             <DropdownMenuLabel>Tema</DropdownMenuLabel>
             <DropdownMenuRadioGroup value={theme} onValueChange={setTheme}>
               {THEMES.map(({ value, label, Icon }) => (

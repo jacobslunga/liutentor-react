@@ -1,7 +1,6 @@
 import { create } from "zustand";
 
 interface ExamViewState {
-
   focusMode: boolean;
   isHeaderMounted: boolean;
 
@@ -20,12 +19,6 @@ interface ExamViewState {
   markChatOpened: () => void;
   reset: (blurSolution: boolean) => void;
 }
-
-
-
-
-
-
 
 export const useExamViewStore = create<ExamViewState>((set) => ({
   focusMode: false,

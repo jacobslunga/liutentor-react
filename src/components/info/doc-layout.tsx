@@ -2,7 +2,6 @@ import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
 import type { DocSection } from "@/types/doc";
 
-
 export function DocBlock({
   heading,
   children,
@@ -37,7 +36,6 @@ export function DocHeading({ children }: { children: ReactNode }) {
   return <h2 className="text-lg leading-snug font-medium">{children}</h2>;
 }
 
-
 export function DocContact({
   title,
   body,
@@ -57,7 +55,6 @@ export function DocContact({
     </DocBlock>
   );
 }
-
 
 export function LegalDocument({
   sections,

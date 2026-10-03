@@ -16,7 +16,6 @@ const WIDTHS = {
 } as const;
 
 type AppDialogProps = {
-
   title?: ReactNode;
   description?: ReactNode;
 
@@ -28,10 +27,6 @@ type AppDialogProps = {
   role?: "dialog" | "alertdialog";
   className?: string;
 };
-
-
-
-
 
 export function AppDialog({
   title,
@@ -48,7 +43,11 @@ export function AppDialog({
     <Dialog open onOpenChange={(open) => !open && onClose()}>
       <DialogContent
         role={role}
-        className={cn("flex max-h-[min(85dvh,42rem)] flex-col", WIDTHS[width], className)}
+        className={cn(
+          "flex max-h-[min(85dvh,42rem)] flex-col",
+          WIDTHS[width],
+          className,
+        )}
       >
         {header ??
           (title && (

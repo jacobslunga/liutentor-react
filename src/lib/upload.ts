@@ -1,16 +1,30 @@
-
 export function parseDateFromFilename(name: string): string | null {
   const pad = (n: number) => String(n).padStart(2, "0");
   const full = name.match(/(\d{4})[-_]?(\d{2})[-_]?(\d{2})/);
   if (full) {
-    const [year, month, day] = [Number(full[1]), Number(full[2]), Number(full[3])];
-    if (year > 1990 && year < 2050 && month >= 1 && month <= 12 && day >= 1 && day <= 31) {
+    const [year, month, day] = [
+      Number(full[1]),
+      Number(full[2]),
+      Number(full[3]),
+    ];
+    if (
+      year > 1990 &&
+      year < 2050 &&
+      month >= 1 &&
+      month <= 12 &&
+      day >= 1 &&
+      day <= 31
+    ) {
       return `${year}-${pad(month)}-${pad(day)}`;
     }
   }
   const short = name.match(/(?<!\d)(\d{2})(\d{2})(\d{2})(?!\d)/);
   if (short) {
-    const [year, month, day] = [Number(short[1]), Number(short[2]), Number(short[3])];
+    const [year, month, day] = [
+      Number(short[1]),
+      Number(short[2]),
+      Number(short[3]),
+    ];
     if (month >= 1 && month <= 12 && day >= 1 && day <= 31) {
       return `${2000 + year}-${pad(month)}-${pad(day)}`;
     }
@@ -31,7 +45,6 @@ const SOLUTION_KEYWORDS = [
   "svar",
 ];
 
-
 export function isSolution(name: string): boolean {
   const n = name.toLowerCase();
   if (n.includes("tenta_och_svar")) return false;
@@ -46,13 +59,13 @@ export interface UploadMetadata {
   fileType: "EXAM" | "SOLUTION";
 }
 
-
 export async function uploadExams(courseCode: string, files: File[]) {
   const code = courseCode.toUpperCase().trim();
   const formData = new FormData();
   const metadata: UploadMetadata[] = files.map((file) => {
     const examDate = parseDateFromFilename(file.name);
-    if (!examDate) throw new Error(`Kunde inte hitta ett datum i filnamnet: ${file.name}`);
+    if (!examDate)
+      throw new Error(`Kunde inte hitta ett datum i filnamnet: ${file.name}`);
     const fileType = isSolution(file.name) ? "SOLUTION" : "EXAM";
     formData.append("files", file);
     return {
@@ -67,7 +80,9 @@ export async function uploadExams(courseCode: string, files: File[]) {
 
   const res = await fetch("/api/upload", { method: "POST", body: formData });
   if (!res.ok) {
-    const body = (await res.json().catch(() => null)) as { message?: string } | null;
+    const body = (await res.json().catch(() => null)) as {
+      message?: string;
+    } | null;
     throw new Error(body?.message || "Ett fel uppstod vid uppladdningen.");
   }
 }

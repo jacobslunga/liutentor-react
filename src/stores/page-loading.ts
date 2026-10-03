@@ -2,14 +2,9 @@ import { useEffect } from "react";
 import { create } from "zustand";
 
 interface PageLoadingState {
-
   pending: number;
   failed: boolean;
 }
-
-
-
-
 
 export const usePageLoadingStore = create<PageLoadingState>(() => ({
   pending: 0,
@@ -32,7 +27,6 @@ function begin() {
     });
   };
 }
-
 
 export function usePageLoadingTask(pending: boolean, error = false) {
   useEffect(() => {

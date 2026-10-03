@@ -1,7 +1,11 @@
 import { create } from "zustand";
 import { AI_API_BASE, getAnonymousId, readSseEvents } from "@/lib/chat-api";
 import { getAuthHeaders } from "@/lib/supabase";
-import type { MultipleChoiceQuizResponse, QuizDifficulty, StoredQuizItem } from "@/types/quiz";
+import type {
+  MultipleChoiceQuizResponse,
+  QuizDifficulty,
+  StoredQuizItem,
+} from "@/types/quiz";
 
 export type QuizStage = "setup" | "generating" | "answering" | "results";
 export interface QuizStatus {
@@ -22,7 +26,10 @@ interface QuizState {
   generationError: string | null;
   generationStatus: QuizStatus | null;
 
-  generate: (courseCode: string, payload: { examIds: number[]; difficulty: QuizDifficulty }) => Promise<void>;
+  generate: (
+    courseCode: string,
+    payload: { examIds: number[]; difficulty: QuizDifficulty },
+  ) => Promise<void>;
   loadFromHistory: (item: StoredQuizItem) => void;
   setActiveQuizId: (id: string | null) => void;
   setAnswer: (questionId: number, optionIndex: number) => void;
@@ -64,26 +71,35 @@ export const useQuizStore = create<QuizState>((set, get) => ({
     }));
 
     try {
-      const response = await fetch(`${AI_API_BASE}/quiz/multiple-choice/${encodeURIComponent(courseCode)}`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-anonymous-user-id": getAnonymousId(),
-          ...(await getAuthHeaders()),
+      const response = await fetch(
+        `${AI_API_BASE}/quiz/multiple-choice/${encodeURIComponent(courseCode)}`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "x-anonymous-user-id": getAnonymousId(),
+            ...(await getAuthHeaders()),
+          },
+          body: JSON.stringify(payload),
+          signal: controller.signal,
         },
-        body: JSON.stringify(payload),
-        signal: controller.signal,
-      });
-      if (!response.ok || !response.body) throw new Error(`Request failed: ${response.statusText}`);
+      );
+      if (!response.ok || !response.body)
+        throw new Error(`Request failed: ${response.statusText}`);
 
       for await (const { event, data } of readSseEvents(response.body)) {
         if (event === "status") {
           set({ generationStatus: data as QuizStatus });
         } else if (event === "result") {
-          set({ quizData: data as MultipleChoiceQuizResponse, isGenerating: false, stage: "answering" });
+          set({
+            quizData: data as MultipleChoiceQuizResponse,
+            isGenerating: false,
+            stage: "answering",
+          });
         } else if (event === "error") {
           set({
-            generationError: (data as { message?: string }).message ?? "Unknown error",
+            generationError:
+              (data as { message?: string }).message ?? "Unknown error",
             isGenerating: false,
           });
         }
@@ -91,7 +107,10 @@ export const useQuizStore = create<QuizState>((set, get) => ({
       if (get().isGenerating) set({ isGenerating: false });
     } catch (err) {
       if ((err as Error)?.name === "AbortError") return;
-      set({ generationError: (err as Error)?.message ?? "Failed to generate quiz", isGenerating: false });
+      set({
+        generationError: (err as Error)?.message ?? "Failed to generate quiz",
+        isGenerating: false,
+      });
     }
   },
 
@@ -117,9 +136,16 @@ export const useQuizStore = create<QuizState>((set, get) => ({
       const last = (s.quizData?.quiz.questions.length ?? 1) - 1;
       return { currentIndex: Math.min(s.currentIndex + 1, last) };
     }),
-  previous: () => set((s) => ({ currentIndex: Math.max(0, s.currentIndex - 1) })),
+  previous: () =>
+    set((s) => ({ currentIndex: Math.max(0, s.currentIndex - 1) })),
   complete: () => set({ stage: "results" }),
-  retake: () => set((s) => ({ stage: "answering", currentIndex: 0, answers: {}, sessionKey: s.sessionKey + 1 })),
+  retake: () =>
+    set((s) => ({
+      stage: "answering",
+      currentIndex: 0,
+      answers: {},
+      sessionKey: s.sessionKey + 1,
+    })),
   reset: () => {
     abortController?.abort();
     abortController = null;

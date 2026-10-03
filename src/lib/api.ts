@@ -1,6 +1,5 @@
 import type { Course, CourseExams, ExamDetail } from "@/types/exam";
 
-
 const GO_API_BASE = "/api/go";
 
 export class ApiError extends Error {
@@ -23,7 +22,6 @@ export async function getCourses(signal?: AbortSignal): Promise<Course[]> {
   const data = await goFetch<{ courses?: Course[] }>("/v1/courses/LIU", signal);
   return data?.courses ?? [];
 }
-
 
 export async function getCourseExams(
   courseCode: string,

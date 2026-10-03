@@ -15,17 +15,11 @@ import { cn } from "@/lib/utils";
 import type { Exam } from "@/types/exam";
 import { Skeleton } from "@/components/ui/skeleton";
 
-
 const CourseStatsPassRate = lazy(() =>
   import("./course-stats-pass-rate").then((m) => ({
     default: m.CourseStatsPassRate,
   })),
 );
-
-
-
-
-
 
 export function CourseSidebar({
   exams,
@@ -143,7 +137,6 @@ function Fact({
     </li>
   );
 }
-
 
 function GradeBar({ grades }: { grades: GradeEntry[] }) {
   return (

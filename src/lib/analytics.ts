@@ -17,21 +17,14 @@ export function getAnalyticsConsent(): boolean | null {
   }
 }
 
-
 export const ANALYTICS_CONSENT_EVENT = "liutentor:analytics-consent";
 
 export function setAnalyticsConsent(granted: boolean) {
   try {
     localStorage.setItem(CONSENT_KEY, granted ? "granted" : "denied");
-  } catch {
-
-  }
+  } catch {}
   window.dispatchEvent(new Event(ANALYTICS_CONSENT_EVENT));
 }
-
-
-
-
 
 export function initAnalytics() {
   if (getAnalyticsConsent() !== true) return;
@@ -39,7 +32,6 @@ export function initAnalytics() {
   if (GA_ID && !window.gtag) {
     window.dataLayer = window.dataLayer ?? [];
     window.gtag = function gtag() {
-
       // oxlint-disable-next-line prefer-rest-params
       window.dataLayer!.push(arguments);
     };

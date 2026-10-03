@@ -1,15 +1,5 @@
 import { createContext, useContext, useSyncExternalStore } from "react";
 
-
-
-
-
-
-
-
-
-
-
 export interface LiveZoomStore {
   get: () => number;
   set: (value: number) => void;
@@ -45,6 +35,5 @@ export function useLiveZoomScale(): number {
 
 const noopSubscribe = () => () => {};
 const one = () => 1;
-
 
 export const ResetZoomContext = createContext<(() => void) | null>(null);

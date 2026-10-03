@@ -8,7 +8,6 @@
     "allowArbitraryExtensions": true,
     "skipLibCheck": true,
 
-
     "moduleResolution": "bundler",
     "allowImportingTsExtensions": true,
     "verbatimModuleSyntax": true,
@@ -16,7 +15,6 @@
     "noEmit": true,
     "jsx": "react-jsx",
     "paths": { "@/*": ["./src/*"] },
-
 
     "noUnusedLocals": true,
     "noUnusedParameters": true,

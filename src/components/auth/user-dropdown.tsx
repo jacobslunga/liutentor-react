@@ -36,10 +36,6 @@ const THEMES = [
   { value: "system", label: "System", Icon: MonitorIcon },
 ] as const;
 
-
-
-
-
 export function UserDropdown() {
   const navigate = useNavigate();
   const { user, displayName } = useProfile();

@@ -28,8 +28,6 @@ export function CourseSearchResults({
   }
 
   return (
-
-
     <ul
       id={id}
       role="listbox"
@@ -50,8 +48,6 @@ export function CourseSearchResults({
           onClick={() => onSelect(item.code)}
         >
           <span className="flex min-w-0 items-baseline gap-2">
-
-
             <span className="min-w-16 shrink-0 font-medium tabular-nums">
               {item.code}
             </span>

@@ -4,10 +4,6 @@ import { cn } from "@/lib/utils";
 const MAX_X = 8;
 const MAX_Y = 6;
 
-
-
-
-
 export function ChatMascot({ className }: { className?: string }) {
   const svgRef = useRef<SVGSVGElement>(null);
   const eyesRef = useRef<SVGGElement>(null);
@@ -42,7 +38,10 @@ export function ChatMascot({ className }: { className?: string }) {
         y += (ty - y) * 0.18;
         frame = requestAnimationFrame(step);
       }
-      eyes.setAttribute("transform", `translate(${x.toFixed(3)} ${y.toFixed(3)})`);
+      eyes.setAttribute(
+        "transform",
+        `translate(${x.toFixed(3)} ${y.toFixed(3)})`,
+      );
     };
 
     const onMove = (e: PointerEvent) => {

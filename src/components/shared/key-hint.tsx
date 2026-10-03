@@ -4,7 +4,6 @@ const isMac =
   typeof navigator !== "undefined" &&
   /Mac|iPhone|iPad/.test(navigator.platform);
 
-
 const SYMBOLS: Record<string, string> = {
   mod: isMac ? "⌘" : "Ctrl",
   ctrl: isMac ? "⌃" : "Ctrl",
@@ -19,7 +18,6 @@ const SYMBOLS: Record<string, string> = {
   arrowleft: "←",
   arrowright: "→",
 };
-
 
 export function KeyHint({
   keys,

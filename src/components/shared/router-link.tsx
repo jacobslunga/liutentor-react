@@ -7,7 +7,6 @@ import { cn } from "@/lib/utils";
 type ButtonLinkProps = AnchorHTMLAttributes<HTMLAnchorElement> &
   VariantProps<typeof buttonVariants> & { ref?: Ref<HTMLAnchorElement> };
 
-
 export function ButtonLink({
   variant,
   size,
@@ -21,7 +20,6 @@ export function ButtonLink({
     />
   );
 }
-
 
 // oxlint-disable-next-line react/only-export-components -- createLink returns a React component.
 export const RouterLinkButton = createLink(ButtonLink);

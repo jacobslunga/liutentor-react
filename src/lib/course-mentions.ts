@@ -1,12 +1,6 @@
 import type { Message } from "@/stores/chat";
 
-
-
-
-
-
 const MENTION_PATTERN = /(^|[^\w@])@([A-Za-z0-9]{5,6})(?![\w])/g;
-
 
 export const MAX_COURSE_MENTIONS = 3;
 
@@ -15,18 +9,12 @@ export interface CourseRef {
   name?: string;
 }
 
-
 export function findCourseMentions(text: string): string[] {
   const codes = new Set<string>();
   for (const match of text.matchAll(MENTION_PATTERN))
     codes.add(match[2].toUpperCase());
   return [...codes];
 }
-
-
-
-
-
 
 export function conversationCourses(
   messages: Message[],
@@ -49,16 +37,15 @@ export function conversationCourses(
 
 export type MentionPart =
   | { type: "text"; text: string }
-
   | { type: "mention"; code: string; text: string };
-
 
 export function splitCourseMentions(text: string): MentionPart[] {
   const parts: MentionPart[] = [];
   let last = 0;
   for (const match of text.matchAll(MENTION_PATTERN)) {
     const start = match.index + match[1].length;
-    if (start > last) parts.push({ type: "text", text: text.slice(last, start) });
+    if (start > last)
+      parts.push({ type: "text", text: text.slice(last, start) });
     last = start + 1 + match[2].length;
     parts.push({
       type: "mention",
@@ -69,7 +56,6 @@ export function splitCourseMentions(text: string): MentionPart[] {
   if (last < text.length) parts.push({ type: "text", text: text.slice(last) });
   return parts;
 }
-
 
 export function findMentionRanges(
   text: string,
@@ -83,10 +69,6 @@ export function findMentionRanges(
     };
   });
 }
-
-
-
-
 
 export function activeMentionQuery(
   value: string,

@@ -3,7 +3,6 @@ import { AVATAR_BG } from "@/lib/avatar-colors";
 import { cn } from "@/lib/utils";
 import { useProfile } from "@/queries/profile";
 
-
 export function UserAvatar({
   className,
   fallbackClassName,
