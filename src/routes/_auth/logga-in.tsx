@@ -5,7 +5,7 @@ import {
   MailIcon,
   TriangleAlertIcon,
 } from "lucide-react";
-import { useState, type FormEvent } from "react";
+import { useState, type SubmitEvent } from "react";
 import { PasswordInput } from "@/components/auth/password-input";
 import { LogoIcon } from "@/components/layout/logo-icon";
 import { useSeo } from "@/hooks/use-seo";
@@ -91,7 +91,7 @@ function LoginForm({ onSwitch }: { onSwitch: () => void }) {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
 
-  async function submit(e: FormEvent) {
+  async function submit(e: SubmitEvent) {
     e.preventDefault();
     const next = {
       email: validateLiuEmail(email),
@@ -208,7 +208,7 @@ function SignupForm({ onSwitch }: { onSwitch: () => void }) {
     (e: React.ChangeEvent<HTMLInputElement>) =>
       setForm((f) => ({ ...f, [key]: e.target.value }));
 
-  async function submit(e: FormEvent) {
+  async function submit(e: SubmitEvent) {
     e.preventDefault();
     const next = {
       email: validateLiuEmail(form.email),
