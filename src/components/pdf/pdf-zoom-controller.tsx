@@ -6,15 +6,15 @@ import { ResetZoomContext } from "./pdf-zoom-context";
 
 const EPSILON = 0.0005;
 
-/**
- * Uses the stable capabilities rather than `useZoom`: that hook returns a new
- * scope object every render and re-renders on every zoom change, which would
- * feed back into the refit effects below.
- *
- * Keeps the document fitted to the available width, capped at `maxPageWidth`
- * when set. A zoom the user picked is scaled with the viewport instead of
- * being reset. Provides a reset function to its children.
- */
+
+
+
+
+
+
+
+
+
 export function PdfZoomController({
   documentId,
   maxPageWidth,
@@ -77,7 +77,7 @@ export function PdfZoomController({
     viewport?.forDocument(documentId).scrollTo({ x: 0, y: 0 });
   }, [viewport, documentId]);
 
-  // Latest `apply` for event subscriptions that shouldn't resubscribe.
+
   const applyRef = useRef(apply);
   useEffect(() => {
     applyRef.current = apply;
@@ -88,7 +88,7 @@ export function PdfZoomController({
     lastWidth.current = 0;
   }, [documentId]);
 
-  // Refit when the cap changes (e.g. switching layout mode).
+
   const isFirstApply = useRef(true);
   useEffect(() => {
     if (!viewport) return;
@@ -106,7 +106,7 @@ export function PdfZoomController({
     });
   }, [scroll, documentId, scrollToTop]);
 
-  // EmbedPDF only refits mode-based zoom; numeric zoom must scale with the viewport.
+
   useEffect(() => {
     if (!viewport || !zoomCapability) return;
     const zoom = zoomCapability.forDocument(documentId);

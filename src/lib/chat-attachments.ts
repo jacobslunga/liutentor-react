@@ -18,11 +18,11 @@ export const FILE_INPUT_ACCEPT =
 const attachmentKey = (f: Pick<File, "name" | "size" | "lastModified">) =>
   `${f.name}:${f.size}:${f.lastModified}`;
 
-/**
- * Validates new files against the chat's limits (type, size, count, total,
- * duplicates) and turns the accepted ones into attachments. Returns the
- * distinct error messages for the rejected ones.
- */
+
+
+
+
+
 export function acceptFiles(
   files: File[],
   existing: ChatAttachment[],
@@ -74,7 +74,7 @@ const IMAGE_EXTENSION: Record<string, string> = {
   "image/gif": "gif",
 };
 
-/** Pasted screenshots often arrive as "image.png" or without an extension. */
+
 export function normalizeClipboardFile(file: File, index: number): File {
   const extension = file.name.split(".").pop()?.toLowerCase();
   if (extension && extension !== file.name.toLowerCase()) return file;

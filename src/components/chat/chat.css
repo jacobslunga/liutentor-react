@@ -1,14 +1,14 @@
 @import "katex/dist/katex.min.css";
 
-/*
- * The transcript and prompt column. Grows with the chat's container (both
- * chats are @container), from 42rem on laptops up to 54rem on big screens.
- */
+
+
+
+
 .chat-column {
   max-width: clamp(42rem, 62cqi, 54rem);
 }
 
-/* Rendered assistant markdown. Colors map Tailwind Typography onto the app's color tokens. */
+
 .chat-prose {
   --tw-prose-body: var(--foreground);
   --tw-prose-headings: var(--foreground);
@@ -30,12 +30,12 @@
   --tw-prose-td-borders: var(--border);
 }
 
-/*
- * Long transcripts: finished rows off screen skip layout and paint. A row only
- * opts in after it has been laid out once (data-measured), so the remembered
- * height is real and scroll positions stay exact. The newest question and
- * reply stay out: one streams, the other is measured when a turn is sent.
- */
+
+
+
+
+
+
 .chat-row {
   contain-intrinsic-size: auto 400px;
 }
@@ -83,8 +83,8 @@
   overflow-wrap: break-word;
 }
 
-/* Tables sit in a bordered card; cells wrap, and only a table too wide even
-   then scrolls sideways. */
+
+
 .chat-prose .table-scroll {
   width: 100%;
   max-width: 100%;
@@ -213,7 +213,7 @@
   color: var(--shiki-dark);
 }
 
-/* A quoted selection reads as one run of text: block elements collapse inline. */
+
 .selection-quote :is(p, li, section, h1, h2, h3, h4) {
   display: inline;
   margin: 0;
@@ -244,7 +244,7 @@
   display: none;
 }
 
-/* The prompt border flows while a reply is streaming. */
+
 .chat-prompt-generating {
   border-color: transparent !important;
   background:

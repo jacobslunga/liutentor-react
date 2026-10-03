@@ -64,7 +64,7 @@ const FIXED_LIMITS = [
 ];
 
 interface SettingsDialogProps {
-  /** Controlled mode, e.g. opened from a menu. Omit to render a trigger button. */
+
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
 }

@@ -28,8 +28,8 @@ export function CourseSearchResults({
   }
 
   return (
-    // Focus stays in the search field (aria-activedescendant), so this is a
-    // plain listbox rather than a focus-managing menu.
+
+
     <ul
       id={id}
       role="listbox"
@@ -44,14 +44,14 @@ export function CourseSearchResults({
           aria-selected={item.code === active}
           className={cn(
             "relative flex cursor-pointer items-center justify-between gap-2 rounded-md py-1.5 pr-2 pl-3 text-sm transition-colors duration-150 ease-out-quick hover:bg-accent hover:text-accent-foreground aria-selected:bg-accent aria-selected:text-accent-foreground",
-            // The pill on the left edge marks the highlighted course.
+
             "before:absolute before:top-1/2 before:left-1 before:h-4 before:w-1 before:-translate-y-1/2 before:scale-y-0 before:rounded-full before:bg-brand before:opacity-0 before:transition-[scale,opacity] before:duration-150 before:ease-snap aria-selected:before:scale-y-100 aria-selected:before:opacity-100 motion-reduce:before:transition-none",
           )}
           onClick={() => onSelect(item.code)}
         >
           <span className="flex min-w-0 items-baseline gap-2">
-            {/* Codes are six characters but not equally wide; a fixed column
-                keeps the names lined up. */}
+
+
             <span className="min-w-16 shrink-0 font-medium tabular-nums">
               {item.code}
             </span>

@@ -41,8 +41,8 @@ export const Route = createFileRoute("/_search/search/$courseCode")({
     parse: ({ courseCode }) => ({ courseCode: courseCode.toUpperCase() }),
     stringify: ({ courseCode }) => ({ courseCode }),
   },
-  // Statistics used to be a tab; it now lives in the sidebar, so an old
-  // ?tab=stats link lands on the exams.
+
+
   validateSearch: (search: Record<string, unknown>): { tab?: "quiz" } =>
     search.tab === "quiz" ? { tab: search.tab } : {},
   component: CoursePage,
@@ -189,7 +189,7 @@ function CourseContent({
   const examsWithSolutions = exams.filter((e) => e.has_solution).length;
 
   function setTab(value: CourseTab) {
-    // Keep the tab in the URL so it can be linked and refreshed.
+
     void navigate({
       search: value === "exams" ? {} : { tab: value },
       replace: true,
@@ -205,7 +205,7 @@ function CourseContent({
             {course.courseName}
           </h1>
         </div>
-        {/* The sidebar carries these facts on wide screens. */}
+
         <p className="flex w-full flex-wrap items-center gap-x-2 gap-y-1 text-sm text-muted-foreground lg:hidden">
           <span>
             <span className="font-bold text-foreground">{exams.length}</span>{" "}
@@ -234,16 +234,16 @@ function CourseContent({
 
       <div className="grid gap-x-8 gap-y-10 pt-6 lg:grid-cols-[minmax(0,1fr)_18.5rem]">
         <div className="grid min-w-0 content-start grid-cols-[minmax(0,1fr)_auto] [&_[role=tabpanel]]:col-span-2">
-          {/* `contents` lets the tab list and panels sit in this grid, beside
-              the sort bar. */}
+
+
           <Tabs
             value={activeTab}
             onValueChange={(value) => setTab(value as CourseTab)}
             className="contents"
           >
-            {/* Tabs fill the bar's height and the active underline sits on its
-                bottom border, so the border is the bar's last edge and rows
-                scroll up against it. */}
+
+
+
             <div className={cn(STICKY_BAR, "flex min-h-12 items-stretch shadow-[inset_0_-1px_var(--border)]")}>
               <TabsList
                 variant="line"
@@ -268,7 +268,7 @@ function CourseContent({
               />
             </TabsContent>
             <TabsContent value="quiz" className="pt-4">
-              {/* Hidden panels stay mounted; only load the quiz once it's opened. */}
+
               {activeTab === "quiz" && (
                 <Suspense fallback={null}>
                   <CourseQuizPanel courseCode={courseCode} exams={exams} />
@@ -292,7 +292,7 @@ function CourseContent({
   );
 }
 
-/** Sticks under the mobile search bar, and to the top on wider screens. */
+
 const STICKY_BAR = "sticky top-12 z-20 bg-background md:top-0";
 
 function Dot() {

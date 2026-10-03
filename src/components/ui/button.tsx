@@ -3,13 +3,9 @@ import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
 import { Slot } from "radix-ui"
 
-// Raised buttons: a top-lit gradient over the fill, a 1px highlight, and a
-// soft shadow that deepens on hover. Press squeezes them a touch.
 const raised =
   "shadow-raised hover:shadow-raised-hover active:scale-[0.98] active:shadow-raised-pressed aria-expanded:shadow-raised-pressed"
 
-// Only the press scale springs (slight overshoot); colors and shadows ease
-// out plainly, since an overshooting color flashes past its target.
 const transition =
   "transition-[scale,box-shadow,background-color,color,border-color,--tw-gradient-from,--tw-gradient-to] duration-150 [transition-timing-function:var(--ease-snap),var(--ease-out-quick),var(--ease-out-quick),var(--ease-out-quick),var(--ease-out-quick),var(--ease-out-quick),var(--ease-out-quick)] active:duration-75 active:ease-out-quick"
 

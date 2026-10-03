@@ -11,11 +11,11 @@ import {
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 
-/**
- * A shadcn AlertDialog asking to confirm a destructive action. Rendered open;
- * mount it conditionally. `onCancel` runs on every dismissal that isn't the
- * confirm button, and dismissal is blocked while `isPending`.
- */
+
+
+
+
+
 export function ConfirmDialog({
   title,
   children,
@@ -47,7 +47,7 @@ export function ConfirmDialog({
           <AlertDialogCancel disabled={isPending}>
             {cancelLabel}
           </AlertDialogCancel>
-          {/* Not AlertDialogAction: that closes the dialog before the work is done. */}
+
           <Button
             variant="destructive"
             disabled={isPending}

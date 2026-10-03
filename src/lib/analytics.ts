@@ -17,29 +17,29 @@ export function getAnalyticsConsent(): boolean | null {
   }
 }
 
-/** Fired on `window` once the visitor has answered the consent banner. */
+
 export const ANALYTICS_CONSENT_EVENT = "liutentor:analytics-consent";
 
 export function setAnalyticsConsent(granted: boolean) {
   try {
     localStorage.setItem(CONSENT_KEY, granted ? "granted" : "denied");
   } catch {
-    // Privacy modes may block storage; the choice still applies for this tab.
+
   }
   window.dispatchEvent(new Event(ANALYTICS_CONSENT_EVENT));
 }
 
-/**
- * Loads Google Analytics (GA4) when VITE_GA_ID is set. Page views are sent by
- * hand from the router, so the initial config doesn't send one of its own.
- */
+
+
+
+
 export function initAnalytics() {
   if (getAnalyticsConsent() !== true) return;
 
   if (GA_ID && !window.gtag) {
     window.dataLayer = window.dataLayer ?? [];
     window.gtag = function gtag() {
-      // GA reads every entry as an arguments object; a plain array breaks it.
+
       // oxlint-disable-next-line prefer-rest-params
       window.dataLayer!.push(arguments);
     };

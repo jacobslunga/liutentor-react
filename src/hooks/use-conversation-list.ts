@@ -54,7 +54,7 @@ function groupLabel(value: string): (typeof CONVERSATION_GROUPS)[number] {
   return "Äldre";
 }
 
-/** Newest-first conversations bucketed by age, empty groups dropped. */
+
 export function groupConversations(conversations: Conversation[]) {
   const byGroup = new Map<string, Conversation[]>();
   for (const c of conversations) {
@@ -67,7 +67,7 @@ export function groupConversations(conversations: Conversation[]) {
   })).filter((g) => g.items.length);
 }
 
-/** Saved turns of a conversation, from the server or this browser. */
+
 export function loadMessages(id: string): Promise<Message[]> {
   return isLocalConversationId(id)
     ? Promise.resolve(loadLocalConversationMessages(id))
@@ -76,12 +76,12 @@ export function loadMessages(id: string): Promise<Message[]> {
 
 export interface LoadedConversation {
   title: string;
-  /** The study course the chat belongs to, if any. */
+
   courseId: string | null;
   messages: Message[];
 }
 
-/** Title and turns of a saved conversation; null when it does not exist. */
+
 export async function loadConversation(
   id: string,
 ): Promise<LoadedConversation | null> {
@@ -98,11 +98,11 @@ export async function loadConversation(
   return info && { ...info, messages };
 }
 
-/**
- * Saved conversations of one kind: from the server when signed in, from this
- * browser otherwise. With `courseId`, the chats of that study course (which
- * only exist for signed-in users); without, the standalone ones.
- */
+
+
+
+
+
 export function useConversationList(
   kind: ConversationKind,
   {

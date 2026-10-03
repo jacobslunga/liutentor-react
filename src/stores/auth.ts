@@ -5,7 +5,7 @@ import { supabase } from "@/lib/supabase";
 interface AuthState {
   session: Session | null;
   user: User | null;
-  /** False until the persisted session has been read on startup. */
+
   ready: boolean;
 }
 
@@ -17,10 +17,10 @@ export const useAuthStore = create<AuthState>(() => ({
 
 let readyPromise: Promise<void> | null = null;
 
-/**
- * Starts listening to Supabase auth. Safe to call more than once; resolves when
- * the initial session is known, so route guards can await it.
- */
+
+
+
+
 export function initAuth(): Promise<void> {
   readyPromise ??= new Promise((resolve) => {
     supabase.auth.onAuthStateChange((_event, session) => {

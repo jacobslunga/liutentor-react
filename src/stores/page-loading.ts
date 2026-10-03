@@ -2,15 +2,15 @@ import { useEffect } from "react";
 import { create } from "zustand";
 
 interface PageLoadingState {
-  /** Reference count of work the page is still waiting for. */
+
   pending: number;
   failed: boolean;
 }
 
-/**
- * Work outside router navigation and TanStack Query (loading the PDF engine,
- * parsing a document) registers here so the loading bar waits for it too.
- */
+
+
+
+
 export const usePageLoadingStore = create<PageLoadingState>(() => ({
   pending: 0,
   failed: false,
@@ -33,7 +33,7 @@ function begin() {
   };
 }
 
-/** Holds the loading bar for as long as `pending` is true. */
+
 export function usePageLoadingTask(pending: boolean, error = false) {
   useEffect(() => {
     if (!pending) return;

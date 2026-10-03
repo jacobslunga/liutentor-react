@@ -7,18 +7,18 @@ import {
   type MessageSource,
 } from "@/stores/chat";
 
-/** Which chat a conversation belongs to: the exam panel or the learning chat. */
+
 export type ConversationKind = "exam" | "learn";
 
 export interface Conversation {
   id: string;
   title: string;
   createdAt: string;
-  /** "TATA24 · Tenta 2026-08-21", when known. */
+
   meta: string;
 }
 
-/** Course and exam labels come from the first chat log of each conversation. */
+
 async function loadMeta(ids: string[]): Promise<Record<string, string>> {
   if (!ids.length) return {};
   try {
@@ -33,7 +33,7 @@ async function loadMeta(ids: string[]): Promise<Record<string, string>> {
     for (const row of logs ?? []) {
       if (!row?.conversation_id || first.has(row.conversation_id)) continue;
       first.set(row.conversation_id, {
-        // Learning chats log every referenced course, comma separated.
+
         courseCode: row.course_code ? row.course_code.split(",").join(", ") : null,
         examId: typeof row.exam_id === "number" ? row.exam_id : null,
       });
@@ -53,15 +53,15 @@ async function loadMeta(ids: string[]): Promise<Record<string, string>> {
     }
     return meta;
   } catch {
-    // Metadata is decoration; the list works without it.
+
     return {};
   }
 }
 
-/**
- * A user's conversations of one kind. Learning chats are split by course:
- * `courseId` null lists the standalone ones, a course id that course's chats.
- */
+
+
+
+
 export const conversationsQuery = (
   userId: string,
   kind: ConversationKind,
@@ -96,14 +96,14 @@ export const conversationsKey = (
   courseId: string | null = null,
 ) => ["conversations", userId, kind, courseId ?? "standalone"];
 
-/** Signed-out history, read from this browser. */
+
 export const localConversationsQuery = (kind: ConversationKind) =>
   queryOptions({
     queryKey: ["conversations", "local", kind],
     queryFn: (): Conversation[] => listLocalConversations(kind),
   });
 
-/** Saved turns of a conversation, normalised to user/assistant messages. */
+
 export async function loadConversationMessages(conversationId: string): Promise<Message[]> {
   const { data, error } = await supabase
     .from("ai_chat_logs")
@@ -135,10 +135,10 @@ export async function loadConversationMessages(conversationId: string): Promise<
   });
 }
 
-/**
- * A conversation's title and study course, or null when it does not exist
- * (or is not ours).
- */
+
+
+
+
 export async function loadConversationInfo(
   conversationId: string,
 ): Promise<{ title: string; courseId: string | null } | null> {

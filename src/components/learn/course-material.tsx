@@ -32,10 +32,10 @@ interface PendingUpload {
 const isPdf = (file: File) =>
   file.type === "application/pdf" || /\.pdf$/i.test(file.name);
 
-/**
- * A course's lecture material: PDFs the course's chats search. Drops here
- * upload material; the chat's own drop target is told to ignore them.
- */
+
+
+
+
 export function CourseMaterial({ courseId }: { courseId: string }) {
   const user = useUser();
   const queryClient = useQueryClient();
@@ -77,7 +77,7 @@ export function CourseMaterial({ courseId }: { courseId: string }) {
     }));
     setUploads((current) => [...pending, ...current]);
 
-    // One at a time: the API checks the quota against what is already saved.
+
     for (const [i, file] of accepted.entries()) {
       try {
         const saved = await uploadCourseFile(user.id, courseId, file);
@@ -93,7 +93,7 @@ export function CourseMaterial({ courseId }: { courseId: string }) {
         setUploads((current) => current.filter((u) => u.id !== pending[i].id));
       }
     }
-    // Starts the status polling for what is still being indexed.
+
     void queryClient.invalidateQueries({ queryKey: courseFilesKey(courseId) });
   }
 

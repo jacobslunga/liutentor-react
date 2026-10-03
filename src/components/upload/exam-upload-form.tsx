@@ -17,7 +17,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 
 interface ExamUploadFormProps {
   initialCourseCode?: string;
-  /** The course is given (e.g. from a course page) and can't be changed. */
+
   fixedCourseCode?: boolean;
 }
 

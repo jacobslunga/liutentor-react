@@ -10,18 +10,18 @@ import { cn } from "@/lib/utils";
 
 export type SegmentedOption<T extends string> = {
   value: T;
-  /** Accessible name; shown as a tooltip when the option is icon-only. */
+
   label: string;
   icon?: ElementType;
-  /** Show only the icon (the label becomes a tooltip). */
+
   iconOnly?: boolean;
 };
 
-/**
- * A single-choice switch drawn as tabs: a muted track with a raised pill that
- * slides to the active option. Radix ToggleGroup underneath, so arrow keys
- * move between options and it reads as one choice to screen readers.
- */
+
+
+
+
+
 export function SegmentedControl<T extends string>({
   value,
   onValueChange,
@@ -37,15 +37,15 @@ export function SegmentedControl<T extends string>({
 }) {
   const trackRef = useRef<HTMLDivElement>(null);
   const [pill, setPill] = useState<{ left: number; width: number } | null>(null);
-  // The first placement snaps; later ones slide.
+
   const [ready, setReady] = useState(false);
 
   useLayoutEffect(() => {
     const track = trackRef.current;
     if (!track) return;
     const measure = () => {
-      // aria-checked, not data-state: a TooltipTrigger around an option
-      // overwrites data-state with its own open/closed value.
+
+
       const active = track.querySelector<HTMLElement>('[aria-checked="true"]');
       if (!active) return setPill(null);
       setPill({ left: active.offsetLeft, width: active.offsetWidth });

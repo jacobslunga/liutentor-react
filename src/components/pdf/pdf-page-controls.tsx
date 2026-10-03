@@ -10,7 +10,7 @@ const MIN_ZOOM = 0.25;
 const MAX_ZOOM = 10;
 const EPSILON = 0.001;
 
-/** Desktop zoom/rotate pill. Faint until the PDF is hovered. */
+
 export function PdfPageControls({
   documentId,
   className,
@@ -79,7 +79,7 @@ export function PdfPageControls({
           if (e.key === "Enter") inputRef.current?.blur();
           if (e.key === "Escape") {
             setDraft(null);
-            // Skip the commit on the blur that follows.
+
             requestAnimationFrame(() => inputRef.current?.blur());
           }
         }}
@@ -109,7 +109,7 @@ export function PdfPageControls({
   );
 }
 
-/** Mobile zoom/rotate bar. */
+
 export function PdfZoomControls({
   documentId,
   className,

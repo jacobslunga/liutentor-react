@@ -16,7 +16,7 @@ export interface QuizMeta {
   sourceExamIds: number[];
   sourceCount: number;
   model: string;
-  /** Absent on quizzes generated before difficulty existed. */
+
   difficulty?: QuizDifficulty;
 }
 

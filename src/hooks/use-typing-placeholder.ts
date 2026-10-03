@@ -6,11 +6,11 @@ const DELETE_MS = 30;
 const HOLD_MS = 1200;
 const GAP_MS = 500;
 
-/**
- * Types example course codes into an input's placeholder. Writes the attribute
- * directly so the animation never re-renders; the placeholder is hidden while
- * the field has a value, so it simply keeps running underneath.
- */
+
+
+
+
+
 export function useTypingPlaceholder(
   inputRef: RefObject<HTMLInputElement | null>,
   prefix = "",

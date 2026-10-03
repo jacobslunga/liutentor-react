@@ -1,7 +1,7 @@
 import { ChevronLeftIcon } from "lucide-react";
 import { useEffect, useRef } from "react";
 
-/** How close to the right edge (as a share of the width) the glow starts. */
+
 const PROXIMITY_START = 0.7;
 
 function proximity(e: MouseEvent) {
@@ -26,7 +26,7 @@ export function FacitEdge({ label = "Facit" }: { label?: string }) {
 
     const paint = () => {
       const v = value;
-      // Dark backgrounds need a softer glow.
+
       const s = document.documentElement.classList.contains("dark") ? 0.6 : 1;
       const mix = (percent: number) =>
         `color-mix(in oklab, var(--brand) ${(percent * s).toFixed(1)}%, transparent)`;

@@ -23,7 +23,7 @@ function AuthLayout() {
   const navigate = useNavigate();
   const user = useUser();
 
-  // Signing in on this page leaves it.
+
   useEffect(() => {
     if (user) void navigate({ to: "/", replace: true });
   }, [user, navigate]);

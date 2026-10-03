@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { initChatMarkdown, isChatMarkdownReady } from "@/lib/chat-markdown";
 
-/** True once markdown (with KaTeX and Shiki) has loaded, or failed to load. */
+
 export function useChatMarkdownReady(): boolean {
   const [ready, setReady] = useState(isChatMarkdownReady);
 

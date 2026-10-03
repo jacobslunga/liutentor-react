@@ -1,4 +1,4 @@
-/** Finds an exam date in a filename: YYYY-MM-DD (any separator) or YYMMDD. */
+
 export function parseDateFromFilename(name: string): string | null {
   const pad = (n: number) => String(n).padStart(2, "0");
   const full = name.match(/(\d{4})[-_]?(\d{2})[-_]?(\d{2})/);
@@ -31,7 +31,7 @@ const SOLUTION_KEYWORDS = [
   "svar",
 ];
 
-/** Guesses whether a file is a solution (facit) from its name. */
+
 export function isSolution(name: string): boolean {
   const n = name.toLowerCase();
   if (n.includes("tenta_och_svar")) return false;
@@ -46,7 +46,7 @@ export interface UploadMetadata {
   fileType: "EXAM" | "SOLUTION";
 }
 
-/** Uploads exam PDFs for review. Throws with a user-facing message. */
+
 export async function uploadExams(courseCode: string, files: File[]) {
   const code = courseCode.toUpperCase().trim();
   const formData = new FormData();

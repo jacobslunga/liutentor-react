@@ -5,22 +5,22 @@ import { useCourseCodes } from "@/queries/exams";
 const MAX_RESULTS = 6;
 
 export interface CourseMentionMenuApi {
-  /** Handles a key typed in the prompt; true when the menu consumed it. */
+
   handleKey: (key: string) => boolean;
 }
 
 interface CourseMentionMenuProps {
   ref?: Ref<CourseMentionMenuApi>;
-  /** What follows the "@", possibly empty. */
+
   query: string;
   onPick: (code: string) => void;
   onClose: () => void;
 }
 
-/**
- * Course suggestions for an "@" being typed in the prompt. Focus stays in the
- * textarea, which forwards arrow keys, Enter, Tab and Escape here.
- */
+
+
+
+
 export function CourseMentionMenu({
   ref,
   query,
@@ -29,7 +29,7 @@ export function CourseMentionMenu({
 }: CourseMentionMenuProps) {
   const { courses } = useCourseCodes();
   const [active, setActive] = useState({ query, index: 0 });
-  // A new query starts from the top without an effect.
+
   const activeIndex = active.query === query ? active.index : 0;
 
   const results = useMemo(() => {
@@ -87,7 +87,7 @@ export function CourseMentionMenu({
               "flex w-full items-baseline gap-3 rounded-xl px-3 py-2 text-left text-sm",
               i === activeIndex ? "bg-accent" : "hover:bg-accent/60",
             )}
-            // Keep focus (and the caret) in the textarea.
+
             onMouseDown={(e) => e.preventDefault()}
             onMouseEnter={() => setActive({ query, index: i })}
             onClick={() => onPick(course.code)}

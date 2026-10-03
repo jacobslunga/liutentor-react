@@ -31,10 +31,10 @@ const TIPS: { text: string; keys?: string[] }[] = [
   { text: "Markera text i ett svar för att fråga om den" },
 ];
 
-/**
- * The chat's quick settings: theme and thinking level, plus how the chat
- * works. Everything else stays in the full settings dialog.
- */
+
+
+
+
 export function ChatSettingsMenu() {
   const { theme = "system", setTheme } = useTheme();
   const { selectedModelId, availableModels } = useSelectedModel();
@@ -51,8 +51,8 @@ export function ChatSettingsMenu() {
         </DropdownMenuTrigger>
         <DropdownMenuContent side="right" align="end" className="w-64">
           <div className="max-h-88 overflow-y-auto overscroll-contain">
-            {/* Choices keep the menu open (preventDefault) so the change is
-                visible in place. */}
+
+
             <DropdownMenuLabel>Tema</DropdownMenuLabel>
             <DropdownMenuRadioGroup value={theme} onValueChange={setTheme}>
               {THEMES.map(({ value, label, Icon }) => (

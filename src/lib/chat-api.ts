@@ -10,7 +10,7 @@ export const LEARN_COMPLETION_URL_LOCAL = `http://localhost:8080/api/v1/chat/lea
 
 const ANONYMOUS_ID_KEY = "liutentor_anonymous_id";
 
-/** Stable per-browser id so anonymous usage can be rate limited. */
+
 export function getAnonymousId(): string {
   try {
     const existing = localStorage.getItem(ANONYMOUS_ID_KEY);
@@ -23,7 +23,7 @@ export function getAnonymousId(): string {
   }
 }
 
-/** Splits an SSE byte stream into `{ event, data }` frames. */
+
 export async function* readSseEvents(
   body: ReadableStream<Uint8Array>,
 ): AsyncGenerator<{ event: string; data: unknown }> {
@@ -46,7 +46,7 @@ export async function* readSseEvents(
       try {
         yield { event, data: JSON.parse(data) };
       } catch {
-        // A frame we can't parse is not worth killing the turn over.
+
       }
     }
   }

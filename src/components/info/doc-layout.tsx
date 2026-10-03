@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
 import type { DocSection } from "@/types/doc";
 
-/** A two-column block: heading on the left (sticky on desktop), body on the right. */
+
 export function DocBlock({
   heading,
   children,
@@ -37,7 +37,7 @@ export function DocHeading({ children }: { children: ReactNode }) {
   return <h2 className="text-lg leading-snug font-medium">{children}</h2>;
 }
 
-/** Contact/action block at the end of a document. */
+
 export function DocContact({
   title,
   body,
@@ -58,7 +58,7 @@ export function DocContact({
   );
 }
 
-/** Numbered legal sections with a table of contents. */
+
 export function LegalDocument({
   sections,
   footer,

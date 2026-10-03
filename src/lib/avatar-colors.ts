@@ -11,7 +11,7 @@ export const AVATAR_COLORS = [
 
 export type AvatarColor = (typeof AVATAR_COLORS)[number];
 
-// Full class names so Tailwind picks them up.
+
 export const AVATAR_BG: Record<string, string> = {
   "rose-500": "bg-rose-500",
   "orange-500": "bg-orange-500",

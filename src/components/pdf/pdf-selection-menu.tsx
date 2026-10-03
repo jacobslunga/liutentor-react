@@ -30,7 +30,7 @@ export function PdfSelectionMenu({
       onExplain(text.slice(0, MAX_SELECTION_LENGTH));
       selection.clear(documentId);
     } catch {
-      // Selection vanished mid-request; nothing to explain.
+
     } finally {
       setIsResolving(false);
     }

@@ -27,7 +27,7 @@ const PdfRenderer = lazy(() =>
   })),
 );
 
-/** Header height plus its bottom border. */
+
 const HEADER_HEIGHT = 57;
 const PDF_BOX_STYLE = {
   paddingTop: `calc(${HEADER_HEIGHT}px + env(safe-area-inset-top, 0px))`,
@@ -60,10 +60,10 @@ function MobileHeader({ children }: { children: ReactNode }) {
   );
 }
 
-/**
- * Phones and touch tablets: one full-width PDF, a compact header, and the facit
- * as a full-screen layer that stays mounted so reopening it is instant.
- */
+
+
+
+
 export function MobileExamView({
   exams,
   examId,
@@ -75,7 +75,7 @@ export function MobileExamView({
   const [showSolution, setShowSolution] = useState(false);
   const [solutionMounted, setSolutionMounted] = useState(false);
 
-  // Keyboards on tablets: f toggles the facit, Esc closes it.
+
   useEffect(() => {
     function onKeyDown(e: KeyboardEvent) {
       if (e.key === "Escape") {

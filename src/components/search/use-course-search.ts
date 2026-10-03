@@ -10,11 +10,11 @@ export interface CourseItem {
 
 const MAX_RESULTS = 10;
 
-/** DOM id of a result option, for the input's aria-activedescendant. */
+
 export const resultOptionId = (listId: string, code: string) =>
   `${listId}-${code}`;
 
-/** Shared search state for the course search inputs. */
+
 export function useCourseSearch() {
   const navigate = useNavigate();
   const addRecent = useRecentSearches((s) => s.add);
@@ -24,7 +24,7 @@ export function useCourseSearch() {
   const items = useMemo<CourseItem[]>(() => {
     const q = query.trim().toUpperCase();
     if (!q) return [];
-    // Exact and prefix matches first, then codes containing the query.
+
     return codes
       .filter((code) => code.includes(q))
       .sort((a, b) => Number(b.startsWith(q)) - Number(a.startsWith(q)))

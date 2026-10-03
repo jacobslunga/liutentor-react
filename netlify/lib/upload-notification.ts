@@ -14,7 +14,7 @@ function escapeHtml(value: string) {
   );
 }
 
-/** Emails the reviewers a summary of new uploads. Returns false when not configured. */
+
 export async function sendUploadNotification(files: UploadedDocument[]): Promise<boolean> {
   const config = serverEnv();
   if (!config.resendApiKey || !config.uploadNotificationTo) {

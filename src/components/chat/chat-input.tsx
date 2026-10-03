@@ -57,13 +57,13 @@ import {
 import { Button } from "@/components/ui/button";
 
 const MAX_LENGTH = 4000;
-/**
- * A course pill drawn behind the textarea's own text. The ring paints outside
- * the box, so the pill never shifts the text it sits under.
- */
+
+
+
+
 const MENTION_PILL_CLASS =
   "rounded-[5px] bg-primary/15 text-transparent ring-2 ring-primary/15 box-decoration-clone";
-/** The counter stays hidden until the user approaches the limit. */
+
 const COUNTER_FROM = MAX_LENGTH * 0.8;
 
 interface PromptLayout {
@@ -100,19 +100,19 @@ interface ChatInputProps {
   selectionContext?: string;
   className?: string;
   placeholder?: string;
-  /** Suggest courses when the user types "@" (the learning chat). */
+
   courseMentions?: boolean;
-  /** The "AI kan göra misstag" line under the prompt. */
+
   showDisclaimer?: boolean;
   onSend: () => void;
   onCancel: () => void;
   onClearSelectionContext: () => void;
 }
 
-/**
- * The prompt. Text stays in the uncontrolled textarea; React tracks only the
- * lightweight send state and measured compact/expanded layout.
- */
+
+
+
+
 export function ChatInput({
   ref,
   initialText = "",
@@ -154,7 +154,7 @@ export function ChatInput({
 
   const mentionLayerRef = useRef<HTMLDivElement>(null);
 
-  /** Redraws the course pills; written to the DOM so typing never re-renders. */
+
   const renderMentionPills = (value: string) => {
     const layer = mentionLayerRef.current;
     if (!layer) return;
@@ -165,7 +165,7 @@ export function ChatInput({
       pill.textContent = part.text;
       return pill;
     });
-    // A trailing newline only takes up a line when something follows it.
+
     layer.replaceChildren(...nodes, document.createTextNode("\u200b"));
     layer.scrollTop = textareaRef.current?.scrollTop ?? 0;
   };
@@ -252,10 +252,10 @@ export function ChatInput({
     );
   }
 
-  /**
-   * Replaces `start..end` as if typed: execCommand keeps the edit on the undo
-   * stack and fires `input`, which syncs everything else.
-   */
+
+
+
+
   function replaceRange(start: number, end: number, text: string) {
     const textarea = textareaRef.current;
     if (!textarea) return;
@@ -268,8 +268,8 @@ export function ChatInput({
       false,
       text,
     );
-    // Firefox can drop trailing whitespace from insertText; whatever the
-    // browser did (or refused to do), make the value what was asked for.
+
+
     if (!done || textarea.value !== expected) {
       textarea.value = expected;
       const caret = start + text.length;
@@ -281,14 +281,14 @@ export function ChatInput({
   function pickMention(code: string) {
     const textarea = textareaRef.current;
     if (!textarea || !mention) return;
-    // Take the rest of the word under the caret, and one space after it, so the
-    // inserted trailing space never doubles up.
+
+
     const rest = /^\S*\s?/.exec(textarea.value.slice(textarea.selectionStart));
     const end = textarea.selectionStart + (rest?.[0].length ?? 0);
     replaceRange(mention.start, end, `@${code} `);
   }
 
-  // Known courses delete as one unit; a code still being typed does not.
+
   const { data: courses } = useQuery({
     ...coursesQuery,
     enabled: courseMentions,
@@ -298,7 +298,7 @@ export function ChatInput({
     [courses],
   );
 
-  /** Backspace/Delete next to a course mention removes all of it. */
+
   function deleteMention(key: string): boolean {
     const textarea = textareaRef.current;
     if (!courseMentions || !textarea) return false;
@@ -341,8 +341,8 @@ export function ChatInput({
   };
 
   useImperativeHandle(ref, () => ({
-    // preventScroll: the panel may still be sliding in; scrolling to the
-    // input mid-transition would jerk the layout.
+
+
     focus: () => textareaRef.current?.focus({ preventScroll: true }),
     getText: () => textareaRef.current?.value ?? "",
     setText,
@@ -365,7 +365,7 @@ export function ChatInput({
 
   const tooLong = longLength > MAX_LENGTH;
   const canSend = (hasText || attachments.length > 0) && !tooLong;
-  // Primitive selectors: the input must not re-render while a reply streams.
+
   const activeCount = useChatStore((s) => s.getActiveAttachments().length);
   const activeBytes = useChatStore((s) =>
     s.getActiveAttachments().reduce((sum, a) => sum + a.size, 0),
@@ -386,7 +386,7 @@ export function ChatInput({
       e.stopPropagation();
       return;
     }
-    // Modified deletes (word, line) keep their native behaviour.
+
     if (
       (e.key === "Backspace" || e.key === "Delete") &&
       !e.altKey &&
@@ -397,7 +397,7 @@ export function ChatInput({
       e.preventDefault();
       return;
     }
-    // Enter sends; Shift+Enter keeps a newline.
+
     if (
       e.key === "Enter" &&
       !e.shiftKey &&
@@ -431,14 +431,14 @@ export function ChatInput({
     >
       <div
         ref={shellRef}
-        // Matches the transcript's width, so the prompt lines up with it.
+
         className="chat-column relative mx-auto"
       >
         <div
           className={cn(
             "relative overflow-hidden border border-input bg-background p-2.5 shadow-xs",
             layout.expanded && "pb-13",
-            // Single row is a pill; extra rows or a header settle to 2xl.
+
             layout.expanded || hasHeader ? "rounded-2xl" : "rounded-[1.75rem]",
             layout.animate &&
               "transition-[border-radius,padding-bottom] duration-200 ease-out",
@@ -632,7 +632,7 @@ export function ChatInput({
   );
 }
 
-/** The "stop generating" square shown on the send button while streaming. */
+
 function StopIcon() {
   return <span className="size-2.5 rounded-xs bg-current" aria-hidden />;
 }

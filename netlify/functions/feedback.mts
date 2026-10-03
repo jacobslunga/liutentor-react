@@ -1,7 +1,7 @@
 import { createClient } from "@supabase/supabase-js";
 import { json, serverEnv } from "../lib/env.ts";
 
-/** Stores a feedback message. */
+
 export default async (req: Request) => {
   if (req.method !== "POST") return json({ message: "Method not allowed" }, 405);
 

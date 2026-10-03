@@ -6,7 +6,7 @@ interface UploadMetadata extends UploadedDocument {
   normalizedFilename: string;
 }
 
-/** Stores uploaded exam PDFs for review: pending-pdfs bucket + pending_uploads row. */
+
 export default async (req: Request) => {
   if (req.method !== "POST") return json({ message: "Method not allowed" }, 405);
 

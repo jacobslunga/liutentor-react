@@ -53,7 +53,7 @@ interface ExamHeaderProps {
   solutionPdfUrl: string | null;
 }
 
-/** Floating toolbar over the exam: back, exam picker, chat, layout, actions. */
+
 export const ExamHeader = memo(function ExamHeader({
   exams,
   examId,

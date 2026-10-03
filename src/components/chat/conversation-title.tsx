@@ -4,12 +4,12 @@ import { useChatStore } from "@/stores/chat";
 
 const CHAR_MS = 28;
 
-/**
- * A title that types itself out from `startedAt` (performance.now()). The
- * visible length comes from the elapsed time, not a counter, so every copy of
- * the same title (header, sidebar) is on the same letter, and a remount
- * picks up where it was instead of starting over.
- */
+
+
+
+
+
+
 export function TypedTitle({
   title,
   startedAt,
@@ -45,7 +45,7 @@ export function TypedTitle({
   );
 }
 
-/** The current conversation's title in a chat header, once it is ready. */
+
 export function ConversationTitle() {
   const title = useChatStore((s) =>
     s.isConversationTitleReady ? s.currentConversationTitle : null,

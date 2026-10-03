@@ -1,4 +1,4 @@
-/** Server-side configuration. Supabase falls back to the client's public values. */
+
 export function serverEnv() {
   const env = process.env;
   return {

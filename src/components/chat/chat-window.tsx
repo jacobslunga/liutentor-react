@@ -31,11 +31,11 @@ export interface ChatWindowProps {
   onClose: () => void;
 }
 
-/**
- * The exam chat panel (lazy-loaded, default export). Its own renders are
- * limited to discrete changes (empty/non-empty, open, quote, drop state);
- * streaming only reaches the transcript row being written.
- */
+
+
+
+
+
 export default function ChatWindow({
   examId,
   courseCode,
@@ -64,7 +64,7 @@ export default function ChatWindow({
   const [isOverDrop, setIsOverDrop] = useState(false);
   const [showScrollBottom, setShowScrollBottom] = useState(false);
 
-  // Drafts are read once from the store when the panel mounts.
+
   const [initialDraft] = useState(() => {
     const { draftInput, draftAttachments } = chatStore.getState();
     return { text: draftInput, attachments: draftAttachments };
@@ -113,7 +113,7 @@ export default function ChatWindow({
     requestAnimationFrame(() => inputRef.current?.focus());
   }, []);
 
-  // "Förklara" from the PDF: ask right away, or queue the quote while a reply streams.
+
   const startPendingSelection = useCallback(
     (pending: PendingSelection) => {
       if (chatStore.getState().isLoading) {
@@ -130,7 +130,7 @@ export default function ChatWindow({
     [chatStore, submit],
   );
 
-  // A panel for another exam starts from an empty chat.
+
   useEffect(() => {
     const store = chatStore.getState();
     if (store.currentExamId !== examId) {
@@ -145,7 +145,7 @@ export default function ChatWindow({
       const taken = chatStore.getState().takePendingSelection();
       if (taken) startPendingSelection(taken);
     };
-    // One may already be waiting (the panel mounts on "Förklara"); the input exists next frame.
+
     const frame = requestAnimationFrame(take);
     const unsubscribe = chatStore.subscribe((s, prev) => {
       if (s.pendingSelection && s.pendingSelection !== prev.pendingSelection)
@@ -157,7 +157,7 @@ export default function ChatWindow({
     };
   }, [chatStore, startPendingSelection]);
 
-  // Keep what was typed when the panel unmounts (e.g. switching layouts).
+
   useEffect(
     () => () => {
       chatStore.setState({
@@ -180,7 +180,7 @@ export default function ChatWindow({
     }
   }, [chatStore, isOpen]);
 
-  // Opening a saved conversation lands at its end.
+
   const pinToBottom = useCallback(() => {
     for (const delay of [0, 30, 80, 160, 300]) {
       setTimeout(() => transcriptRef.current?.scrollToBottom("auto"), delay);
@@ -191,7 +191,7 @@ export default function ChatWindow({
     if (conversationId && !chatStore.getState().isLoading) pinToBottom();
   }, [chatStore, conversationId, pinToBottom]);
 
-  // Cmd/Ctrl+. toggles history.
+
   useEffect(() => {
     function onKeyDown(e: KeyboardEvent) {
       if (
@@ -209,7 +209,7 @@ export default function ChatWindow({
     return () => document.removeEventListener("keydown", onKeyDown, true);
   }, [chatStore]);
 
-  // Files: drop anywhere on the panel, or paste while it is open.
+
   useEffect(() => {
     const root = rootRef.current;
     if (!root) return;
@@ -257,8 +257,8 @@ export default function ChatWindow({
     };
   }, [chatStore]);
 
-  // While we smooth-scroll to the bottom, the scroll passes back through the
-  // "far from bottom" zone; ignore it until we arrive (or give up after a second).
+
+
   const autoScrolling = useRef(false);
   const autoScrollTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
 
@@ -283,7 +283,7 @@ export default function ChatWindow({
       }
       return;
     }
-    // Hysteresis keeps the button from flickering near the threshold.
+
     if (distance > 160) setShowScrollBottom(true);
     else if (distance < 80) setShowScrollBottom(false);
   }

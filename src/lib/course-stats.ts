@@ -59,7 +59,7 @@ export function computeCourseStats(exams: Exam[]): CourseStats {
   }
 
   const series: PassRatePoint[] = [...byDate].map(([date, group]) => {
-    // Upstream uses a zero pass rate to represent "not recorded".
+
     const measured = group.filter((e) => Number(e.pass_rate ?? 0) > 0);
     const students = group.reduce((sum, e) => sum + studentCount(e), 0);
     const weight = measured.reduce((sum, e) => sum + studentCount(e), 0);
@@ -124,7 +124,7 @@ export function computeCourseStats(exams: Exam[]): CourseStats {
   };
 }
 
-/** Text color for a pass rate: good, middling, poor. */
+
 export function passRateClass(rate: number) {
   if (rate >= 50) return "text-emerald-600 dark:text-emerald-400";
   if (rate >= 30) return "text-amber-600 dark:text-amber-400";

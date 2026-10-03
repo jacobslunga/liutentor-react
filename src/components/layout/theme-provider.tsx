@@ -23,8 +23,8 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
       enableSystem
       storageKey="color-mode"
       disableTransitionOnChange
-      // The pre-paint theme script lives in index.html; next-themes' own inline
-      // script never runs in a client-rendered app and only makes React warn.
+
+
       scriptProps={{ type: "application/json" }}
     >
       <FaviconSync />

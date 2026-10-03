@@ -3,7 +3,7 @@ import { AVATAR_BG } from "@/lib/avatar-colors";
 import { cn } from "@/lib/utils";
 import { useProfile } from "@/queries/profile";
 
-/** The signed-in user's avatar image, or initials on their avatar color. */
+
 export function UserAvatar({
   className,
   fallbackClassName,

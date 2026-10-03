@@ -4,7 +4,7 @@ const isMac =
   typeof navigator !== "undefined" &&
   /Mac|iPhone|iPad/.test(navigator.platform);
 
-// Key names (as in KeyboardEvent.key, plus "Mod") drawn as symbols.
+
 const SYMBOLS: Record<string, string> = {
   mod: isMac ? "⌘" : "Ctrl",
   ctrl: isMac ? "⌃" : "Ctrl",
@@ -20,7 +20,7 @@ const SYMBOLS: Record<string, string> = {
   arrowright: "→",
 };
 
-/** A shortcut such as "Mod+." or "Shift+Enter" as shadcn Kbd keys. */
+
 export function KeyHint({
   keys,
   className,

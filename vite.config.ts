@@ -8,9 +8,11 @@ import { netlifyFunctionsDev } from "./netlify-functions-dev.ts";
 const DEFAULT_GO_API_URL =
   "https://liutentor-go-687405545415.europe-west1.run.app";
 
-// Fonts the first paint needs. Without a preload the browser only finds them
-// after the CSS has downloaded and parsed.
-const PRELOAD_FONTS = [/inter-latin-[\w-]+\.woff2$/];
+
+
+const PRELOAD_FONTS = [
+  /basier-circle-(?:regular|semibold)-(?!italic-)[\w-]+\.woff2$/,
+];
 
 function fontPreload(): Plugin {
   return {
@@ -35,10 +37,10 @@ function fontPreload(): Plugin {
   };
 }
 
-// Primer's component CSS is unlayered, which would beat every Tailwind
-// utility. Wrapping it in a layer (ordered in index.html between Tailwind's
-// base and utilities) lets Primer override preflight while className still
-// overrides Primer.
+
+
+
+
 function primerCssLayer(): Plugin {
   return {
     name: "primer-css-layer",
@@ -52,11 +54,11 @@ function primerCssLayer(): Plugin {
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), "");
-  // Functions run in-process during dev and read their config from process.env.
+
   for (const [key, value] of Object.entries(env)) process.env[key] ??= value;
 
-  // The Go service sends no CORS headers, so the browser reaches it through a
-  // same-origin proxy (Netlify does the same in production).
+
+
   const goApiProxy = {
     "/api/go": {
       target: env.GO_API_URL || DEFAULT_GO_API_URL,
@@ -80,8 +82,8 @@ export default defineConfig(({ mode }) => {
     resolve: {
       alias: { "@": path.resolve(import.meta.dirname, "./src") },
     },
-    // Deps only reached through lazy routes are otherwise discovered late in
-    // dev, which triggers a full reload mid-navigation.
+
+
     optimizeDeps: {
       include: [
         "recharts",
@@ -104,8 +106,8 @@ export default defineConfig(({ mode }) => {
     server: { proxy: goApiProxy },
     preview: { proxy: goApiProxy },
     build: {
-      // The chunks over the default limit (PDF engine, KaTeX/markdown, Shiki
-      // grammars) are all lazy-loaded, so their size doesn't block startup.
+
+
       chunkSizeWarningLimit: 1000,
     },
   };

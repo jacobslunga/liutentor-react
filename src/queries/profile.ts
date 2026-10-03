@@ -58,7 +58,7 @@ export const activityQuery = (userId: string) =>
     },
   });
 
-/** The signed-in user's profile plus display helpers. */
+
 export function useProfile() {
   const user = useUser();
   const localColor = useSettingsStore((s) => s.avatarColor);
@@ -82,7 +82,7 @@ export function useProfile() {
   };
 }
 
-/** Updates columns on the signed-in user's profile and patches the cached copy. */
+
 export function useUpdateProfile() {
   const queryClient = useQueryClient();
   const user = useUser();

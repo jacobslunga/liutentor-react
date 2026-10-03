@@ -1,13 +1,13 @@
 import type { Message } from "@/stores/chat";
 
-/**
- * "@TATA41"-style course references in the learning chat. LiU course codes are
- * five or six letters and digits (TATA41, TDDE44, 725G80); matching loosely and
- * uppercasing lets "@tata41" work too.
- */
+
+
+
+
+
 const MENTION_PATTERN = /(^|[^\w@])@([A-Za-z0-9]{5,6})(?![\w])/g;
 
-/** The backend accepts at most this many courses per turn. */
+
 export const MAX_COURSE_MENTIONS = 3;
 
 export interface CourseRef {
@@ -15,7 +15,7 @@ export interface CourseRef {
   name?: string;
 }
 
-/** Codes mentioned in `text`, uppercased, in order, without duplicates. */
+
 export function findCourseMentions(text: string): string[] {
   const codes = new Set<string>();
   for (const match of text.matchAll(MENTION_PATTERN))
@@ -23,11 +23,11 @@ export function findCourseMentions(text: string): string[] {
   return [...codes];
 }
 
-/**
- * Courses referenced anywhere in the conversation, so a follow-up question
- * keeps the course context without repeating the mention. The most recently
- * mentioned courses win when there are more than the backend accepts.
- */
+
+
+
+
+
 export function conversationCourses(
   messages: Message[],
   nameByCode: Map<string, string>,
@@ -49,10 +49,10 @@ export function conversationCourses(
 
 export type MentionPart =
   | { type: "text"; text: string }
-  /** `text` is the mention as typed, e.g. "@tata41". */
+
   | { type: "mention"; code: string; text: string };
 
-/** Splits a user message into text and course mentions for rendering. */
+
 export function splitCourseMentions(text: string): MentionPart[] {
   const parts: MentionPart[] = [];
   let last = 0;
@@ -70,7 +70,7 @@ export function splitCourseMentions(text: string): MentionPart[] {
   return parts;
 }
 
-/** Where each mention sits in `text`: `start` is the "@", `end` is exclusive. */
+
 export function findMentionRanges(
   text: string,
 ): { start: number; end: number; code: string }[] {
@@ -84,10 +84,10 @@ export function findMentionRanges(
   });
 }
 
-/**
- * The "@query" being typed right before the caret, if any. `start` is the
- * index of the "@".
- */
+
+
+
+
 export function activeMentionQuery(
   value: string,
   caret: number,

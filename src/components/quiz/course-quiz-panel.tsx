@@ -15,7 +15,7 @@ import { QuizStart } from "./quiz-start";
 
 const MAX_SOURCE_EXAMS = 5;
 
-/** Quiz tab on the course page (lazy-loaded, default export). */
+
 export default function CourseQuizPanel({ courseCode, exams }: { courseCode: string; exams: Exam[] }) {
   const stage = useQuizStore((s) => s.stage);
   const quizData = useQuizStore((s) => s.quizData);
@@ -28,13 +28,13 @@ export default function CourseQuizPanel({ courseCode, exams }: { courseCode: str
 
   const examPool = exams.filter((e) => e.pdf_url);
 
-  // A quiz belongs to its course; leaving the tab or course abandons it.
+
   useEffect(() => {
     useQuizStore.getState().reset();
     return () => useQuizStore.getState().reset();
   }, [courseCode]);
 
-  // A freshly generated quiz is saved server-side; mark its history row as active.
+
   useEffect(() => {
     if (!user) return;
     return useQuizStore.subscribe(async (s, prev) => {
@@ -46,7 +46,7 @@ export default function CourseQuizPanel({ courseCode, exams }: { courseCode: str
 
   function start() {
     if (!examPool.length) return;
-    // A random 2–4 exams (or all when there are few) keeps quizzes varied.
+
     const shuffled = [...examPool].sort(() => Math.random() - 0.5);
     const count = Math.min(
       examPool.length <= 2 ? examPool.length : Math.floor(Math.random() * 3) + 2,

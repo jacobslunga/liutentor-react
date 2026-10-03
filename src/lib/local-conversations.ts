@@ -1,10 +1,10 @@
 import type { Conversation, ConversationKind } from "@/queries/conversations";
 import { createMessageId, type Message } from "@/stores/chat";
 
-/**
- * Chat history for signed-out users, kept in this browser only. Ids carry a
- * prefix so they are never mistaken for (or sent as) server conversation ids.
- */
+
+
+
+
 const STORAGE_KEY = "liutentor_conversations_v1";
 const LOCAL_PREFIX = "local:";
 const MAX_CONVERSATIONS = 50;
@@ -12,7 +12,7 @@ const MAX_CONVERSATIONS = 50;
 type StoredMessage = Pick<Message, "role" | "content" | "context" | "selectionContext" | "sources" | "attachments">;
 
 interface StoredConversation extends Conversation {
-  /** Missing on chats saved before the learning chat existed: those are exam chats. */
+
   kind?: ConversationKind;
   messages: StoredMessage[];
 }
@@ -31,7 +31,7 @@ function readAll(): StoredConversation[] {
   }
 }
 
-/** Newest first. Drops the oldest chats when the browser runs out of room. */
+
 function writeAll(conversations: StoredConversation[]) {
   let kept = conversations.slice(0, MAX_CONVERSATIONS);
   while (kept.length) {
@@ -45,7 +45,7 @@ function writeAll(conversations: StoredConversation[]) {
   try {
     localStorage.removeItem(STORAGE_KEY);
   } catch {
-    // Storage unavailable (private mode, blocked site data): history is best effort.
+
   }
 }
 
@@ -80,7 +80,7 @@ export function saveLocalConversation(
         ...(context ? { context } : {}),
         ...(selectionContext ? { selectionContext } : {}),
         ...(sources?.length ? { sources } : {}),
-        // Files cannot be stored; keep the chips, marked as no longer attached.
+
         ...(attachments?.length
           ? {
               attachments: attachments.map(({ id, name, mediaType, size, lastModified }) => ({

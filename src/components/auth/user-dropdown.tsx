@@ -36,10 +36,10 @@ const THEMES = [
   { value: "system", label: "System", Icon: MonitorIcon },
 ] as const;
 
-/**
- * The account menu behind the avatar, after GitHub's: who you are, your
- * pages, settings and appearance, help, and signing out.
- */
+
+
+
+
 export function UserDropdown() {
   const navigate = useNavigate();
   const { user, displayName } = useProfile();
