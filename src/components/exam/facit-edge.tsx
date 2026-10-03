@@ -1,7 +1,6 @@
 import { ChevronLeftIcon } from "lucide-react";
 import { useEffect, useRef } from "react";
 
-
 const PROXIMITY_START = 0.7;
 
 function proximity(e: MouseEvent) {

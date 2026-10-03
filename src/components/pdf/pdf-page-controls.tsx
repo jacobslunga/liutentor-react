@@ -10,7 +10,6 @@ const MIN_ZOOM = 0.25;
 const MAX_ZOOM = 10;
 const EPSILON = 0.001;
 
-
 export function PdfPageControls({
   documentId,
   className,
@@ -108,7 +107,6 @@ export function PdfPageControls({
     </div>
   );
 }
-
 
 export function PdfZoomControls({
   documentId,

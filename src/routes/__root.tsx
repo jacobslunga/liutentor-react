@@ -42,7 +42,9 @@ function NotFound() {
       <p className="text-sm text-muted-foreground">
         Sidan du letar efter har flyttats eller finns inte.
       </p>
-      <RouterLinkButton to="/" variant="outline">Till startsidan</RouterLinkButton>
+      <RouterLinkButton to="/" variant="outline">
+        Till startsidan
+      </RouterLinkButton>
     </div>
   );
 }

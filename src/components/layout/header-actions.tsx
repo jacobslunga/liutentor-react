@@ -6,7 +6,6 @@ import { cn } from "@/lib/utils";
 import { useUploadModal } from "@/stores/upload-modal";
 import { Button } from "@/components/ui/button";
 
-
 export function HeaderActions({ className }: { className?: string }) {
   const openUploadModal = useUploadModal((s) => s.open);
 
@@ -14,7 +13,6 @@ export function HeaderActions({ className }: { className?: string }) {
 
   return (
     <div className={cn("flex shrink-0 items-center gap-2", className)}>
-
       <div className="sm:hidden">
         <RouterLinkButton
           to="/chatt"

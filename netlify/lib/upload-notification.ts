@@ -10,15 +10,21 @@ export interface UploadedDocument {
 function escapeHtml(value: string) {
   return value.replace(
     /[&<>'"]/g,
-    (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;" })[c]!,
+    (c) =>
+      ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;" })[
+        c
+      ]!,
   );
 }
 
-
-export async function sendUploadNotification(files: UploadedDocument[]): Promise<boolean> {
+export async function sendUploadNotification(
+  files: UploadedDocument[],
+): Promise<boolean> {
   const config = serverEnv();
   if (!config.resendApiKey || !config.uploadNotificationTo) {
-    console.warn("Upload notification skipped: RESEND_API_KEY or UPLOAD_NOTIFICATION_TO is not set");
+    console.warn(
+      "Upload notification skipped: RESEND_API_KEY or UPLOAD_NOTIFICATION_TO is not set",
+    );
     return false;
   }
 

@@ -23,7 +23,6 @@ function AuthLayout() {
   const navigate = useNavigate();
   const user = useUser();
 
-
   useEffect(() => {
     if (user) void navigate({ to: "/", replace: true });
   }, [user, navigate]);

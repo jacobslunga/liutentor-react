@@ -5,7 +5,6 @@ import { useCourseCodes } from "@/queries/exams";
 const MAX_RESULTS = 6;
 
 export interface CourseMentionMenuApi {
-
   handleKey: (key: string) => boolean;
 }
 
@@ -16,10 +15,6 @@ interface CourseMentionMenuProps {
   onPick: (code: string) => void;
   onClose: () => void;
 }
-
-
-
-
 
 export function CourseMentionMenu({
   ref,

@@ -32,10 +32,6 @@ interface PendingUpload {
 const isPdf = (file: File) =>
   file.type === "application/pdf" || /\.pdf$/i.test(file.name);
 
-
-
-
-
 export function CourseMaterial({ courseId }: { courseId: string }) {
   const user = useUser();
   const queryClient = useQueryClient();
@@ -76,7 +72,6 @@ export function CourseMaterial({ courseId }: { courseId: string }) {
       sizeBytes: file.size,
     }));
     setUploads((current) => [...pending, ...current]);
-
 
     for (const [i, file] of accepted.entries()) {
       try {

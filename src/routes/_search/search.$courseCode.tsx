@@ -42,7 +42,6 @@ export const Route = createFileRoute("/_search/search/$courseCode")({
     stringify: ({ courseCode }) => ({ courseCode }),
   },
 
-
   validateSearch: (search: Record<string, unknown>): { tab?: "quiz" } =>
     search.tab === "quiz" ? { tab: search.tab } : {},
   component: CoursePage,
@@ -189,7 +188,6 @@ function CourseContent({
   const examsWithSolutions = exams.filter((e) => e.has_solution).length;
 
   function setTab(value: CourseTab) {
-
     void navigate({
       search: value === "exams" ? {} : { tab: value },
       replace: true,
@@ -199,9 +197,9 @@ function CourseContent({
   return (
     <div className="flex w-full flex-col">
       <header className="flex flex-wrap items-center justify-between gap-4">
-        <div className="flex flex-col min-w-0 flex-wrap items-start gap-y-2">
+        <div className="flex min-w-0 flex-col flex-wrap items-start gap-y-2">
           <Badge variant="secondary">{courseCode}</Badge>
-          <h1 className="text-2xl md:text-4xl leading-tight font-semibold wrap-break-word">
+          <h1 className="text-2xl leading-tight font-semibold wrap-break-word md:text-4xl">
             {course.courseName}
           </h1>
         </div>
@@ -233,28 +231,34 @@ function CourseContent({
       </header>
 
       <div className="grid gap-x-8 gap-y-10 pt-6 lg:grid-cols-[minmax(0,1fr)_18.5rem]">
-        <div className="grid min-w-0 content-start grid-cols-[minmax(0,1fr)_auto] [&_[role=tabpanel]]:col-span-2">
-
-
+        <div className="grid min-w-0 grid-cols-[minmax(0,1fr)_auto] content-start [&_[role=tabpanel]]:col-span-2">
           <Tabs
             value={activeTab}
             onValueChange={(value) => setTab(value as CourseTab)}
             className="contents"
           >
-
-
-
-            <div className={cn(STICKY_BAR, "flex min-h-12 items-stretch shadow-[inset_0_-1px_var(--border)]")}>
+            <div
+              className={cn(
+                STICKY_BAR,
+                "flex min-h-12 items-stretch shadow-[inset_0_-1px_var(--border)]",
+              )}
+            >
               <TabsList
                 variant="line"
                 aria-label="Kursvy"
                 className="self-stretch p-0 group-data-horizontal/tabs:h-auto"
               >
-                <TabsTrigger value="exams" className="h-full px-2 group-data-horizontal/tabs:after:bottom-0">
+                <TabsTrigger
+                  value="exams"
+                  className="h-full px-2 group-data-horizontal/tabs:after:bottom-0"
+                >
                   Tentor
                   <Badge variant="secondary">{exams.length}</Badge>
                 </TabsTrigger>
-                <TabsTrigger value="quiz" className="h-full px-2 group-data-horizontal/tabs:after:bottom-0">
+                <TabsTrigger
+                  value="quiz"
+                  className="h-full px-2 group-data-horizontal/tabs:after:bottom-0"
+                >
                   Quiz
                 </TabsTrigger>
               </TabsList>
@@ -268,7 +272,6 @@ function CourseContent({
               />
             </TabsContent>
             <TabsContent value="quiz" className="pt-4">
-
               {activeTab === "quiz" && (
                 <Suspense fallback={null}>
                   <CourseQuizPanel courseCode={courseCode} exams={exams} />
@@ -291,7 +294,6 @@ function CourseContent({
     </div>
   );
 }
-
 
 const STICKY_BAR = "sticky top-12 z-20 bg-background md:top-0";
 
@@ -329,13 +331,17 @@ function SortMenu({
           onValueChange={(value) => setSortBy(value as ExamSortBy)}
         >
           <DropdownMenuRadioItem value="date">Datum</DropdownMenuRadioItem>
-          <DropdownMenuRadioItem value="pass-rate">Godkänd</DropdownMenuRadioItem>
+          <DropdownMenuRadioItem value="pass-rate">
+            Godkänd
+          </DropdownMenuRadioItem>
         </DropdownMenuRadioGroup>
         <DropdownMenuSeparator />
         <DropdownMenuLabel>Ordning</DropdownMenuLabel>
         <DropdownMenuRadioGroup
           value={sortDirection}
-          onValueChange={(value) => setSortDirection(value as ExamSortDirection)}
+          onValueChange={(value) =>
+            setSortDirection(value as ExamSortDirection)
+          }
         >
           <DropdownMenuRadioItem value="desc">Fallande</DropdownMenuRadioItem>
           <DropdownMenuRadioItem value="asc">Stigande</DropdownMenuRadioItem>

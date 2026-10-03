@@ -31,7 +31,6 @@ function ProfileLayout() {
   const navigate = useNavigate();
   const user = useUser();
 
-
   useEffect(() => {
     if (!user) void navigate({ to: "/logga-in", replace: true });
   }, [user, navigate]);

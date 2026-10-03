@@ -1,4 +1,3 @@
-
 export function serverEnv() {
   const env = process.env;
   return {
@@ -7,8 +6,10 @@ export function serverEnv() {
     resendApiKey: env.RESEND_API_KEY ?? env.NUXT_RESEND_API_KEY ?? "",
     uploadNotificationTo:
       env.UPLOAD_NOTIFICATION_TO ?? "jacobslunga21@yahoo.se",
-    uploadNotificationFrom: env.UPLOAD_NOTIFICATION_FROM ?? "LiU Tentor <notifications@liutentor.se>",
-    uploadReviewUrl: env.UPLOAD_REVIEW_URL ?? "https://admin.liutentor.se/admin/review",
+    uploadNotificationFrom:
+      env.UPLOAD_NOTIFICATION_FROM ?? "LiU Tentor <notifications@liutentor.se>",
+    uploadReviewUrl:
+      env.UPLOAD_REVIEW_URL ?? "https://admin.liutentor.se/admin/review",
   };
 }
 

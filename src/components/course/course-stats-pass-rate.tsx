@@ -15,7 +15,6 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { AppDialog } from "@/components/shared/app-dialog";
 
-
 const RECENT_COUNT = 5;
 
 const MAX_YEAR_LABELS = 10;
@@ -35,11 +34,6 @@ interface ChartPoint extends PassRatePoint {
   index: number;
   rate: number;
 }
-
-
-
-
-
 
 export function CourseStatsPassRate({
   points,
@@ -127,7 +121,6 @@ function AllSittings({
   average: number;
 }) {
   const yearLabels = useMemo(() => {
-
     const yearStarts: { index: number; year: string }[] = [];
     for (const point of data) {
       const year = String(new Date(point.timestamp).getFullYear());

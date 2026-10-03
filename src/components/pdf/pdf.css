@@ -1,8 +1,3 @@
-
-
-
-
-
 .pdf-viewport {
   scrollbar-width: none;
   overscroll-behavior: contain;
@@ -16,26 +11,19 @@
   will-change: transform;
 }
 
-
-
 .pdf-render-surface {
   mix-blend-mode: multiply;
 }
-
 
 .dark .pdf-render-surface {
   filter: invert(1) hue-rotate(180deg) brightness(0.92);
   mix-blend-mode: screen;
 }
 
-
-
 .pdf-selection-surface > div[style*="mix-blend-mode"] {
   mix-blend-mode: normal !important;
   opacity: 0.35;
 }
-
-
 
 .pdf-mobile-pointer {
   touch-action: pan-x pan-y pinch-zoom !important;

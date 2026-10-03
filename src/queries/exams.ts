@@ -21,7 +21,6 @@ export const examDetailQuery = (examId: string | number) =>
     staleTime: Infinity,
   });
 
-
 export function useCourseCodes() {
   const { data: courses = [], isPending } = useQuery(coursesQuery);
 

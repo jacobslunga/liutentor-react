@@ -7,46 +7,32 @@ const DURATION = 2000;
 
 const THROTTLE = 80;
 
-
-
-
-
 const SETTLE_DELAY = 250;
 const HIDE_DELAY = 150;
-
-
-
-
 
 const ARM_WINDOW = 600;
 const FADE_MS = 300;
 
-
 function isBarless(pathname: string) {
   return pathname === "/chatt" || pathname.startsWith("/chatt/");
 }
-
 
 function estimate(elapsed: number) {
   const completion = (elapsed / DURATION) * 100;
   return (2 / Math.PI) * 100 * Math.atan(completion / 50);
 }
 
-
-
-
-
-
 export function AppLoadingBar() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
-  const routerPending = useRouterState({ select: (s) => s.status === "pending" });
+  const routerPending = useRouterState({
+    select: (s) => s.status === "pending",
+  });
   const fetching = useIsFetching() > 0;
   const pendingTasks = usePageLoadingStore((s) => s.pending > 0);
   const failed = usePageLoadingStore((s) => s.failed);
   const barless = isBarless(pathname);
   const isLoading = !barless && (routerPending || fetching || pendingTasks);
   const [armed, setArmed] = useState(false);
-
 
   useEffect(() => {
     setArmed(true);
@@ -109,8 +95,6 @@ export function AppLoadingBar() {
     };
 
     if (barless) {
-
-
       clearAll();
       stopAnimation();
       setVisible(false);
@@ -119,7 +103,6 @@ export function AppLoadingBar() {
     }
 
     if (isLoading) {
-
       if (t.settle) {
         clearTimeout(t.settle);
         t.settle = undefined;

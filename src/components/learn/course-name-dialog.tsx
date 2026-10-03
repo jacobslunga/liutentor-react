@@ -14,7 +14,6 @@ interface CourseNameDialogProps {
   onSubmit: (name: string) => Promise<void>;
 }
 
-
 export function CourseNameDialog({
   open,
   onOpenChange,
@@ -22,7 +21,6 @@ export function CourseNameDialog({
   onSubmit,
 }: CourseNameDialogProps) {
   const renaming = !!initialName;
-
 
   if (!open) return null;
 
@@ -59,7 +57,6 @@ function CourseNameForm({
     try {
       await onSubmit(trimmed);
     } catch {
-
     } finally {
       setSaving(false);
     }

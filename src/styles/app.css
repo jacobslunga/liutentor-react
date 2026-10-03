@@ -1,69 +1,4 @@
-
 @plugin "@tailwindcss/typography";
-
-@font-face {
-  font-family: "Basier Circle";
-  src: url("../assets/fonts/basier-circle-regular.woff2") format("woff2");
-  font-style: normal;
-  font-weight: 400;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: "Basier Circle";
-  src: url("../assets/fonts/basier-circle-regular-italic.woff2") format("woff2");
-  font-style: italic;
-  font-weight: 400;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: "Basier Circle";
-  src: url("../assets/fonts/basier-circle-medium.woff2") format("woff2");
-  font-style: normal;
-  font-weight: 500;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: "Basier Circle";
-  src: url("../assets/fonts/basier-circle-medium-italic.woff2") format("woff2");
-  font-style: italic;
-  font-weight: 500;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: "Basier Circle";
-  src: url("../assets/fonts/basier-circle-semibold.woff2") format("woff2");
-  font-style: normal;
-  font-weight: 600;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: "Basier Circle";
-  src: url("../assets/fonts/basier-circle-semibold-italic.woff2") format("woff2");
-  font-style: italic;
-  font-weight: 600;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: "Basier Circle";
-  src: url("../assets/fonts/basier-circle-bold.woff2") format("woff2");
-  font-style: normal;
-  font-weight: 700;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: "Basier Circle";
-  src: url("../assets/fonts/basier-circle-bold-italic.woff2") format("woff2");
-  font-style: italic;
-  font-weight: 700;
-  font-display: swap;
-}
 
 @font-face {
   font-family: "Logo";
@@ -95,20 +30,16 @@
 }
 
 :root {
-
   --grade-low: oklch(from var(--brand) 0.755 0.155 h);
   --grade-mid: oklch(from var(--brand) 0.6 0.145 h);
   --grade-high: oklch(from var(--brand) 0.46 0.11 h);
   --grade-fail: var(--destructive);
-
 
   --rate-1: oklch(from var(--brand) 0.911 0.0453 h);
   --rate-2: oklch(from var(--brand) 0.8072 0.1109 h);
   --rate-3: oklch(from var(--brand) 0.7521 0.1557 h);
   --rate-4: oklch(from var(--brand) 0.6506 0.138 h);
   --rate-5: oklch(from var(--brand) 0.5382 0.1159 h);
-
-
 
   --chart-point: var(--muted-foreground);
 }
@@ -117,7 +48,6 @@
   --grade-low: oklch(from var(--brand) 0.55 0.12 h);
   --grade-mid: oklch(from var(--brand) 0.68 0.145 h);
   --grade-high: oklch(from var(--brand) 0.83 0.13 h);
-
 
   --rate-1: oklch(from var(--brand) 0.42 0.05 h);
   --rate-2: oklch(from var(--brand) 0.53 0.07 h);
@@ -213,8 +143,6 @@
 }
 
 @layer base {
-
-
   button:not(:disabled),
   [role="button"]:not([aria-disabled="true"]),
   [role="link"],

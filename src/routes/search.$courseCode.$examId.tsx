@@ -8,16 +8,17 @@ import { useSeo } from "@/hooks/use-seo";
 import { courseExamsQuery, examDetailQuery } from "@/queries/exams";
 import { Button } from "@/components/ui/button";
 
-
 const TOUCH_VIEWER_QUERY = "(max-width: 1023px), (pointer: coarse)";
 
 export const Route = createFileRoute("/search/$courseCode/$examId")({
   params: {
-    parse: ({ courseCode, examId }) => ({ courseCode: courseCode.toUpperCase(), examId }),
+    parse: ({ courseCode, examId }) => ({
+      courseCode: courseCode.toUpperCase(),
+      examId,
+    }),
     stringify: ({ courseCode, examId }) => ({ courseCode, examId }),
   },
   loader: ({ context, params }) => {
-
     void context.queryClient.prefetchQuery(courseExamsQuery(params.courseCode));
     return context.queryClient.ensureQueryData(examDetailQuery(params.examId));
   },
@@ -39,7 +40,9 @@ function ExamError({ reset }: { reset: () => void }) {
   return (
     <div className="flex h-dvh flex-col items-center justify-center gap-2">
       <p className="text-2xl text-foreground/80">Något gick fel!</p>
-      <p className="text-sm text-muted-foreground">Ibland fungerar det att bara ladda om sidan :)</p>
+      <p className="text-sm text-muted-foreground">
+        Ibland fungerar det att bara ladda om sidan :)
+      </p>
       <Button variant="outline" onClick={reset}>
         Ladda om
       </Button>
@@ -57,7 +60,9 @@ function ExamPage() {
   const solutionPdfUrl = detail?.solution?.pdf_url ?? null;
 
   useSeo({
-    title: exam ? `${exam.course_code} – Tenta ${exam.exam_date}` : `${courseCode} – Tenta`,
+    title: exam
+      ? `${exam.course_code} – Tenta ${exam.exam_date}`
+      : `${courseCode} – Tenta`,
     description: `Tentamensvisning för ${courseCode} på LiU Tentor.`,
     path: `/search/${courseCode}/${examId}`,
     robots: "noindex, nofollow",

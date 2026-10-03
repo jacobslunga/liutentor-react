@@ -58,9 +58,6 @@ import { Button } from "@/components/ui/button";
 
 const MAX_LENGTH = 4000;
 
-
-
-
 const MENTION_PILL_CLASS =
   "rounded-[5px] bg-primary/15 text-transparent ring-2 ring-primary/15 box-decoration-clone";
 
@@ -109,10 +106,6 @@ interface ChatInputProps {
   onClearSelectionContext: () => void;
 }
 
-
-
-
-
 export function ChatInput({
   ref,
   initialText = "",
@@ -153,7 +146,6 @@ export function ChatInput({
   }, [attachments]);
 
   const mentionLayerRef = useRef<HTMLDivElement>(null);
-
 
   const renderMentionPills = (value: string) => {
     const layer = mentionLayerRef.current;
@@ -252,10 +244,6 @@ export function ChatInput({
     );
   }
 
-
-
-
-
   function replaceRange(start: number, end: number, text: string) {
     const textarea = textareaRef.current;
     if (!textarea) return;
@@ -269,7 +257,6 @@ export function ChatInput({
       text,
     );
 
-
     if (!done || textarea.value !== expected) {
       textarea.value = expected;
       const caret = start + text.length;
@@ -282,12 +269,10 @@ export function ChatInput({
     const textarea = textareaRef.current;
     if (!textarea || !mention) return;
 
-
     const rest = /^\S*\s?/.exec(textarea.value.slice(textarea.selectionStart));
     const end = textarea.selectionStart + (rest?.[0].length ?? 0);
     replaceRange(mention.start, end, `@${code} `);
   }
-
 
   const { data: courses } = useQuery({
     ...coursesQuery,
@@ -297,7 +282,6 @@ export function ChatInput({
     () => new Set(courses?.map((c) => c.code)),
     [courses],
   );
-
 
   function deleteMention(key: string): boolean {
     const textarea = textareaRef.current;
@@ -341,8 +325,6 @@ export function ChatInput({
   };
 
   useImperativeHandle(ref, () => ({
-
-
     focus: () => textareaRef.current?.focus({ preventScroll: true }),
     getText: () => textareaRef.current?.value ?? "",
     setText,
@@ -620,7 +602,7 @@ export function ChatInput({
           aria-hidden="true"
           tabIndex={-1}
           rows={1}
-          className="pointer-events-none absolute h-0 overflow-hidden border-0 p-0 text-[0.9375rem] leading-6 whitespace-pre-wrap invisible"
+          className="pointer-events-none invisible absolute h-0 overflow-hidden border-0 p-0 text-[0.9375rem] leading-6 whitespace-pre-wrap"
         />
       </div>
       {showDisclaimer && (
@@ -631,7 +613,6 @@ export function ChatInput({
     </form>
   );
 }
-
 
 function StopIcon() {
   return <span className="size-2.5 rounded-xs bg-current" aria-hidden />;

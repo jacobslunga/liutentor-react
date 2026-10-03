@@ -1,4 +1,5 @@
 import { Link, useNavigate, useParams } from "@tanstack/react-router";
+import { m } from "framer-motion";
 import {
   EllipsisIcon,
   LogOutIcon,
@@ -20,7 +21,11 @@ import { cn } from "@/lib/utils";
 import type { Conversation } from "@/queries/conversations";
 import { useProfile } from "@/queries/profile";
 import { useChatStore } from "@/stores/chat";
-import { isSidebarShortcut, useLearnSidebar } from "@/stores/learn-sidebar";
+import {
+  isSidebarShortcut,
+  sidebarWidth,
+  useLearnSidebar,
+} from "@/stores/learn-sidebar";
 import { useSettingsStore } from "@/stores/settings";
 import { ChatSettingsMenu } from "./chat-settings-menu";
 import { SidebarCourses } from "./sidebar-courses";
@@ -35,13 +40,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-
-
-
-
 export function ChatSidebar() {
   const { inline, open, setOpen } = useLearnSidebar();
-
 
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
@@ -52,7 +52,6 @@ export function ChatSidebar() {
     document.addEventListener("keydown", onKeyDown);
     return () => document.removeEventListener("keydown", onKeyDown);
   }, [open, setOpen]);
-
 
   useEffect(() => {
     if (inline || !open) return;
@@ -67,25 +66,26 @@ export function ChatSidebar() {
 
   return (
     <>
-      <div
+      <m.div
         aria-hidden
+        initial={false}
+        animate={{ opacity: open ? 1 : 0 }}
         className={cn(
-          "fixed inset-0 z-40 bg-black/40 transition-opacity duration-200",
-          open ? "opacity-100" : "pointer-events-none opacity-0",
+          "fixed inset-0 z-40 bg-black/40",
+          !open && "pointer-events-none",
         )}
         onClick={() => setOpen(false)}
       />
-      <aside
+      <m.aside
         aria-label="Chattar"
         aria-hidden={!open}
         inert={!open}
-        className={cn(
-          "fixed inset-y-0 left-0 z-50 w-[min(18rem,85vw)] border-r bg-background shadow-lg transition-transform duration-200 ease-out",
-          open ? "translate-x-0" : "-translate-x-full",
-        )}
+        className="fixed inset-y-0 left-0 z-50 w-[min(18rem,85vw)] border-r bg-background shadow-lg"
+        initial={false}
+        animate={{ x: open ? "0%" : "-100%" }}
       >
         <SidebarContent />
-      </aside>
+      </m.aside>
     </>
   );
 }
@@ -98,50 +98,32 @@ const KEY_STEP = 16;
 const clampWidth = (width: number) =>
   Math.round(Math.min(MAX_WIDTH, Math.max(MIN_WIDTH, width)));
 
-
-
-
-
 function InlineSidebar({ open }: { open: boolean }) {
   const storedWidth = useSettingsStore((s) => s.chatSidebarWidth);
   const setStoredWidth = useSettingsStore((s) => s.setChatSidebarWidth);
-
-  const [dragWidth, setDragWidth] = useState<number | null>(null);
   const drag = useRef<{ startX: number; startWidth: number } | null>(null);
-  const width = dragWidth ?? storedWidth;
-  const dragging = dragWidth !== null;
 
   function endDrag() {
     if (!drag.current) return;
     drag.current = null;
     document.body.style.removeProperty("cursor");
-    if (dragWidth !== null) setStoredWidth(dragWidth);
-    setDragWidth(null);
+    setStoredWidth(sidebarWidth.get());
   }
 
   return (
-    <aside
+    <m.aside
       aria-label="Chattar"
       aria-hidden={!open}
       inert={!open}
-      style={{ width: open ? width : 0 }}
+      style={{ width: sidebarWidth }}
+      initial={false}
+      animate={{ x: open ? "0%" : "-100%" }}
       className={cn(
-        "relative z-30 shrink-0",
+        "absolute inset-y-0 left-0 z-30 bg-background",
         !open && "pointer-events-none",
       )}
     >
-      <div
-        className={cn(
-          "h-full border-r bg-muted/30 will-change-transform",
-
-
-
-          !dragging &&
-            "transition-transform duration-200 ease-out motion-reduce:transition-none",
-          open ? "translate-x-0" : "-translate-x-full",
-        )}
-        style={{ width }}
-      >
+      <div className="h-full border-r bg-muted/30">
         <SidebarContent />
       </div>
       {open && (
@@ -151,20 +133,23 @@ function InlineSidebar({ open }: { open: boolean }) {
           aria-label="Sidopanelens bredd"
           aria-valuemin={MIN_WIDTH}
           aria-valuemax={MAX_WIDTH}
-          aria-valuenow={width}
+          aria-valuenow={storedWidth}
           tabIndex={0}
           className="absolute inset-y-0 right-0 z-10 w-1.5 cursor-col-resize touch-none outline-none select-none focus-visible:bg-ring"
           onPointerDown={(e) => {
             if (e.button !== 0) return;
             e.preventDefault();
             e.currentTarget.setPointerCapture(e.pointerId);
-            drag.current = { startX: e.clientX, startWidth: width };
+            drag.current = {
+              startX: e.clientX,
+              startWidth: sidebarWidth.get(),
+            };
 
             document.body.style.cursor = "col-resize";
           }}
           onPointerMove={(e) => {
             if (!drag.current) return;
-            setDragWidth(
+            sidebarWidth.set(
               clampWidth(
                 drag.current.startWidth + e.clientX - drag.current.startX,
               ),
@@ -186,7 +171,7 @@ function InlineSidebar({ open }: { open: boolean }) {
           }}
         />
       )}
-    </aside>
+    </m.aside>
   );
 }
 
@@ -376,10 +361,6 @@ function SidebarContent() {
   );
 }
 
-
-
-
-
 function RowTitle({ conversation }: { conversation: Conversation }) {
   const liveTitle = useChatStore((s) =>
     s.currentConversationId === conversation.id && s.isConversationTitleReady
@@ -392,7 +373,6 @@ function RowTitle({ conversation }: { conversation: Conversation }) {
   if (!liveTitle) return conversation.title;
   return <TypedTitle title={liveTitle} startedAt={startedAt} />;
 }
-
 
 function AccountRow() {
   const navigate = useNavigate();

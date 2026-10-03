@@ -2,7 +2,11 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { randomAvatarColor } from "@/lib/avatar-colors";
 import { DEFAULT_QUIZ_DIFFICULTY, type QuizDifficulty } from "@/types/quiz";
-import { CHAT_MODELS, DEFAULT_MODEL_ID, type ChatModelId } from "@/lib/chat-models";
+import {
+  CHAT_MODELS,
+  DEFAULT_MODEL_ID,
+  type ChatModelId,
+} from "@/lib/chat-models";
 import { useUser } from "@/stores/auth";
 
 export type LayoutMode = "exam-with-facit" | "exam-only";
@@ -30,7 +34,6 @@ interface SettingsState {
   setChatSidebarWidth: (value: number) => void;
 }
 
-
 export const useSettingsStore = create<SettingsState>()(
   persist(
     (set) => ({
@@ -43,7 +46,8 @@ export const useSettingsStore = create<SettingsState>()(
       chatSidebarOpen: true,
       chatSidebarWidth: 256,
       setLayoutMode: (layoutMode) => set({ layoutMode }),
-      setShowExplainPopover: (showExplainPopover) => set({ showExplainPopover }),
+      setShowExplainPopover: (showExplainPopover) =>
+        set({ showExplainPopover }),
       setBlurFacitUntilHover: (blurFacitUntilHover) =>
         set({ blurFacitUntilHover }),
       setSelectedModelId: (selectedModelId) => set({ selectedModelId }),
@@ -55,10 +59,6 @@ export const useSettingsStore = create<SettingsState>()(
     { name: "liutentor-settings", version: 1 },
   ),
 );
-
-
-
-
 
 export function useSelectedModel() {
   const user = useUser();

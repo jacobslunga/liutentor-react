@@ -6,15 +6,6 @@ import { ResetZoomContext } from "./pdf-zoom-context";
 
 const EPSILON = 0.0005;
 
-
-
-
-
-
-
-
-
-
 export function PdfZoomController({
   documentId,
   maxPageWidth,
@@ -34,13 +25,16 @@ export function PdfZoomController({
   const availableWidth = useCallback((): number | null => {
     if (!viewport) return null;
     const width =
-      viewport.forDocument(documentId).getMetrics().clientWidth - 2 * viewport.getViewportGap();
+      viewport.forDocument(documentId).getMetrics().clientWidth -
+      2 * viewport.getViewportGap();
     return width > 0 ? width : null;
   }, [viewport, documentId]);
 
   const contentWidth = useCallback((): number | null => {
     if (!scroll) return null;
-    const spreads = scroll.forDocument(documentId).getSpreadPagesWithRotatedSize();
+    const spreads = scroll
+      .forDocument(documentId)
+      .getSpreadPagesWithRotatedSize();
     if (!spreads?.length) return null;
 
     const pageGap = scroll.getPageGap();
@@ -62,7 +56,8 @@ export function PdfZoomController({
     if (!available) return;
     lastWidth.current = available;
 
-    const content = maxPageWidth !== null && available > maxPageWidth ? contentWidth() : null;
+    const content =
+      maxPageWidth !== null && available > maxPageWidth ? contentWidth() : null;
     if (maxPageWidth === null || !content) {
       lastApplied.current = 0;
       zoom.requestZoom(ZoomMode.FitWidth);
@@ -77,7 +72,6 @@ export function PdfZoomController({
     viewport?.forDocument(documentId).scrollTo({ x: 0, y: 0 });
   }, [viewport, documentId]);
 
-
   const applyRef = useRef(apply);
   useEffect(() => {
     applyRef.current = apply;
@@ -87,7 +81,6 @@ export function PdfZoomController({
     lastApplied.current = 0;
     lastWidth.current = 0;
   }, [documentId]);
-
 
   const isFirstApply = useRef(true);
   useEffect(() => {
@@ -106,7 +99,6 @@ export function PdfZoomController({
     });
   }, [scroll, documentId, scrollToTop]);
 
-
   useEffect(() => {
     if (!viewport || !zoomCapability) return;
     const zoom = zoomCapability.forDocument(documentId);
@@ -122,13 +114,15 @@ export function PdfZoomController({
       const level = zoom.getState().zoomLevel;
       const isOurs =
         typeof level !== "number" ||
-        (!!lastApplied.current && Math.abs(level - lastApplied.current) < EPSILON);
+        (!!lastApplied.current &&
+          Math.abs(level - lastApplied.current) < EPSILON);
 
       if (isOurs) {
         applyRef.current();
       } else if (previousWidth) {
         const current = zoom.getState().currentZoomLevel;
-        if (current) zoom.requestZoom(current * (width / previousWidth), { vx: 0, vy: 0 });
+        if (current)
+          zoom.requestZoom(current * (width / previousWidth), { vx: 0, vy: 0 });
       }
     });
   }, [viewport, zoomCapability, documentId, availableWidth]);
@@ -138,5 +132,9 @@ export function PdfZoomController({
     requestAnimationFrame(scrollToTop);
   }, [apply, scrollToTop]);
 
-  return <ResetZoomContext.Provider value={reset}>{children}</ResetZoomContext.Provider>;
+  return (
+    <ResetZoomContext.Provider value={reset}>
+      {children}
+    </ResetZoomContext.Provider>
+  );
 }

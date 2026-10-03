@@ -64,16 +64,10 @@ function Spinner() {
   );
 }
 
-
 function PageLoadingTask({ pending }: { pending: boolean }) {
   usePageLoadingTask(pending);
   return null;
 }
-
-
-
-
-
 
 export const PdfRenderer = memo(function PdfRenderer({
   pdfUrl,
@@ -88,7 +82,6 @@ export const PdfRenderer = memo(function PdfRenderer({
   const [liveZoom] = useState(createLiveZoomStore);
   const maxPageWidth =
     layoutMode === "exam-only" ? MAX_EXAM_ONLY_PAGE_WIDTH : null;
-
 
   const plugins = useMemo(
     () => [
@@ -110,7 +103,6 @@ export const PdfRenderer = memo(function PdfRenderer({
     ],
     [pdfUrl],
   );
-
 
   const onExplainRef = useLatest(onExplain);
   const explain = useCallback(
@@ -248,7 +240,6 @@ function PdfPage({ documentId, page, isMobile, onExplain }: PdfPageProps) {
         <Rotate
           documentId={documentId}
           pageIndex={page.pageIndex}
-
 
           className="bg-background"
           style={{ width: page.width, height: page.height }}

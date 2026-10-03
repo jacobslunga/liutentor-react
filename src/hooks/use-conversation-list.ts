@@ -54,7 +54,6 @@ function groupLabel(value: string): (typeof CONVERSATION_GROUPS)[number] {
   return "Äldre";
 }
 
-
 export function groupConversations(conversations: Conversation[]) {
   const byGroup = new Map<string, Conversation[]>();
   for (const c of conversations) {
@@ -66,7 +65,6 @@ export function groupConversations(conversations: Conversation[]) {
     items: byGroup.get(label) ?? [],
   })).filter((g) => g.items.length);
 }
-
 
 export function loadMessages(id: string): Promise<Message[]> {
   return isLocalConversationId(id)
@@ -80,7 +78,6 @@ export interface LoadedConversation {
   courseId: string | null;
   messages: Message[];
 }
-
 
 export async function loadConversation(
   id: string,
@@ -97,11 +94,6 @@ export async function loadConversation(
   ]);
   return info && { ...info, messages };
 }
-
-
-
-
-
 
 export function useConversationList(
   kind: ConversationKind,

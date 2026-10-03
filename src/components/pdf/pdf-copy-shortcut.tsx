@@ -2,7 +2,6 @@ import { useSelectionCapability } from "@embedpdf/plugin-selection/react";
 import { useEffect } from "react";
 import { normalizePdfText } from "@/lib/pdf-text";
 
-
 export function PdfCopyShortcut() {
   const { provides: selection } = useSelectionCapability();
 
@@ -15,7 +14,12 @@ export function PdfCopyShortcut() {
     });
 
     async function onKeyDown(e: KeyboardEvent) {
-      if (!(e.metaKey || e.ctrlKey) || e.key.toLowerCase() !== "c" || !hasSelection) return;
+      if (
+        !(e.metaKey || e.ctrlKey) ||
+        e.key.toLowerCase() !== "c" ||
+        !hasSelection
+      )
+        return;
       if (!selection) return;
       e.preventDefault();
       try {

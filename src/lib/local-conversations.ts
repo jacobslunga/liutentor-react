@@ -1,36 +1,42 @@
 import type { Conversation, ConversationKind } from "@/queries/conversations";
 import { createMessageId, type Message } from "@/stores/chat";
 
-
-
-
-
 const STORAGE_KEY = "liutentor_conversations_v1";
 const LOCAL_PREFIX = "local:";
 const MAX_CONVERSATIONS = 50;
 
-type StoredMessage = Pick<Message, "role" | "content" | "context" | "selectionContext" | "sources" | "attachments">;
+type StoredMessage = Pick<
+  Message,
+  | "role"
+  | "content"
+  | "context"
+  | "selectionContext"
+  | "sources"
+  | "attachments"
+>;
 
 interface StoredConversation extends Conversation {
-
   kind?: ConversationKind;
   messages: StoredMessage[];
 }
 
-export const isLocalConversationId = (id: string | null | undefined): id is string =>
-  !!id?.startsWith(LOCAL_PREFIX);
+export const isLocalConversationId = (
+  id: string | null | undefined,
+): id is string => !!id?.startsWith(LOCAL_PREFIX);
 
-export const createLocalConversationId = () => `${LOCAL_PREFIX}${crypto.randomUUID()}`;
+export const createLocalConversationId = () =>
+  `${LOCAL_PREFIX}${crypto.randomUUID()}`;
 
 function readAll(): StoredConversation[] {
   try {
-    const parsed: unknown = JSON.parse(localStorage.getItem(STORAGE_KEY) ?? "[]");
+    const parsed: unknown = JSON.parse(
+      localStorage.getItem(STORAGE_KEY) ?? "[]",
+    );
     return Array.isArray(parsed) ? parsed : [];
   } catch {
     return [];
   }
 }
-
 
 function writeAll(conversations: StoredConversation[]) {
   let kept = conversations.slice(0, MAX_CONVERSATIONS);
@@ -44,9 +50,7 @@ function writeAll(conversations: StoredConversation[]) {
   }
   try {
     localStorage.removeItem(STORAGE_KEY);
-  } catch {
-
-  }
+  } catch {}
 }
 
 export function listLocalConversations(kind: ConversationKind): Conversation[] {
@@ -74,7 +78,14 @@ export function saveLocalConversation(
   const persisted = messages
     .filter((m) => m.content.trim() || m.attachments?.length)
     .map(
-      ({ role, content, context, selectionContext, sources, attachments }): StoredMessage => ({
+      ({
+        role,
+        content,
+        context,
+        selectionContext,
+        sources,
+        attachments,
+      }): StoredMessage => ({
         role,
         content,
         ...(context ? { context } : {}),
@@ -83,14 +94,16 @@ export function saveLocalConversation(
 
         ...(attachments?.length
           ? {
-              attachments: attachments.map(({ id, name, mediaType, size, lastModified }) => ({
-                id,
-                name,
-                mediaType,
-                size,
-                lastModified,
-                active: false,
-              })),
+              attachments: attachments.map(
+                ({ id, name, mediaType, size, lastModified }) => ({
+                  id,
+                  name,
+                  mediaType,
+                  size,
+                  lastModified,
+                  active: false,
+                }),
+              ),
             }
           : {}),
       }),

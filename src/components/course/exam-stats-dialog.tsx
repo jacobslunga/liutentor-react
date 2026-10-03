@@ -43,9 +43,6 @@ export function ExamStatsDialog({
   );
   const maxCount = Math.max(...chartData.map((d) => d.count));
 
-
-
-
   return (
     <span
       className="contents"

@@ -7,7 +7,6 @@ import {
   InputGroupInput,
 } from "@/components/ui/input-group";
 
-
 export function PasswordInput(
   props: Omit<ComponentProps<typeof InputGroupInput>, "type">,
 ) {

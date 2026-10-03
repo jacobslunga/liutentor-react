@@ -22,7 +22,7 @@ export function AnalyticsConsent() {
 
   return (
     <aside
-      className="fixed right-4 bottom-4 left-4 z-100 mx-auto rounded-lg max-w-xl border bg-background p-4 shadow-lg sm:left-auto sm:p-5"
+      className="fixed right-4 bottom-4 left-4 z-100 mx-auto max-w-xl rounded-lg border bg-background p-4 shadow-lg sm:left-auto sm:p-5"
       aria-label="Inställningar för analyscookies"
     >
       <p className="font-medium">Hjälp oss förbättra LiU Tentor</p>

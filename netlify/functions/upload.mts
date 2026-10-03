@@ -1,14 +1,17 @@
 import { createClient } from "@supabase/supabase-js";
 import { json, serverEnv } from "../lib/env.ts";
-import { sendUploadNotification, type UploadedDocument } from "../lib/upload-notification.ts";
+import {
+  sendUploadNotification,
+  type UploadedDocument,
+} from "../lib/upload-notification.ts";
 
 interface UploadMetadata extends UploadedDocument {
   normalizedFilename: string;
 }
 
-
 export default async (req: Request) => {
-  if (req.method !== "POST") return json({ message: "Method not allowed" }, 405);
+  if (req.method !== "POST")
+    return json({ message: "Method not allowed" }, 405);
 
   let form: FormData;
   try {
@@ -24,7 +27,9 @@ export default async (req: Request) => {
     return json({ message: "Invalid upload metadata" }, 400);
   }
 
-  const files = form.getAll("files").filter((f): f is File => f instanceof File);
+  const files = form
+    .getAll("files")
+    .filter((f): f is File => f instanceof File);
   if (!files.length || files.length !== metadata.length) {
     return json({ message: "Missing required fields" }, 400);
   }
@@ -48,7 +53,10 @@ export default async (req: Request) => {
     const filePath = `public/${item.normalizedFilename}`;
     const { error: storageError } = await supabase.storage
       .from("pending-pdfs")
-      .upload(filePath, await file.arrayBuffer(), { contentType: "application/pdf", upsert: false });
+      .upload(filePath, await file.arrayBuffer(), {
+        contentType: "application/pdf",
+        upsert: false,
+      });
     if (storageError) return json({ message: storageError.message }, 500);
 
     const { error: dbError } = await supabase.from("pending_uploads").insert([

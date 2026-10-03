@@ -34,7 +34,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-
 export function SidebarCourses({ onNavigate }: { onNavigate: () => void }) {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
@@ -228,11 +227,6 @@ export function SidebarCourses({ onNavigate }: { onNavigate: () => void }) {
   );
 }
 
-
-
-
-
-
 function CourseHoverList({
   course,
   onNavigate,
@@ -259,7 +253,6 @@ function CourseHoverList({
         collisionPadding={12}
         className="z-50 flex max-h-[min(24rem,var(--radix-hover-card-content-available-height))] w-72 origin-(--radix-hover-card-content-transform-origin) flex-col overflow-hidden rounded-xl bg-popover text-popover-foreground shadow-lg ring-1 ring-foreground/10 duration-150 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95 data-[state=open]:slide-in-from-left-1"
       >
-
         {open && (
           <CourseChatList
             course={course}

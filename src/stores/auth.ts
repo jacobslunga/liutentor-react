@@ -17,10 +17,6 @@ export const useAuthStore = create<AuthState>(() => ({
 
 let readyPromise: Promise<void> | null = null;
 
-
-
-
-
 export function initAuth(): Promise<void> {
   readyPromise ??= new Promise((resolve) => {
     supabase.auth.onAuthStateChange((_event, session) => {

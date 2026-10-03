@@ -15,31 +15,40 @@ import { QuizStart } from "./quiz-start";
 
 const MAX_SOURCE_EXAMS = 5;
 
-
-export default function CourseQuizPanel({ courseCode, exams }: { courseCode: string; exams: Exam[] }) {
+export default function CourseQuizPanel({
+  courseCode,
+  exams,
+}: {
+  courseCode: string;
+  exams: Exam[];
+}) {
   const stage = useQuizStore((s) => s.stage);
   const quizData = useQuizStore((s) => s.quizData);
   const sessionKey = useQuizStore((s) => s.sessionKey);
   const activeQuizId = useQuizStore((s) => s.activeQuizId);
   const user = useUser();
   const queryClient = useQueryClient();
-  const historyQuery = useMemo(() => quizHistoryQuery(user?.id ?? "", courseCode), [user?.id, courseCode]);
+  const historyQuery = useMemo(
+    () => quizHistoryQuery(user?.id ?? "", courseCode),
+    [user?.id, courseCode],
+  );
   const { data: history = [] } = useQuery({ ...historyQuery, enabled: !!user });
 
   const examPool = exams.filter((e) => e.pdf_url);
-
 
   useEffect(() => {
     useQuizStore.getState().reset();
     return () => useQuizStore.getState().reset();
   }, [courseCode]);
 
-
   useEffect(() => {
     if (!user) return;
     return useQuizStore.subscribe(async (s, prev) => {
       if (s.stage !== "answering" || prev.stage !== "generating") return;
-      const rows = await queryClient.fetchQuery({ ...historyQuery, staleTime: 0 });
+      const rows = await queryClient.fetchQuery({
+        ...historyQuery,
+        staleTime: 0,
+      });
       if (rows[0]) useQuizStore.getState().setActiveQuizId(rows[0].id);
     });
   }, [user, queryClient, historyQuery]);
@@ -49,7 +58,9 @@ export default function CourseQuizPanel({ courseCode, exams }: { courseCode: str
 
     const shuffled = [...examPool].sort(() => Math.random() - 0.5);
     const count = Math.min(
-      examPool.length <= 2 ? examPool.length : Math.floor(Math.random() * 3) + 2,
+      examPool.length <= 2
+        ? examPool.length
+        : Math.floor(Math.random() * 3) + 2,
       MAX_SOURCE_EXAMS,
     );
     void useQuizStore.getState().generate(courseCode, {
@@ -60,10 +71,13 @@ export default function CourseQuizPanel({ courseCode, exams }: { courseCode: str
 
   async function remove(item: StoredQuizItem) {
     if (!user) return;
-    if (useQuizStore.getState().activeQuizId === item.id) useQuizStore.getState().reset();
+    if (useQuizStore.getState().activeQuizId === item.id)
+      useQuizStore.getState().reset();
     const previous = queryClient.getQueryData(historyQuery.queryKey);
-    queryClient.setQueryData(historyQuery.queryKey, (old: StoredQuizItem[] | undefined) =>
-      old?.filter((q) => q.id !== item.id),
+    queryClient.setQueryData(
+      historyQuery.queryKey,
+      (old: StoredQuizItem[] | undefined) =>
+        old?.filter((q) => q.id !== item.id),
     );
     try {
       await deleteQuiz(user.id, item.id);
@@ -78,7 +92,11 @@ export default function CourseQuizPanel({ courseCode, exams }: { courseCode: str
     <div className="w-full">
       {stage === "setup" && (
         <div className="flex animate-in flex-col gap-10 duration-200 fade-in-0">
-          <QuizStart courseCode={courseCode} poolSize={examPool.length} onStart={start} />
+          <QuizStart
+            courseCode={courseCode}
+            poolSize={examPool.length}
+            onStart={start}
+          />
           <QuizHistoryList
             history={history}
             signedIn={!!user}
@@ -89,7 +107,9 @@ export default function CourseQuizPanel({ courseCode, exams }: { courseCode: str
         </div>
       )}
       {stage === "generating" && <QuizGenerating />}
-      {stage === "answering" && quizData && <QuizAnswering key={sessionKey} questions={quizData.quiz.questions} />}
+      {stage === "answering" && quizData && (
+        <QuizAnswering key={sessionKey} questions={quizData.quiz.questions} />
+      )}
       {stage === "results" && quizData && <QuizResults quizData={quizData} />}
     </div>
   );

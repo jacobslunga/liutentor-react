@@ -18,7 +18,6 @@ export function AuthActions({
 
   const settings = showSettings && <SettingsDialog />;
 
-
   if (signedIn) return <UserDropdown />;
 
   return (

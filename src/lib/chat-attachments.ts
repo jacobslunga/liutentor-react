@@ -18,11 +18,6 @@ export const FILE_INPUT_ACCEPT =
 const attachmentKey = (f: Pick<File, "name" | "size" | "lastModified">) =>
   `${f.name}:${f.size}:${f.lastModified}`;
 
-
-
-
-
-
 export function acceptFiles(
   files: File[],
   existing: ChatAttachment[],
@@ -56,7 +51,9 @@ export function acceptFiles(
         lastModified: file.lastModified,
         active: true,
         file,
-        ...(file.type.startsWith("image/") ? { previewUrl: URL.createObjectURL(file) } : {}),
+        ...(file.type.startsWith("image/")
+          ? { previewUrl: URL.createObjectURL(file) }
+          : {}),
       });
       keys.add(attachmentKey(file));
       count += 1;
@@ -74,15 +71,18 @@ const IMAGE_EXTENSION: Record<string, string> = {
   "image/gif": "gif",
 };
 
-
 export function normalizeClipboardFile(file: File, index: number): File {
   const extension = file.name.split(".").pop()?.toLowerCase();
   if (extension && extension !== file.name.toLowerCase()) return file;
   const resolved = IMAGE_EXTENSION[file.type];
   if (!resolved) return file;
   const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
-  return new File([file], `skarmbild-${timestamp}${index ? `-${index + 1}` : ""}.${resolved}`, {
-    type: file.type,
-    lastModified: Date.now(),
-  });
+  return new File(
+    [file],
+    `skarmbild-${timestamp}${index ? `-${index + 1}` : ""}.${resolved}`,
+    {
+      type: file.type,
+      lastModified: Date.now(),
+    },
+  );
 }

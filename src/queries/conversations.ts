@@ -7,7 +7,6 @@ import {
   type MessageSource,
 } from "@/stores/chat";
 
-
 export type ConversationKind = "exam" | "learn";
 
 export interface Conversation {
@@ -17,7 +16,6 @@ export interface Conversation {
 
   meta: string;
 }
-
 
 async function loadMeta(ids: string[]): Promise<Record<string, string>> {
   if (!ids.length) return {};
@@ -29,38 +27,52 @@ async function loadMeta(ids: string[]): Promise<Record<string, string>> {
       .order("created_at", { ascending: true });
     if (error) throw error;
 
-    const first = new Map<string, { courseCode: string | null; examId: number | null }>();
+    const first = new Map<
+      string,
+      { courseCode: string | null; examId: number | null }
+    >();
     for (const row of logs ?? []) {
       if (!row?.conversation_id || first.has(row.conversation_id)) continue;
       first.set(row.conversation_id, {
-
-        courseCode: row.course_code ? row.course_code.split(",").join(", ") : null,
+        courseCode: row.course_code
+          ? row.course_code.split(",").join(", ")
+          : null,
         examId: typeof row.exam_id === "number" ? row.exam_id : null,
       });
     }
 
-    const examIds = [...new Set([...first.values()].map((m) => m.examId).filter((id): id is number => id !== null))];
+    const examIds = [
+      ...new Set(
+        [...first.values()]
+          .map((m) => m.examId)
+          .filter((id): id is number => id !== null),
+      ),
+    ];
     const dateById = new Map<number, string>();
     if (examIds.length) {
-      const { data: exams } = await supabase.from("exams").select("id, exam_date").in("id", examIds);
-      for (const e of exams ?? []) if (e?.id && e?.exam_date) dateById.set(e.id, e.exam_date);
+      const { data: exams } = await supabase
+        .from("exams")
+        .select("id, exam_date")
+        .in("id", examIds);
+      for (const e of exams ?? [])
+        if (e?.id && e?.exam_date) dateById.set(e.id, e.exam_date);
     }
 
     const meta: Record<string, string> = {};
     for (const [id, m] of first) {
-      const parts = [m.courseCode, m.examId !== null && dateById.get(m.examId) ? `Tenta ${dateById.get(m.examId)}` : null];
+      const parts = [
+        m.courseCode,
+        m.examId !== null && dateById.get(m.examId)
+          ? `Tenta ${dateById.get(m.examId)}`
+          : null,
+      ];
       meta[id] = parts.filter(Boolean).join(" · ");
     }
     return meta;
   } catch {
-
     return {};
   }
 }
-
-
-
-
 
 export const conversationsQuery = (
   userId: string,
@@ -96,15 +108,15 @@ export const conversationsKey = (
   courseId: string | null = null,
 ) => ["conversations", userId, kind, courseId ?? "standalone"];
 
-
 export const localConversationsQuery = (kind: ConversationKind) =>
   queryOptions({
     queryKey: ["conversations", "local", kind],
     queryFn: (): Conversation[] => listLocalConversations(kind),
   });
 
-
-export async function loadConversationMessages(conversationId: string): Promise<Message[]> {
+export async function loadConversationMessages(
+  conversationId: string,
+): Promise<Message[]> {
   const { data, error } = await supabase
     .from("ai_chat_logs")
     .select("role, content, sources, created_at")
@@ -113,7 +125,9 @@ export async function loadConversationMessages(conversationId: string): Promise<
   if (error) throw error;
 
   return (data ?? []).flatMap((row): Message[] => {
-    const role = String(row?.role ?? "").trim().toLowerCase();
+    const role = String(row?.role ?? "")
+      .trim()
+      .toLowerCase();
     const normalized = ["user", "human"].includes(role)
       ? "user"
       : ["assistant", "ai", "bot", "model"].includes(role)
@@ -135,10 +149,6 @@ export async function loadConversationMessages(conversationId: string): Promise<
   });
 }
 
-
-
-
-
 export async function loadConversationInfo(
   conversationId: string,
 ): Promise<{ title: string; courseId: string | null } | null> {
@@ -155,8 +165,15 @@ export async function loadConversationInfo(
 
 export async function deleteConversations(userId: string, ids: string[]) {
   if (!ids.length) return;
-  const { error: logsError } = await supabase.from("ai_chat_logs").delete().in("conversation_id", ids);
+  const { error: logsError } = await supabase
+    .from("ai_chat_logs")
+    .delete()
+    .in("conversation_id", ids);
   if (logsError) throw logsError;
-  const { error } = await supabase.from("conversations").delete().in("id", ids).eq("user_id", userId);
+  const { error } = await supabase
+    .from("conversations")
+    .delete()
+    .in("id", ids)
+    .eq("user_id", userId);
   if (error) throw error;
 }

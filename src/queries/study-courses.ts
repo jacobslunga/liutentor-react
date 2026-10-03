@@ -18,7 +18,6 @@ export const studyCoursesQuery = (userId: string) =>
     queryFn: () => listStudyCourses(userId),
   });
 
-
 export const courseFilesQuery = (courseId: string) =>
   queryOptions({
     queryKey: courseFilesKey(courseId),
@@ -30,7 +29,6 @@ export const courseFilesQuery = (courseId: string) =>
         ? 3000
         : false,
   });
-
 
 export function useStudyCourses() {
   const user = useUser();
@@ -46,7 +44,6 @@ export function useStudyCourses() {
     user,
   };
 }
-
 
 export function useStudyCourse(courseId: string | null) {
   const { courses, isPending } = useStudyCourses();

@@ -2,7 +2,8 @@ import type { Exam } from "@/types/exam";
 
 const GRADE_ORDER = ["VG", "5", "4", "3", "G", "U"] as const;
 
-export type GradeToken = "grade-fail" | "grade-high" | "grade-low" | "grade-mid";
+export type GradeToken =
+  "grade-fail" | "grade-high" | "grade-low" | "grade-mid";
 
 const GRADE_TOKENS: Record<string, GradeToken> = {
   U: "grade-fail",
@@ -48,7 +49,8 @@ function studentCount(exam: Exam) {
 
 export function computeCourseStats(exams: Exam[]): CourseStats {
   const sorted = [...exams].sort((a, b) => {
-    const diff = new Date(a.exam_date).getTime() - new Date(b.exam_date).getTime();
+    const diff =
+      new Date(a.exam_date).getTime() - new Date(b.exam_date).getTime();
     return diff !== 0 ? diff : a.exam_name.localeCompare(b.exam_name);
   });
 
@@ -59,16 +61,18 @@ export function computeCourseStats(exams: Exam[]): CourseStats {
   }
 
   const series: PassRatePoint[] = [...byDate].map(([date, group]) => {
-
     const measured = group.filter((e) => Number(e.pass_rate ?? 0) > 0);
     const students = group.reduce((sum, e) => sum + studentCount(e), 0);
     const weight = measured.reduce((sum, e) => sum + studentCount(e), 0);
 
     const rate = measured.length
       ? weight > 0
-        ? measured.reduce((sum, e) => sum + Number(e.pass_rate) * studentCount(e), 0) /
-          weight
-        : measured.reduce((sum, e) => sum + Number(e.pass_rate), 0) / measured.length
+        ? measured.reduce(
+            (sum, e) => sum + Number(e.pass_rate) * studentCount(e),
+            0,
+          ) / weight
+        : measured.reduce((sum, e) => sum + Number(e.pass_rate), 0) /
+          measured.length
       : undefined;
 
     return {
@@ -89,14 +93,14 @@ export function computeCourseStats(exams: Exam[]): CourseStats {
   }
   const gradeTotal = [...totals.values()].reduce((sum, n) => sum + n, 0);
 
-  const grades: GradeEntry[] = GRADE_ORDER.filter((key) => (totals.get(key) ?? 0) > 0).map(
-    (key) => ({
-      key,
-      value: totals.get(key) ?? 0,
-      pct: gradeTotal ? ((totals.get(key) ?? 0) / gradeTotal) * 100 : 0,
-      token: GRADE_TOKENS[key],
-    }),
-  );
+  const grades: GradeEntry[] = GRADE_ORDER.filter(
+    (key) => (totals.get(key) ?? 0) > 0,
+  ).map((key) => ({
+    key,
+    value: totals.get(key) ?? 0,
+    pct: gradeTotal ? ((totals.get(key) ?? 0) / gradeTotal) * 100 : 0,
+    token: GRADE_TOKENS[key],
+  }));
 
   const totalStudents = grades.reduce((sum, g) => sum + g.value, 0);
   const measuredPoints = series.filter((p) => p.rate !== undefined);
@@ -109,7 +113,8 @@ export function computeCourseStats(exams: Exam[]): CourseStats {
     overallPassRate = ((totalStudents - failed) / totalStudents) * 100;
   } else if (hasPassRateData) {
     overallPassRate =
-      measuredPoints.reduce((sum, p) => sum + (p.rate ?? 0), 0) / measuredPoints.length;
+      measuredPoints.reduce((sum, p) => sum + (p.rate ?? 0), 0) /
+      measuredPoints.length;
   }
 
   return {
@@ -123,7 +128,6 @@ export function computeCourseStats(exams: Exam[]): CourseStats {
     hasAnyData: hasPassRateData || hasGradeData,
   };
 }
-
 
 export function passRateClass(rate: number) {
   if (rate >= 50) return "text-emerald-600 dark:text-emerald-400";

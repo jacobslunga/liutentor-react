@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { initChatMarkdown, isChatMarkdownReady } from "@/lib/chat-markdown";
 
-
 export function useChatMarkdownReady(): boolean {
   const [ready, setReady] = useState(isChatMarkdownReady);
 
@@ -9,7 +8,9 @@ export function useChatMarkdownReady(): boolean {
     if (ready) return;
     let active = true;
     initChatMarkdown()
-      .catch((error) => console.error("[chat] markdown failed to initialise", error))
+      .catch((error) =>
+        console.error("[chat] markdown failed to initialise", error),
+      )
       .finally(() => {
         if (active) setReady(true);
       });

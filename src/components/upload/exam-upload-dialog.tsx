@@ -2,7 +2,6 @@ import { useUploadModal } from "@/stores/upload-modal";
 import { ExamUploadForm } from "./exam-upload-form";
 import { AppDialog } from "@/components/shared/app-dialog";
 
-
 export function ExamUploadDialog() {
   const isOpen = useUploadModal((s) => s.isOpen);
   const courseCode = useUploadModal((s) => s.prefilledCourseCode);

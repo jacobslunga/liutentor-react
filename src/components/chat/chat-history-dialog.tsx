@@ -28,10 +28,6 @@ interface ChatHistoryDialogProps {
   onSelect: () => void;
 }
 
-
-
-
-
 export function ChatHistoryDialog({ onSelect }: ChatHistoryDialogProps) {
   const chatStore = useChatStoreApi();
   const open = useChatStore((s) => s.isHistoryOpen);
@@ -77,7 +73,6 @@ export function ChatHistoryDialog({ onSelect }: ChatHistoryDialogProps) {
         currentConversationId: item.id,
         currentConversationTitle: item.title,
         isConversationTitleReady: true,
-
 
         // oxlint-disable-next-line react/purity
         titleTypingStartedAt: performance.now(),

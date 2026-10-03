@@ -6,11 +6,6 @@ const DELETE_MS = 30;
 const HOLD_MS = 1200;
 const GAP_MS = 500;
 
-
-
-
-
-
 export function useTypingPlaceholder(
   inputRef: RefObject<HTMLInputElement | null>,
   prefix = "",
@@ -32,7 +27,13 @@ export function useTypingPlaceholder(
       const current = examples[index % examples.length];
       const doneTyping = chars === current.length && !deleting;
       const doneDeleting = chars === 0 && deleting;
-      const delay = doneTyping ? HOLD_MS : doneDeleting ? GAP_MS : deleting ? DELETE_MS : TYPE_MS;
+      const delay = doneTyping
+        ? HOLD_MS
+        : doneDeleting
+          ? GAP_MS
+          : deleting
+            ? DELETE_MS
+            : TYPE_MS;
 
       timer = setTimeout(() => {
         if (doneTyping) deleting = true;

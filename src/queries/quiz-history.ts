@@ -7,9 +7,10 @@ import {
   type StoredQuizItem,
 } from "@/types/quiz";
 
-
 function normalizeDifficulty(value: unknown): QuizDifficulty | undefined {
-  return QUIZ_DIFFICULTIES.includes(value as QuizDifficulty) ? (value as QuizDifficulty) : undefined;
+  return QUIZ_DIFFICULTIES.includes(value as QuizDifficulty)
+    ? (value as QuizDifficulty)
+    : undefined;
 }
 
 export const quizHistoryQuery = (userId: string, courseCode: string) =>
@@ -18,7 +19,9 @@ export const quizHistoryQuery = (userId: string, courseCode: string) =>
     queryFn: async (): Promise<StoredQuizItem[]> => {
       const { data, error } = await supabase
         .from("ai_quiz_logs")
-        .select("id, created_at, quiz, source_count, source_exam_ids, course_code, model, difficulty")
+        .select(
+          "id, created_at, quiz, source_count, source_exam_ids, course_code, model, difficulty",
+        )
         .eq("user_id", userId)
         .eq("course_code", courseCode)
         .order("created_at", { ascending: false });
@@ -35,21 +38,20 @@ export const quizHistoryQuery = (userId: string, courseCode: string) =>
               ...quiz,
               meta: {
                 sourceCount: quiz?.meta?.sourceCount ?? row.source_count ?? 0,
-                sourceExamIds: quiz?.meta?.sourceExamIds ?? row.source_exam_ids ?? [],
-                courseCode: quiz?.meta?.courseCode ?? row.course_code ?? courseCode,
+                sourceExamIds:
+                  quiz?.meta?.sourceExamIds ?? row.source_exam_ids ?? [],
+                courseCode:
+                  quiz?.meta?.courseCode ?? row.course_code ?? courseCode,
                 model: quiz?.meta?.model ?? row.model ?? "okand-modell",
-                difficulty: normalizeDifficulty(quiz?.meta?.difficulty) ?? normalizeDifficulty(row.difficulty),
+                difficulty:
+                  normalizeDifficulty(quiz?.meta?.difficulty) ??
+                  normalizeDifficulty(row.difficulty),
               },
             },
           };
         });
     },
   });
-
-
-
-
-
 
 export async function deleteQuiz(userId: string, id: string) {
   const { data, error } = await supabase

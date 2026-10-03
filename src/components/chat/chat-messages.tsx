@@ -9,6 +9,7 @@ import {
   useCallback,
   useEffect,
   useImperativeHandle,
+  useLayoutEffect,
   useRef,
   useState,
   type Ref,
@@ -17,7 +18,7 @@ import {
 import { toast } from "sonner";
 import { useShallow } from "zustand/react/shallow";
 import { useChatMarkdownReady } from "@/hooks/use-chat-markdown";
-import { RowTracker } from "./row-tracker";
+import { useVirtualizer } from "@tanstack/react-virtual";
 import {
   renderCachedChatMarkdown,
   renderChatMarkdown,
@@ -31,6 +32,7 @@ import {
   useChatStore,
   useChatStoreApi,
   type ChatAttachment,
+  type ChatScrollPosition,
   type MessageSource,
 } from "@/stores/chat";
 import { SelectionPopover } from "./selection-popover";
@@ -78,6 +80,7 @@ interface ChatMessagesProps {
   scrollRef: RefObject<HTMLElement | null>;
   className?: string;
   onReplyToSelection: (text: string) => void;
+  onScrollDistanceChange?: (distance: number) => void;
 }
 
 export function ChatMessages({
@@ -85,61 +88,143 @@ export function ChatMessages({
   scrollRef,
   className,
   onReplyToSelection,
+  onScrollDistanceChange,
 }: ChatMessagesProps) {
   const chatStore = useChatStoreApi();
   const ids = useChatStore(useShallow((s) => s.messages.map((m) => m.id)));
-  const [tracker] = useState(() => new RowTracker(scrollRef));
-  const [eager] = useState(
-    () => chatStore.getState().savedScrollPosition !== null,
+  const [initialPosition] = useState(
+    () => chatStore.getState().savedScrollPosition,
   );
-
-  useEffect(() => {
-    tracker.connect();
-    return () => tracker.disconnect();
-  }, [tracker]);
+  const [reserve, setReserve] = useState(initialPosition?.reserve ?? 0);
+  const reserveRef = useRef(reserve);
+  const [paddingTop, setPaddingTop] = useState(64);
+  const [scrollElement, setScrollElement] = useState<HTMLElement | null>(null);
   const mdReady = useChatMarkdownReady();
   const rootRef = useRef<HTMLDivElement>(null);
   const scrollAnimationRef = useRef<number | null>(null);
+  const pendingScroll = useRef<(() => void) | null>(null);
+  const initialized = useRef(false);
+  const latestPosition = useRef<ChatScrollPosition | null>(initialPosition);
+  const getItemKey = useCallback((index: number) => ids[index], [ids]);
+  // TanStack Virtual owns mutable measurement state and must not be compiler-memoized.
+  // oxlint-disable-next-line react/incompatible-library
+  const virtualizer = useVirtualizer({
+    count: ids.length,
+    getScrollElement: () => scrollElement,
+    getItemKey,
+    estimateSize: () => 240,
+    overscan: 5,
+    gap: 4,
+    scrollMargin: paddingTop,
+    scrollPaddingStart: 80,
+    initialOffset: initialPosition?.offset ?? 0,
+    initialMeasurementsCache: initialPosition?.measurements,
+    anchorTo: "start",
+    followOnAppend: false,
+    // Resizing rich markdown can trigger another resize during measurement.
+    useAnimationFrameWithResizeObserver: true,
+  });
+  useEffect(() => {
+    // The parent's DOM ref is attached after the child's layout effects.
+    const frame = requestAnimationFrame(() =>
+      setScrollElement(scrollRef.current),
+    );
+    return () => cancelAnimationFrame(frame);
+  }, [scrollRef]);
   const [popover, setPopover] = useState<{
     x: number;
     y: number;
     anchor: number;
   } | null>(null);
+  const firstMessageId = ids[0];
+  const previousFirstMessageId = useRef(firstMessageId);
+  const [measurementVersion, setMeasurementVersion] = useState(0);
+  const measureRow = useCallback(
+    (node: HTMLDivElement | null) => virtualizer.measureElement(node),
+    // Changing the ref remeasures rows that stayed mounted after a cache reset.
+    // oxlint-disable-next-line react-hooks/exhaustive-deps
+    [virtualizer, measurementVersion],
+  );
+  useLayoutEffect(() => {
+    if (previousFirstMessageId.current === firstMessageId) return;
+    previousFirstMessageId.current = firstMessageId;
+    initialized.current = false;
+    latestPosition.current = null;
+    pendingScroll.current = null;
+    reserveRef.current = 0;
+    setReserve(0);
+    setPopover(null);
+    if (scrollAnimationRef.current !== null) {
+      cancelAnimationFrame(scrollAnimationRef.current);
+      scrollAnimationRef.current = null;
+    }
+  }, [firstMessageId]);
 
-  const scrollToBottom = useCallback(
-    (behavior: ScrollBehavior = "smooth") => {
+  // Keep correcting an explicit destination while newly mounted rows are measured.
+  // The operation ends once settled; later streaming never follows the bottom.
+  const scrollToTarget = useCallback(
+    (target: () => number | null, behavior: ScrollBehavior) => {
       const el = scrollRef.current;
       if (!el) return;
       if (scrollAnimationRef.current !== null) {
         cancelAnimationFrame(scrollAnimationRef.current);
         scrollAnimationRef.current = null;
       }
-      if (
-        behavior === "auto" ||
-        window.matchMedia("(prefers-reduced-motion: reduce)").matches
-      ) {
-        el.scrollTop = el.scrollHeight;
-        return;
-      }
-
       const startTop = el.scrollTop;
       const startedAt = performance.now();
-      const duration = 400;
+      const duration =
+        behavior === "smooth" &&
+        !window.matchMedia("(prefers-reduced-motion: reduce)").matches
+          ? 400
+          : 0;
+      let settled = 0;
+      let previous: number | null = null;
       const animate = (now: number) => {
-        const progress = Math.min((now - startedAt) / duration, 1);
+        const destination = target();
+        if (destination === null) {
+          scrollAnimationRef.current = null;
+          return;
+        }
+        const progress = duration
+          ? Math.min((now - startedAt) / duration, 1)
+          : 1;
         const eased = 1 - (1 - progress) ** 3;
-        const bottom = Math.max(el.scrollHeight - el.clientHeight, 0);
-        el.scrollTop = startTop + (bottom - startTop) * eased;
-        if (progress < 1) {
+        const next = Math.max(
+          0,
+          Math.min(destination, el.scrollHeight - el.clientHeight),
+        );
+        virtualizer.scrollToOffset(startTop + (next - startTop) * eased);
+        settled =
+          progress === 1 &&
+          previous !== null &&
+          Math.abs(previous - next) < 1 &&
+          Math.abs(el.scrollTop - next) < 1
+            ? settled + 1
+            : 0;
+        previous = next;
+        if (settled < 3 && now - startedAt < 1200) {
           scrollAnimationRef.current = requestAnimationFrame(animate);
         } else {
-          el.scrollTop = el.scrollHeight;
           scrollAnimationRef.current = null;
         }
       };
       scrollAnimationRef.current = requestAnimationFrame(animate);
     },
-    [scrollRef],
+    [scrollRef, virtualizer],
+  );
+
+  const scrollToBottom = useCallback(
+    (behavior: ScrollBehavior = "smooth") => {
+      const run = () =>
+        scrollToTarget(() => {
+          const el = scrollRef.current;
+          return el ? el.scrollHeight - el.clientHeight : null;
+        }, behavior);
+      if (!rootRef.current || !virtualizer.scrollElement)
+        pendingScroll.current = run;
+      else run();
+    },
+    [scrollRef, scrollToTarget, virtualizer],
   );
 
   useEffect(
@@ -150,36 +235,111 @@ export function ChatMessages({
     [],
   );
 
-  const restoreScroll = useCallback(() => {
-    const el = scrollRef.current;
-    if (!el) return;
-    const saved = chatStore.getState().savedScrollPosition;
-    if (saved !== null) {
-      el.scrollTop = saved;
-    } else {
-      scrollToBottom("auto");
-      requestAnimationFrame(() => scrollToBottom("auto"));
-    }
-  }, [chatStore, scrollRef, scrollToBottom]);
+  const restoreScroll = useCallback(
+    (saved = chatStore.getState().savedScrollPosition) => {
+      if (
+        !saved ||
+        saved.firstMessageId !== chatStore.getState().messages[0]?.id
+      ) {
+        scrollToBottom("auto");
+        return;
+      }
+      reserveRef.current = saved.reserve;
+      setReserve(saved.reserve);
+      const run = () => {
+        const index = chatStore
+          .getState()
+          .messages.findIndex((m) => m.id === saved.anchorId);
+        virtualizer.scrollToOffset(saved.offset);
+        scrollToTarget(() => {
+          if (index < 0) return saved.offset;
+          const item = virtualizer
+            .getVirtualItems()
+            .find((item) => item.index === index);
+          if (item) return item.start + saved.anchorOffset;
+          const offset = virtualizer.getOffsetForIndex(index, "start");
+          return offset ? offset[0] + 80 + saved.anchorOffset : saved.offset;
+        }, "auto");
+      };
+      if (!rootRef.current || !virtualizer.scrollElement)
+        pendingScroll.current = run;
+      else run();
+    },
+    [chatStore, scrollToBottom, scrollToTarget, virtualizer],
+  );
 
   const scrollUserMessageToTop = useCallback(() => {
-    const root = rootRef.current;
-    const parent = scrollRef.current;
-    if (!root || !parent) return;
-    const userRows = root.querySelectorAll<HTMLElement>('[data-role="user"]');
-    if (userRows.length <= 1) {
-      parent.scrollTop = 0;
-      return;
+    const run = () => {
+      const parent = scrollRef.current;
+      if (!parent) return;
+      const messages = chatStore.getState().messages;
+      const index = messages.findLastIndex((m) => m.role === "user");
+      if (index < 0) return;
+      const firstQuestion =
+        messages.filter((m) => m.role === "user").length === 1;
+      reserveRef.current = firstQuestion
+        ? 0
+        : Math.max(parent.clientHeight - 120, 0);
+      setReserve(reserveRef.current);
+      scrollToTarget(() => {
+        if (firstQuestion) return 0;
+        const item = virtualizer
+          .getVirtualItems()
+          .find((item) => item.index === index);
+        if (item) {
+          const nextReserve = Math.max(
+            parent.clientHeight - item.size - 4 - 40,
+            0,
+          );
+          if (nextReserve !== reserveRef.current) {
+            reserveRef.current = nextReserve;
+            setReserve(nextReserve);
+          }
+          return item.start - 80;
+        }
+        return virtualizer.getOffsetForIndex(index, "start")?.[0] ?? null;
+      }, "smooth");
+    };
+    if (!rootRef.current || !virtualizer.scrollElement)
+      pendingScroll.current = run;
+    else run();
+  }, [chatStore, scrollRef, scrollToTarget, virtualizer]);
+
+  const captureScrollPosition = useCallback(() => {
+    const el = scrollRef.current;
+    const messages = chatStore.getState().messages;
+    if (!el || !el.clientHeight || !rootRef.current || !messages.length) return;
+    const items = virtualizer.getVirtualItems();
+    const anchor =
+      items.find((item) => item.end > el.scrollTop) ?? items.at(-1);
+    // A conversation replacement can unmount the old transcript in the same commit.
+    if (!items.length || items[0].key !== messages[items[0].index]?.id) return;
+    const saved: ChatScrollPosition = {
+      offset: el.scrollTop,
+      anchorId: anchor ? (messages[anchor.index]?.id ?? null) : null,
+      anchorOffset: anchor ? el.scrollTop - anchor.start : 0,
+      measurements: virtualizer.takeSnapshot(),
+      width: rootRef.current.clientWidth,
+      reserve: reserveRef.current,
+      firstMessageId: messages[0].id,
+    };
+    latestPosition.current = saved;
+  }, [chatStore, scrollRef, virtualizer]);
+
+  const saveCapturedPosition = useCallback(() => {
+    const saved = latestPosition.current;
+    if (
+      saved &&
+      saved.firstMessageId === chatStore.getState().messages[0]?.id
+    ) {
+      chatStore.setState({ savedScrollPosition: saved });
     }
-    const lastUser = userRows[userRows.length - 1];
-    const gap = Number.parseFloat(getComputedStyle(root).rowGap) || 0;
-    const reserve = Math.max(
-      parent.clientHeight - lastUser.offsetHeight - gap - 40,
-      0,
-    );
-    root.style.setProperty("--last-message-height", `${reserve}px`);
-    lastUser.scrollIntoView({ behavior: "smooth", block: "start" });
-  }, [scrollRef]);
+  }, [chatStore]);
+
+  const persistScrollPosition = useCallback(() => {
+    captureScrollPosition();
+    saveCapturedPosition();
+  }, [captureScrollPosition, saveCapturedPosition]);
 
   useImperativeHandle(
     ref,
@@ -187,31 +347,118 @@ export function ChatMessages({
       scrollToBottom,
       scrollUserMessageToTop,
       restoreScroll,
-      persistScrollPosition: () => {
-        const el = scrollRef.current;
-        if (el) chatStore.setState({ savedScrollPosition: el.scrollTop });
-      },
+      persistScrollPosition,
     }),
     [
-      chatStore,
       scrollToBottom,
       scrollUserMessageToTop,
       restoreScroll,
-      scrollRef,
+      persistScrollPosition,
     ],
   );
 
   useEffect(() => {
-    if (!mdReady) return;
+    if (!mdReady || !scrollElement || !firstMessageId || initialized.current)
+      return;
+    initialized.current = true;
+    if (pendingScroll.current) {
+      const run = pendingScroll.current;
+      pendingScroll.current = null;
+      run();
+      return;
+    }
     if (
       chatStore.getState().isLoading &&
       chatStore.getState().savedScrollPosition === null
     ) {
       requestAnimationFrame(scrollUserMessageToTop);
     } else {
-      requestAnimationFrame(restoreScroll);
+      requestAnimationFrame(() => restoreScroll(initialPosition));
     }
-  }, [chatStore, mdReady, restoreScroll, scrollUserMessageToTop]);
+  }, [
+    chatStore,
+    firstMessageId,
+    initialPosition,
+    mdReady,
+    restoreScroll,
+    scrollElement,
+    scrollUserMessageToTop,
+  ]);
+
+  useLayoutEffect(() => {
+    if (!mdReady || !scrollElement) return;
+    const root = rootRef.current;
+    const el = scrollRef.current;
+    if (!root || !el) return;
+    el.style.overflowAnchor = "none";
+    let width = root.clientWidth;
+    if (initialPosition && initialPosition.width !== width) {
+      virtualizer.measure();
+      setMeasurementVersion((version) => version + 1);
+    }
+    const observer = new ResizeObserver(() => {
+      setPaddingTop(Number.parseFloat(getComputedStyle(root).paddingTop) || 0);
+      if (width === root.clientWidth) return;
+      const items = virtualizer.getVirtualItems();
+      const anchor = items.find((item) => item.end > el.scrollTop);
+      const relative = anchor ? el.scrollTop - anchor.start : 0;
+      width = root.clientWidth;
+      virtualizer.measure();
+      setMeasurementVersion((version) => version + 1);
+      if (anchor)
+        scrollToTarget(() => {
+          const item = virtualizer
+            .getVirtualItems()
+            .find((item) => item.key === anchor.key);
+          if (item) return item.start + relative;
+          const offset = virtualizer.getOffsetForIndex(anchor.index, "start");
+          return offset ? offset[0] + 80 + relative : null;
+        }, "auto");
+    });
+    observer.observe(root);
+    return () => observer.disconnect();
+  }, [
+    initialPosition,
+    mdReady,
+    scrollElement,
+    scrollRef,
+    scrollToTarget,
+    virtualizer,
+  ]);
+
+  // Use the last committed snapshot: descendant removal can clamp scrollTop
+  // before a parent's unmount cleanup runs.
+  useLayoutEffect(() => () => saveCapturedPosition(), [saveCapturedPosition]);
+
+  useLayoutEffect(() => {
+    const el = scrollRef.current;
+    if (mdReady && el) {
+      captureScrollPosition();
+      onScrollDistanceChange?.(
+        el.scrollHeight - el.clientHeight - el.scrollTop,
+      );
+    }
+  });
+
+  useEffect(() => {
+    const el = scrollRef.current;
+    const stop = () => {
+      pendingScroll.current = null;
+      if (scrollAnimationRef.current !== null)
+        cancelAnimationFrame(scrollAnimationRef.current);
+      scrollAnimationRef.current = null;
+    };
+    el?.addEventListener("wheel", stop, { passive: true });
+    el?.addEventListener("touchstart", stop, { passive: true });
+    el?.addEventListener("pointerdown", stop);
+    el?.addEventListener("scroll", captureScrollPosition, { passive: true });
+    return () => {
+      el?.removeEventListener("wheel", stop);
+      el?.removeEventListener("touchstart", stop);
+      el?.removeEventListener("pointerdown", stop);
+      el?.removeEventListener("scroll", captureScrollPosition);
+    };
+  }, [captureScrollPosition, scrollRef]);
 
   useEffect(() => {
     if (!popover) return;
@@ -280,23 +527,41 @@ export function ChatMessages({
       <div
         ref={rootRef}
         className={cn(
-          "chat-column mx-auto flex w-full min-w-0 flex-col gap-1 px-4 sm:px-5 [&>*:last-child]:min-h-(--last-message-height)",
+          "chat-column mx-auto w-full min-w-0 shrink-0 px-4 sm:px-5",
           className,
         )}
         onMouseUp={onMouseUp}
         onClick={handleCodeCopy}
       >
-        {ids.map((id, i) => (
-          <MessageRow
-            key={id}
-            id={id}
-            index={i}
-            isLast={i === ids.length - 1}
-            isRecent={i >= ids.length - 2}
-            startsNear={eager || i >= ids.length - INITIAL_ROWS}
-            tracker={tracker}
-          />
-        ))}
+        <div
+          className="relative"
+          style={{ height: virtualizer.getTotalSize() }}
+        >
+          <div
+            className="absolute inset-x-0 top-0 flex flex-col gap-1"
+            style={{
+              transform: `translateY(${(virtualizer.getVirtualItems()[0]?.start ?? paddingTop) - paddingTop}px)`,
+            }}
+          >
+            {virtualizer.getVirtualItems().map((item) => (
+              <div
+                key={item.key}
+                data-index={item.index}
+                ref={measureRow}
+                style={{
+                  minHeight:
+                    item.index === ids.length - 1 ? reserve : undefined,
+                }}
+              >
+                <MessageRow
+                  id={ids[item.index]}
+                  index={item.index}
+                  isLast={item.index === ids.length - 1}
+                />
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
       {popover && (
         <SelectionPopover x={popover.x} y={popover.y} onReply={reply} />
@@ -309,23 +574,14 @@ function randomLoadingPhrase() {
   return LOADING_PHRASES[Math.floor(Math.random() * LOADING_PHRASES.length)];
 }
 
-const INITIAL_ROWS = 8;
-const ESTIMATED_ROW_HEIGHT = 240;
-
 const MessageRow = memo(function MessageRow({
   id,
   index,
   isLast,
-  isRecent,
-  startsNear,
-  tracker,
 }: {
   id: string;
   index: number;
   isLast: boolean;
-  isRecent: boolean;
-  startsNear: boolean;
-  tracker: RowTracker;
 }) {
   const message = useChatStore((s) => {
     const atIndex = s.messages[index];
@@ -333,61 +589,16 @@ const MessageRow = memo(function MessageRow({
   });
   const [loadingPhrase] = useState(randomLoadingPhrase);
   const isStreaming = useChatStore((s) => isLast && s.isLoading);
-  const rowRef = useRef<HTMLDivElement>(null);
-
-  const [view, setView] = useState<{ near: boolean; height: number | null }>({
-    near: startsNear,
-    height: null,
-  });
-  useEffect(() => {
-    const el = rowRef.current;
-    if (!el) return;
-    return tracker.observe(el, (near) =>
-      setView((v) =>
-        near
-          ? v.near
-            ? v
-            : { ...v, near }
-          : { near, height: el.offsetHeight },
-      ),
-    );
-  }, [tracker]);
-
-  useEffect(() => {
-    let second = 0;
-    const first = requestAnimationFrame(() => {
-      second = requestAnimationFrame(() =>
-        rowRef.current?.setAttribute("data-measured", ""),
-      );
-    });
-    return () => {
-      cancelAnimationFrame(first);
-      cancelAnimationFrame(second);
-    };
-  }, []);
 
   if (!message) return null;
-
-  if (!view.near && !isRecent && !isStreaming) {
-    return (
-      <div
-        ref={rowRef}
-        data-role={message.role}
-        className="chat-row"
-        style={{ height: view.height ?? ESTIMATED_ROW_HEIGHT }}
-      />
-    );
-  }
 
   if (message.role === "user") {
     return (
       <div
-        ref={rowRef}
         data-role="user"
-        data-recent={isRecent || undefined}
         className="chat-row flex min-w-0 scroll-mt-20 justify-end py-2"
       >
-        <div className="flex max-w-[85%] min-w-0 flex-col items-start gap-2 rounded-2xl bg-muted px-4 py-3 shadow-xs sm:max-w-[75%] @4xl:px-5">
+        <div className="flex max-w-[85%] min-w-0 flex-col items-start gap-2 rounded-2xl bg-muted px-4 py-3 shadow-xs sm:max-w-[75%]">
           {message.selectionContext && (
             <div className="line-clamp-3 border-l-2 border-foreground/30 pl-3 text-sm text-muted-foreground">
               "<SelectionQuote text={message.selectionContext} />"
@@ -401,7 +612,7 @@ const MessageRow = memo(function MessageRow({
             </div>
           )}
           {message.content && (
-            <p className="text-sm leading-relaxed whitespace-pre-wrap sm:text-[0.9375rem] @4xl:text-base">
+            <p className="text-sm leading-relaxed whitespace-pre-wrap sm:text-[0.9375rem]">
               <UserText text={message.content} />
             </p>
           )}
@@ -420,9 +631,7 @@ const MessageRow = memo(function MessageRow({
 
   return (
     <div
-      ref={rowRef}
       data-role="assistant"
-      data-recent={isRecent || undefined}
       className="chat-row w-full min-w-0 overflow-hidden pt-2 pb-8"
     >
       {showStatus && (
@@ -435,7 +644,7 @@ const MessageRow = memo(function MessageRow({
       )}
       {html && (
         <div
-          className="chat-prose prose prose-sm w-full sm:prose-base prose-strong:font-semibold prose-h1:text-xl prose-h2:text-lg prose-h3:text-base prose-h4:text-sm sm:prose-h1:text-2xl sm:prose-h2:text-xl sm:prose-h3:text-lg sm:prose-h4:text-base prose-h5:text-sm prose-h6:text-xs prose-headings:font-semibold max-w-none min-w-0 dark:prose-invert"
+          className="chat-prose prose prose-sm w-full max-w-none min-w-0 sm:prose-base dark:prose-invert prose-headings:font-semibold prose-h1:text-xl sm:prose-h1:text-2xl prose-h2:text-lg sm:prose-h2:text-xl prose-h3:text-base sm:prose-h3:text-lg prose-h4:text-sm sm:prose-h4:text-base prose-h5:text-sm prose-h6:text-xs prose-strong:font-semibold"
           dangerouslySetInnerHTML={{ __html: html }}
         />
       )}

@@ -31,11 +31,6 @@ export interface ChatWindowProps {
   onClose: () => void;
 }
 
-
-
-
-
-
 export default function ChatWindow({
   examId,
   courseCode,
@@ -51,7 +46,6 @@ export default function ChatWindow({
   const chatStore = useChatStoreApi();
   const hasMessages = useChatStore((s) => s.messages.length > 0);
   const isOpen = useChatStore((s) => s.isOpen);
-  const conversationId = useChatStore((s) => s.currentConversationId);
   const { selectedModelId } = useSelectedModel();
   const { send, cancelGeneration } = useExamChat({
     examId,
@@ -63,7 +57,6 @@ export default function ChatWindow({
   const [selectionContext, setSelectionContext] = useState("");
   const [isOverDrop, setIsOverDrop] = useState(false);
   const [showScrollBottom, setShowScrollBottom] = useState(false);
-
 
   const [initialDraft] = useState(() => {
     const { draftInput, draftAttachments } = chatStore.getState();
@@ -113,7 +106,6 @@ export default function ChatWindow({
     requestAnimationFrame(() => inputRef.current?.focus());
   }, []);
 
-
   const startPendingSelection = useCallback(
     (pending: PendingSelection) => {
       if (chatStore.getState().isLoading) {
@@ -129,7 +121,6 @@ export default function ChatWindow({
     },
     [chatStore, submit],
   );
-
 
   useEffect(() => {
     const store = chatStore.getState();
@@ -157,7 +148,6 @@ export default function ChatWindow({
     };
   }, [chatStore, startPendingSelection]);
 
-
   useEffect(
     () => () => {
       chatStore.setState({
@@ -168,29 +158,36 @@ export default function ChatWindow({
     [chatStore],
   );
 
+  const wasOpen = useRef(isOpen);
   useEffect(() => {
     if (isOpen) {
-      requestAnimationFrame(() => {
-        transcriptRef.current?.restoreScroll();
+      const frame = requestAnimationFrame(() => {
+        if (!wasOpen.current) transcriptRef.current?.restoreScroll();
+        wasOpen.current = true;
         inputRef.current?.focus();
       });
+      return () => cancelAnimationFrame(frame);
     } else {
+      wasOpen.current = false;
       chatStore.getState().setHistoryOpen(false);
       transcriptRef.current?.persistScrollPosition();
     }
   }, [chatStore, isOpen]);
 
-
+  const pinFrame = useRef<number | null>(null);
   const pinToBottom = useCallback(() => {
-    for (const delay of [0, 30, 80, 160, 300]) {
-      setTimeout(() => transcriptRef.current?.scrollToBottom("auto"), delay);
-    }
+    if (pinFrame.current !== null) cancelAnimationFrame(pinFrame.current);
+    pinFrame.current = requestAnimationFrame(() => {
+      pinFrame.current = null;
+      transcriptRef.current?.scrollToBottom("auto");
+    });
   }, []);
-
-  useEffect(() => {
-    if (conversationId && !chatStore.getState().isLoading) pinToBottom();
-  }, [chatStore, conversationId, pinToBottom]);
-
+  useEffect(
+    () => () => {
+      if (pinFrame.current !== null) cancelAnimationFrame(pinFrame.current);
+    },
+    [],
+  );
 
   useEffect(() => {
     function onKeyDown(e: KeyboardEvent) {
@@ -208,7 +205,6 @@ export default function ChatWindow({
     document.addEventListener("keydown", onKeyDown, true);
     return () => document.removeEventListener("keydown", onKeyDown, true);
   }, [chatStore]);
-
 
   useEffect(() => {
     const root = rootRef.current;
@@ -257,35 +253,18 @@ export default function ChatWindow({
     };
   }, [chatStore]);
 
-
-
-  const autoScrolling = useRef(false);
-  const autoScrollTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
-
   function scrollToLatest() {
-    setShowScrollBottom(false);
-    autoScrolling.current = true;
-    clearTimeout(autoScrollTimer.current);
-    autoScrollTimer.current = setTimeout(
-      () => (autoScrolling.current = false),
-      1000,
-    );
     transcriptRef.current?.scrollToBottom("smooth");
   }
 
-  function onScroll(e: React.UIEvent<HTMLDivElement>) {
-    const el = e.currentTarget;
-    const distance = el.scrollHeight - (el.scrollTop + el.clientHeight);
-    if (autoScrolling.current) {
-      if (distance < 80) {
-        autoScrolling.current = false;
-        clearTimeout(autoScrollTimer.current);
-      }
-      return;
-    }
-
+  const updateScrollDistance = useCallback((distance: number) => {
     if (distance > 160) setShowScrollBottom(true);
     else if (distance < 80) setShowScrollBottom(false);
+  }, []);
+
+  function onScroll(e: React.UIEvent<HTMLDivElement>) {
+    const el = e.currentTarget;
+    updateScrollDistance(el.scrollHeight - (el.scrollTop + el.clientHeight));
   }
 
   function startNewChat() {
@@ -301,7 +280,7 @@ export default function ChatWindow({
   return (
     <div
       ref={rootRef}
-      className="@container relative flex h-full w-full flex-col overflow-hidden bg-background"
+      className="relative flex h-full w-full flex-col overflow-hidden bg-background"
     >
       {isOverDrop && <ChatDropOverlay />}
 
@@ -345,6 +324,7 @@ export default function ChatWindow({
             scrollRef={scrollRef}
             className="pt-16 pb-36 sm:pb-44"
             onReplyToSelection={replyToSelection}
+            onScrollDistanceChange={updateScrollDistance}
           />
         ) : (
           <div className="flex min-h-0 flex-1 flex-col items-center justify-center gap-4 px-4 pb-28 text-center">

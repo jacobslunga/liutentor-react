@@ -10,7 +10,6 @@ export const LEARN_COMPLETION_URL_LOCAL = `http://localhost:8080/api/v1/chat/lea
 
 const ANONYMOUS_ID_KEY = "liutentor_anonymous_id";
 
-
 export function getAnonymousId(): string {
   try {
     const existing = localStorage.getItem(ANONYMOUS_ID_KEY);
@@ -22,7 +21,6 @@ export function getAnonymousId(): string {
     return "unknown";
   }
 }
-
 
 export async function* readSseEvents(
   body: ReadableStream<Uint8Array>,
@@ -45,9 +43,7 @@ export async function* readSseEvents(
       if (!event || !data) continue;
       try {
         yield { event, data: JSON.parse(data) };
-      } catch {
-
-      }
+      } catch {}
     }
   }
 }

@@ -53,7 +53,6 @@ interface ExamHeaderProps {
   solutionPdfUrl: string | null;
 }
 
-
 export const ExamHeader = memo(function ExamHeader({
   exams,
   examId,

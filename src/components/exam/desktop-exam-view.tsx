@@ -1,4 +1,6 @@
 import { LoaderCircleIcon, MousePointer2Icon, UploadIcon } from "lucide-react";
+import { m } from "framer-motion";
+import { ChatMotion } from "@/components/chat/chat-motion";
 import {
   lazy,
   Suspense,
@@ -57,14 +59,6 @@ interface DesktopExamViewProps {
   exams: Exam[];
 }
 
-
-
-
-
-
-
-
-
 export function DesktopExamView({
   examId,
   courseCode,
@@ -78,6 +72,7 @@ export function DesktopExamView({
   const split = useRef(55);
   const overlayWidth = useRef(Math.round(window.innerWidth / 2));
   const isOverlayResizing = useRef(false);
+  const overlays = useRef(new Set<HTMLElement>());
 
   const layoutMode = useSettingsStore((s) => s.layoutMode);
   const showExplain = useSettingsStore((s) => s.showExplainPopover);
@@ -90,7 +85,6 @@ export function DesktopExamView({
   const isExamOnly = layoutMode === "exam-only";
   const hasFacit = !!solutionPdfUrl;
 
-
   const applySplit = useCallback((percent: number) => {
     split.current = clampSplit(percent);
     rootRef.current?.style.setProperty("--exam-split", `${split.current}%`);
@@ -100,10 +94,18 @@ export function DesktopExamView({
 
     const min = Math.min(OVERLAY_MIN, max);
     overlayWidth.current = Math.round(Math.max(min, Math.min(width, max)));
-    rootRef.current?.style.setProperty(
-      "--exam-overlay-width",
-      `${overlayWidth.current}px`,
-    );
+    // Set on the overlays themselves: an inherited CSS variable makes Safari
+    // restyle the whole chat transcript (KaTeX and all) on every frame.
+    for (const el of overlays.current)
+      el.style.width = `${overlayWidth.current}px`;
+  }, []);
+  const registerOverlay = useCallback((el: HTMLElement | null) => {
+    if (!el) return;
+    el.style.width = `${overlayWidth.current}px`;
+    overlays.current.add(el);
+    return () => {
+      overlays.current.delete(el);
+    };
   }, []);
 
   useLayoutEffect(() => {
@@ -114,7 +116,6 @@ export function DesktopExamView({
   const explain = useCallback((text: string) => {
     examChatStore.getState().askAboutSelection("Förklara", text);
   }, []);
-
 
   useEffect(() => {
     useExamViewStore
@@ -134,9 +135,6 @@ export function DesktopExamView({
     useExamViewStore.getState().setSolutionBlurred(blurFacitUntilHover);
   }, [blurFacitUntilHover]);
 
-
-
-
   useEffect(() => {
     let cancelled = false;
     const warm = () =>
@@ -154,7 +152,6 @@ export function DesktopExamView({
     };
   }, [examId]);
 
-
   useEffect(() => {
     if (!chatOpen) return;
     const view = useExamViewStore.getState();
@@ -164,13 +161,11 @@ export function DesktopExamView({
 
   const latest = useLatest({ isExamOnly, hasFacit });
 
-
   useEffect(() => {
     function onMove(e: MouseEvent) {
       const view = useExamViewStore.getState();
 
       if (view.focusMode) {
-
         if (!view.isHeaderMounted && e.clientY < FOCUS_SUMMON_Y)
           view.setHeaderMounted(true);
         else if (view.isHeaderMounted && e.clientY > HEADER_ACTIVE_Y)
@@ -215,7 +210,6 @@ export function DesktopExamView({
       document.documentElement.removeEventListener("mouseleave", onLeave);
     };
   }, [latest]);
-
 
   useEffect(() => {
     function onKeyDown(e: KeyboardEvent) {
@@ -322,7 +316,6 @@ export function DesktopExamView({
             <div className="relative z-20 w-0 shrink-0">
               <ResizeHandle
                 onResizeStart={() => {
-
                   const rect = splitRowRef.current?.getBoundingClientRect();
                   splitRowWidth.current = {
                     left: rect?.left ?? 0,
@@ -354,6 +347,7 @@ export function DesktopExamView({
         <SideOverlay
           visible={isFacitVisible && !chatOpen}
           zIndex="z-30"
+          overlayRef={registerOverlay}
           onResize={applyOverlayWidth}
           onResizeStart={() => (isOverlayResizing.current = true)}
           onResizeEnd={() => (isOverlayResizing.current = false)}
@@ -373,6 +367,7 @@ export function DesktopExamView({
         <SideOverlay
           visible={chatOpen}
           zIndex="z-40"
+          overlayRef={registerOverlay}
           onResize={applyOverlayWidth}
           onResizeStart={() => (isOverlayResizing.current = true)}
           onResizeEnd={() => (isOverlayResizing.current = false)}
@@ -393,14 +388,11 @@ export function DesktopExamView({
   );
 }
 
-
-
-
-
 function SideOverlay({
   visible,
   zIndex,
   children,
+  overlayRef,
   onResize,
   onResizeStart,
   onResizeEnd,
@@ -408,47 +400,49 @@ function SideOverlay({
   visible: boolean;
   zIndex: string;
   children: ReactNode;
+  overlayRef: (el: HTMLElement | null) => (() => void) | undefined;
   onResize: (width: number) => void;
   onResizeStart: () => void;
   onResizeEnd: () => void;
 }) {
-
-
-
-  const [mounted, setMounted] = useState(false);
-  useEffect(() => {
-    let frame = requestAnimationFrame(() => {
-      frame = requestAnimationFrame(() => setMounted(true));
-    });
-    return () => cancelAnimationFrame(frame);
-  }, []);
-  const shown = visible && mounted;
+  // Make the panel inert only once it has slid out: toggling inert restyles
+  // the whole transcript, which in Safari would hold up the first frame.
+  const [parked, setParked] = useState(!visible);
+  if (visible && parked) setParked(false);
+  const hidden = !visible && parked;
 
   return (
-    <div
-      aria-hidden={!shown}
-      inert={!shown}
-      className={cn(
-        "fixed right-0 bottom-0 flex h-dvh border-l bg-background shadow-xl transition-[translate,opacity,filter] duration-200 ease-spring dark:shadow-none",
-        zIndex,
-        shown
-          ? "translate-x-0 opacity-100"
-          : "pointer-events-none translate-x-full opacity-0 blur-sm",
-      )}
-      style={{ width: "var(--exam-overlay-width)" }}
-    >
-      <div className="relative z-10 w-0 shrink-0">
-        <ResizeHandle
-          onResize={(x) => onResize(window.innerWidth - x)}
-          onResizeStart={onResizeStart}
-          onResizeEnd={onResizeEnd}
-        />
-      </div>
-      <div className="min-w-0 flex-1 overflow-hidden">{children}</div>
-    </div>
+    <ChatMotion>
+      <m.div
+        ref={overlayRef}
+        aria-hidden={hidden}
+        inert={hidden}
+        // Park slightly past 100% so the left-hand shadow is off-screen too.
+        initial={{ x: "110%" }}
+        animate={{ x: visible ? "0%" : "110%" }}
+        transition={{ type: "tween", duration: 0.2, ease: [0.32, 0.72, 0, 1] }}
+        onAnimationComplete={() => {
+          if (!visible) setParked(true);
+        }}
+        // Keep a permanent compositor layer so Safari doesn't repaint the
+        // whole panel into a fresh one each time the slide starts.
+        className={cn(
+          "fixed right-0 bottom-0 flex h-dvh border-l bg-background shadow-xl will-change-transform dark:shadow-none",
+          zIndex,
+        )}
+      >
+        <div className="relative z-10 w-0 shrink-0">
+          <ResizeHandle
+            onResize={(x) => onResize(window.innerWidth - x)}
+            onResizeStart={onResizeStart}
+            onResizeEnd={onResizeEnd}
+          />
+        </div>
+        <div className="min-w-0 flex-1 overflow-hidden">{children}</div>
+      </m.div>
+    </ChatMotion>
   );
 }
-
 
 function SolutionPane({
   pdfUrl,

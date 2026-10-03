@@ -1,13 +1,15 @@
 @import "katex/dist/katex.min.css";
 
-
-
-
-
+/* % rather than cqi: container queries make Safari restyle the whole
+   transcript on every resize frame. */
 .chat-column {
-  max-width: clamp(42rem, 62cqi, 54rem);
+  max-width: clamp(40rem, 56%, 48rem);
 }
 
+/* The learn page has the whole window to itself, so use a wider column. */
+.learn-chat .chat-column {
+  max-width: clamp(40rem, 80%, 50rem);
+}
 
 .chat-prose {
   --tw-prose-body: var(--foreground);
@@ -28,20 +30,6 @@
   --tw-prose-hr: var(--border);
   --tw-prose-th-borders: var(--border);
   --tw-prose-td-borders: var(--border);
-}
-
-
-
-
-
-
-
-.chat-row {
-  contain-intrinsic-size: auto 400px;
-}
-
-.chat-row[data-measured]:not([data-recent]) {
-  content-visibility: auto;
 }
 
 .chat-prose .katex-display {
@@ -82,8 +70,6 @@
 .chat-prose li {
   overflow-wrap: break-word;
 }
-
-
 
 .chat-prose .table-scroll {
   width: 100%;
@@ -213,7 +199,6 @@
   color: var(--shiki-dark);
 }
 
-
 .selection-quote :is(p, li, section, h1, h2, h3, h4) {
   display: inline;
   margin: 0;
@@ -243,7 +228,6 @@
 .selection-quote .code-header {
   display: none;
 }
-
 
 .chat-prompt-generating {
   border-color: transparent !important;

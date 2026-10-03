@@ -10,10 +10,8 @@ export interface CourseItem {
 
 const MAX_RESULTS = 10;
 
-
 export const resultOptionId = (listId: string, code: string) =>
   `${listId}-${code}`;
-
 
 export function useCourseSearch() {
   const navigate = useNavigate();

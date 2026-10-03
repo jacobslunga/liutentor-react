@@ -18,12 +18,6 @@ import {
   InputGroupInput,
 } from "@/components/ui/input-group";
 
-
-
-
-
-
-
 function CourseSearchBase({
   className,
   renderInput,
@@ -47,7 +41,6 @@ function CourseSearchBase({
   const [focused, setFocused] = useState(false);
   const [active, setActive] = useState("");
   const open = focused && query.trim().length > 0;
-
 
   useEffect(() => {
     setActive(items[0]?.code ?? "");
@@ -113,7 +106,6 @@ function CourseSearchBase({
   );
 }
 
-
 export function HeroCourseSearch() {
   const inputRef = useRef<HTMLInputElement>(null);
   useTypingPlaceholder(inputRef, "Sök efter ");
@@ -123,7 +115,7 @@ export function HeroCourseSearch() {
   return (
     <CourseSearchBase
       renderInput={({ value, onChange, ...handlers }) => (
-        <div className="relative flex w-full items-center rounded-full border border-foreground/20 bg-background text-sm transition-colors duration-200 hover:border-foreground/40 focus-within:border-brand focus-within:ring-1 focus-within:ring-brand focus-within:hover:border-brand">
+        <div className="relative flex w-full items-center rounded-full border border-foreground/20 bg-background text-sm transition-colors duration-200 focus-within:border-brand focus-within:ring-1 focus-within:ring-brand hover:border-foreground/40 focus-within:hover:border-brand">
           <SearchIcon className="pointer-events-none absolute left-5 size-6 text-muted-foreground" />
           <input
             ref={inputRef}
@@ -141,7 +133,6 @@ export function HeroCourseSearch() {
     />
   );
 }
-
 
 export function HeaderCourseSearch({ className }: { className?: string }) {
   const inputRef = useRef<HTMLInputElement>(null);

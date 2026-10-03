@@ -64,7 +64,6 @@ const FIXED_LIMITS = [
 ];
 
 interface SettingsDialogProps {
-
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
 }

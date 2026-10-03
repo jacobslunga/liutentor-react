@@ -24,7 +24,6 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
       storageKey="color-mode"
       disableTransitionOnChange
 
-
       scriptProps={{ type: "application/json" }}
     >
       <FaviconSync />

@@ -14,7 +14,6 @@ async function fetchBytes(url: string) {
   return new Uint8Array(await res.arrayBuffer());
 }
 
-
 export async function downloadFile(url: string, filename: string) {
   try {
     const res = await fetch(url);
@@ -23,10 +22,6 @@ export async function downloadFile(url: string, filename: string) {
     window.open(url, "_blank");
   }
 }
-
-
-
-
 
 export async function downloadZip(
   files: { url: string; filename: string }[],
@@ -43,12 +38,14 @@ export async function downloadZip(
   saveBlob(new Blob([zipped], { type: "application/zip" }), zipName);
 }
 
-
 export function examFileNames(courseCode: string, examDate: string) {
   const base = `${courseCode}_${examDate}`;
-  return { exam: `${base}_EXAM.pdf`, solution: `${base}_SOLUTION.pdf`, zip: `${base}.zip` };
+  return {
+    exam: `${base}_EXAM.pdf`,
+    solution: `${base}_SOLUTION.pdf`,
+    zip: `${base}.zip`,
+  };
 }
-
 
 export function downloadBoth(
   courseCode: string,

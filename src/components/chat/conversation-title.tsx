@@ -4,12 +4,6 @@ import { useChatStore } from "@/stores/chat";
 
 const CHAR_MS = 28;
 
-
-
-
-
-
-
 export function TypedTitle({
   title,
   startedAt,
@@ -44,7 +38,6 @@ export function TypedTitle({
     </span>
   );
 }
-
 
 export function ConversationTitle() {
   const title = useChatStore((s) =>

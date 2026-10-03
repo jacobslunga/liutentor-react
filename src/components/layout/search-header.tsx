@@ -6,8 +6,6 @@ import { LogoIcon } from "./logo-icon";
 export function SearchHeader() {
   return (
     <header className="relative z-40 w-full bg-background pt-[env(safe-area-inset-top,0px)]">
-
-
       <div className="container mx-auto flex min-h-16 max-w-6xl items-center gap-4 px-4 py-3 md:gap-6 md:px-8">
         <Link
           to="/"

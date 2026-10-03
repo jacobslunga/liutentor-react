@@ -37,17 +37,6 @@ function gestureScale(el: HTMLElement) {
   }
 }
 
-
-
-
-
-
-
-
-
-
-
-
 export function PdfWheelZoom() {
   const viewportRef = useViewportElement();
   const liveZoom = useContext(LiveZoomContext);
@@ -103,7 +92,10 @@ export function PdfWheelZoom() {
       viewport!.dispatchEvent(synthetic);
     }
 
-    viewport.addEventListener("wheel", onWheel, { capture: true, passive: false });
+    viewport.addEventListener("wheel", onWheel, {
+      capture: true,
+      passive: false,
+    });
     return () => {
       viewport.removeEventListener("wheel", onWheel, { capture: true });
       observer?.disconnect();

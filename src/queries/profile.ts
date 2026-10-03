@@ -1,4 +1,9 @@
-import { queryOptions, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  queryOptions,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
 import { useUser } from "@/stores/auth";
 import { useSettingsStore } from "@/stores/settings";
@@ -36,11 +41,19 @@ export const activityQuery = (userId: string) =>
     queryKey: ["activity", userId],
     queryFn: async (): Promise<Activity> => {
       const [quizRes, conversationsRes] = await Promise.all([
-        supabase.from("ai_quiz_logs").select("id", { count: "exact", head: true }).eq("user_id", userId),
-        supabase.from("conversations").select("id", { count: "exact" }).eq("user_id", userId),
+        supabase
+          .from("ai_quiz_logs")
+          .select("id", { count: "exact", head: true })
+          .eq("user_id", userId),
+        supabase
+          .from("conversations")
+          .select("id", { count: "exact" })
+          .eq("user_id", userId),
       ]);
 
-      const conversationIds = (conversationsRes.data ?? []).map((row: { id: string }) => row.id);
+      const conversationIds = (conversationsRes.data ?? []).map(
+        (row: { id: string }) => row.id,
+      );
       let chatMessageCount = 0;
       if (conversationIds.length) {
         const logs = await supabase
@@ -57,7 +70,6 @@ export const activityQuery = (userId: string) =>
       };
     },
   });
-
 
 export function useProfile() {
   const user = useUser();
@@ -82,7 +94,6 @@ export function useProfile() {
   };
 }
 
-
 export function useUpdateProfile() {
   const queryClient = useQueryClient();
   const user = useUser();
@@ -90,14 +101,18 @@ export function useUpdateProfile() {
   return useMutation({
     mutationFn: async (patch: Partial<Profile>) => {
       if (!user) throw new Error("Not signed in");
-      const { error } = await supabase.from("profiles").update(patch).eq("id", user.id);
+      const { error } = await supabase
+        .from("profiles")
+        .update(patch)
+        .eq("id", user.id);
       if (error) throw error;
       return patch;
     },
     onSuccess: (patch) => {
       if (!user) return;
-      queryClient.setQueryData<Profile | null>(profileQuery(user.id).queryKey, (old) =>
-        old ? { ...old, ...patch } : old,
+      queryClient.setQueryData<Profile | null>(
+        profileQuery(user.id).queryKey,
+        (old) => (old ? { ...old, ...patch } : old),
       );
     },
   });

@@ -1,11 +1,6 @@
 import { Readable } from "node:stream";
 import type { Plugin } from "vite";
 
-
-
-
-
-
 export function netlifyFunctionsDev(routes: Record<string, string>): Plugin {
   return {
     name: "netlify-functions-dev",
@@ -19,13 +14,18 @@ export function netlifyFunctionsDev(routes: Record<string, string>): Plugin {
         try {
           const mod = await server.ssrLoadModule(file);
           const hasBody = req.method !== "GET" && req.method !== "HEAD";
-          const request = new Request(new URL(req.url!, `http://${req.headers.host}`), {
-            method: req.method,
-            headers: req.headers as Record<string, string>,
-            body: hasBody ? (Readable.toWeb(req) as ReadableStream) : undefined,
+          const request = new Request(
+            new URL(req.url!, `http://${req.headers.host}`),
+            {
+              method: req.method,
+              headers: req.headers as Record<string, string>,
+              body: hasBody
+                ? (Readable.toWeb(req) as ReadableStream)
+                : undefined,
 
-            ...(hasBody ? { duplex: "half" } : {}),
-          });
+              ...(hasBody ? { duplex: "half" } : {}),
+            },
+          );
           const response: Response = await mod.default(request);
           res.statusCode = response.status;
           response.headers.forEach((value, key) => res.setHeader(key, value));
