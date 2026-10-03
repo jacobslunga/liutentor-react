@@ -13,7 +13,7 @@ import { AppDialog } from "@/components/shared/app-dialog";
 import { Button } from "@/components/ui/button";
 import { DialogDescription, DialogTitle } from "@/components/ui/dialog";
 
-/** Lets the page settle before the dialog asks for attention. */
+
 const OPEN_DELAY_MS = 900;
 
 const HIGHLIGHTS = [
@@ -22,10 +22,10 @@ const HIGHLIGHTS = [
   { Icon: QuoteIcon, text: "Få svar med källor ur ditt material" },
 ];
 
-/**
- * Introduces the learning chat to visitors who haven't seen it, once. Waits
- * for the analytics banner to be answered so the two never compete.
- */
+
+
+
+
 export function ChatIntroDialog() {
   const navigate = useNavigate();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
@@ -42,7 +42,7 @@ export function ChatIntroDialog() {
     return () => window.removeEventListener(ANALYTICS_CONSENT_EVENT, onConsent);
   }, [consentAnswered]);
 
-  // Finding the chat on your own counts as having seen the intro.
+
   useEffect(() => {
     if (onChat) markChatIntroSeen();
   }, [onChat]);

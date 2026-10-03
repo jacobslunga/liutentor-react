@@ -1,11 +1,11 @@
 import { Readable } from "node:stream";
 import type { Plugin } from "vite";
 
-/**
- * Serves the Netlify Functions under netlify/functions during `vite dev`, so
- * forms that post to /api/* work without the Netlify CLI. Each function is
- * loaded through Vite's SSR loader and called with a standard Request.
- */
+
+
+
+
+
 export function netlifyFunctionsDev(routes: Record<string, string>): Plugin {
   return {
     name: "netlify-functions-dev",
@@ -23,7 +23,7 @@ export function netlifyFunctionsDev(routes: Record<string, string>): Plugin {
             method: req.method,
             headers: req.headers as Record<string, string>,
             body: hasBody ? (Readable.toWeb(req) as ReadableStream) : undefined,
-            // Required by Node when streaming a request body.
+
             ...(hasBody ? { duplex: "half" } : {}),
           });
           const response: Response = await mod.default(request);

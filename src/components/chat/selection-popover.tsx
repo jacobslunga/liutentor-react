@@ -25,7 +25,7 @@ export function SelectionPopover({
           variant="outline"
           className="font-medium"
           onMouseDown={(e) => {
-            // Keep the selection alive until we've read it.
+
             e.preventDefault();
             e.stopPropagation();
             onReply();

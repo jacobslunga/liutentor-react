@@ -24,17 +24,17 @@ const LEVEL_ICONS: Record<QuizDifficulty, typeof SignalLowIcon> = {
   hard: SignalHighIcon,
 };
 
-/**
- * The quiz tab's starting point: what a quiz is, a difficulty to pick, and
- * one clear way to start.
- */
+
+
+
+
 export function QuizStart({
   courseCode,
   poolSize,
   onStart,
 }: {
   courseCode: string;
-  /** Exams with a PDF the quiz can draw from. */
+
   poolSize: number;
   onStart: () => void;
 }) {

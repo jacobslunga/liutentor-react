@@ -108,7 +108,7 @@ const ExamRow = memo(function ExamRow({
     params: { courseCode, examId: String(exam.id) },
   } as const;
 
-  // Warm the route chunk and the exam detail before the click lands.
+
   function prefetch() {
     void router.preloadRoute(target);
     void queryClient.prefetchQuery(examDetailQuery(exam.id));

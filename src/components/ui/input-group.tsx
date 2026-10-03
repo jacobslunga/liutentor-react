@@ -112,9 +112,9 @@ function InputGroupText({ className, ...props }: React.ComponentProps<"span">) {
   )
 }
 
-// The group draws the field (fill, border, recessed shadow); the control
-// inside stays bare so the field reads as one even surface. The resets are
-// keyed on data-slot so they outrank Input's own classes in the cascade.
+
+
+
 function InputGroupInput({
   className,
   ...props

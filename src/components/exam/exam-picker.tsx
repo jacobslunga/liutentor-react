@@ -36,14 +36,14 @@ interface ExamPickerProps {
   exams: Exam[];
   examId: string;
   courseCode: string;
-  /** Rendered as the trigger's label. */
+
   children: React.ReactNode;
   triggerClassName?: string;
   triggerSize?: "sm" | "default";
   align?: "start" | "center" | "end";
 }
 
-/** Popover listing all exams of the course; picking one navigates to it. */
+
 export function ExamPicker({
   exams,
   examId,
@@ -148,8 +148,8 @@ export function ExamPicker({
           </div>
         </div>
 
-        {/* The padding sits inside the scroller, so rows clip flush against
-          the header instead of peeking through a gap above them. */}
+
+
         <div
           ref={listRef}
           className="max-h-[min(20rem,60dvh)] max-w-[calc(100vw-2rem)] overflow-y-auto"

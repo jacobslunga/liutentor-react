@@ -1,6 +1,6 @@
 import type { Course, CourseExams, ExamDetail } from "@/types/exam";
 
-/** Same-origin proxy to the Go exam service (see vite.config.ts / netlify.toml). */
+
 const GO_API_BASE = "/api/go";
 
 export class ApiError extends Error {
@@ -24,7 +24,7 @@ export async function getCourses(signal?: AbortSignal): Promise<Course[]> {
   return data?.courses ?? [];
 }
 
-/** Resolves to null for course codes the archive has no exams for. */
+
 export async function getCourseExams(
   courseCode: string,
   signal?: AbortSignal,

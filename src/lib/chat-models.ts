@@ -1,8 +1,8 @@
-/**
- * The picker is presented as a thinking level rather than a model name: students
- * pick how much effort they want spent, not a vendor. Each level maps to exactly
- * one model, so the mapping stays swappable without touching the UI copy.
- */
+
+
+
+
+
 export const CHAT_MODELS = [
   {
     id: "gemini-flash-lite-minimal",

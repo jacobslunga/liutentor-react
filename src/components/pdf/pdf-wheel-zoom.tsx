@@ -6,7 +6,7 @@ const WHEEL_PIXELS_PER_NOTCH = 100;
 const WHEEL_LINES_PER_NOTCH = 3;
 const MAX_NOTCHES_PER_EVENT = 3;
 const ZOOM_PER_NOTCH = 0.105;
-/** Pixel deltas at or above this come from a mouse wheel, not a trackpad. */
+
 const MOUSE_NOTCH_DELTA_THRESHOLD = 40;
 
 function isMouseNotch(event: WheelEvent) {
@@ -37,17 +37,17 @@ function gestureScale(el: HTMLElement) {
   }
 }
 
-/**
- * Ctrl/Cmd+wheel zoom tuning, rendered inside the Viewport.
- *
- * - Mouse-wheel notches are re-dispatched as a normalized pixel delta so each
- *   notch zooms by the same factor on every platform (trackpads pass through).
- * - The gesture element's CSS transform is mirrored into the live zoom store
- *   so the zoom label tracks the preview before EmbedPDF commits the level.
- *
- * Attached natively: React registers wheel listeners as passive, and this one
- * must be able to preventDefault in the capture phase.
- */
+
+
+
+
+
+
+
+
+
+
+
 export function PdfWheelZoom() {
   const viewportRef = useViewportElement();
   const liveZoom = useContext(LiveZoomContext);

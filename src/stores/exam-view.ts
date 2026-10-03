@@ -1,16 +1,16 @@
 import { create } from "zustand";
 
 interface ExamViewState {
-  /** Header hidden until the pointer reaches the top edge. */
+
   focusMode: boolean;
   isHeaderMounted: boolean;
-  /** Exam-only mode: the facit overlay on the right. */
+
   isFacitVisible: boolean;
-  /** Opened with the keyboard/click, so pointer movement won't close it. */
+
   isFacitManual: boolean;
-  /** Exam-with-facit mode: the solution is blurred until hovered. */
+
   solutionBlurred: boolean;
-  /** The chat overlay mounts on first open and then stays mounted. */
+
   chatHasBeenOpened: boolean;
 
   toggleFocusMode: () => void;
@@ -21,12 +21,12 @@ interface ExamViewState {
   reset: (blurSolution: boolean) => void;
 }
 
-/**
- * UI state for the exam page that several siblings read (header, panes,
- * overlays, key handler). Everything here changes on discrete events; the
- * per-pixel values (split and overlay widths, facit proximity) never enter
- * React state.
- */
+
+
+
+
+
+
 export const useExamViewStore = create<ExamViewState>((set) => ({
   focusMode: false,
   isHeaderMounted: true,

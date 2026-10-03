@@ -1,14 +1,14 @@
 import { AI_API_BASE } from "@/lib/chat-api";
 import { getAuthHeaders, supabase } from "@/lib/supabase";
 
-/**
- * Study courses: free-form spaces in the learning chat where a signed-in
- * student collects lecture PDFs. Courses themselves are plain rows (RLS);
- * material goes through the API, which indexes it for the course's chats.
- */
+
+
+
+
+
 
 export const MATERIAL_BUCKET = "study-materials";
-/** Total size of all PDFs in one course; the API enforces it too. */
+
 export const COURSE_QUOTA_BYTES = 100 * 1024 * 1024;
 export const COURSE_NAME_MAX = 80;
 
@@ -31,7 +31,7 @@ export interface CourseFile {
 
 const COURSES_URL = `${AI_API_BASE}/study-courses`;
 
-/** Calls the study-course API; throws with the server's (Swedish) message. */
+
 async function api<T>(path: string, init: RequestInit = {}): Promise<T> {
   const response = await fetch(`${COURSES_URL}${path}`, {
     ...init,
@@ -86,7 +86,7 @@ export async function renameStudyCourse(id: string, name: string) {
   if (error) throw error;
 }
 
-/** Deletes the course with its material and chats. */
+
 export function deleteStudyCourse(id: string) {
   return api<null>(`/${id}`, { method: "DELETE" });
 }
@@ -95,10 +95,10 @@ export function listCourseFiles(courseId: string) {
   return api<CourseFile[]>(`/${courseId}/files`);
 }
 
-/**
- * Uploads a PDF straight to Storage (no size cap from the API host), then
- * asks the API to index it. The API removes the upload again if it refuses.
- */
+
+
+
+
 export async function uploadCourseFile(
   userId: string,
   courseId: string,
@@ -119,10 +119,10 @@ export function deleteCourseFile(courseId: string, fileId: string) {
   return api<null>(`/${courseId}/files/${fileId}`, { method: "DELETE" });
 }
 
-/**
- * A short-lived link to a course file an answer cited, found by the OpenAI
- * file id the citation carries. Null when the file is gone.
- */
+
+
+
+
 export async function courseFileUrl(openaiFileId: string): Promise<string | null> {
   const { data } = await supabase
     .from("study_course_files")

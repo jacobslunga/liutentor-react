@@ -8,13 +8,13 @@ import { Spinner } from "@/components/ui/spinner";
 interface CourseNameDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  /** Set when renaming; empty for a new course. */
+
   initialName?: string;
-  /** Resolves when saved; a rejection keeps the dialog open. */
+
   onSubmit: (name: string) => Promise<void>;
 }
 
-/** Names a new study course, or renames one. */
+
 export function CourseNameDialog({
   open,
   onOpenChange,
@@ -23,7 +23,7 @@ export function CourseNameDialog({
 }: CourseNameDialogProps) {
   const renaming = !!initialName;
 
-  // Unmounted while closed, so the field starts from `initialName` each time.
+
   if (!open) return null;
 
   return (
@@ -59,7 +59,7 @@ function CourseNameForm({
     try {
       await onSubmit(trimmed);
     } catch {
-      // The caller has told the user; staying open lets them try again.
+
     } finally {
       setSaving(false);
     }

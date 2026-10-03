@@ -16,10 +16,10 @@ const WIDTHS = {
 } as const;
 
 type AppDialogProps = {
-  /** Heading; omit when `header` renders its own DialogTitle. */
+
   title?: ReactNode;
   description?: ReactNode;
-  /** Replaces the default title/description block. */
+
   header?: ReactNode;
   footer?: ReactNode;
   children?: ReactNode;
@@ -29,10 +29,10 @@ type AppDialogProps = {
   className?: string;
 };
 
-/**
- * A shadcn Dialog with the usual parts (title, description, body, footer).
- * Rendered open; mount it conditionally.
- */
+
+
+
+
 export function AppDialog({
   title,
   description,

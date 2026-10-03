@@ -1,7 +1,7 @@
 import { createContext, useContext } from "react";
 import { create, useStore } from "zustand";
 
-/** A web page, or (with `fileId`) a study-course file, an answer cited. */
+
 export type MessageSource =
   | { type?: "web"; title: string; url: string }
   | { type: "file"; title: string; fileId: string };
@@ -23,20 +23,20 @@ export interface ChatAttachment {
 }
 
 export interface Message {
-  /** Stable client id so rows can be memoized while the last one streams. */
+
   id: string;
   role: "user" | "assistant";
   content: string;
   context?: string;
   selectionContext?: string;
   attachments?: ChatAttachment[];
-  /**
-   * What the assistant is doing right now, e.g. searching the web. Live only
-   * for the turn being streamed; reloaded history never carries it.
-   */
+
+
+
+
   status?: MessageStatus | null;
   sources?: MessageSource[];
-  /** When the server logged it; only on messages loaded from history. */
+
   createdAt?: string;
 }
 
@@ -55,19 +55,19 @@ export interface ChatState {
   draftAttachments: ChatAttachment[];
   currentExamId: string | null;
   currentConversationId: string | null;
-  /** The study course the open (or about to be started) chat belongs to. */
+
   currentCourseId: string | null;
   currentConversationTitle: string | null;
   isConversationTitleReady: boolean;
-  /**
-   * When the generated title arrived (performance.now()), so every place that
-   * shows it types it out in step; null shows it whole.
-   */
+
+
+
+
   titleTypingStartedAt: number | null;
-  /**
-   * Whether the sidebar row types the title too: yes for a freshly generated
-   * title, no when opening a chat whose row already shows it.
-   */
+
+
+
+
   titleTypesInSidebar: boolean;
   pendingSelection: PendingSelection | null;
 
@@ -78,7 +78,7 @@ export interface ChatState {
   setHistoryOpen: (value: boolean) => void;
   askAboutSelection: (prompt: string, context: string) => void;
   takePendingSelection: () => PendingSelection | null;
-  /** Replace one message (by id) with a patched copy. */
+
   updateMessage: (id: string, patch: Partial<Message>) => void;
   getActiveAttachments: () => ChatAttachment[];
   deactivateAttachment: (id: string) => void;
@@ -94,14 +94,14 @@ function revokePreviews(attachments: ChatAttachment[]) {
   for (const url of urls) URL.revokeObjectURL(url);
 }
 
-/**
- * Chat state. Components must select the slice they need: the streaming reply
- * replaces the last message every frame, and anything subscribed to
- * `messages` re-renders with it.
- *
- * Each chat surface owns a store, so the exam panel and the learning chat never
- * overwrite each other's conversation.
- */
+
+
+
+
+
+
+
+
 export const createChatStore = () =>
   create<ChatState>((set, get) => ({
     isOpen: false,
@@ -188,12 +188,12 @@ export const createChatStore = () =>
 
 export type ChatStore = ReturnType<typeof createChatStore>;
 
-/** The side panel in the exam view. */
+
 export const examChatStore = createChatStore();
-/** The standalone learning chat at /chatt. */
+
 export const learnChatStore = createChatStore();
 
-/** Which store the chat components below it read; the exam panel by default. */
+
 export const ChatStoreContext = createContext<ChatStore>(examChatStore);
 
 export const useChatStoreApi = () => useContext(ChatStoreContext);

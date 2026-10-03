@@ -8,7 +8,7 @@ import { useSeo } from "@/hooks/use-seo";
 import { courseExamsQuery, examDetailQuery } from "@/queries/exams";
 import { Button } from "@/components/ui/button";
 
-/** Touch tablets use the full-width viewer in either orientation. */
+
 const TOUCH_VIEWER_QUERY = "(max-width: 1023px), (pointer: coarse)";
 
 export const Route = createFileRoute("/search/$courseCode/$examId")({
@@ -17,7 +17,7 @@ export const Route = createFileRoute("/search/$courseCode/$examId")({
     stringify: ({ courseCode, examId }) => ({ courseCode, examId }),
   },
   loader: ({ context, params }) => {
-    // Start both requests with the route chunk; the exam list is not awaited.
+
     void context.queryClient.prefetchQuery(courseExamsQuery(params.courseCode));
     return context.queryClient.ensureQueryData(examDetailQuery(params.examId));
   },

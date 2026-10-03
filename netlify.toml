@@ -4,15 +4,11 @@
 
 [build.environment]
   NODE_VERSION = "22"
-  # Must match "packageManager" in package.json: the lockfile's patch hashes
-  # and pnpm-manager entry are written by this version, and older pnpm (the
-  # Netlify default) rejects them in a frozen install.
   PNPM_VERSION = "12.6.0"
 
 [functions]
   directory = "netlify/functions"
 
-# Same-origin proxy to the Go exam service (it does not send CORS headers).
 [[redirects]]
   from = "/api/go/*"
   to = "https://liutentor-go-687405545415.europe-west1.run.app/:splat"
@@ -39,7 +35,6 @@
   to = "/index.html"
   status = 200
 
-# The learning chat: /chatt, /chatt/<conversation> and /chatt/kurs/<course>.
 [[redirects]]
   from = "/chatt"
   to = "/index.html"
@@ -95,7 +90,6 @@
   to = "/404.html"
   status = 404
 
-# Hashed build output never changes, so it can be cached forever.
 [[headers]]
   for = "/assets/*"
   [headers.values]

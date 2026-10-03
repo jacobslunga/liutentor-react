@@ -64,17 +64,17 @@ function Spinner() {
   );
 }
 
-/** Holds the page loading bar while `pending`; renders nothing. */
+
 function PageLoadingTask({ pending }: { pending: boolean }) {
   usePageLoadingTask(pending);
   return null;
 }
 
-/**
- * A self-contained PDF viewer: its own PDFium engine, plugin registry, zoom
- * and scroll state. Memoized with primitive props so parents re-rendering
- * (drags, chat streaming) never reach the pages.
- */
+
+
+
+
+
 export const PdfRenderer = memo(function PdfRenderer({
   pdfUrl,
   layoutMode = "default",
@@ -89,7 +89,7 @@ export const PdfRenderer = memo(function PdfRenderer({
   const maxPageWidth =
     layoutMode === "exam-only" ? MAX_EXAM_ONLY_PAGE_WIDTH : null;
 
-  // Only a new URL may rebuild the registry; anything else would reload the document.
+
   const plugins = useMemo(
     () => [
       createPluginRegistration(DocumentManagerPluginPackage, {
@@ -111,7 +111,7 @@ export const PdfRenderer = memo(function PdfRenderer({
     [pdfUrl],
   );
 
-  // Keep page rendering stable across parent re-renders that pass a new callback.
+
   const onExplainRef = useLatest(onExplain);
   const explain = useCallback(
     (text: string) => onExplainRef.current?.(text),
@@ -248,8 +248,8 @@ function PdfPage({ documentId, page, isMobile, onExplain }: PdfPageProps) {
         <Rotate
           documentId={documentId}
           pageIndex={page.pageIndex}
-          // The page is blended onto the background: multiplied in light mode,
-          // inverted and screened in dark (pdf.css).
+
+
           className="bg-background"
           style={{ width: page.width, height: page.height }}
         >

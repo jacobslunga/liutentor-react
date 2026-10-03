@@ -115,7 +115,7 @@ function LoginForm({ onSwitch }: { onSwitch: () => void }) {
       });
       return;
     }
-    // The auth layout leaves this page as soon as the session lands.
+
     if (data.session) setSuccess(true);
   }
 
@@ -263,7 +263,7 @@ function SignupForm({ onSwitch }: { onSwitch: () => void }) {
         .eq("id", data.user.id);
     }
     setLoading(false);
-    // With a session the auth layout redirects; otherwise email confirmation is pending.
+
     if (!data.session) setSuccess(true);
   }
 

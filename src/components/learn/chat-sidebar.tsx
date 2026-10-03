@@ -35,14 +35,14 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-/**
- * The learning chat's conversation list. Sits beside the chat on wide screens
- * and slides over it as a drawer on narrow ones.
- */
+
+
+
+
 export function ChatSidebar() {
   const { inline, open, setOpen } = useLearnSidebar();
 
-  // Cmd/Ctrl+. shows or hides the sidebar, inline or as a drawer.
+
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
       if (!isSidebarShortcut(e)) return;
@@ -53,7 +53,7 @@ export function ChatSidebar() {
     return () => document.removeEventListener("keydown", onKeyDown);
   }, [open, setOpen]);
 
-  // The drawer closes with Escape like any other overlay.
+
   useEffect(() => {
     if (inline || !open) return;
     const onKeyDown = (e: KeyboardEvent) => {
@@ -98,14 +98,14 @@ const KEY_STEP = 16;
 const clampWidth = (width: number) =>
   Math.round(Math.min(MAX_WIDTH, Math.max(MIN_WIDTH, width)));
 
-/**
- * The sidebar beside the chat. Its right edge drags to resize, with no visible
- * grip; double-click resets it. The width is remembered across visits.
- */
+
+
+
+
 function InlineSidebar({ open }: { open: boolean }) {
   const storedWidth = useSettingsStore((s) => s.chatSidebarWidth);
   const setStoredWidth = useSettingsStore((s) => s.setChatSidebarWidth);
-  // While dragging, the width lives here and is saved once on release.
+
   const [dragWidth, setDragWidth] = useState<number | null>(null);
   const drag = useRef<{ startX: number; startWidth: number } | null>(null);
   const width = dragWidth ?? storedWidth;
@@ -133,9 +133,9 @@ function InlineSidebar({ open }: { open: boolean }) {
       <div
         className={cn(
           "h-full border-r bg-muted/30 will-change-transform",
-          // Changing the layout width on every animation frame makes a long
-          // transcript reflow repeatedly (especially expensive in Safari).
-          // The layout now snaps once while only this surface slides.
+
+
+
           !dragging &&
             "transition-transform duration-200 ease-out motion-reduce:transition-none",
           open ? "translate-x-0" : "-translate-x-full",
@@ -159,7 +159,7 @@ function InlineSidebar({ open }: { open: boolean }) {
             e.preventDefault();
             e.currentTarget.setPointerCapture(e.pointerId);
             drag.current = { startX: e.clientX, startWidth: width };
-            // Keep the resize cursor even when the pointer outruns the edge.
+
             document.body.style.cursor = "col-resize";
           }}
           onPointerMove={(e) => {
@@ -376,10 +376,10 @@ function SidebarContent() {
   );
 }
 
-/**
- * The open conversation's row follows the chat store, so a generated title
- * types itself out here in step with the chat header.
- */
+
+
+
+
 function RowTitle({ conversation }: { conversation: Conversation }) {
   const liveTitle = useChatStore((s) =>
     s.currentConversationId === conversation.id && s.isConversationTitleReady
@@ -393,7 +393,7 @@ function RowTitle({ conversation }: { conversation: Conversation }) {
   return <TypedTitle title={liveTitle} startedAt={startedAt} />;
 }
 
-/** Who is signed in, opening the account menu, with settings beside it. */
+
 function AccountRow() {
   const navigate = useNavigate();
   const { user, displayName } = useProfile();

@@ -31,18 +31,18 @@ import { IconButton } from "@/components/shared/icon-button";
 import { Spinner } from "@/components/ui/spinner";
 
 const PENDING_REPLY_ID = "pending-reply";
-/**
- * Opening a saved chat shows its spinner for at least this long. Loads are
- * often near-instant, and a spinner that flickers for a frame reads as a
- * glitch; a short, steady beat reads as deliberate.
- */
+
+
+
+
+
 const MIN_LOAD_MS = 200;
 const REPLY_POLL_MS = 2500;
 const REPLY_POLL_ATTEMPTS = 60;
-/** A question newer than this with no answer is still being answered. */
+
 const REPLY_WINDOW_MS = 3 * 60 * 1000;
 
-/** The last saved turn is a recent question: its answer is on its way. */
+
 function isAwaitingReply(messages: Message[]): boolean {
   const last = messages.at(-1);
   if (last?.role !== "user" || !last.createdAt) return false;
@@ -56,16 +56,16 @@ const pendingReply = (): Message => ({
   status: { step: "pending", message: "Svaret skrivs fortfarande..." },
 });
 
-/**
- * One conversation in the learning chat, or a new one when `conversationId`
- * is null. The first turn of a new chat creates its id, and the URL follows.
- */
+
+
+
+
 export function LearnChat({
   conversationId,
   courseId = null,
 }: {
   conversationId: string | null;
-  /** On a study course's page (no conversation yet): start a chat in it. */
+
   courseId?: string | null;
 }) {
   const chatStore = useChatStoreApi();
@@ -82,7 +82,7 @@ export function LearnChat({
   const { send, cancelGeneration } = useLearnChat();
   const sidebar = useLearnSidebar();
 
-  // A quote belongs to the conversation it was taken from.
+
   const [selection, setSelection] = useState({ id: conversationId, text: "" });
   const selectionContext = selection.id === currentId ? selection.text : "";
   const setSelectionContext = useCallback(
@@ -92,14 +92,14 @@ export function LearnChat({
   );
   const [isOverDrop, setIsOverDrop] = useState(false);
   const [showScrollBottom, setShowScrollBottom] = useState(false);
-  // Bumped each time a saved conversation is opened, so its transcript mounts
-  // fresh (scroll state included) instead of reusing the previous chat's.
+
+
   const [transcriptKey, setTranscriptKey] = useState(0);
   const [loadFailure, setLoadFailure] = useState<{
     id: string;
     reason: "missing" | "error";
   } | null>(null);
-  // Loading until the store holds the conversation the URL names.
+
   const loadState =
     !conversationId || currentId === conversationId
       ? "ready"
@@ -107,16 +107,16 @@ export function LearnChat({
         ? loadFailure.reason
         : "loading";
 
-  // Opening a saved conversation lands at its end.
+
   const pinToBottom = useCallback(() => {
     for (const delay of [0, 30, 80, 160, 300]) {
       setTimeout(() => transcriptRef.current?.scrollToBottom("auto"), delay);
     }
   }, []);
 
-  // Bring the store in line with the URL: load the conversation it names, or
-  // start empty (in the course whose page this is). The chat the store already
-  // holds (e.g. one that just got its id from its first turn) is left alone.
+
+
+
   useEffect(() => {
     const state = chatStore.getState();
     if (
@@ -124,7 +124,7 @@ export function LearnChat({
       (conversationId !== null || state.currentCourseId === courseId)
     )
       return;
-    // A reply still streaming for the chat we leave keeps going and is saved.
+
     chatStore.getState().clearChat();
     inputRef.current?.discardAttachments();
     if (!conversationId) {
@@ -135,8 +135,8 @@ export function LearnChat({
 
     let cancelled = false;
 
-    // The answer is still being written (the chat was left mid-reply): check
-    // back until it is saved, then show it.
+
+
     const pollForReply = async () => {
       for (let attempt = 0; attempt < REPLY_POLL_ATTEMPTS; attempt++) {
         await new Promise((r) => setTimeout(r, REPLY_POLL_MS));
@@ -149,7 +149,7 @@ export function LearnChat({
           return;
         }
       }
-      // Gave up: drop the placeholder rather than spin forever.
+
       if (!cancelled)
         chatStore.setState((s) => ({
           messages: s.messages.filter((m) => m.id !== PENDING_REPLY_ID),
@@ -175,8 +175,8 @@ export function LearnChat({
           currentCourseId: conversation.courseId,
           currentConversationTitle: conversation.title,
           isConversationTitleReady: true,
-          // The header types the title in each time a chat opens; the sidebar
-          // row already shows it.
+
+
           titleTypingStartedAt: performance.now(),
           titleTypesInSidebar: false,
           savedScrollPosition: null,
@@ -198,7 +198,7 @@ export function LearnChat({
     onCourseHomeRef.current = !!courseId && !hasMessages;
   });
 
-  // A new chat's first turn creates its id; move the URL onto it.
+
   const conversationIdRef = useRef(conversationId);
   useEffect(() => {
     conversationIdRef.current = conversationId;
@@ -267,12 +267,12 @@ export function LearnChat({
     [setSelectionContext],
   );
 
-  // Files: drop anywhere on the chat, or paste.
+
   useEffect(() => {
     const root = rootRef.current;
     if (!root) return;
     let depth = 0;
-    // On a course's page, dropped files are course material, not attachments.
+
     const hasFiles = (e: DragEvent) =>
       !onCourseHomeRef.current && !!e.dataTransfer?.types.includes("Files");
     const onEnter = (e: DragEvent) => {
@@ -315,8 +315,8 @@ export function LearnChat({
     };
   }, []);
 
-  // While we smooth-scroll to the bottom, the scroll passes back through the
-  // "far from bottom" zone; ignore it until we arrive (or give up after a second).
+
+
   const autoScrolling = useRef(false);
   const autoScrollTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
 
@@ -341,7 +341,7 @@ export function LearnChat({
       }
       return;
     }
-    // Hysteresis keeps the button from flickering near the threshold.
+
     if (distance > 160) setShowScrollBottom(true);
     else if (distance < 80) setShowScrollBottom(false);
   }
@@ -464,7 +464,7 @@ export function LearnChat({
                 icon={SquarePenIcon}
                 label="Ny chatt"
                 onClick={() => {
-                  // A new chat stays in the course the open one belongs to.
+
                   const course = chatStore.getState().currentCourseId;
                   void navigate(
                     course
@@ -510,10 +510,10 @@ function HeaderButton({
   );
 }
 
-/**
- * The course crumb and conversation title on a frosted pill, so they stay
- * readable over the transcript scrolling underneath.
- */
+
+
+
+
 function TitlePill({ showCrumb }: { showCrumb: boolean }) {
   const hasTitle = useChatStore(
     (s) => s.isConversationTitleReady && !!s.currentConversationTitle,
@@ -534,7 +534,7 @@ function TitlePill({ showCrumb }: { showCrumb: boolean }) {
   );
 }
 
-/** "Kursnamn ›" before the title of a chat that belongs to a study course. */
+
 function CourseCrumb() {
   const courseId = useChatStore((s) => s.currentCourseId);
   const { course } = useStudyCourse(courseId);

@@ -12,13 +12,13 @@ interface SettingsState {
   showExplainPopover: boolean;
   blurFacitUntilHover: boolean;
   selectedModelId: ChatModelId;
-  /** Local fallback until the profile has a saved avatar color. */
+
   avatarColor: string;
-  /** Remembered so students who want easy quizzes get them every time. */
+
   quizDifficulty: QuizDifficulty;
-  /** The learning chat's conversation sidebar, on wide screens. */
+
   chatSidebarOpen: boolean;
-  /** Its width in px, set by dragging its edge. */
+
   chatSidebarWidth: number;
   setLayoutMode: (mode: LayoutMode) => void;
   setShowExplainPopover: (value: boolean) => void;
@@ -30,7 +30,7 @@ interface SettingsState {
   setChatSidebarWidth: (value: number) => void;
 }
 
-/** Rarely-changing user preferences, persisted to localStorage. */
+
 export const useSettingsStore = create<SettingsState>()(
   persist(
     (set) => ({
@@ -56,10 +56,10 @@ export const useSettingsStore = create<SettingsState>()(
   ),
 );
 
-/**
- * The model to actually use. A gated tier is dropped for signed-out users at
- * read time, so the picker never shows a level the backend would reject.
- */
+
+
+
+
 export function useSelectedModel() {
   const user = useUser();
   const stored = useSettingsStore((s) => s.selectedModelId);

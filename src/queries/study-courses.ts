@@ -18,7 +18,7 @@ export const studyCoursesQuery = (userId: string) =>
     queryFn: () => listStudyCourses(userId),
   });
 
-/** A course's material; polls while anything is still being indexed. */
+
 export const courseFilesQuery = (courseId: string) =>
   queryOptions({
     queryKey: courseFilesKey(courseId),
@@ -31,7 +31,7 @@ export const courseFilesQuery = (courseId: string) =>
         : false,
   });
 
-/** The signed-in user's study courses; empty when signed out. */
+
 export function useStudyCourses() {
   const user = useUser();
   const query = useQuery({
@@ -40,14 +40,14 @@ export function useStudyCourses() {
   });
   return {
     ...query,
-    // A disabled query stays pending; signed out there is nothing to wait for.
+
     isPending: !!user && query.isPending,
     courses: query.data ?? [],
     user,
   };
 }
 
-/** One of the user's courses, from the cached list. */
+
 export function useStudyCourse(courseId: string | null) {
   const { courses, isPending } = useStudyCourses();
   return {

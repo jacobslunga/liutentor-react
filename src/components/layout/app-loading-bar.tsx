@@ -4,39 +4,39 @@ import { useEffect, useRef, useState } from "react";
 import { usePageLoadingStore } from "@/stores/page-loading";
 
 const DURATION = 2000;
-/** Ignore bursts of work shorter than this, so fast pages never flash. */
+
 const THROTTLE = 80;
-/**
- * How long to wait for more work before declaring the page done. Loading is
- * chained (data resolves, then a lazy component mounts and starts fetching), so
- * the count dips to zero in between.
- */
+
+
+
+
+
 const SETTLE_DELAY = 250;
 const HIDE_DELAY = 150;
-/**
- * How long after a page change new work may still start the bar. Only
- * navigation to another page arms it, so background refetches and in-page
- * changes (switching a tab, sorting) never make it flash.
- */
+
+
+
+
+
 const ARM_WINDOW = 600;
 const FADE_MS = 300;
 
-/** Pages that never show the bar: the chat loads in place, like an app. */
+
 function isBarless(pathname: string) {
   return pathname === "/chatt" || pathname.startsWith("/chatt/");
 }
 
-/** Asymptotic: creeps toward 100% without arriving until the work finishes. */
+
 function estimate(elapsed: number) {
   const completion = (elapsed / DURATION) * 100;
   return (2 / Math.PI) * 100 * Math.atan(completion / 50);
 }
 
-/**
- * Top-of-page progress bar. Progress is written straight to the element's
- * style every frame, so this component only re-renders when loading starts or
- * stops.
- */
+
+
+
+
+
 export function AppLoadingBar() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const routerPending = useRouterState({ select: (s) => s.status === "pending" });
@@ -47,7 +47,7 @@ export function AppLoadingBar() {
   const isLoading = !barless && (routerPending || fetching || pendingTasks);
   const [armed, setArmed] = useState(false);
 
-  // A new pathname means a new page; search params and hashes don't count.
+
   useEffect(() => {
     setArmed(true);
     const id = setTimeout(() => setArmed(false), ARM_WINDOW);
@@ -103,14 +103,14 @@ export function AppLoadingBar() {
       setProgress(100);
       t.hide = setTimeout(() => {
         setVisible(false);
-        // Keep the width until the fade ends so the bar doesn't shrink visibly.
+
         t.reset = setTimeout(() => setProgress(0), FADE_MS);
       }, HIDE_DELAY);
     };
 
     if (barless) {
-      // Drop a bar still running from the page we came from, without the
-      // finishing sweep.
+
+
       clearAll();
       stopAnimation();
       setVisible(false);
@@ -119,14 +119,14 @@ export function AppLoadingBar() {
     }
 
     if (isLoading) {
-      // Work arriving during the settle window rejoins the running batch.
+
       if (t.settle) {
         clearTimeout(t.settle);
         t.settle = undefined;
         return;
       }
       if (t.raf || t.throttle) return;
-      // Work that isn't part of a page change stays invisible.
+
       if (!armed) return;
       clearAll();
       t.start = 0;

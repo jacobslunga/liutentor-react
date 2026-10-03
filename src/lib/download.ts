@@ -14,7 +14,7 @@ async function fetchBytes(url: string) {
   return new Uint8Array(await res.arrayBuffer());
 }
 
-/** Downloads a (cross-origin) file under the given name, or opens it as a fallback. */
+
 export async function downloadFile(url: string, filename: string) {
   try {
     const res = await fetch(url);
@@ -24,10 +24,10 @@ export async function downloadFile(url: string, filename: string) {
   }
 }
 
-/**
- * Downloads several files as one zip. PDFs are already compressed, so they're
- * stored as-is; fflate loads only when a zip is actually asked for.
- */
+
+
+
+
 export async function downloadZip(
   files: { url: string; filename: string }[],
   zipName: string,
@@ -43,13 +43,13 @@ export async function downloadZip(
   saveBlob(new Blob([zipped], { type: "application/zip" }), zipName);
 }
 
-/** File names for an exam's PDFs, and the zip holding both. */
+
 export function examFileNames(courseCode: string, examDate: string) {
   const base = `${courseCode}_${examDate}`;
   return { exam: `${base}_EXAM.pdf`, solution: `${base}_SOLUTION.pdf`, zip: `${base}.zip` };
 }
 
-/** Zips the exam and its solution into one download, with progress in a toast. */
+
 export function downloadBoth(
   courseCode: string,
   examDate: string,

@@ -1,6 +1,6 @@
 import { useLayoutEffect, useRef } from "react";
 
-/** A ref that always holds the latest value, for stable callbacks. */
+
 export function useLatest<T>(value: T) {
   const ref = useRef(value);
   useLayoutEffect(() => {

@@ -25,8 +25,8 @@ function upsertMeta(selector: string, attributes: Record<string, string>) {
   }
 }
 
-/** Keeps metadata correct during client-side navigation. Initial responses are
- * enriched by the matching Netlify edge function for crawlers and previews. */
+
+
 export function useSeo({
   title,
   description = DEFAULT_DESCRIPTION,

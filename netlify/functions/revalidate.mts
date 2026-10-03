@@ -5,7 +5,7 @@ function json(body: unknown, status = 200) {
   });
 }
 
-/** Keeps the existing exam-change webhook useful after the Nuxt → React cutover. */
+
 export default async (request: Request) => {
   if (request.method !== "POST") return json({ message: "Method not allowed" }, 405);
 

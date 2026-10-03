@@ -18,7 +18,7 @@ export function AuthActions({
 
   const settings = showSettings && <SettingsDialog />;
 
-  // Signed in, settings live in the account menu.
+
   if (signedIn) return <UserDropdown />;
 
   return (

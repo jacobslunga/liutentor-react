@@ -18,12 +18,12 @@ import {
   InputGroupInput,
 } from "@/components/ui/input-group";
 
-/**
- * Wires a text input to a listbox shown under it, as a
- * combobox. Focus never leaves the input: we drive the highlight ourselves
- * and point aria-activedescendant at it. Enter takes the highlighted course,
- * which starts on the first result, so a typed course code needs no selection.
- */
+
+
+
+
+
+
 function CourseSearchBase({
   className,
   renderInput,
@@ -48,7 +48,7 @@ function CourseSearchBase({
   const [active, setActive] = useState("");
   const open = focused && query.trim().length > 0;
 
-  // A new result list starts highlighted on its first item.
+
   useEffect(() => {
     setActive(items[0]?.code ?? "");
   }, [items]);
@@ -97,7 +97,7 @@ function CourseSearchBase({
       {open && (
         <div
           className="absolute inset-x-0 top-full z-50 mt-1 overflow-hidden rounded-lg border bg-popover shadow-lg"
-          // Keep focus in the input so clicking a result doesn't close the list first.
+
           onMouseDown={(e) => e.preventDefault()}
         >
           <CourseSearchResults
@@ -113,7 +113,7 @@ function CourseSearchBase({
   );
 }
 
-/** Large pill search on the home page. */
+
 export function HeroCourseSearch() {
   const inputRef = useRef<HTMLInputElement>(null);
   useTypingPlaceholder(inputRef, "Sök efter ");
@@ -142,7 +142,7 @@ export function HeroCourseSearch() {
   );
 }
 
-/** Compact search in the search header. Focus it with "/". */
+
 export function HeaderCourseSearch({ className }: { className?: string }) {
   const inputRef = useRef<HTMLInputElement>(null);
 

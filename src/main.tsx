@@ -12,7 +12,7 @@ import "./index.css";
 void initAuth();
 
 initAnalytics();
-// A frame later the route has set document.title, so the view carries its name.
+
 router.subscribe("onResolved", ({ toLocation }) =>
   requestAnimationFrame(() => trackPageView(toLocation.pathname)),
 );

@@ -21,7 +21,7 @@ export const examDetailQuery = (examId: string | number) =>
     staleTime: Infinity,
   });
 
-/** Course codes that have exams in the archive, plus a code → name lookup. */
+
 export function useCourseCodes() {
   const { data: courses = [], isPending } = useQuery(coursesQuery);
 

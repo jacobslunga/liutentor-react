@@ -31,7 +31,7 @@ function ProfileLayout() {
   const navigate = useNavigate();
   const user = useUser();
 
-  // Signing out on this page leaves it.
+
   useEffect(() => {
     if (!user) void navigate({ to: "/logga-in", replace: true });
   }, [user, navigate]);

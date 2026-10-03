@@ -6,7 +6,7 @@ import { useMemo } from "react";
 import { cn } from "@/lib/utils";
 import "katex/dist/katex.min.css";
 
-/** Puts \[..\] and \(..\) into $-delimiters and spaces math off adjacent letters. */
+
 function normalizeMathDelimiters(content: string): string {
   const normalized = content
     .replace(/\\\[([\s\S]*?)\\\]/g, (_m, inner: string) => `$$${inner.trim()}$$`)

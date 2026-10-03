@@ -12,11 +12,11 @@ import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 import { Spinner } from "@/components/ui/spinner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-/**
- * A study course's page: its name, a prompt that starts a chat in the course,
- * and tabs for the course's chats and its material. Shown as the learning
- * chat's empty state, so the first turn turns into the chat in place.
- */
+
+
+
+
+
 export function CourseHome({
   courseId,
   input,

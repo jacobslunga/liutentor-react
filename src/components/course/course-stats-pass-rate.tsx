@@ -15,9 +15,9 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { AppDialog } from "@/components/shared/app-dialog";
 
-/** Sittings shown in the sidebar; the rest live in the dialog. */
+
 const RECENT_COUNT = 5;
-/** Year labels past this count collide in the dialog's width. */
+
 const MAX_YEAR_LABELS = 10;
 
 const dateFormatter = new Intl.DateTimeFormat("sv-SE", {
@@ -36,11 +36,11 @@ interface ChartPoint extends PassRatePoint {
   rate: number;
 }
 
-/**
- * Pass rate per exam sitting as bars. The sidebar shows the latest few
- * sittings, each labeled with its value; a dialog holds every sitting plus a
- * table, so hover is never the only way to read one.
- */
+
+
+
+
+
 export function CourseStatsPassRate({
   points,
   average,
@@ -127,7 +127,7 @@ function AllSittings({
   average: number;
 }) {
   const yearLabels = useMemo(() => {
-    // First sitting of each year, thinned so labels never collide.
+
     const yearStarts: { index: number; year: string }[] = [];
     for (const point of data) {
       const year = String(new Date(point.timestamp).getFullYear());

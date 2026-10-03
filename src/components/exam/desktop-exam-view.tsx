@@ -33,7 +33,7 @@ const SPLIT_MAX = 80;
 const SPLIT_KEY_STEP = 2;
 const OVERLAY_MIN = 420;
 const OVERLAY_MAX_SHARE = 0.85;
-/** The header is summoned from the very top in focus mode, and leaves below this. */
+
 const HEADER_ACTIVE_Y = 96;
 const FOCUS_SUMMON_Y = 8;
 
@@ -57,14 +57,14 @@ interface DesktopExamViewProps {
   exams: Exam[];
 }
 
-/**
- * Desktop exam viewer: floating header, exam + facit split (or exam only with
- * a facit overlay) and the chat overlay.
- *
- * Re-render budget: this component renders on layout/visibility changes only.
- * Split and overlay widths live in refs and CSS variables on the root, the
- * facit glow tracks the pointer on its own, and the PDF renderers are memoized.
- */
+
+
+
+
+
+
+
+
 export function DesktopExamView({
   examId,
   courseCode,
@@ -90,14 +90,14 @@ export function DesktopExamView({
   const isExamOnly = layoutMode === "exam-only";
   const hasFacit = !!solutionPdfUrl;
 
-  // Widths are written straight to CSS variables; never through React state.
+
   const applySplit = useCallback((percent: number) => {
     split.current = clampSplit(percent);
     rootRef.current?.style.setProperty("--exam-split", `${split.current}%`);
   }, []);
   const applyOverlayWidth = useCallback((width: number) => {
     const max = window.innerWidth * OVERLAY_MAX_SHARE;
-    // The minimum gives way on a window too narrow to honour it.
+
     const min = Math.min(OVERLAY_MIN, max);
     overlayWidth.current = Math.round(Math.max(min, Math.min(width, max)));
     rootRef.current?.style.setProperty(
@@ -115,7 +115,7 @@ export function DesktopExamView({
     examChatStore.getState().askAboutSelection("Förklara", text);
   }, []);
 
-  // A new exam starts with fresh view state and an empty chat.
+
   useEffect(() => {
     useExamViewStore
       .getState()
@@ -134,9 +134,9 @@ export function DesktopExamView({
     useExamViewStore.getState().setSolutionBlurred(blurFacitUntilHover);
   }, [blurFacitUntilHover]);
 
-  // Load the chat in the background and mount it hidden, so the first open
-  // slides in a ready panel. Otherwise the panel would mount already visible
-  // and slide in a loading spinner, with the content popping in at the end.
+
+
+
   useEffect(() => {
     let cancelled = false;
     const warm = () =>
@@ -154,7 +154,7 @@ export function DesktopExamView({
     };
   }, [examId]);
 
-  // Opening the chat hides the facit overlay and mounts the chat for good.
+
   useEffect(() => {
     if (!chatOpen) return;
     const view = useExamViewStore.getState();
@@ -164,13 +164,13 @@ export function DesktopExamView({
 
   const latest = useLatest({ isExamOnly, hasFacit });
 
-  // Pointer: header reveal in focus mode, and the facit overlay near the right edge.
+
   useEffect(() => {
     function onMove(e: MouseEvent) {
       const view = useExamViewStore.getState();
 
       if (view.focusMode) {
-        // Hysteresis: summoned from the very top, dismissed well below it.
+
         if (!view.isHeaderMounted && e.clientY < FOCUS_SUMMON_Y)
           view.setHeaderMounted(true);
         else if (view.isHeaderMounted && e.clientY > HEADER_ACTIVE_Y)
@@ -216,7 +216,7 @@ export function DesktopExamView({
     };
   }, [latest]);
 
-  // Keyboard: Esc closes history/facit/chat, c chat, f focus, e facit/blur, arrows split.
+
   useEffect(() => {
     function onKeyDown(e: KeyboardEvent) {
       if (e.defaultPrevented) return;
@@ -243,7 +243,7 @@ export function DesktopExamView({
       ) {
         return;
       }
-      // Let browser/OS shortcuts through (cmd/ctrl+F, alt combos, ...).
+
       if (e.metaKey || e.ctrlKey || e.altKey) return;
 
       const { isExamOnly } = latest.current;
@@ -322,7 +322,7 @@ export function DesktopExamView({
             <div className="relative z-20 w-0 shrink-0">
               <ResizeHandle
                 onResizeStart={() => {
-                  // The row can't change size mid-drag, so measure it once.
+
                   const rect = splitRowRef.current?.getBoundingClientRect();
                   splitRowWidth.current = {
                     left: rect?.left ?? 0,
@@ -393,10 +393,10 @@ export function DesktopExamView({
   );
 }
 
-/**
- * A right-hand overlay that stays mounted while hidden (like v-show), so its
- * PDF or chat keeps state. Width comes from the shared CSS variable.
- */
+
+
+
+
 function SideOverlay({
   visible,
   zIndex,
@@ -412,9 +412,9 @@ function SideOverlay({
   onResizeStart: () => void;
   onResizeEnd: () => void;
 }) {
-  // Mount in the hidden position and reveal two frames later, so even an
-  // overlay that mounts open slides in. (@starting-style can't do this
-  // reliably: Safari won't transition the translate set via a CSS variable.)
+
+
+
   const [mounted, setMounted] = useState(false);
   useEffect(() => {
     let frame = requestAnimationFrame(() => {
@@ -449,7 +449,7 @@ function SideOverlay({
   );
 }
 
-/** The facit half of the split, blurred until hovered when that setting is on. */
+
 function SolutionPane({
   pdfUrl,
   explainEnabled,

@@ -8,10 +8,10 @@ interface Metrics {
   trackWidth: number;
 }
 
-/**
- * A visible horizontal scrollbar for zoomed-in pages (native ones are thin or
- * hidden on most platforms). Only this component re-renders while scrolling.
- */
+
+
+
+
 export function PdfScrollbars() {
   const viewportRef = useViewportElement();
   const trackRef = useRef<HTMLDivElement>(null);

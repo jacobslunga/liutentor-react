@@ -41,7 +41,7 @@ function truncateTitle(title: string, maxLength: number): string {
     : `${title.slice(0, maxLength - 1).trimEnd()}…`;
 }
 
-/** Signed-out chats live in this browser; write the current one back. */
+
 function persistLocalConversation(store: ChatStore, transport: ChatTransport) {
   const { currentConversationId, currentConversationTitle, messages } =
     store.getState();
@@ -56,10 +56,10 @@ function persistLocalConversation(store: ChatStore, transport: ChatTransport) {
   void queryClient.invalidateQueries({ queryKey: ["conversations", "local"] });
 }
 
-/**
- * Tells the API to stop a turn. Only the Stop button does this: leaving a
- * chat lets the answer finish and be saved.
- */
+
+
+
+
 async function cancelTurnOnServer(turnId: string) {
   try {
     await fetch(`${AI_API_BASE}/chat/turns/${turnId}/cancel`, {
@@ -70,19 +70,19 @@ async function cancelTurnOnServer(turnId: string) {
       },
     });
   } catch {
-    // Best effort: the answer then simply completes.
+
   }
 }
 
-/** Where a chat surface sends its turns and what it sends besides the history. */
+
 export interface ChatTransport {
   kind: ConversationKind;
   url: string;
-  /** Extra payload fields, merged next to messages, model and conversation. */
+
   payload: Record<string, unknown>;
-  /** Label kept with a signed-out conversation, e.g. the course code. */
+
   meta: string;
-  /** The study course a new conversation is created in. */
+
   courseId?: string | null;
 }
 
@@ -103,7 +103,7 @@ export interface CancelledTurn {
   attachments: ChatAttachment[];
 }
 
-/** The exam panel: turns go to the exam's endpoint with its PDFs. */
+
 export function useExamChat(ctx: ChatContext) {
   const store = useChatStoreApi();
   return useChat(store, () => ({
@@ -118,10 +118,10 @@ export function useExamChat(ctx: ChatContext) {
   }));
 }
 
-/**
- * The learning chat: no exam, but every course mentioned so far ("@TATA41")
- * rides along so the model can look it up.
- */
+
+
+
+
 export function useLearnChat() {
   const store = useChatStoreApi();
   const { nameByCode } = useCourseCodes();
@@ -141,20 +141,20 @@ export function useLearnChat() {
   });
 }
 
-/**
- * Sends chat turns to the AI service and streams the reply into the chat
- * store. Text deltas are flushed at most once per animation frame, and only
- * the streaming assistant message is replaced, so earlier rows never re-render.
- *
- * `transport` is read when a turn is sent, with the history including the new
- * question, so it may derive payload fields from the conversation.
- */
+
+
+
+
+
+
+
+
 export function useChat(
   store: ChatStore,
   transport: (messages: Message[]) => ChatTransport,
 ) {
   const abortRef = useRef<AbortController | null>(null);
-  /** The turn being streamed, so Stop can cancel it on the server. */
+
   const turnIdRef = useRef<string | null>(null);
   const transportRef = useRef(transport);
   useEffect(() => {
@@ -165,8 +165,8 @@ export function useChat(
     [store],
   );
 
-  // No abort on unmount: a reply keeps streaming (and is saved) after the user
-  // leaves the chat. Only an explicit Stop cancels it.
+
+
 
   const cancelGeneration = useCallback((): CancelledTurn | null => {
     if (turnIdRef.current) void cancelTurnOnServer(turnIdRef.current);
@@ -184,10 +184,10 @@ export function useChat(
       if (!last.content.trim()) {
         const userMsg = msgs.at(-2);
         if (msgs.length === 2) {
-          // First turn: keep the question visible, note the cancellation.
+
           next = [...msgs.slice(0, -1), { ...last, content: CANCELLED_NOTE }];
         } else {
-          // Later turn: drop it and hand the question back to the input.
+
           if (userMsg?.role === "user") {
             cancelled = {
               content: userMsg.content,
@@ -238,7 +238,7 @@ export function useChat(
         });
       }
 
-      // Signed-in users get a conversation row so the turn lands in history.
+
       const userId = useAuthStore.getState().user?.id;
       if (userId && !store.getState().currentConversationId) {
         const title = fallbackTitle(50);
@@ -259,7 +259,7 @@ export function useChat(
             currentConversationId: data.id,
             currentConversationTitle: title,
           });
-          // List the chat right away; the refetch fills in the rest.
+
           const { kind, meta, courseId } = currentTransport();
           queryClient.setQueryData<Conversation[]>(
             conversationsKey(userId, kind, courseId),
@@ -284,8 +284,8 @@ export function useChat(
         });
       }
 
-      // The chat this turn belongs to. The user may open another one while the
-      // reply streams; the turn then keeps going but stops touching the screen.
+
+
       const turnConversationId = store.getState().currentConversationId;
       const isShown = () =>
         store.getState().currentConversationId === turnConversationId;
@@ -314,10 +314,10 @@ export function useChat(
       const turnId = crypto.randomUUID();
       turnIdRef.current = turnId;
       const transportAtSend = currentTransport();
-      // Signed-out history lists the chat as soon as it is asked.
+
       persistLocalConversation(store, transportAtSend);
 
-      // The turn's own copy, so it can be saved even if the chat is closed.
+
       const turnMessages = store.getState().messages;
       let turnReply: Partial<Message> = {};
       let turnTitle = store.getState().currentConversationTitle || "Ny chatt";
@@ -329,7 +329,7 @@ export function useChat(
         if (isShown()) store.getState().updateMessage(assistantId, p);
       };
 
-      /** Signed-out chats are saved by the browser, from the turn's own copy. */
+
       const persistTurn = () => {
         if (!isLocalConversationId(turnConversationId)) return;
         const final = turnMessages.map((m) =>
@@ -345,7 +345,7 @@ export function useChat(
         void queryClient.invalidateQueries({
           queryKey: ["conversations", "local"],
         });
-        // Reopened while this streamed: its reloaded copy lacks the answer.
+
         const shown = store.getState().messages;
         if (
           isShown() &&
@@ -387,7 +387,7 @@ export function useChat(
             ...transportAtSend.payload,
             messages: history,
             modelId: opts.modelId || DEFAULT_MODEL_ID,
-            // Local ids never leave the browser; the server only knows its own.
+
             conversationId: isLocalConversationId(
               store.getState().currentConversationId,
             )
@@ -398,7 +398,7 @@ export function useChat(
             turnId,
           }),
         );
-        // Includes this turn's files: the user message is already in the store.
+
         for (const attachment of store.getState().getActiveAttachments()) {
           if (attachment.file)
             formData.append("files", attachment.file, attachment.name);
@@ -452,7 +452,7 @@ export function useChat(
               });
             }
             const id = turnConversationId;
-            // Every cached list shows the new title without waiting on a refetch.
+
             queryClient.setQueriesData<Conversation[]>(
               { queryKey: ["conversations"] },
               (old) => old?.map((c) => (c.id === id ? { ...c, title } : c)),

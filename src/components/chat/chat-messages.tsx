@@ -75,16 +75,11 @@ export interface ChatTranscriptApi {
 
 interface ChatMessagesProps {
   ref?: Ref<ChatTranscriptApi>;
-  /** The scroll container that holds the transcript. */
   scrollRef: RefObject<HTMLElement | null>;
   className?: string;
   onReplyToSelection: (text: string) => void;
 }
 
-/**
- * The transcript. Subscribes only to the list of message ids, so a streamed
- * token re-renders the one row that owns the message, not the list.
- */
 export function ChatMessages({
   ref,
   scrollRef,
@@ -94,8 +89,6 @@ export function ChatMessages({
   const chatStore = useChatStoreApi();
   const ids = useChatStore(useShallow((s) => s.messages.map((m) => m.id)));
   const [tracker] = useState(() => new RowTracker(scrollRef));
-  // A restored scroll offset needs every row at its real height to land on
-  // the same content, so then rows render up front instead of on approach.
   const [eager] = useState(
     () => chatStore.getState().savedScrollPosition !== null,
   );
@@ -129,9 +122,6 @@ export function ChatMessages({
         return;
       }
 
-      // Windowed rows can change the document height as the scroll passes them.
-      // Native smooth scrolling keeps its original target and can therefore stop
-      // early. Recalculate the bottom throughout the animation instead.
       const startTop = el.scrollTop;
       const startedAt = performance.now();
       const duration = 400;
@@ -172,10 +162,6 @@ export function ChatMessages({
     }
   }, [chatStore, scrollRef, scrollToBottom]);
 
-  /**
-   * Scrolls the newest question to the top and reserves room below it, so the
-   * answer streams into view instead of pushing the question away.
-   */
   const scrollUserMessageToTop = useCallback(() => {
     const root = rootRef.current;
     const parent = scrollRef.current;
@@ -215,7 +201,6 @@ export function ChatMessages({
     ],
   );
 
-  // Position the transcript once markdown is up and rows have their real height.
   useEffect(() => {
     if (!mdReady) return;
     if (
@@ -228,7 +213,6 @@ export function ChatMessages({
     }
   }, [chatStore, mdReady, restoreScroll, scrollUserMessageToTop]);
 
-  // The "Ask" popover hides when the selection clears or the transcript scrolls away.
   useEffect(() => {
     if (!popover) return;
     const onSelectionChange = () => {
@@ -325,9 +309,7 @@ function randomLoadingPhrase() {
   return LOADING_PHRASES[Math.floor(Math.random() * LOADING_PHRASES.length)];
 }
 
-/** Rows rendered right away when a conversation opens (it opens at the end). */
 const INITIAL_ROWS = 8;
-/** Placeholder height for a row that has never been rendered. */
 const ESTIMATED_ROW_HEIGHT = 240;
 
 const MessageRow = memo(function MessageRow({
@@ -339,12 +321,9 @@ const MessageRow = memo(function MessageRow({
   tracker,
 }: {
   id: string;
-  /** Position in the list, for an O(1) lookup instead of a search per update. */
   index: number;
   isLast: boolean;
-  /** The newest question and reply: streamed into and measured by scrolling. */
   isRecent: boolean;
-  /** Render on mount rather than waiting to come near the viewport. */
   startsNear: boolean;
   tracker: RowTracker;
 }) {
@@ -352,14 +331,10 @@ const MessageRow = memo(function MessageRow({
     const atIndex = s.messages[index];
     return atIndex?.id === id ? atIndex : s.messages.find((m) => m.id === id);
   });
-  // A new assistant row mounts per turn, so each turn gets its own phrase.
   const [loadingPhrase] = useState(randomLoadingPhrase);
   const isStreaming = useChatStore((s) => isLast && s.isLoading);
   const rowRef = useRef<HTMLDivElement>(null);
 
-  // Far from the viewport, a row keeps only its box: a spacer at the height it
-  // last had (or an estimate if it has never rendered). The tracker keeps the
-  // scroll position steady when that height turns out different.
   const [view, setView] = useState<{ near: boolean; height: number | null }>({
     near: startsNear,
     height: null,
@@ -378,8 +353,6 @@ const MessageRow = memo(function MessageRow({
     );
   }, [tracker]);
 
-  // Let the row lay out once at full size before it may be skipped offscreen,
-  // so the browser remembers its real height instead of the placeholder.
   useEffect(() => {
     let second = 0;
     const first = requestAnimationFrame(() => {
@@ -439,7 +412,6 @@ const MessageRow = memo(function MessageRow({
 
   const showStatus =
     !!message.status?.message || (!message.content && isStreaming);
-  // The streaming reply changes every frame; finished replies come from the cache.
   const html = message.content
     ? isStreaming
       ? renderChatMarkdown(message.content)
@@ -494,7 +466,6 @@ const MessageRow = memo(function MessageRow({
   );
 });
 
-/** A cited study-course file; opens the PDF through a short-lived link. */
 function FileSourceChip({
   source,
 }: {
@@ -504,7 +475,6 @@ function FileSourceChip({
 
   async function open() {
     if (opening) return;
-    // Open the tab inside the click, or the browser blocks it as a popup.
     const tab = window.open("", "_blank");
     setOpening(true);
     try {
@@ -544,7 +514,6 @@ function FileSourceChip({
   );
 }
 
-/** A question as typed, with "@TATA41" course mentions set off. */
 function UserText({ text }: { text: string }) {
   return splitCourseMentions(text).map((part, i) =>
     part.type === "text" ? (
@@ -591,7 +560,6 @@ function AttachmentChip({ attachment }: { attachment: ChatAttachment }) {
 
 const copyTimers = new WeakMap<HTMLElement, number>();
 
-/** Delegated handler for the copy buttons inside rendered code blocks. */
 function handleCodeCopy(e: React.MouseEvent) {
   const btn = (e.target as HTMLElement).closest<HTMLElement>(".code-copy");
   if (!btn) return;

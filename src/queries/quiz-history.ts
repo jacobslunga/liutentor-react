@@ -7,7 +7,7 @@ import {
   type StoredQuizItem,
 } from "@/types/quiz";
 
-/** Anything the text column holds that isn't a known level is dropped. */
+
 function normalizeDifficulty(value: unknown): QuizDifficulty | undefined {
   return QUIZ_DIFFICULTIES.includes(value as QuizDifficulty) ? (value as QuizDifficulty) : undefined;
 }
@@ -46,11 +46,11 @@ export const quizHistoryQuery = (userId: string, courseCode: string) =>
     },
   });
 
-/**
- * Deletes a saved quiz. `.select()` matters: when RLS filters a delete,
- * PostgREST reports no error and affects no rows, so the returned rows are the
- * only way to tell a real delete from a silent no-op.
- */
+
+
+
+
+
 export async function deleteQuiz(userId: string, id: string) {
   const { data, error } = await supabase
     .from("ai_quiz_logs")

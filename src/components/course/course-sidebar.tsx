@@ -15,18 +15,18 @@ import { cn } from "@/lib/utils";
 import type { Exam } from "@/types/exam";
 import { Skeleton } from "@/components/ui/skeleton";
 
-// recharts stays out of the course page chunk until the sidebar needs it.
+
 const CourseStatsPassRate = lazy(() =>
   import("./course-stats-pass-rate").then((m) => ({
     default: m.CourseStatsPassRate,
   })),
 );
 
-/**
- * The course page's right column, after the "About" sidebar on a GitHub
- * repository page: key facts, the grade distribution as a stacked bar (like
- * the repo's language bar), and pass rates over time.
- */
+
+
+
+
+
 export function CourseSidebar({
   exams,
   className,
@@ -144,7 +144,7 @@ function Fact({
   );
 }
 
-/** One stacked bar plus a legend, like the language breakdown on GitHub. */
+
 function GradeBar({ grades }: { grades: GradeEntry[] }) {
   return (
     <>

@@ -12,9 +12,9 @@ export interface QuizStatus {
 interface QuizState {
   stage: QuizStage;
   quizData: MultipleChoiceQuizResponse | null;
-  /** History row of the quiz being answered, if it has one. */
+
   activeQuizId: string | null;
-  /** Bumped per attempt so the answering view remounts fresh. */
+
   sessionKey: number;
   currentIndex: number;
   answers: Record<number, number>;

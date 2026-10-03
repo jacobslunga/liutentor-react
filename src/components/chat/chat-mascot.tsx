@@ -4,10 +4,10 @@ import { cn } from "@/lib/utils";
 const MAX_X = 8;
 const MAX_Y = 6;
 
-/**
- * The chat's empty-state face; its eyes follow the pointer and blink now and
- * then. Animated with direct attribute writes, never through React state.
- */
+
+
+
+
 export function ChatMascot({ className }: { className?: string }) {
   const svgRef = useRef<SVGSVGElement>(null);
   const eyesRef = useRef<SVGGElement>(null);

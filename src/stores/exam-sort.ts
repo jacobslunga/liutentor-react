@@ -54,7 +54,7 @@ export function useExamSortPreference(scope: ExamSortScope) {
   };
 }
 
-/** Sorts exams by date or pass rate; exams without a pass rate sink to the end. */
+
 export function sortExams<T extends { exam_date: string; exam_name: string; pass_rate: number }>(
   exams: T[],
   sortBy: ExamSortBy,

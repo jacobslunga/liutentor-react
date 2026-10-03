@@ -2,7 +2,7 @@ import { useSelectionCapability } from "@embedpdf/plugin-selection/react";
 import { useEffect } from "react";
 import { normalizePdfText } from "@/lib/pdf-text";
 
-/** Cmd/Ctrl+C copies the PDF text selection with Swedish diacritics repaired. */
+
 export function PdfCopyShortcut() {
   const { provides: selection } = useSelectionCapability();
 

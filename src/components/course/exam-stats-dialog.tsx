@@ -43,9 +43,9 @@ export function ExamStatsDialog({
   );
   const maxCount = Math.max(...chartData.map((d) => d.count));
 
-  // The dialog sits inside a clickable exam row. React bubbles events from
-  // portals through the component tree, so clicks and keys on the overlay or
-  // content would reach the row and open the exam; stop them here.
+
+
+
   return (
     <span
       className="contents"

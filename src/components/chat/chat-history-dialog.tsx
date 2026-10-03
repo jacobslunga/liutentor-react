@@ -28,10 +28,10 @@ interface ChatHistoryDialogProps {
   onSelect: () => void;
 }
 
-/**
- * Search, open and delete saved conversations: from the server when signed
- * in, from this browser otherwise.
- */
+
+
+
+
 export function ChatHistoryDialog({ onSelect }: ChatHistoryDialogProps) {
   const chatStore = useChatStoreApi();
   const open = useChatStore((s) => s.isHistoryOpen);
@@ -77,8 +77,8 @@ export function ChatHistoryDialog({ onSelect }: ChatHistoryDialogProps) {
         currentConversationId: item.id,
         currentConversationTitle: item.title,
         isConversationTitleReady: true,
-        // The header types the title in, as in the learning chat. This runs in
-        // a click handler, not during render.
+
+
         // oxlint-disable-next-line react/purity
         titleTypingStartedAt: performance.now(),
         savedScrollPosition: null,

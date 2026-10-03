@@ -34,7 +34,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-/** "Kurser" in the chat sidebar: the user's study courses, or a sign-in nudge. */
+
 export function SidebarCourses({ onNavigate }: { onNavigate: () => void }) {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
@@ -94,7 +94,7 @@ export function SidebarCourses({ onNavigate }: { onNavigate: () => void }) {
     try {
       await deleteStudyCourse(pendingDelete.id);
       updateCache((old) => old.filter((c) => c.id !== pendingDelete.id));
-      // Its chats went with it.
+
       void queryClient.invalidateQueries({ queryKey: ["conversations"] });
       if (pendingDelete.id === activeId)
         void navigate({ to: "/chatt", replace: true });
@@ -228,11 +228,11 @@ export function SidebarCourses({ onNavigate }: { onNavigate: () => void }) {
   );
 }
 
-/**
- * A course's chats, shown beside its sidebar row on hover. It stays open while
- * the pointer is on the row or on the list itself, and closes shortly after it
- * has left both. Touch devices never hover, so there the row just links on.
- */
+
+
+
+
+
 function CourseHoverList({
   course,
   onNavigate,
@@ -259,7 +259,7 @@ function CourseHoverList({
         collisionPadding={12}
         className="z-50 flex max-h-[min(24rem,var(--radix-hover-card-content-available-height))] w-72 origin-(--radix-hover-card-content-transform-origin) flex-col overflow-hidden rounded-xl bg-popover text-popover-foreground shadow-lg ring-1 ring-foreground/10 duration-150 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95 data-[state=open]:slide-in-from-left-1"
       >
-        {/* Only fetched while open, and cached for the next hover. */}
+
         {open && (
           <CourseChatList
             course={course}
