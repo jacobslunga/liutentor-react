@@ -405,8 +405,6 @@ function SideOverlay({
   onResizeStart: () => void;
   onResizeEnd: () => void;
 }) {
-  // Make the panel inert only once it has slid out: toggling inert restyles
-  // the whole transcript, which in Safari would hold up the first frame.
   const [parked, setParked] = useState(!visible);
   if (visible && parked) setParked(false);
   const hidden = !visible && parked;
@@ -417,17 +415,14 @@ function SideOverlay({
         ref={overlayRef}
         aria-hidden={hidden}
         inert={hidden}
-        // Park slightly past 100% so the left-hand shadow is off-screen too.
         initial={{ x: "110%" }}
         animate={{ x: visible ? "0%" : "110%" }}
         transition={{ type: "tween", duration: 0.2, ease: [0.32, 0.72, 0, 1] }}
         onAnimationComplete={() => {
           if (!visible) setParked(true);
         }}
-        // Keep a permanent compositor layer so Safari doesn't repaint the
-        // whole panel into a fresh one each time the slide starts.
         className={cn(
-          "fixed right-0 bottom-0 flex h-dvh border-l bg-background shadow-xl will-change-transform dark:shadow-none",
+          "fixed right-0 bottom-0 flex h-dvh border-l bg-background shadow-2xl will-change-transform dark:shadow-none",
           zIndex,
         )}
       >

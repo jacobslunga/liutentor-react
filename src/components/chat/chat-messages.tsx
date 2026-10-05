@@ -600,7 +600,7 @@ const MessageRow = memo(function MessageRow({
       >
         <div className="flex max-w-[85%] min-w-0 flex-col items-start gap-2 rounded-2xl bg-muted px-4 py-3 shadow-xs sm:max-w-[75%]">
           {message.selectionContext && (
-            <div className="line-clamp-3 border-l-2 border-foreground/30 pl-3 text-sm text-muted-foreground">
+            <div className="line-clamp-3 border-l-2 border-foreground/30 pl-3 font-chat text-sm text-muted-foreground">
               "<SelectionQuote text={message.selectionContext} />"
             </div>
           )}
@@ -644,7 +644,7 @@ const MessageRow = memo(function MessageRow({
       )}
       {html && (
         <div
-          className="chat-prose prose prose-sm w-full max-w-none min-w-0 sm:prose-base dark:prose-invert prose-headings:font-semibold prose-h1:text-xl sm:prose-h1:text-2xl prose-h2:text-lg sm:prose-h2:text-xl prose-h3:text-base sm:prose-h3:text-lg prose-h4:text-sm sm:prose-h4:text-base prose-h5:text-sm prose-h6:text-xs prose-strong:font-semibold"
+          className="chat-prose prose prose-sm w-full max-w-none min-w-0 font-chat sm:prose-base dark:prose-invert prose-headings:font-semibold prose-h1:text-xl sm:prose-h1:text-2xl prose-h2:text-lg sm:prose-h2:text-xl prose-h3:text-base sm:prose-h3:text-lg prose-h4:text-sm sm:prose-h4:text-base prose-h5:text-sm prose-h6:text-xs prose-strong:font-semibold"
           dangerouslySetInnerHTML={{ __html: html }}
         />
       )}

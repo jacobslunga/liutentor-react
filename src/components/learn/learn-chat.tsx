@@ -349,6 +349,7 @@ export function LearnChat({
           ? "Fråga om kursen och dess material"
           : "Fråga något, eller skriv @ för att välja kurs"
       }
+      welcome={!conversationId && !currentId && !hasMessages && !inCourse}
       courseMentions
       showDisclaimer={false}
       selectionContext={selectionContext}
@@ -422,11 +423,11 @@ export function LearnChat({
             onScrollDistanceChange={updateScrollDistance}
           />
         </m.div>
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 flex flex-col items-center bg-linear-to-t from-background to-transparent pt-10 pb-3 sm:pb-4">
+        <div className="chat-composer-backdrop pointer-events-none absolute inset-x-0 bottom-0 z-20 flex flex-col items-center pt-4 pb-3 sm:pb-4">
           {showScrollBottom && (
             <IconButton
               variant="outline"
-              className="pointer-events-auto mb-2.5 animate-in rounded-full shadow-md duration-150 fade-in-0"
+              className="pointer-events-auto absolute -top-6 left-1/2 -translate-x-1/2 animate-in rounded-full shadow-md duration-150 fade-in-0"
               aria-label="Scrolla längst ned"
               onClick={scrollToLatest}
             >
