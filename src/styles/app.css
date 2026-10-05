@@ -1,5 +1,53 @@
 @plugin "@tailwindcss/typography";
 
+:root {
+  --system-font:
+    -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro", "Segoe UI",
+    sans-serif;
+  --ui-font: "Oceanic Grotesk", var(--system-font);
+  --chat-font: "Libron", Georgia, "Times New Roman", serif;
+}
+
+:root[data-ui-font="system"] {
+  --ui-font: var(--system-font);
+}
+
+:root[data-chat-font="system"] {
+  --chat-font: var(--system-font);
+}
+
+@font-face {
+  font-family: "Libron";
+  src: url("../assets/fonts/Libron-Regular.ttf") format("truetype");
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Libron";
+  src: url("../assets/fonts/Libron-Italic.ttf") format("truetype");
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Libron";
+  src: url("../assets/fonts/Libron-Bold.ttf") format("truetype");
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Libron";
+  src: url("../assets/fonts/Libron-BoldItalic.ttf") format("truetype");
+  font-style: italic;
+  font-weight: 700;
+  font-display: swap;
+}
+
 @font-face {
   font-family: "Logo";
   src: url("../assets/fonts/gt-super-text-bold.woff2") format("woff2");
@@ -11,6 +59,7 @@
 }
 
 @theme inline {
+  --font-serif: "Libron", Georgia, "Times New Roman", serif;
   --font-logo: "Logo", serif;
   --text-2xs: 0.6875rem;
   --breakpoint-3xl: 1920px;
@@ -156,4 +205,19 @@
   summary {
     cursor: pointer;
   }
+}
+@font-face {
+  font-family: "Oceanic Grotesk";
+  src: url("../assets/fonts/OceanicGrotesk-Regular.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Oceanic Grotesk";
+  src: url("../assets/fonts/OceanicGrotesk-Medium.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 500 900;
+  font-display: swap;
 }

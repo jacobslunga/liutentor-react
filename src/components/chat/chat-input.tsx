@@ -1,5 +1,4 @@
 import {
-  ArrowUpIcon,
   ChevronDownIcon,
   CornerDownLeftIcon,
   FileTextIcon,
@@ -63,22 +62,6 @@ const MENTION_PILL_CLASS =
 
 const COUNTER_FROM = MAX_LENGTH * 0.8;
 
-interface PromptLayout {
-  expanded: boolean;
-  textHeight: number;
-  leftWidth: number;
-  rightWidth: number;
-  animate: boolean;
-}
-
-const INITIAL_PROMPT_LAYOUT: PromptLayout = {
-  expanded: false,
-  textHeight: 24,
-  leftWidth: 64,
-  rightWidth: 120,
-  animate: false,
-};
-
 export interface ChatInputApi {
   focus: () => void;
   getText: () => string;
@@ -97,6 +80,7 @@ interface ChatInputProps {
   selectionContext?: string;
   className?: string;
   placeholder?: string;
+  welcome?: boolean;
 
   courseMentions?: boolean;
 
@@ -113,6 +97,7 @@ export function ChatInput({
   selectionContext,
   className,
   placeholder = "Fråga vad som helst",
+  welcome = false,
   courseMentions = false,
   showDisclaimer = true,
   onSend,
@@ -125,16 +110,13 @@ export function ChatInput({
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const measurementRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const leftControlsRef = useRef<HTMLDivElement>(null);
-  const rightControlsRef = useRef<HTMLDivElement>(null);
-  const layoutRef = useRef(INITIAL_PROMPT_LAYOUT);
-  const animationTimerRef = useRef<number | null>(null);
   const [attachments, setAttachments] = useState<ChatAttachment[]>(() =>
     initialAttachments.filter((a) => a.active && a.file),
   );
   const [hasText, setHasText] = useState(!!initialText.trim());
+  const [hasInput, setHasInput] = useState(initialText.length > 0);
   const [longLength, setLongLength] = useState(0);
-  const [layout, setLayout] = useState(INITIAL_PROMPT_LAYOUT);
+  const [textHeight, setTextHeight] = useState(24);
   const [mention, setMention] = useState<{
     start: number;
     query: string;
@@ -164,65 +146,20 @@ export function ChatInput({
 
   const syncTextState = (value: string) => {
     setHasText(!!value.trim());
+    setHasInput(value.length > 0);
     setLongLength(value.length >= COUNTER_FROM ? value.length : 0);
     renderMentionPills(value);
   };
 
-  const measurePrompt = useCallback((allowAnimation = true) => {
-    const shell = shellRef.current;
+  const measurePrompt = useCallback(() => {
     const textarea = textareaRef.current;
     const measurement = measurementRef.current;
-    if (!shell || !textarea || !measurement) return;
-
-    const leftWidth = leftControlsRef.current?.offsetWidth ?? 64;
-    const rightWidth = rightControlsRef.current?.offsetWidth ?? 120;
-    const compactTextWidth = Math.max(
-      1,
-      shell.clientWidth - leftWidth - rightWidth - 44,
-    );
+    if (!textarea || !measurement) return;
 
     measurement.value = textarea.value;
-    measurement.style.width = `${compactTextWidth}px`;
-    const expanded =
-      textarea.value.includes("\n") || measurement.scrollHeight > 24;
-    measurement.style.width = `${expanded ? shell.clientWidth - 44 : compactTextWidth}px`;
-    const textHeight = Math.min(192, Math.max(24, measurement.scrollHeight));
-
-    const previous = layoutRef.current;
-    const startsExpansion =
-      allowAnimation &&
-      !previous.expanded &&
-      expanded &&
-      !matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const next: PromptLayout = {
-      expanded,
-      textHeight,
-      leftWidth,
-      rightWidth,
-      animate: startsExpansion || (previous.animate && expanded),
-    };
-
-    layoutRef.current = next;
-    setLayout((current) =>
-      current.expanded === next.expanded &&
-      current.textHeight === next.textHeight &&
-      current.leftWidth === next.leftWidth &&
-      current.rightWidth === next.rightWidth &&
-      current.animate === next.animate
-        ? current
-        : next,
-    );
-
-    if (!startsExpansion) return;
-    if (animationTimerRef.current)
-      window.clearTimeout(animationTimerRef.current);
-    animationTimerRef.current = window.setTimeout(() => {
-      const settled = { ...layoutRef.current, animate: false };
-      layoutRef.current = settled;
-      setLayout(settled);
-      animationTimerRef.current = null;
-    }, 200);
-  }, []);
+    measurement.style.width = `${Math.max(1, textarea.clientWidth - (welcome ? 16 : 56))}px`;
+    setTextHeight(Math.min(192, Math.max(24, measurement.scrollHeight)));
+  }, [welcome]);
 
   const setText = (value: string) => {
     if (textareaRef.current) textareaRef.current.value = value;
@@ -301,16 +238,10 @@ export function ChatInput({
   }
 
   useLayoutEffect(() => {
-    measurePrompt(false);
+    measurePrompt();
     const observer = new ResizeObserver(() => measurePrompt());
     if (shellRef.current) observer.observe(shellRef.current);
-    if (leftControlsRef.current) observer.observe(leftControlsRef.current);
-    if (rightControlsRef.current) observer.observe(rightControlsRef.current);
-    return () => {
-      observer.disconnect();
-      if (animationTimerRef.current)
-        window.clearTimeout(animationTimerRef.current);
-    };
+    return () => observer.disconnect();
   }, [measurePrompt]);
 
   const addFiles = (files: File[]) => {
@@ -403,6 +334,76 @@ export function ChatInput({
 
   const hasHeader = !!selectionContext || attachments.length > 0;
 
+  const sendButton = (
+    <IconButton
+      variant="ghost"
+      className={cn(
+        "rounded-lg text-muted-foreground",
+        !welcome && "absolute right-0 bottom-0",
+      )}
+      aria-label={isLoading ? "Avbryt svar" : "Skicka meddelande"}
+      hideTooltip
+      disabled={!isLoading && !canSend}
+      onClick={() => (isLoading ? onCancel() : submit())}
+    >
+      {isLoading ? <StopIcon /> : <CornerDownLeftIcon />}
+    </IconButton>
+  );
+
+  const toolbar = (
+    <div
+      className={cn(
+        "grid grid-cols-2 items-center gap-x-2 gap-y-0.5 px-1 sm:grid-cols-[1fr_auto_1fr]",
+        welcome ? "mt-2" : "mt-1",
+      )}
+    >
+      <div className="flex h-8 items-center gap-0.5">
+        <input
+          ref={fileInputRef}
+          type="file"
+          multiple
+          className="hidden"
+          accept={FILE_INPUT_ACCEPT}
+          onChange={(e) => {
+            if (e.target.files) addFiles(Array.from(e.target.files));
+            e.target.value = "";
+          }}
+        />
+        <IconButton
+          variant="ghost"
+          className="rounded-full"
+          aria-label="Bifoga filer"
+          disabled={isLoading || capacityReached}
+          onClick={() => fileInputRef.current?.click()}
+        >
+          <PlusIcon />
+        </IconButton>
+      </div>
+
+      {showDisclaimer && (
+        <p className="col-span-2 row-start-2 text-center text-2xs text-muted-foreground sm:col-span-1 sm:col-start-2 sm:row-start-1">
+          AI kan göra misstag. Kontrollera svar.
+        </p>
+      )}
+      <div className="col-start-2 row-start-1 flex h-8 items-center justify-end gap-1 sm:col-start-3">
+        <ModelPicker />
+        {welcome && sendButton}
+        {longLength > 0 && (
+          <span
+            className={cn(
+              "text-2xs",
+              tooLong
+                ? "font-medium text-destructive"
+                : "text-muted-foreground",
+            )}
+          >
+            {longLength} / {MAX_LENGTH}
+          </span>
+        )}
+      </div>
+    </div>
+  );
+
   return (
     <form
       className={cn("w-full px-3 sm:px-4", className)}
@@ -413,17 +414,15 @@ export function ChatInput({
     >
       <div
         ref={shellRef}
-
-        className="chat-column relative mx-auto"
+        className={cn(
+          "chat-column relative mx-auto",
+          welcome && "chat-welcome-column",
+        )}
       >
         <div
           className={cn(
-            "relative overflow-hidden border border-input bg-background p-2.5 shadow-xs",
-            layout.expanded && "pb-13",
-
-            layout.expanded || hasHeader ? "rounded-2xl" : "rounded-[1.75rem]",
-            layout.animate &&
-              "transition-[border-radius,padding-bottom] duration-200 ease-out",
+            "relative overflow-hidden rounded-2xl border border-input p-2.5 shadow-xs",
+            welcome ? "bg-card" : "bg-background",
             isLoading && "chat-prompt-generating",
           )}
         >
@@ -485,37 +484,29 @@ export function ChatInput({
           )}
 
           <div className="relative">
+            {welcome && !hasInput && <WelcomePlaceholder />}
             {courseMentions && (
               <div
                 ref={mentionLayerRef}
                 aria-hidden
                 className={cn(
-                  "pointer-events-none absolute inset-0 overflow-hidden py-1 text-[0.9375rem] leading-6 wrap-break-word whitespace-pre-wrap text-transparent",
-                  layout.animate &&
-                    "transition-[padding] duration-200 ease-out",
+                  "pointer-events-none absolute inset-0 overflow-hidden py-1 pl-2 text-[0.9375rem] leading-6 wrap-break-word whitespace-pre-wrap text-transparent",
+                  welcome ? "pr-2" : "pr-12",
                 )}
-                style={{
-                  paddingLeft: layout.expanded ? 8 : layout.leftWidth + 8,
-                  paddingRight: layout.expanded ? 8 : layout.rightWidth + 8,
-                }}
               />
             )}
             <textarea
               ref={textareaRef}
               defaultValue={initialText}
               rows={1}
-              placeholder={placeholder}
+              placeholder={welcome ? "" : placeholder}
               aria-label="Meddelande"
               className={cn(
-                "relative block max-h-50 w-full resize-none overflow-y-auto border-0 bg-transparent py-1 text-[0.9375rem] leading-6 text-foreground outline-none placeholder:text-muted-foreground",
-                layout.expanded && "min-h-16",
-                layout.animate &&
-                  "transition-[height,min-height,padding] duration-200 ease-out",
+                "relative block max-h-50 w-full resize-none overflow-y-auto border-0 bg-transparent py-1 pl-2 text-[0.9375rem] leading-6 text-foreground outline-none placeholder:text-muted-foreground",
+                welcome ? "pr-2" : "pr-12",
               )}
               style={{
-                height: layout.textHeight + 8,
-                paddingLeft: layout.expanded ? 8 : layout.leftWidth + 8,
-                paddingRight: layout.expanded ? 8 : layout.rightWidth + 8,
+                height: welcome ? Math.max(72, textHeight + 8) : textHeight + 8,
               }}
               onInput={(e) => {
                 syncTextState(e.currentTarget.value);
@@ -530,63 +521,12 @@ export function ChatInput({
               }}
               onKeyDown={onKeyDown}
             />
+            {!welcome && sendButton}
           </div>
-
-          <div
-            ref={leftControlsRef}
-            className="absolute bottom-2.5 left-2.5 flex h-8 items-center gap-0.5"
-          >
-            <input
-              ref={fileInputRef}
-              type="file"
-              multiple
-              className="hidden"
-              accept={FILE_INPUT_ACCEPT}
-              onChange={(e) => {
-                if (e.target.files) addFiles(Array.from(e.target.files));
-                e.target.value = "";
-              }}
-            />
-            <IconButton
-              variant="ghost"
-              className="rounded-full"
-              aria-label="Bifoga filer"
-              disabled={isLoading || capacityReached}
-              onClick={() => fileInputRef.current?.click()}
-            >
-              <PlusIcon />
-            </IconButton>
-          </div>
-
-          <div
-            ref={rightControlsRef}
-            className="absolute right-2.5 bottom-2.5 flex h-8 shrink-0 items-center gap-1"
-          >
-            <ModelPicker />
-            {longLength > 0 && (
-              <span
-                className={cn(
-                  "text-2xs",
-                  tooLong
-                    ? "font-medium text-destructive"
-                    : "text-muted-foreground",
-                )}
-              >
-                {longLength} / {MAX_LENGTH}
-              </span>
-            )}
-            <IconButton
-              variant="default"
-              className="rounded-full"
-              aria-label={isLoading ? "Avbryt svar" : "Skicka meddelande"}
-              hideTooltip
-              disabled={!isLoading && !canSend}
-              onClick={() => (isLoading ? onCancel() : submit())}
-            >
-              {isLoading ? <StopIcon /> : <ArrowUpIcon />}
-            </IconButton>
-          </div>
+          {welcome && toolbar}
         </div>
+
+        {!welcome && toolbar}
 
         {mention && (
           <CourseMentionMenu
@@ -605,11 +545,6 @@ export function ChatInput({
           className="pointer-events-none invisible absolute h-0 overflow-hidden border-0 p-0 text-[0.9375rem] leading-6 whitespace-pre-wrap"
         />
       </div>
-      {showDisclaimer && (
-        <p className="mt-2 text-center text-2xs text-muted-foreground">
-          AI kan göra misstag. Kontrollera svar.
-        </p>
-      )}
     </form>
   );
 }
@@ -646,5 +581,45 @@ function ModelPicker() {
         </DropdownMenuRadioGroup>
       </DropdownMenuContent>
     </DropdownMenu>
+  );
+}
+
+const WELCOME_PLACEHOLDERS = [
+  "Fråga något, eller skriv @ för att välja kurs",
+  "Förklara ett begrepp jag fastnat på",
+  "Hjälp mig förstå en tentauppgift",
+  "Förhör mig inför nästa tenta",
+];
+
+function WelcomePlaceholder() {
+  const [index, setIndex] = useState(0);
+
+  useEffect(() => {
+    const reducedMotion = matchMedia("(prefers-reduced-motion: reduce)");
+    let timer: number | undefined;
+    const update = () => {
+      window.clearInterval(timer);
+      if (!reducedMotion.matches) {
+        timer = window.setInterval(() => {
+          setIndex((current) => (current + 1) % WELCOME_PLACEHOLDERS.length);
+        }, 5000);
+      }
+    };
+    update();
+    reducedMotion.addEventListener("change", update);
+    return () => {
+      window.clearInterval(timer);
+      reducedMotion.removeEventListener("change", update);
+    };
+  }, []);
+
+  return (
+    <span
+      key={index}
+      aria-hidden="true"
+      className="chat-welcome-placeholder pointer-events-none absolute inset-x-2 top-1 text-left text-[0.9375rem] leading-6 text-muted-foreground"
+    >
+      {WELCOME_PLACEHOLDERS[index]}
+    </span>
   );
 }

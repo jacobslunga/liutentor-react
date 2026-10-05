@@ -5,7 +5,6 @@ import { SettingsDialog } from "@/components/settings/settings-dialog";
 import type { ChatModelId } from "@/lib/chat-models";
 import { useSelectedModel, useSettingsStore } from "@/stores/settings";
 import { IconButton } from "@/components/shared/icon-button";
-import { KeyHint } from "@/components/shared/key-hint";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -23,14 +22,6 @@ const THEMES = [
   { value: "system", label: "System", Icon: MonitorIcon },
 ] as const;
 
-const TIPS: { text: string; keys?: string[] }[] = [
-  { text: "Välj en kurs att prata om, t.ex. @TATA41", keys: ["@"] },
-  { text: "Skicka meddelande", keys: ["Enter"] },
-  { text: "Ny rad", keys: ["Shift+Enter"] },
-  { text: "Dra in eller klistra in bilder och PDF:er" },
-  { text: "Markera text i ett svar för att fråga om den" },
-];
-
 export function ChatSettingsMenu() {
   const { theme = "system", setTheme } = useTheme();
   const { selectedModelId, availableModels } = useSelectedModel();
@@ -46,7 +37,7 @@ export function ChatSettingsMenu() {
           </IconButton>
         </DropdownMenuTrigger>
         <DropdownMenuContent side="right" align="end" className="w-64">
-          <div className="max-h-88 overflow-y-auto overscroll-contain">
+          <div className="max-h-88 overflow-x-hidden overflow-y-auto overscroll-contain">
             <DropdownMenuLabel>Tema</DropdownMenuLabel>
             <DropdownMenuRadioGroup value={theme} onValueChange={setTheme}>
               {THEMES.map(({ value, label, Icon }) => (
@@ -83,28 +74,6 @@ export function ChatSettingsMenu() {
                 </DropdownMenuRadioItem>
               ))}
             </DropdownMenuRadioGroup>
-            <div className="border-t px-4 pt-2 pb-3">
-              <p className="pb-2 text-xs font-semibold text-muted-foreground">
-                Tips
-              </p>
-              <ul className="space-y-1.5">
-                {TIPS.map(({ keys, text }) => (
-                  <li
-                    key={text}
-                    className="flex items-center justify-between gap-3 text-xs text-muted-foreground"
-                  >
-                    <span>{text}</span>
-                    {keys && (
-                      <span className="flex shrink-0 gap-1">
-                        {keys.map((key) => (
-                          <KeyHint key={key} keys={key} />
-                        ))}
-                      </span>
-                    )}
-                  </li>
-                ))}
-              </ul>
-            </div>
           </div>
           <DropdownMenuSeparator />
           <DropdownMenuItem onSelect={() => setDialogOpen(true)}>

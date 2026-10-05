@@ -1,4 +1,4 @@
-import { QuoteIcon } from "lucide-react";
+import { CornerUpLeft } from "lucide-react";
 import { createPortal } from "react-dom";
 import { Button } from "@/components/ui/button";
 
@@ -30,8 +30,8 @@ export function SelectionPopover({
             onReply();
           }}
         >
-          <QuoteIcon fill="currentColor" />
           Fråga
+          <CornerUpLeft />
         </Button>
       </div>
     </div>,

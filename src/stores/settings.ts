@@ -10,8 +10,14 @@ import {
 import { useUser } from "@/stores/auth";
 
 export type LayoutMode = "exam-with-facit" | "exam-only";
+export type ChatFont = "libron" | "system";
+export type UiFont = "oceanic-grotesk" | "system";
 
 interface SettingsState {
+  chatFont: ChatFont;
+  uiFont: UiFont;
+  setChatFont: (font: ChatFont) => void;
+  setUiFont: (font: UiFont) => void;
   layoutMode: LayoutMode;
   showExplainPopover: boolean;
   blurFacitUntilHover: boolean;
@@ -37,6 +43,10 @@ interface SettingsState {
 export const useSettingsStore = create<SettingsState>()(
   persist(
     (set) => ({
+      chatFont: "libron",
+      uiFont: "oceanic-grotesk",
+      setChatFont: (chatFont) => set({ chatFont }),
+      setUiFont: (uiFont) => set({ uiFont }),
       layoutMode: "exam-with-facit",
       showExplainPopover: true,
       blurFacitUntilHover: true,
@@ -56,7 +66,17 @@ export const useSettingsStore = create<SettingsState>()(
       setChatSidebarOpen: (chatSidebarOpen) => set({ chatSidebarOpen }),
       setChatSidebarWidth: (chatSidebarWidth) => set({ chatSidebarWidth }),
     }),
-    { name: "liutentor-settings", version: 1 },
+    {
+      name: "liutentor-settings",
+      version: 3,
+      migrate: (persistedState) => {
+        const settings = persistedState as Partial<SettingsState>;
+        return {
+          ...settings,
+          uiFont: settings.uiFont === "system" ? "system" : "oceanic-grotesk",
+        };
+      },
+    },
   ),
 );
 

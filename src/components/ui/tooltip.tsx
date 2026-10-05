@@ -1,5 +1,6 @@
 import * as React from "react";
 import { cn } from "@/lib/utils";
+import { isTabNavigation } from "@/lib/input-modality";
 import { Tooltip as TooltipPrimitive } from "radix-ui";
 
 function TooltipProvider({
@@ -22,9 +23,19 @@ function Tooltip({
 }
 
 function TooltipTrigger({
+  onFocus,
   ...props
 }: React.ComponentProps<typeof TooltipPrimitive.Trigger>) {
-  return <TooltipPrimitive.Trigger data-slot="tooltip-trigger" {...props} />;
+  return (
+    <TooltipPrimitive.Trigger
+      data-slot="tooltip-trigger"
+      {...props}
+      onFocus={(event) => {
+        onFocus?.(event);
+        if (!isTabNavigation()) event.preventDefault();
+      }}
+    />
+  );
 }
 
 function TooltipContent({

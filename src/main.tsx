@@ -7,9 +7,13 @@ import { initAnalytics, trackPageView } from "@/lib/analytics";
 import { queryClient } from "@/lib/query-client";
 import { router } from "@/router";
 import { initAuth } from "@/stores/auth";
+import { initFontSettings } from "@/lib/font-settings";
+import { initInputModality } from "@/lib/input-modality";
 import "./index.css";
 
 void initAuth();
+initFontSettings();
+initInputModality();
 
 initAnalytics();
 
