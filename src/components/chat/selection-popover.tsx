@@ -1,4 +1,4 @@
-import { CornerUpLeft } from "lucide-react";
+import { CornerUpRight } from "lucide-react";
 import { createPortal } from "react-dom";
 import { Button } from "@/components/ui/button";
 
@@ -17,7 +17,7 @@ export function SelectionPopover({
       style={{
         left: x,
         top: y,
-        transform: "translate(-50%, calc(-100% - 8px))",
+        transform: "translate(-50%, 8px)",
       }}
     >
       <div className="animate-in duration-150 fade-in-0 zoom-in-95">
@@ -29,8 +29,8 @@ export function SelectionPopover({
             onReply();
           }}
         >
-          Fråga
-          <CornerUpLeft />
+          <CornerUpRight />
+          Fråga om detta
         </Button>
       </div>
     </div>,

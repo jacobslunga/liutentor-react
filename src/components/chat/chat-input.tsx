@@ -336,11 +336,8 @@ export function ChatInput({
 
   const sendButton = (
     <IconButton
-      variant="ghost"
-      className={cn(
-        "rounded-lg text-muted-foreground",
-        !welcome && "absolute right-0 bottom-0",
-      )}
+      variant={isLoading ? "secondary" : "default"}
+      className={cn("rounded-lg", !welcome && "absolute right-0 bottom-0")}
       aria-label={isLoading ? "Avbryt svar" : "Skicka meddelande"}
       hideTooltip
       disabled={!isLoading && !canSend}
@@ -353,8 +350,8 @@ export function ChatInput({
   const toolbar = (
     <div
       className={cn(
-        "grid grid-cols-2 items-center gap-x-2 gap-y-0.5 px-1 sm:grid-cols-[1fr_auto_1fr]",
-        welcome ? "mt-2" : "mt-1",
+        "grid grid-cols-2 items-center gap-x-2 px-1 sm:grid-cols-[1fr_auto_1fr]",
+        welcome ? "mt-2" : "mt-0",
       )}
     >
       <div className="flex h-8 items-center gap-0.5">
@@ -421,16 +418,15 @@ export function ChatInput({
       >
         <div
           className={cn(
-            "relative overflow-hidden rounded-2xl border border-input p-2.5 shadow-xs",
-            welcome ? "bg-card" : "bg-background",
+            "relative overflow-hidden rounded-2xl border border-input bg-card p-1.5 shadow-xs dark:shadow-[0_3px_10px_-1px_rgba(255,255,255,0.07)]",
             isLoading && "chat-prompt-generating",
           )}
         >
           {hasHeader && (
-            <div className="-mx-2.5 -mt-2.5 mb-2 flex flex-col items-stretch gap-2 overflow-hidden rounded-t-xl border-b bg-muted/50 px-2.5 pt-2 pb-2.5">
+            <div className="-mx-1.5 -mt-1.5 mb-1.5 flex flex-col items-stretch gap-2 overflow-hidden border-b bg-muted/50 px-3 py-2">
               {selectionContext && (
-                <div className="flex w-full animate-in items-start gap-3 duration-200 fade-in-0">
-                  <CornerDownLeftIcon className="mt-0.5 size-4 shrink-0 -scale-x-100" />
+                <div className="flex w-full animate-in items-center gap-2.5 duration-200 fade-in-0">
+                  <CornerDownLeftIcon className="size-4 shrink-0 -scale-x-100 text-muted-foreground" />
                   <span className="line-clamp-3 min-w-0 flex-1 text-sm leading-relaxed font-normal text-foreground">
                     "<SelectionQuote text={selectionContext} />"
                   </span>

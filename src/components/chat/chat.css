@@ -63,29 +63,6 @@
   --tw-prose-td-borders: var(--border);
 }
 
-/* Keep headings distinct; soften only emphasis within the body text. */
-:root[data-chat-font="libron"] .chat-prose :is(h1, h2, h3, h4, h5, h6) {
-  font-weight: 700;
-  -webkit-text-stroke: 0;
-}
-
-:root[data-chat-font="libron"] .chat-prose :is(strong, b) {
-  font-weight: 500;
-  -webkit-text-stroke: 0.012em currentColor;
-}
-
-:root[data-chat-font="libron"]
-  .chat-prose
-  :is(h1, h2, h3, h4, h5, h6)
-  :is(strong, b) {
-  font-weight: inherit;
-  -webkit-text-stroke: 0;
-}
-
-:root[data-chat-font="libron"] .chat-prose :is(code, .katex) {
-  -webkit-text-stroke: 0;
-}
-
 .chat-prose .katex-display {
   width: 100%;
   max-width: 100%;
@@ -142,7 +119,7 @@
 }
 
 .chat-prose .table-scroll thead {
-  background-color: var(--muted);
+  background-color: var(--background);
   border-bottom: 1px solid var(--border);
 }
 
@@ -237,7 +214,7 @@
   padding: 1rem 1.25rem;
   overflow-x: auto;
   line-height: 1.6;
-  background-color: var(--shiki-light-bg);
+  background-color: var(--background) !important;
 }
 
 .chat-prose .code-block pre.shiki,
@@ -246,7 +223,7 @@
 }
 
 .dark .chat-prose .code-block pre.shiki {
-  background-color: var(--shiki-dark-bg);
+  background-color: var(--background) !important;
 }
 
 .dark .chat-prose .code-block pre.shiki span {

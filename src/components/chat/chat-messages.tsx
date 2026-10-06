@@ -1,4 +1,7 @@
 import {
+  CheckIcon,
+  ChevronDownIcon,
+  CopyIcon,
   FileTextIcon,
   GlobeIcon,
   ImageIcon,
@@ -15,6 +18,7 @@ import {
   type Ref,
   type RefObject,
 } from "react";
+import { flushSync } from "react-dom";
 import { toast } from "sonner";
 import { useShallow } from "zustand/react/shallow";
 import { useChatMarkdownReady } from "@/hooks/use-chat-markdown";
@@ -28,6 +32,7 @@ import { splitCourseMentions } from "@/lib/course-mentions";
 import { courseFileUrl } from "@/lib/study-courses";
 import { formatFileSize } from "@/lib/format";
 import { cn } from "@/lib/utils";
+import { IconButton } from "@/components/shared/icon-button";
 import {
   useChatStore,
   useChatStoreApi,
@@ -492,7 +497,7 @@ export function ChatMessages({
       const rect = range.getBoundingClientRect();
       setPopover({
         x: rect.left + rect.width / 2,
-        y: rect.top,
+        y: rect.bottom,
         anchor: scrollRef.current?.scrollTop ?? 0,
       });
     }, 0);
@@ -596,9 +601,9 @@ const MessageRow = memo(function MessageRow({
     return (
       <div
         data-role="user"
-        className="chat-row flex min-w-0 scroll-mt-20 justify-end py-2"
+        className="group/message chat-row flex min-w-0 scroll-mt-20 flex-col items-end pt-2"
       >
-        <div className="flex max-w-[85%] min-w-0 flex-col items-start gap-2 rounded-2xl bg-muted px-4 py-3 shadow-xs sm:max-w-[75%]">
+        <div className="flex max-w-[85%] min-w-0 flex-col items-start gap-2 rounded-xl bg-brand/10 px-4 py-1.5 shadow-xs sm:max-w-[75%]">
           {message.selectionContext && (
             <div className="line-clamp-3 border-l-2 border-foreground/30 pl-3 font-chat text-sm text-muted-foreground">
               "<SelectionQuote text={message.selectionContext} />"
@@ -611,10 +616,11 @@ const MessageRow = memo(function MessageRow({
               ))}
             </div>
           )}
+          {message.content && <CollapsibleUserText text={message.content} />}
+        </div>
+        <div className="mt-0.5 -mr-1.5 h-7">
           {message.content && (
-            <p className="text-sm leading-relaxed whitespace-pre-wrap sm:text-[0.9375rem]">
-              <UserText text={message.content} />
-            </p>
+            <CopyButton text={message.content} className={ACTION_REVEAL} />
           )}
         </div>
       </div>
@@ -632,7 +638,7 @@ const MessageRow = memo(function MessageRow({
   return (
     <div
       data-role="assistant"
-      className="chat-row w-full min-w-0 overflow-hidden pt-2 pb-8"
+      className="group/message chat-row w-full min-w-0 overflow-hidden pt-2 pb-4"
     >
       {showStatus && (
         <div className="mb-2 flex h-6 items-center gap-2">
@@ -647,6 +653,11 @@ const MessageRow = memo(function MessageRow({
           className="chat-prose prose prose-sm w-full max-w-none min-w-0 font-chat sm:prose-base dark:prose-invert prose-headings:font-semibold prose-h1:text-xl sm:prose-h1:text-2xl prose-h2:text-lg sm:prose-h2:text-xl prose-h3:text-base sm:prose-h3:text-lg prose-h4:text-sm sm:prose-h4:text-base prose-h5:text-sm prose-h6:text-xs prose-strong:font-semibold prose-li:marker:font-bold prose-li:marker:text-foreground"
           dangerouslySetInnerHTML={{ __html: html }}
         />
+      )}
+      {message.content && !isStreaming && (
+        <div className="mt-1 -ml-1.5">
+          <CopyButton text={message.content} className={ACTION_REVEAL} />
+        </div>
       )}
       {!!message.sources?.length && (
         <div className="mt-3 flex flex-wrap gap-1.5">
@@ -720,6 +731,92 @@ function FileSourceChip({
       <FileTextIcon />
       <span className="truncate">{source.title}</span>
     </Button>
+  );
+}
+
+const ACTION_REVEAL =
+  "opacity-0 transition-opacity duration-150 group-hover/message:opacity-100 group-focus-within/message:opacity-100 focus-visible:opacity-100 [@media(hover:none)]:opacity-100";
+
+const COLLAPSE_CHARS = 100;
+const COLLAPSE_LINES = 3;
+
+function CopyButton({ text, className }: { text: string; className?: string }) {
+  const [copied, setCopied] = useState(false);
+  const timer = useRef<number | undefined>(undefined);
+  useEffect(() => () => window.clearTimeout(timer.current), []);
+
+  return (
+    <IconButton
+      variant="ghost"
+      size="icon-sm"
+      className={cn("text-muted-foreground", className)}
+      aria-label={copied ? "Kopierat" : "Kopiera"}
+      onClick={() => {
+        navigator.clipboard.writeText(text).then(
+          () => {
+            setCopied(true);
+            window.clearTimeout(timer.current);
+            timer.current = window.setTimeout(() => setCopied(false), 1500);
+          },
+          () => toast.error("Kunde inte kopiera."),
+        );
+      }}
+    >
+      {copied ? <CheckIcon /> : <CopyIcon />}
+    </IconButton>
+  );
+}
+
+function CollapsibleUserText({ text }: { text: string }) {
+  const [expanded, setExpanded] = useState(false);
+  const textRef = useRef<HTMLParagraphElement>(null);
+  const lines = text.split("\n");
+  const collapsible =
+    text.length > COLLAPSE_CHARS || lines.length > COLLAPSE_LINES;
+  const shown =
+    collapsible && !expanded
+      ? lines
+          .slice(0, COLLAPSE_LINES)
+          .join("\n")
+          .slice(0, COLLAPSE_CHARS)
+          .trimEnd() + "…"
+      : text;
+
+  return (
+    <div className="flex min-w-0 flex-col items-start gap-1">
+      <p
+        ref={textRef}
+        className="overflow-hidden text-sm leading-relaxed whitespace-pre-wrap text-foreground sm:text-[0.9375rem]"
+      >
+        <UserText text={shown} />
+      </p>
+      {collapsible && (
+        <button
+          type="button"
+          className="-ml-0.5 flex size-5 items-center justify-center rounded-md text-muted-foreground transition-colors hover:text-foreground"
+          aria-label={expanded ? "Visa mindre" : "Visa mer"}
+          aria-expanded={expanded}
+          onClick={() => {
+            const el = textRef.current;
+            const from = el?.offsetHeight ?? 0;
+            flushSync(() => setExpanded((v) => !v));
+            if (!el || matchMedia("(prefers-reduced-motion: reduce)").matches)
+              return;
+            el.animate(
+              [{ height: `${from}px` }, { height: `${el.offsetHeight}px` }],
+              { duration: 200, easing: "cubic-bezier(0.22, 1, 0.36, 1)" },
+            );
+          }}
+        >
+          <ChevronDownIcon
+            className={cn(
+              "size-4 transition-transform duration-150",
+              expanded && "rotate-180",
+            )}
+          />
+        </button>
+      )}
+    </div>
   );
 }
 

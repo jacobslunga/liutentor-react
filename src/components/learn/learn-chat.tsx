@@ -351,7 +351,7 @@ export function LearnChat({
       }
       welcome={!conversationId && !currentId && !hasMessages && !inCourse}
       courseMentions
-      showDisclaimer={false}
+      showDisclaimer={hasMessages}
       selectionContext={selectionContext}
       onSend={handleSend}
       onCancel={handleCancel}
@@ -448,8 +448,8 @@ export function LearnChat({
       {isOverDrop && <ChatDropOverlay />}
 
       <div className="pointer-events-none absolute inset-x-0 top-0 z-20">
-        <div className="pointer-events-none relative isolate flex h-14 items-center justify-between gap-2 px-3">
-          <div className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-20 bg-linear-to-b from-background via-background/90 to-transparent" />
+        <div className="pointer-events-none relative isolate flex h-10 items-center justify-between gap-2 px-3">
+          <div className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-16 bg-[linear-gradient(to_bottom,var(--background)_0,var(--background)_55%,transparent_100%)]" />
           <m.div
             style={{ x: headerX }}
             className="flex min-w-0 items-center gap-1"

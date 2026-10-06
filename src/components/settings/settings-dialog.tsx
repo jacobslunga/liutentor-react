@@ -9,7 +9,6 @@ import {
   useSelectedModel,
   useSettingsStore,
   type LayoutMode,
-  type ChatFont,
   type UiFont,
 } from "@/stores/settings";
 import { Button } from "@/components/ui/button";
@@ -102,8 +101,6 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
 }
 
 function SettingsContent() {
-  const chatFont = useSettingsStore((s) => s.chatFont);
-  const setChatFont = useSettingsStore((s) => s.setChatFont);
   const uiFont = useSettingsStore((s) => s.uiFont);
   const setUiFont = useSettingsStore((s) => s.setUiFont);
   const { theme = "system", setTheme } = useTheme();
@@ -121,24 +118,6 @@ function SettingsContent() {
   return (
     <div className="flex flex-col gap-6 pt-1 pb-2">
       <Section title="Utseende">
-        <Row label="Chattens typsnitt">
-          <Select
-            value={chatFont}
-            onValueChange={(value) => setChatFont(value as ChatFont)}
-          >
-            <SelectTrigger
-              size="sm"
-              className="w-44"
-              aria-label="Chattens typsnitt"
-            >
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="libron">Libron</SelectItem>
-              <SelectItem value="system">System</SelectItem>
-            </SelectContent>
-          </Select>
-        </Row>
         <Row label="Gränssnittets typsnitt">
           <Select
             value={uiFont}

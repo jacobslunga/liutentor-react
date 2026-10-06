@@ -10,13 +10,10 @@ import {
 import { useUser } from "@/stores/auth";
 
 export type LayoutMode = "exam-with-facit" | "exam-only";
-export type ChatFont = "libron" | "system";
 export type UiFont = "oceanic-grotesk" | "system";
 
 interface SettingsState {
-  chatFont: ChatFont;
   uiFont: UiFont;
-  setChatFont: (font: ChatFont) => void;
   setUiFont: (font: UiFont) => void;
   layoutMode: LayoutMode;
   showExplainPopover: boolean;
@@ -43,9 +40,7 @@ interface SettingsState {
 export const useSettingsStore = create<SettingsState>()(
   persist(
     (set) => ({
-      chatFont: "libron",
       uiFont: "oceanic-grotesk",
-      setChatFont: (chatFont) => set({ chatFont }),
       setUiFont: (uiFont) => set({ uiFont }),
       layoutMode: "exam-with-facit",
       showExplainPopover: true,

@@ -11,8 +11,8 @@ const buttonVariants = cva(
     variants: {
       variant: {
         default: `bg-primary text-primary-foreground inset-shadow-sheen hover:from-white/24 dark:from-white/40 dark:hover:from-white/55`,
-        outline: `border-border bg-card inset-shadow-highlight hover:to-foreground/[0.07] aria-expanded:to-foreground/[0.07] dark:border-input dark:from-white/[0.06] dark:to-transparent dark:hover:from-white/10`,
-        secondary: `bg-secondary bg-linear-to-b from-transparent to-foreground/[0.04] text-secondary-foreground inset-shadow-highlight hover:to-foreground/[0.08] aria-expanded:to-foreground/[0.08] dark:from-white/[0.06] dark:to-transparent`,
+        outline: `border-border bg-card hover:to-foreground/[0.07] aria-expanded:to-foreground/[0.07] dark:border-input dark:from-white/[0.06] dark:to-transparent dark:hover:from-white/10`,
+        secondary: `bg-secondary text-secondary-foreground hover:to-foreground/[0.08] aria-expanded:to-foreground/[0.08] dark:from-white/[0.06] dark:to-transparent`,
         ghost:
           "hover:bg-muted hover:text-foreground active:scale-[0.97] aria-expanded:bg-muted aria-expanded:text-foreground dark:hover:bg-muted/50",
         destructive:

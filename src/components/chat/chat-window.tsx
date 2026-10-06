@@ -286,7 +286,7 @@ export default function ChatWindow({
 
       <div className="pointer-events-none absolute inset-x-0 top-0 z-20">
         <div className="pointer-events-none relative isolate flex h-14 items-center justify-between gap-2 px-3">
-          <div className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-20 bg-linear-to-b from-background via-background/90 to-transparent" />
+          <div className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[4.5rem] bg-[linear-gradient(to_bottom,var(--background)_0,var(--background)_55%,transparent_100%)]" />
           <div className="flex min-w-0 items-center gap-1">
             <HeaderButton
               icon={ChevronRightIcon}
