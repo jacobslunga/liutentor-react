@@ -202,4 +202,21 @@
   html {
     @apply font-sans;
   }
+  /* Tailwind is rem-based, so raising the root size scales the whole UI
+     (text, spacing, chat column width) on large monitors. */
+  @media (min-width: 1536px) {
+    html {
+      font-size: 106.25%;
+    }
+  }
+  @media (min-width: 1920px) {
+    html {
+      font-size: 112.5%;
+    }
+  }
+  @media (min-width: 2560px) {
+    html {
+      font-size: 125%;
+    }
+  }
 }
