@@ -22,7 +22,6 @@ export function SelectionPopover({
     >
       <div className="animate-in duration-150 fade-in-0 zoom-in-95">
         <Button
-          variant="outline"
           onMouseDown={(e) => {
             e.preventDefault();
             e.stopPropagation();

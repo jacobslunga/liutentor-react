@@ -1,9 +1,12 @@
 import { Link, useNavigate } from "@tanstack/react-router";
 import { m, useTransform } from "framer-motion";
 import {
-  ArrowDownIcon,
+  CalendarIcon,
   ChevronRightIcon,
+  FileTextIcon,
   FolderIcon,
+  GraduationCapIcon,
+  LightbulbIcon,
   PanelLeftIcon,
   SquarePenIcon,
 } from "lucide-react";
@@ -11,6 +14,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { ChatDropOverlay } from "@/components/chat/chat-drop-overlay";
 import { ChatInput, type ChatInputApi } from "@/components/chat/chat-input";
 import { ChatMascot } from "@/components/chat/chat-mascot";
+import { ScrollToBottomButton } from "@/components/chat/scroll-to-bottom-button";
 import {
   ChatMessages,
   type ChatTranscriptApi,
@@ -55,6 +59,13 @@ const pendingReply = (): Message => ({
   content: "",
   status: { step: "pending", message: "Svaret skrivs fortfarande..." },
 });
+
+const WELCOME_SUGGESTIONS = [
+  { icon: LightbulbIcon, text: "Förklara ett begrepp jag fastnat på" },
+  { icon: FileTextIcon, text: "Hjälp mig förstå en tentauppgift" },
+  { icon: GraduationCapIcon, text: "Förhör mig inför nästa tenta" },
+  { icon: CalendarIcon, text: "Skapa en studieplan inför tentan" },
+];
 
 export function LearnChat({
   conversationId,
@@ -252,7 +263,7 @@ export function LearnChat({
 
   function handleSend() {
     const input = inputRef.current;
-    const text = input?.getText() ?? "";
+    const text = (input?.getText() ?? "").trim();
     const attachments = input?.getAttachments() ?? [];
     if ((!text.trim() && !attachments.length) || chatStore.getState().isLoading)
       return;
@@ -393,16 +404,33 @@ export function LearnChat({
     );
   } else if (!hasMessages) {
     body = (
-      <div className="flex min-h-0 flex-1 flex-col items-center justify-center gap-6 px-1 pb-[12vh]">
-        <div className="flex flex-col items-center gap-4 px-3 text-center">
-          <ChatMascot className="size-14 shrink-0" />
-          <div className="space-y-2">
-            <h1 className="text-2xl font-medium sm:text-3xl">
+      <div className="flex min-h-0 flex-1 flex-col items-center justify-center overflow-y-auto pb-[10vh]">
+        <div className="w-full px-3 sm:px-4">
+          <div className="chat-column chat-welcome-column mx-auto">
+            <ChatMascot className="size-14 shrink-0" />
+            <h1 className="mt-6 mb-6 text-3xl font-medium tracking-tight sm:text-4xl">
               Vad vill du lära dig idag?
             </h1>
           </div>
         </div>
         <div className="w-full">{input}</div>
+        <ul className="chat-column chat-welcome-column mx-auto mt-4 w-full px-3 sm:px-4">
+          {WELCOME_SUGGESTIONS.map(({ icon: Icon, text }) => (
+            <li key={text}>
+              <button
+                type="button"
+                className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left text-[0.9375rem] text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                onClick={() => {
+                  inputRef.current?.setText(text);
+                  inputRef.current?.focus();
+                }}
+              >
+                <Icon className="size-4 shrink-0" />
+                {text}
+              </button>
+            </li>
+          ))}
+        </ul>
       </div>
     );
   } else {
@@ -423,17 +451,11 @@ export function LearnChat({
             onScrollDistanceChange={updateScrollDistance}
           />
         </m.div>
-        <div className="chat-composer-backdrop pointer-events-none absolute inset-x-0 bottom-0 z-20 flex flex-col items-center pt-4 pb-3 sm:pb-4">
-          {showScrollBottom && (
-            <IconButton
-              variant="outline"
-              className="pointer-events-auto absolute -top-6 left-1/2 -translate-x-1/2 animate-in rounded-full shadow-md duration-150 fade-in-0"
-              aria-label="Scrolla längst ned"
-              onClick={scrollToLatest}
-            >
-              <ArrowDownIcon />
-            </IconButton>
-          )}
+        <div className="chat-composer-backdrop pointer-events-none absolute inset-x-0 bottom-0 z-20 flex flex-col items-center pt-12 pb-3 sm:pb-4">
+          <ScrollToBottomButton
+            visible={showScrollBottom}
+            onClick={scrollToLatest}
+          />
           {input}
         </div>
       </>
@@ -530,7 +552,7 @@ function TitlePill({ showCrumb }: { showCrumb: boolean }) {
   return (
     <div
       className={cn(
-        "pointer-events-auto flex min-w-0 items-center gap-0.5 py-1 pr-3.5",
+        "pointer-events-auto flex min-w-0 items-center gap-0.5 py-1 pr-3.5 select-none",
         course ? "pl-1" : "pl-3.5",
       )}
     >

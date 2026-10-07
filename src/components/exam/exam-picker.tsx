@@ -160,9 +160,9 @@ export function ExamPicker({
                   type="button"
                   data-current={current}
                   className={cn(
-                    "grid w-full grid-cols-[3.25rem_6.75rem_3.75rem_3.5rem_1rem] items-center gap-x-2 rounded-sm px-3 py-2 text-left transition-colors duration-150",
+                    "relative grid w-full grid-cols-[3.25rem_6.75rem_3.75rem_3.5rem_1rem] items-center gap-x-2 rounded-sm px-3 py-2 text-left transition-colors duration-150",
                     current
-                      ? "bg-accent font-semibold"
+                      ? "bg-accent font-semibold before:absolute before:inset-y-2 before:left-0 before:w-0.5 before:rounded-full before:bg-brand"
                       : "text-foreground/90 hover:bg-muted hover:text-foreground",
                   )}
                   onClick={() => pick(exam)}

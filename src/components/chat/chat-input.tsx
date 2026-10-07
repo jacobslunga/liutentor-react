@@ -1,5 +1,9 @@
 import {
+  BrainIcon,
   ChevronDownIcon,
+  ZapIcon,
+  type LucideIcon,
+  ArrowUpIcon,
   CornerDownLeftIcon,
   FileTextIcon,
   ImageIcon,
@@ -49,8 +53,7 @@ import { IconButton } from "@/components/shared/icon-button";
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuRadioGroup,
-  DropdownMenuRadioItem,
+  DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
@@ -117,6 +120,12 @@ export function ChatInput({
   const [hasInput, setHasInput] = useState(initialText.length > 0);
   const [longLength, setLongLength] = useState(0);
   const [textHeight, setTextHeight] = useState(24);
+  const [expanded, setExpanded] = useState(false);
+  const expandedRef = useRef(false);
+  const compactDelta = useRef(0);
+  const plusRef = useRef<HTMLDivElement>(null);
+  const controlsRef = useRef<HTMLDivElement>(null);
+  const flipRects = useRef<Map<HTMLElement, DOMRect>>(new Map());
   const [mention, setMention] = useState<{
     start: number;
     query: string;
@@ -154,12 +163,51 @@ export function ChatInput({
   const measurePrompt = useCallback(() => {
     const textarea = textareaRef.current;
     const measurement = measurementRef.current;
-    if (!textarea || !measurement) return;
+    const shell = shellRef.current;
+    if (!textarea || !measurement || !shell) return;
 
-    measurement.value = textarea.value;
-    measurement.style.width = `${Math.max(1, textarea.clientWidth - (welcome ? 16 : 56))}px`;
-    setTextHeight(Math.min(192, Math.max(24, measurement.scrollHeight)));
-  }, [welcome]);
+    // Whether the text fits on one row is always decided at the compact
+    // width, so expanding never feeds back into the decision.
+    if (!expandedRef.current)
+      compactDelta.current = shell.clientWidth - textarea.clientWidth;
+    const measureAt = (width: number) => {
+      measurement.value = textarea.value;
+      measurement.style.width = `${Math.max(1, width)}px`;
+      return measurement.scrollHeight;
+    };
+    const compactHeight = measureAt(
+      shell.clientWidth - compactDelta.current - 16,
+    );
+    const wantExpanded = compactHeight > 26;
+    const style = getComputedStyle(shell);
+    const gutter =
+      parseFloat(style.paddingLeft) + parseFloat(style.paddingRight);
+    const height = wantExpanded
+      ? measureAt(shell.clientWidth - gutter - 22 - 16)
+      : compactHeight;
+
+    if (wantExpanded !== expandedRef.current) {
+      for (const el of [plusRef.current, controlsRef.current])
+        if (el) flipRects.current.set(el, el.getBoundingClientRect());
+      expandedRef.current = wantExpanded;
+      setExpanded(wantExpanded);
+    }
+    setTextHeight(Math.min(192, Math.max(24, height)));
+  }, []);
+
+  useLayoutEffect(() => {
+    for (const [el, from] of flipRects.current) {
+      const to = el.getBoundingClientRect();
+      const dx = from.left - to.left;
+      const dy = from.top - to.top;
+      if (dx || dy)
+        el.animate(
+          [{ transform: `translate(${dx}px, ${dy}px)` }, { transform: "none" }],
+          { duration: 220, easing: "cubic-bezier(0.2, 0.8, 0.2, 1)" },
+        );
+    }
+    flipRects.current.clear();
+  }, [expanded]);
 
   const setText = (value: string) => {
     if (textareaRef.current) textareaRef.current.value = value;
@@ -337,68 +385,14 @@ export function ChatInput({
   const sendButton = (
     <IconButton
       variant={isLoading ? "secondary" : "default"}
-      className={cn("rounded-lg", !welcome && "absolute right-0 bottom-0")}
+      className="size-10 rounded-xl [&_svg:not([class*='size-'])]:size-5"
       aria-label={isLoading ? "Avbryt svar" : "Skicka meddelande"}
       hideTooltip
       disabled={!isLoading && !canSend}
       onClick={() => (isLoading ? onCancel() : submit())}
     >
-      {isLoading ? <StopIcon /> : <CornerDownLeftIcon />}
+      {isLoading ? <StopIcon /> : <ArrowUpIcon />}
     </IconButton>
-  );
-
-  const toolbar = (
-    <div
-      className={cn(
-        "grid grid-cols-2 items-center gap-x-2 px-1 sm:grid-cols-[1fr_auto_1fr]",
-        welcome ? "mt-2" : "mt-0",
-      )}
-    >
-      <div className="flex h-8 items-center gap-0.5">
-        <input
-          ref={fileInputRef}
-          type="file"
-          multiple
-          className="hidden"
-          accept={FILE_INPUT_ACCEPT}
-          onChange={(e) => {
-            if (e.target.files) addFiles(Array.from(e.target.files));
-            e.target.value = "";
-          }}
-        />
-        <IconButton
-          variant="ghost"
-          className="rounded-full"
-          aria-label="Bifoga filer"
-          disabled={isLoading || capacityReached}
-          onClick={() => fileInputRef.current?.click()}
-        >
-          <PlusIcon />
-        </IconButton>
-      </div>
-
-      {showDisclaimer && (
-        <p className="col-span-2 row-start-2 text-center text-2xs text-muted-foreground sm:col-span-1 sm:col-start-2 sm:row-start-1">
-          AI kan göra misstag. Kontrollera svar.
-        </p>
-      )}
-      <div className="col-start-2 row-start-1 flex h-8 items-center justify-end gap-1 sm:col-start-3">
-        <ModelPicker />
-        {welcome && sendButton}
-        {longLength > 0 && (
-          <span
-            className={cn(
-              "text-2xs",
-              tooLong
-                ? "font-medium text-destructive"
-                : "text-muted-foreground",
-            )}
-          >
-            {longLength} / {MAX_LENGTH}
-          </span>
-        )}
-      </div>
-    </div>
   );
 
   return (
@@ -413,17 +407,17 @@ export function ChatInput({
         ref={shellRef}
         className={cn(
           "chat-column relative mx-auto",
-          welcome && "chat-welcome-column",
+          welcome ? "chat-welcome-column" : "px-4 sm:px-5",
         )}
       >
         <div
           className={cn(
-            "relative overflow-hidden rounded-2xl border border-input bg-card p-1.5 shadow-xs dark:shadow-[0_3px_10px_-1px_rgba(255,255,255,0.07)]",
+            "relative overflow-hidden rounded-xl border border-input bg-card p-1.5 shadow-xs dark:border-border dark:shadow-[0_2px_2px_-4px_rgba(0,0,0,0.15)]",
             isLoading && "chat-prompt-generating",
           )}
         >
           {hasHeader && (
-            <div className="-mx-1.5 -mt-1.5 mb-1.5 flex flex-col items-stretch gap-2 overflow-hidden border-b bg-muted/50 px-3 py-2">
+            <div className="-mx-2.5 -mt-2.5 mb-2.5 flex flex-col items-stretch gap-2 overflow-hidden border-b bg-muted/50 px-3 py-2">
               {selectionContext && (
                 <div className="flex w-full animate-in items-center gap-2.5 duration-200 fade-in-0">
                   <CornerDownLeftIcon className="size-4 shrink-0 -scale-x-100 text-muted-foreground" />
@@ -479,50 +473,97 @@ export function ChatInput({
             </div>
           )}
 
-          <div className="relative">
-            {welcome && !hasInput && <WelcomePlaceholder />}
-            {courseMentions && (
-              <div
-                ref={mentionLayerRef}
-                aria-hidden
-                className={cn(
-                  "pointer-events-none absolute inset-0 overflow-hidden py-1 pl-2 text-[0.9375rem] leading-6 wrap-break-word whitespace-pre-wrap text-transparent",
-                  welcome ? "pr-2" : "pr-12",
-                )}
-              />
-            )}
-            <textarea
-              ref={textareaRef}
-              defaultValue={initialText}
-              rows={1}
-              placeholder={welcome ? "" : placeholder}
-              aria-label="Meddelande"
-              className={cn(
-                "relative block max-h-50 w-full resize-none overflow-y-auto border-0 bg-transparent py-1 pl-2 text-[0.9375rem] leading-6 text-foreground outline-none placeholder:text-muted-foreground",
-                welcome ? "pr-2" : "pr-12",
-              )}
-              style={{
-                height: welcome ? Math.max(72, textHeight + 8) : textHeight + 8,
+          <div
+            className="grid items-end gap-x-1"
+            style={{
+              gridTemplateColumns: "auto minmax(0, 1fr) auto",
+              gridTemplateAreas: expanded
+                ? '"text text text" "plus . controls"'
+                : '"plus text controls"',
+            }}
+          >
+            <input
+              ref={fileInputRef}
+              type="file"
+              multiple
+              className="hidden"
+              accept={FILE_INPUT_ACCEPT}
+              onChange={(e) => {
+                if (e.target.files) addFiles(Array.from(e.target.files));
+                e.target.value = "";
               }}
-              onInput={(e) => {
-                syncTextState(e.currentTarget.value);
-                syncMention(e.currentTarget);
-                measurePrompt();
-              }}
-              onSelect={(e) => syncMention(e.currentTarget)}
-              onBlur={() => setMention(null)}
-              onScroll={(e) => {
-                if (mentionLayerRef.current)
-                  mentionLayerRef.current.scrollTop = e.currentTarget.scrollTop;
-              }}
-              onKeyDown={onKeyDown}
             />
-            {!welcome && sendButton}
+            <div ref={plusRef} style={{ gridArea: "plus" }}>
+              <IconButton
+                variant="ghost"
+                className="size-10 rounded-xl [&_svg:not([class*='size-'])]:size-5"
+                aria-label="Bifoga filer"
+                disabled={isLoading || capacityReached}
+                onClick={() => fileInputRef.current?.click()}
+              >
+                <PlusIcon />
+              </IconButton>
+            </div>
+            <div className="relative min-w-0" style={{ gridArea: "text" }}>
+              {welcome && !hasInput && <WelcomePlaceholder />}
+              {courseMentions && (
+                <div
+                  ref={mentionLayerRef}
+                  aria-hidden
+                  className="pointer-events-none absolute inset-0 overflow-hidden py-2 pr-2 pl-2 text-base leading-6 wrap-break-word whitespace-pre-wrap text-transparent"
+                />
+              )}
+              <textarea
+                ref={textareaRef}
+                defaultValue={initialText}
+                rows={1}
+                placeholder={welcome ? "" : placeholder}
+                aria-label="Meddelande"
+                className="relative block max-h-50 w-full resize-none overflow-y-auto border-0 bg-transparent py-2 pr-2 pl-2 text-base leading-6 text-foreground transition-[height] duration-200 ease-out-quick outline-none placeholder:text-muted-foreground"
+                style={{ height: textHeight + 16 }}
+                onInput={(e) => {
+                  syncTextState(e.currentTarget.value);
+                  syncMention(e.currentTarget);
+                  measurePrompt();
+                }}
+                onSelect={(e) => syncMention(e.currentTarget)}
+                onBlur={() => setMention(null)}
+                onScroll={(e) => {
+                  if (mentionLayerRef.current)
+                    mentionLayerRef.current.scrollTop =
+                      e.currentTarget.scrollTop;
+                }}
+                onKeyDown={onKeyDown}
+              />
+            </div>
+            <div
+              ref={controlsRef}
+              className="flex items-center gap-1"
+              style={{ gridArea: "controls" }}
+            >
+              {longLength > 0 && (
+                <span
+                  className={cn(
+                    "text-2xs",
+                    tooLong
+                      ? "font-medium text-destructive"
+                      : "text-muted-foreground",
+                  )}
+                >
+                  {longLength} / {MAX_LENGTH}
+                </span>
+              )}
+              <ModelPicker />
+              {sendButton}
+            </div>
           </div>
-          {welcome && toolbar}
         </div>
 
-        {!welcome && toolbar}
+        {showDisclaimer && (
+          <p className="mt-2 text-center text-2xs text-muted-foreground">
+            AI kan göra misstag. Kontrollera svar.
+          </p>
+        )}
 
         {mention && (
           <CourseMentionMenu
@@ -538,7 +579,7 @@ export function ChatInput({
           aria-hidden="true"
           tabIndex={-1}
           rows={1}
-          className="pointer-events-none invisible absolute h-0 overflow-hidden border-0 p-0 text-[0.9375rem] leading-6 whitespace-pre-wrap"
+          className="pointer-events-none invisible absolute h-0 overflow-hidden border-0 p-0 text-base leading-6 whitespace-pre-wrap"
         />
       </div>
     </form>
@@ -548,6 +589,11 @@ export function ChatInput({
 function StopIcon() {
   return <span className="size-2.5 rounded-xs bg-current" aria-hidden />;
 }
+
+const MODEL_ICONS: Record<ChatModelId, LucideIcon> = {
+  "gemini-flash-lite-minimal": ZapIcon,
+  "gemini-flash-lite-medium": BrainIcon,
+};
 
 function ModelPicker() {
   const { selectedModelId, availableModels } = useSelectedModel();
@@ -559,22 +605,40 @@ function ModelPicker() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="sm" aria-label="Tankenivå">
+        <Button
+          variant="ghost"
+          className="h-10 rounded-xl px-3 text-base text-foreground/80"
+          aria-label="Tankenivå"
+        >
           {label}
           <ChevronDownIcon />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent side="top" align="end" className="min-w-48">
-        <DropdownMenuRadioGroup
-          value={selectedModelId}
-          onValueChange={(value) => setSelectedModelId(value as ChatModelId)}
-        >
-          {availableModels.map((model) => (
-            <DropdownMenuRadioItem key={model.id} value={model.id}>
-              {model.label}
-            </DropdownMenuRadioItem>
-          ))}
-        </DropdownMenuRadioGroup>
+      <DropdownMenuContent
+        side="top"
+        align="end"
+        sideOffset={8}
+        className="flex w-56 min-w-0 flex-col gap-1 rounded-xl p-1"
+      >
+        {availableModels.map((model) => {
+          const Icon = MODEL_ICONS[model.id];
+          return (
+            <DropdownMenuItem
+              key={model.id}
+              data-selected={model.id === selectedModelId}
+              className="items-start gap-2.5 rounded-lg px-2.5 py-1.5 data-[selected=true]:bg-muted"
+              onSelect={() => setSelectedModelId(model.id)}
+            >
+              <Icon className="mt-0.5 size-4" />
+              <div className="flex flex-col">
+                <span className="text-sm leading-snug">{model.label}</span>
+                <span className="text-xs leading-snug font-normal text-muted-foreground">
+                  {model.hint}
+                </span>
+              </div>
+            </DropdownMenuItem>
+          );
+        })}
       </DropdownMenuContent>
     </DropdownMenu>
   );
@@ -613,7 +677,7 @@ function WelcomePlaceholder() {
     <span
       key={index}
       aria-hidden="true"
-      className="chat-welcome-placeholder pointer-events-none absolute inset-x-2 top-1 text-left text-[0.9375rem] leading-6 text-muted-foreground"
+      className="chat-welcome-placeholder pointer-events-none absolute inset-x-2 top-2 text-left text-base leading-6 text-muted-foreground"
     >
       {WELCOME_PLACEHOLDERS[index]}
     </span>

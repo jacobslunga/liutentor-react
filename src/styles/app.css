@@ -1,10 +1,11 @@
+@import "@fontsource-variable/inter";
 @plugin "@tailwindcss/typography";
 
 :root {
   --system-font:
     -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro", "Segoe UI",
     sans-serif;
-  --ui-font: "Oceanic Grotesk", var(--system-font);
+  --ui-font: "Inter Variable", var(--system-font);
 }
 
 :root[data-ui-font="system"] {
@@ -173,19 +174,4 @@
   summary {
     cursor: pointer;
   }
-}
-@font-face {
-  font-family: "Oceanic Grotesk";
-  src: url("../assets/fonts/OceanicGrotesk-Regular.woff2") format("woff2");
-  font-style: normal;
-  font-weight: 400;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: "Oceanic Grotesk";
-  src: url("../assets/fonts/OceanicGrotesk-Medium.woff2") format("woff2");
-  font-style: normal;
-  font-weight: 500 900;
-  font-display: swap;
 }

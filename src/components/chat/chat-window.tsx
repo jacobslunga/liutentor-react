@@ -1,10 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import {
-  ArrowDownIcon,
-  ChevronRightIcon,
-  HistoryIcon,
-  PlusIcon,
-} from "lucide-react";
+import { ChevronRightIcon, HistoryIcon, PlusIcon } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useExamChat } from "@/hooks/use-chat";
 import { normalizeClipboardFile } from "@/lib/chat-attachments";
@@ -16,6 +11,7 @@ import {
 import { useSelectedModel } from "@/stores/settings";
 import { ChatDropOverlay } from "./chat-drop-overlay";
 import { ChatHistoryDialog } from "./chat-history-dialog";
+import { ScrollToBottomButton } from "./scroll-to-bottom-button";
 import { ChatInput, type ChatInputApi } from "./chat-input";
 import { ChatMascot } from "./chat-mascot";
 import { ChatMessages, type ChatTranscriptApi } from "./chat-messages";
@@ -82,7 +78,7 @@ export default function ChatWindow({
 
   function handleSend() {
     const input = inputRef.current;
-    const text = input?.getText() ?? "";
+    const text = (input?.getText() ?? "").trim();
     const attachments = input?.getAttachments() ?? [];
     if ((!text.trim() && !attachments.length) || chatStore.getState().isLoading)
       return;
@@ -348,17 +344,11 @@ export default function ChatWindow({
         )}
       </div>
 
-      <div className="chat-composer-backdrop pointer-events-none absolute inset-x-0 bottom-0 z-20 flex flex-col items-center pt-4 pb-3 sm:pb-4">
-        {showScrollBottom && hasMessages && (
-          <IconButton
-            variant="outline"
-            className="pointer-events-auto absolute -top-6 left-1/2 -translate-x-1/2 animate-in rounded-full shadow-md duration-150 fade-in-0"
-            aria-label="Scrolla längst ned"
-            onClick={scrollToLatest}
-          >
-            <ArrowDownIcon />
-          </IconButton>
-        )}
+      <div className="chat-composer-backdrop pointer-events-none absolute inset-x-0 bottom-0 z-20 flex flex-col items-center pt-12 pb-3 sm:pb-4">
+        <ScrollToBottomButton
+          visible={showScrollBottom && hasMessages}
+          onClick={scrollToLatest}
+        />
         <ChatInput
           ref={inputRef}
           className="pointer-events-auto"

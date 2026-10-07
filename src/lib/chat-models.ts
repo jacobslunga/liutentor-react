@@ -1,24 +1,17 @@
 export const CHAT_MODELS = [
   {
     id: "gemini-flash-lite-minimal",
-    label: "Låg",
-    hint: "Snabbast. Bra för korta frågor.",
+    label: "Snabb",
+    hint: "Få snabba svar",
     provider: "Google",
     requiresAuth: false,
   },
   {
     id: "gemini-flash-lite-medium",
-    label: "Medium",
-    hint: "Standard för de flesta uppgifter.",
+    label: "Tänker",
+    hint: "Hantera komplexa uppgifter",
     provider: "Google",
     requiresAuth: false,
-  },
-  {
-    id: "gemini-flash-lite-high",
-    label: "Hög",
-    hint: "Tänker längre. Bäst på svåra uppgifter.",
-    provider: "Google",
-    requiresAuth: true,
   },
 ] as const;
 

@@ -650,7 +650,7 @@ const MessageRow = memo(function MessageRow({
       )}
       {html && (
         <div
-          className="chat-prose prose prose-sm w-full max-w-none min-w-0 font-chat sm:prose-base dark:prose-invert prose-headings:font-semibold prose-h1:text-xl sm:prose-h1:text-2xl prose-h2:text-lg sm:prose-h2:text-xl prose-h3:text-base sm:prose-h3:text-lg prose-h4:text-sm sm:prose-h4:text-base prose-h5:text-sm prose-h6:text-xs prose-strong:font-semibold prose-li:marker:font-bold prose-li:marker:text-foreground"
+          className="chat-prose prose prose-sm w-full max-w-none min-w-0 font-chat sm:prose-base dark:prose-invert prose-headings:font-semibold prose-h1:text-xl sm:prose-h1:text-2xl prose-h2:text-lg sm:prose-h2:text-xl prose-h3:text-base sm:prose-h3:text-lg prose-h4:text-sm sm:prose-h4:text-base prose-h5:text-sm prose-h6:text-xs prose-strong:font-semibold prose-li:marker:text-foreground"
           dangerouslySetInnerHTML={{ __html: html }}
         />
       )}
@@ -737,9 +737,6 @@ function FileSourceChip({
 const ACTION_REVEAL =
   "opacity-0 transition-opacity duration-150 group-hover/message:opacity-100 group-focus-within/message:opacity-100 focus-visible:opacity-100 [@media(hover:none)]:opacity-100";
 
-const COLLAPSE_CHARS = 100;
-const COLLAPSE_LINES = 3;
-
 function CopyButton({ text, className }: { text: string; className?: string }) {
   const [copied, setCopied] = useState(false);
   const timer = useRef<number | undefined>(undefined);
@@ -769,26 +766,31 @@ function CopyButton({ text, className }: { text: string; className?: string }) {
 
 function CollapsibleUserText({ text }: { text: string }) {
   const [expanded, setExpanded] = useState(false);
+  const [overflowing, setOverflowing] = useState(false);
   const textRef = useRef<HTMLParagraphElement>(null);
-  const lines = text.split("\n");
-  const collapsible =
-    text.length > COLLAPSE_CHARS || lines.length > COLLAPSE_LINES;
-  const shown =
-    collapsible && !expanded
-      ? lines
-          .slice(0, COLLAPSE_LINES)
-          .join("\n")
-          .slice(0, COLLAPSE_CHARS)
-          .trimEnd() + "…"
-      : text;
+  const collapsible = overflowing || expanded;
+
+  useLayoutEffect(() => {
+    const el = textRef.current;
+    if (!el || expanded) return;
+    const measure = () => setOverflowing(el.scrollHeight > el.clientHeight + 1);
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [text, expanded]);
 
   return (
     <div className="flex min-w-0 flex-col items-start gap-1">
       <p
         ref={textRef}
-        className="overflow-hidden text-sm leading-relaxed whitespace-pre-wrap text-foreground sm:text-[0.9375rem]"
+        className={cn(
+          "overflow-hidden text-sm leading-relaxed whitespace-pre-wrap text-foreground sm:text-[0.9375rem]",
+          // Collapse after 6 rendered rows.
+          !expanded && "line-clamp-6",
+        )}
       >
-        <UserText text={shown} />
+        <UserText text={text} />
       </p>
       {collapsible && (
         <button

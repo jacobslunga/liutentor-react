@@ -131,7 +131,7 @@ function SettingsContent() {
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="oceanic-grotesk">Oceanic Grotesk</SelectItem>
+              <SelectItem value="inter">Inter</SelectItem>
               <SelectItem value="system">System</SelectItem>
             </SelectContent>
           </Select>

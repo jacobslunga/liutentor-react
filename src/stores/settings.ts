@@ -10,7 +10,7 @@ import {
 import { useUser } from "@/stores/auth";
 
 export type LayoutMode = "exam-with-facit" | "exam-only";
-export type UiFont = "oceanic-grotesk" | "system";
+export type UiFont = "inter" | "system";
 
 interface SettingsState {
   uiFont: UiFont;
@@ -40,7 +40,7 @@ interface SettingsState {
 export const useSettingsStore = create<SettingsState>()(
   persist(
     (set) => ({
-      uiFont: "oceanic-grotesk",
+      uiFont: "inter",
       setUiFont: (uiFont) => set({ uiFont }),
       layoutMode: "exam-with-facit",
       showExplainPopover: true,
@@ -68,7 +68,7 @@ export const useSettingsStore = create<SettingsState>()(
         const settings = persistedState as Partial<SettingsState>;
         return {
           ...settings,
-          uiFont: settings.uiFont === "system" ? "system" : "oceanic-grotesk",
+          uiFont: settings.uiFont === "system" ? "system" : "inter",
         };
       },
     },

@@ -62,7 +62,7 @@ export function SegmentedControl<T extends string>({
       value={value}
       onValueChange={(next) => next && onValueChange(next as T)}
       className={cn(
-        "relative isolate inline-flex h-8 items-center rounded-lg bg-muted p-0.5",
+        "relative isolate inline-flex h-8 items-center rounded-lg bg-accent p-0.5 dark:bg-muted",
         className,
       )}
     >
