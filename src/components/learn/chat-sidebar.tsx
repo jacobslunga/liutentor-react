@@ -14,7 +14,6 @@ import { AuthActions } from "@/components/auth/auth-actions";
 import { UserAvatar } from "@/components/auth/user-avatar";
 import { TypedTitle } from "@/components/chat/conversation-title";
 import { LogoIcon } from "@/components/layout/logo-icon";
-import { ResizeEdge } from "@/components/shared/resize-edge";
 import { RouterLinkButton } from "@/components/shared/router-link";
 import { useConversationList } from "@/hooks/use-conversation-list";
 import { signOut } from "@/lib/auth";
@@ -103,13 +102,11 @@ function InlineSidebar({ open }: { open: boolean }) {
   const storedWidth = useSettingsStore((s) => s.chatSidebarWidth);
   const setStoredWidth = useSettingsStore((s) => s.setChatSidebarWidth);
   const drag = useRef<{ startX: number; startWidth: number } | null>(null);
-  const [dragging, setDragging] = useState(false);
 
   function endDrag() {
     if (!drag.current) return;
     drag.current = null;
     document.body.style.removeProperty("cursor");
-    setDragging(false);
     setStoredWidth(sidebarWidth.get());
   }
 
@@ -130,8 +127,7 @@ function InlineSidebar({ open }: { open: boolean }) {
         <SidebarContent />
       </div>
       {open && (
-        <ResizeEdge
-          active={dragging}
+        <div
           role="separator"
           aria-orientation="vertical"
           aria-label="Sidopanelens bredd"
@@ -139,7 +135,7 @@ function InlineSidebar({ open }: { open: boolean }) {
           aria-valuemax={MAX_WIDTH}
           aria-valuenow={storedWidth}
           tabIndex={0}
-          className="absolute inset-y-0 right-0 z-10 translate-x-1/2"
+          className="absolute inset-y-0 right-0 z-10 w-1.5 cursor-col-resize touch-none outline-none select-none focus-visible:bg-ring"
           onPointerDown={(e) => {
             if (e.button !== 0) return;
             e.preventDefault();
@@ -150,7 +146,6 @@ function InlineSidebar({ open }: { open: boolean }) {
             };
 
             document.body.style.cursor = "col-resize";
-            setDragging(true);
           }}
           onPointerMove={(e) => {
             if (!drag.current) return;

@@ -1,5 +1,6 @@
+import { GripVerticalIcon } from "lucide-react";
 import { useState, type MouseEvent } from "react";
-import { ResizeEdge } from "@/components/shared/resize-edge";
+import { cn } from "@/lib/utils";
 
 interface ResizeHandleProps {
   onResize: (clientX: number) => void;
@@ -38,12 +39,29 @@ export function ResizeHandle({
   }
 
   return (
-    <ResizeEdge
-      active={isResizing}
-      className="absolute inset-y-0 left-0 z-20 -translate-x-1/2"
+    <div
+      className="group absolute inset-y-0 left-0 z-20 flex w-5 -translate-x-1/2 cursor-col-resize touch-none items-center justify-center outline-none select-none"
       onMouseDown={start}
     >
-      <div className="absolute inset-y-0 w-px" />
-    </ResizeEdge>
+      <div
+        className={cn(
+          "absolute inset-y-0 w-px transition-colors duration-200 group-hover:w-0.5",
+          isResizing ? "bg-brand" : "bg-border group-hover:bg-brand/50",
+        )}
+      />
+      <div
+        className={cn(
+          "relative flex h-8 w-4 items-center justify-center rounded-[6px] border bg-background shadow-md transition-colors duration-200 dark:bg-muted",
+          isResizing ? "scale-110 border-brand" : "group-hover:border-brand/50",
+        )}
+      >
+        <GripVerticalIcon
+          className={cn(
+            "size-3.5",
+            isResizing ? "text-brand" : "text-muted-foreground",
+          )}
+        />
+      </div>
+    </div>
   );
 }
