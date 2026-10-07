@@ -43,7 +43,12 @@ import {
   useChatStoreApi,
   type ChatAttachment,
 } from "@/stores/chat";
-import { useSelectedModel, useSettingsStore } from "@/stores/settings";
+import { useMediaQuery } from "@/hooks/use-media-query";
+import {
+  MOBILE_QUERY,
+  useSelectedModel,
+  useSettingsStore,
+} from "@/stores/settings";
 import {
   CourseMentionMenu,
   type CourseMentionMenuApi,
@@ -108,6 +113,7 @@ export function ChatInput({
   onClearSelectionContext,
 }: ChatInputProps) {
   const chatStore = useChatStoreApi();
+  const mobile = useMediaQuery(MOBILE_QUERY);
   const isLoading = useChatStore((s) => s.isLoading);
   const shellRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -385,7 +391,7 @@ export function ChatInput({
   const sendButton = (
     <IconButton
       variant={isLoading ? "secondary" : "default"}
-      className="size-10 rounded-xl [&_svg:not([class*='size-'])]:size-5"
+      className="size-9 rounded-xl sm:size-10 [&_svg:not([class*='size-'])]:size-5"
       aria-label={isLoading ? "Avbryt svar" : "Skicka meddelande"}
       hideTooltip
       disabled={!isLoading && !canSend}
@@ -496,7 +502,7 @@ export function ChatInput({
             <div ref={plusRef} style={{ gridArea: "plus" }}>
               <IconButton
                 variant="ghost"
-                className="size-10 rounded-xl [&_svg:not([class*='size-'])]:size-5"
+                className="size-9 rounded-xl sm:size-10 [&_svg:not([class*='size-'])]:size-5"
                 aria-label="Bifoga filer"
                 disabled={isLoading || capacityReached}
                 onClick={() => fileInputRef.current?.click()}
@@ -505,7 +511,17 @@ export function ChatInput({
               </IconButton>
             </div>
             <div className="relative min-w-0" style={{ gridArea: "text" }}>
-              {welcome && !hasInput && <WelcomePlaceholder />}
+              {!hasInput &&
+                (welcome ? (
+                  <WelcomePlaceholder />
+                ) : (
+                  <span
+                    aria-hidden="true"
+                    className="pointer-events-none absolute inset-x-2 top-2 truncate text-base leading-6 text-muted-foreground"
+                  >
+                    {placeholder}
+                  </span>
+                ))}
               {courseMentions && (
                 <div
                   ref={mentionLayerRef}
@@ -517,10 +533,12 @@ export function ChatInput({
                 ref={textareaRef}
                 defaultValue={initialText}
                 rows={1}
-                placeholder={welcome ? "" : placeholder}
                 aria-label="Meddelande"
-                className="relative block max-h-50 w-full resize-none overflow-y-auto border-0 bg-transparent py-2 pr-2 pl-2 text-base leading-6 text-foreground transition-[height] duration-200 ease-out-quick outline-none placeholder:text-muted-foreground"
-                style={{ height: textHeight + 16 }}
+                className="relative block max-h-52 w-full resize-none border-0 bg-transparent py-2 pr-2 pl-2 text-base leading-6 text-foreground transition-[height] duration-200 ease-out-quick outline-none placeholder:text-muted-foreground"
+                style={{
+                  height: textHeight + 16,
+                  overflowY: textHeight >= 192 ? "auto" : "hidden",
+                }}
                 onInput={(e) => {
                   syncTextState(e.currentTarget.value);
                   syncMention(e.currentTarget);
@@ -553,7 +571,7 @@ export function ChatInput({
                   {longLength} / {MAX_LENGTH}
                 </span>
               )}
-              <ModelPicker />
+              {!mobile && <ModelPicker />}
               {sendButton}
             </div>
           </div>
@@ -677,7 +695,7 @@ function WelcomePlaceholder() {
     <span
       key={index}
       aria-hidden="true"
-      className="chat-welcome-placeholder pointer-events-none absolute inset-x-2 top-2 text-left text-base leading-6 text-muted-foreground"
+      className="chat-welcome-placeholder pointer-events-none absolute inset-x-2 top-2 truncate text-left text-base leading-6 text-muted-foreground"
     >
       {WELCOME_PLACEHOLDERS[index]}
     </span>

@@ -7,6 +7,7 @@ import {
   DEFAULT_MODEL_ID,
   type ChatModelId,
 } from "@/lib/chat-models";
+import { useMediaQuery } from "@/hooks/use-media-query";
 import { useUser } from "@/stores/auth";
 
 export type LayoutMode = "exam-with-facit" | "exam-only";
@@ -75,14 +76,19 @@ export const useSettingsStore = create<SettingsState>()(
   ),
 );
 
+export const MOBILE_QUERY = "(max-width: 639px)";
+
 export function useSelectedModel() {
   const user = useUser();
   const stored = useSettingsStore((s) => s.selectedModelId);
+  const mobile = useMediaQuery(MOBILE_QUERY);
 
   const availableModels = CHAT_MODELS.filter((m) => !m.requiresAuth || !!user);
-  const selectedModelId = availableModels.some((m) => m.id === stored)
-    ? stored
-    : DEFAULT_MODEL_ID;
+  // The model picker is hidden on mobile, which always uses the default.
+  const selectedModelId =
+    !mobile && availableModels.some((m) => m.id === stored)
+      ? stored
+      : DEFAULT_MODEL_ID;
 
   return { selectedModelId, availableModels };
 }
