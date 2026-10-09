@@ -1,3 +1,4 @@
+import { DialogPresence } from "@/components/shared/dialog-presence";
 import { CheckIcon, ChevronRightIcon, Trash2Icon } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { useState } from "react";
@@ -107,20 +108,22 @@ export function QuizHistoryList({
         </div>
       )}
 
-      {pendingDelete && (
-        <ConfirmDialog
-          title="Ta bort quizet?"
-          confirmLabel="Ta bort"
-          onConfirm={() => {
-            onDelete(pendingDelete);
-            setPendingDelete(null);
-          }}
-          onCancel={() => setPendingDelete(null)}
-        >
-          Quizet från {dateLabel(pendingDelete.createdAt)} tas bort permanent.
-          Det går inte att ångra.
-        </ConfirmDialog>
-      )}
+      <DialogPresence>
+        {pendingDelete && (
+          <ConfirmDialog
+            title="Ta bort quizet?"
+            confirmLabel="Ta bort"
+            onConfirm={() => {
+              onDelete(pendingDelete);
+              setPendingDelete(null);
+            }}
+            onCancel={() => setPendingDelete(null)}
+          >
+            Quizet från {dateLabel(pendingDelete.createdAt)} tas bort permanent.
+            Det går inte att ångra.
+          </ConfirmDialog>
+        )}
+      </DialogPresence>
     </section>
   );
 }

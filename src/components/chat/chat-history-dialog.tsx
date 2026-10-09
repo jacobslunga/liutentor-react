@@ -1,3 +1,4 @@
+import { DialogPresence } from "@/components/shared/dialog-presence";
 import { SearchIcon, Trash2Icon } from "lucide-react";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
@@ -215,66 +216,70 @@ export function ChatHistoryDialog({ onSelect }: ChatHistoryDialogProps) {
 
   return (
     <>
-      {open && (
-        <AppDialog
-          className="h-[min(85dvh,720px)]"
-          onClose={close}
-          header={
-            <DialogHeader>
-              <DialogTitle>Chatthistorik</DialogTitle>
-              <DialogDescription>
-                {isSignedIn
-                  ? "Sök och öppna tidigare chattar"
-                  : "Sparas bara i den här webbläsaren. Logga in för att spara dem på ditt konto."}
-              </DialogDescription>
-              <div className="mt-3 flex items-center gap-2">
-                <InputGroup>
-                  <InputGroupAddon>
-                    <SearchIcon />
-                  </InputGroupAddon>
-                  <InputGroupInput
-                    value={search}
-                    onChange={(e) => setSearch(e.target.value)}
-                    placeholder="Sök bland chattar..."
-                    aria-label="Sök bland chattar"
-                  />
-                </InputGroup>
-                {conversations.length > 0 && (
-                  <IconButton
-                    variant="destructive"
-                    disabled={deleting}
-                    aria-label="Radera alla chattar"
-                    onClick={() => setPendingDelete("all")}
-                  >
-                    <Trash2Icon />
-                  </IconButton>
+      <DialogPresence>
+        {open && (
+          <AppDialog
+            className="h-[min(85dvh,720px)]"
+            onClose={close}
+            header={
+              <DialogHeader>
+                <DialogTitle>Chatthistorik</DialogTitle>
+                <DialogDescription>
+                  {isSignedIn
+                    ? "Sök och öppna tidigare chattar"
+                    : "Sparas bara i den här webbläsaren. Logga in för att spara dem på ditt konto."}
+                </DialogDescription>
+                <div className="mt-3 flex items-center gap-2">
+                  <InputGroup>
+                    <InputGroupAddon>
+                      <SearchIcon />
+                    </InputGroupAddon>
+                    <InputGroupInput
+                      value={search}
+                      onChange={(e) => setSearch(e.target.value)}
+                      placeholder="Sök bland chattar..."
+                      aria-label="Sök bland chattar"
+                    />
+                  </InputGroup>
+                  {conversations.length > 0 && (
+                    <IconButton
+                      variant="destructive"
+                      disabled={deleting}
+                      aria-label="Radera alla chattar"
+                      onClick={() => setPendingDelete("all")}
+                    >
+                      <Trash2Icon />
+                    </IconButton>
+                  )}
+                </div>
+                {actionError && (
+                  <p className="pt-2 text-sm text-destructive">{actionError}</p>
                 )}
-              </div>
-              {actionError && (
-                <p className="pt-2 text-sm text-destructive">{actionError}</p>
-              )}
-            </DialogHeader>
-          }
-        >
-          {body}
-        </AppDialog>
-      )}
+              </DialogHeader>
+            }
+          >
+            {body}
+          </AppDialog>
+        )}
+      </DialogPresence>
 
-      {pendingDelete && (
-        <ConfirmDialog
-          title={
-            pendingDelete === "all" ? "Radera all historik?" : "Är du säker?"
-          }
-          confirmLabel={pendingDelete === "all" ? "Radera alla" : "Radera"}
-          isPending={deleting}
-          onConfirm={() => void confirmDelete()}
-          onCancel={() => setPendingDelete(null)}
-        >
-          {pendingDelete === "all"
-            ? `Alla ${conversations.length} chattar kommer att raderas permanent. Det går inte att ångra.`
-            : "Den här chatten kommer att raderas permanent och kan inte ångras."}
-        </ConfirmDialog>
-      )}
+      <DialogPresence>
+        {pendingDelete && (
+          <ConfirmDialog
+            title={
+              pendingDelete === "all" ? "Radera all historik?" : "Är du säker?"
+            }
+            confirmLabel={pendingDelete === "all" ? "Radera alla" : "Radera"}
+            isPending={deleting}
+            onConfirm={() => void confirmDelete()}
+            onCancel={() => setPendingDelete(null)}
+          >
+            {pendingDelete === "all"
+              ? `Alla ${conversations.length} chattar kommer att raderas permanent. Det går inte att ångra.`
+              : "Den här chatten kommer att raderas permanent och kan inte ångras."}
+          </ConfirmDialog>
+        )}
+      </DialogPresence>
     </>
   );
 }

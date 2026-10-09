@@ -1,0 +1,151 @@
+.dialog-motion[data-state="open"] {
+  animation: dialog-arrive 220ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.dialog-motion[data-state="closed"] {
+  animation: dialog-depart 140ms cubic-bezier(0.4, 0, 0.8, 0.2) both;
+  pointer-events: none;
+}
+
+.overlay-motion[data-state="open"] {
+  animation: surface-fade-in 180ms ease-out both;
+}
+
+.overlay-motion[data-state="closed"] {
+  animation: surface-fade-out 140ms ease-in both;
+}
+
+.floating-motion {
+  --surface-x: 0px;
+  --surface-y: -6px;
+  --surface-tilt: -0.6deg;
+  --surface-enter-duration: 170ms;
+  --surface-exit-duration: 110ms;
+}
+
+.floating-motion[data-side="top"] {
+  --surface-y: 6px;
+  --surface-tilt: 0.6deg;
+}
+
+.floating-motion[data-side="left"] {
+  --surface-x: 6px;
+  --surface-y: 0px;
+}
+
+.floating-motion[data-side="right"] {
+  --surface-x: -6px;
+  --surface-y: 0px;
+  --surface-tilt: 0.6deg;
+}
+
+.floating-motion.tooltip-motion {
+  --surface-enter-duration: 130ms;
+  --surface-exit-duration: 90ms;
+  --surface-tilt: 0deg;
+}
+
+.floating-motion:is(
+  [data-state="open"],
+  [data-state="delayed-open"],
+  [data-state="instant-open"]
+) {
+  animation: surface-arrive var(--surface-enter-duration)
+    cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.floating-motion[data-state="closed"] {
+  animation: surface-depart var(--surface-exit-duration)
+    cubic-bezier(0.4, 0, 0.8, 0.2) both;
+  pointer-events: none;
+}
+
+@keyframes dialog-arrive {
+  0% {
+    opacity: 0;
+    transform: translateY(8px) scale(0.98, 0.97) rotate(-0.25deg);
+    filter: blur(2px);
+  }
+  100% {
+    opacity: 1;
+    transform: none;
+    filter: none;
+  }
+}
+
+@keyframes dialog-depart {
+  from {
+    opacity: 1;
+    transform: none;
+    filter: none;
+  }
+  to {
+    opacity: 0;
+    transform: translateY(8px) scale(0.98, 0.96) rotate(0.3deg);
+    filter: blur(2px);
+  }
+}
+
+@keyframes surface-arrive {
+  0% {
+    opacity: 0;
+    transform: translate(var(--surface-x), var(--surface-y)) scale(0.96, 0.92)
+      rotate(var(--surface-tilt));
+    filter: blur(2px);
+  }
+  100% {
+    opacity: 1;
+    transform: none;
+    filter: none;
+  }
+}
+
+@keyframes surface-depart {
+  from {
+    opacity: 1;
+    transform: none;
+    filter: none;
+  }
+  to {
+    opacity: 0;
+    transform: translate(var(--surface-x), var(--surface-y)) scale(0.97, 0.95)
+      rotate(var(--surface-tilt));
+    filter: blur(1.5px);
+  }
+}
+
+@keyframes surface-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes surface-fade-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dialog-motion[data-state="open"],
+  .overlay-motion[data-state="open"],
+  .floating-motion:is(
+    [data-state="open"],
+    [data-state="delayed-open"],
+    [data-state="instant-open"]
+  ) {
+    animation: surface-fade-in 80ms linear both;
+  }
+
+  .dialog-motion[data-state="closed"],
+  .overlay-motion[data-state="closed"],
+  .floating-motion[data-state="closed"] {
+    animation: surface-fade-out 80ms linear both;
+  }
+}

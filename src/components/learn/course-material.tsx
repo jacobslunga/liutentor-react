@@ -1,3 +1,4 @@
+import { DialogPresence } from "@/components/shared/dialog-presence";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   AlertCircleIcon,
@@ -230,18 +231,20 @@ export function CourseMaterial({ courseId }: { courseId: string }) {
         </ul>
       )}
 
-      {pendingDelete && (
-        <ConfirmDialog
-          title="Ta bort filen?"
-          confirmLabel="Ta bort"
-          isPending={deleting}
-          onConfirm={() => void confirmDelete()}
-          onCancel={() => setPendingDelete(null)}
-        >
-          "{pendingDelete.name}" tas bort från kursen, och chattarna kan inte
-          längre söka i den.
-        </ConfirmDialog>
-      )}
+      <DialogPresence>
+        {pendingDelete && (
+          <ConfirmDialog
+            title="Ta bort filen?"
+            confirmLabel="Ta bort"
+            isPending={deleting}
+            onConfirm={() => void confirmDelete()}
+            onCancel={() => setPendingDelete(null)}
+          >
+            "{pendingDelete.name}" tas bort från kursen, och chattarna kan inte
+            längre söka i den.
+          </ConfirmDialog>
+        )}
+      </DialogPresence>
     </div>
   );
 }

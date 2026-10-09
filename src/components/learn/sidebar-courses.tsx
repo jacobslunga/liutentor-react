@@ -1,3 +1,4 @@
+import { DialogPresence } from "@/components/shared/dialog-presence";
 import { useQueryClient } from "@tanstack/react-query";
 import { Link, useNavigate, useParams } from "@tanstack/react-router";
 import {
@@ -211,18 +212,20 @@ export function SidebarCourses({ onNavigate }: { onNavigate: () => void }) {
         onSubmit={rename}
       />
 
-      {pendingDelete && (
-        <ConfirmDialog
-          title="Radera kursen?"
-          confirmLabel="Radera"
-          isPending={deleting}
-          onConfirm={() => void confirmDelete()}
-          onCancel={() => setPendingDelete(null)}
-        >
-          "{pendingDelete.name}" raderas permanent, med allt material och alla
-          chattar i kursen. Det går inte att ångra.
-        </ConfirmDialog>
-      )}
+      <DialogPresence>
+        {pendingDelete && (
+          <ConfirmDialog
+            title="Radera kursen?"
+            confirmLabel="Radera"
+            isPending={deleting}
+            onConfirm={() => void confirmDelete()}
+            onCancel={() => setPendingDelete(null)}
+          >
+            "{pendingDelete.name}" raderas permanent, med allt material och alla
+            chattar i kursen. Det går inte att ångra.
+          </ConfirmDialog>
+        )}
+      </DialogPresence>
     </section>
   );
 }

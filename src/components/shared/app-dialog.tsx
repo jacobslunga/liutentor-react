@@ -8,6 +8,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
+import { useDialogPresence } from "@/hooks/use-dialog-presence";
 
 const WIDTHS = {
   medium: "sm:max-w-md",
@@ -39,9 +40,11 @@ export function AppDialog({
   role,
   className,
 }: AppDialogProps) {
+  const { open, onAnimationEnd } = useDialogPresence();
   return (
-    <Dialog open onOpenChange={(open) => !open && onClose()}>
+    <Dialog open={open} onOpenChange={(open) => !open && onClose()}>
       <DialogContent
+        onAnimationEnd={onAnimationEnd}
         role={role}
         className={cn(
           "flex max-h-[min(85dvh,42rem)] flex-col",

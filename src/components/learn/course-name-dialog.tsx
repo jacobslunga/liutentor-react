@@ -1,3 +1,4 @@
+import { DialogPresence } from "@/components/shared/dialog-presence";
 import { useId, useState } from "react";
 import { COURSE_NAME_MAX } from "@/lib/study-courses";
 import { AppDialog } from "@/components/shared/app-dialog";
@@ -22,15 +23,17 @@ export function CourseNameDialog({
 }: CourseNameDialogProps) {
   const renaming = !!initialName;
 
-  if (!open) return null;
-
   return (
-    <CourseNameForm
-      renaming={renaming}
-      initialName={initialName}
-      onCancel={() => onOpenChange(false)}
-      onSubmit={onSubmit}
-    />
+    <DialogPresence>
+      {open && (
+        <CourseNameForm
+          renaming={renaming}
+          initialName={initialName}
+          onCancel={() => onOpenChange(false)}
+          onSubmit={onSubmit}
+        />
+      )}
+    </DialogPresence>
   );
 }
 

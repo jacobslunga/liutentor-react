@@ -22,6 +22,7 @@ import {
   type Ref,
 } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { AnimatePresence, m } from "framer-motion";
 import { toast } from "sonner";
 import {
   acceptFiles,
@@ -116,6 +117,7 @@ export function ChatInput({
   const mobile = useMediaQuery(MOBILE_QUERY);
   const isLoading = useChatStore((s) => s.isLoading);
   const shellRef = useRef<HTMLDivElement>(null);
+  const composerRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const measurementRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -128,7 +130,6 @@ export function ChatInput({
   const [textHeight, setTextHeight] = useState(24);
   const [expanded, setExpanded] = useState(false);
   const expandedRef = useRef(false);
-  const compactDelta = useRef(0);
   const plusRef = useRef<HTMLDivElement>(null);
   const controlsRef = useRef<HTMLDivElement>(null);
   const flipRects = useRef<Map<HTMLElement, DOMRect>>(new Map());
@@ -143,6 +144,7 @@ export function ChatInput({
   }, [attachments]);
 
   const mentionLayerRef = useRef<HTMLDivElement>(null);
+  const hasHeader = !!selectionContext || attachments.length > 0;
 
   const renderMentionPills = (value: string) => {
     const layer = mentionLayerRef.current;
@@ -169,28 +171,27 @@ export function ChatInput({
   const measurePrompt = useCallback(() => {
     const textarea = textareaRef.current;
     const measurement = measurementRef.current;
-    const shell = shellRef.current;
-    if (!textarea || !measurement || !shell) return;
+    const composer = composerRef.current;
+    const plus = plusRef.current;
+    const controls = controlsRef.current;
+    if (!textarea || !measurement || !composer || !plus || !controls) return;
 
     // Whether the text fits on one row is always decided at the compact
     // width, so expanding never feeds back into the decision.
-    if (!expandedRef.current)
-      compactDelta.current = shell.clientWidth - textarea.clientWidth;
+    const style = getComputedStyle(composer);
+    const gutter =
+      parseFloat(style.paddingLeft) + parseFloat(style.paddingRight);
+    const contentWidth = composer.clientWidth - gutter;
+    const compactWidth =
+      contentWidth - plus.offsetWidth - controls.offsetWidth - 8;
     const measureAt = (width: number) => {
       measurement.value = textarea.value;
       measurement.style.width = `${Math.max(1, width)}px`;
       return measurement.scrollHeight;
     };
-    const compactHeight = measureAt(
-      shell.clientWidth - compactDelta.current - 16,
-    );
-    const wantExpanded = compactHeight > 26;
-    const style = getComputedStyle(shell);
-    const gutter =
-      parseFloat(style.paddingLeft) + parseFloat(style.paddingRight);
-    const height = wantExpanded
-      ? measureAt(shell.clientWidth - gutter - 22 - 16)
-      : compactHeight;
+    const compactHeight = measureAt(compactWidth - 16);
+    const wantExpanded = hasHeader || compactHeight > 26;
+    const height = wantExpanded ? measureAt(contentWidth - 16) : compactHeight;
 
     if (wantExpanded !== expandedRef.current) {
       for (const el of [plusRef.current, controlsRef.current])
@@ -199,14 +200,18 @@ export function ChatInput({
       setExpanded(wantExpanded);
     }
     setTextHeight(Math.min(192, Math.max(24, height)));
-  }, []);
+  }, [hasHeader]);
 
   useLayoutEffect(() => {
+    const reducedMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
     for (const [el, from] of flipRects.current) {
+      for (const animation of el.getAnimations()) animation.cancel();
       const to = el.getBoundingClientRect();
       const dx = from.left - to.left;
       const dy = from.top - to.top;
-      if (dx || dy)
+      if (!reducedMotion && (dx || dy))
         el.animate(
           [{ transform: `translate(${dx}px, ${dy}px)` }, { transform: "none" }],
           { duration: 220, easing: "cubic-bezier(0.2, 0.8, 0.2, 1)" },
@@ -295,6 +300,7 @@ export function ChatInput({
     measurePrompt();
     const observer = new ResizeObserver(() => measurePrompt());
     if (shellRef.current) observer.observe(shellRef.current);
+    if (controlsRef.current) observer.observe(controlsRef.current);
     return () => observer.disconnect();
   }, [measurePrompt]);
 
@@ -386,12 +392,10 @@ export function ChatInput({
     });
   }
 
-  const hasHeader = !!selectionContext || attachments.length > 0;
-
   const sendButton = (
     <IconButton
       variant={isLoading ? "secondary" : "default"}
-      className="size-9 rounded-xl sm:size-10 [&_svg:not([class*='size-'])]:size-5"
+      className="size-8 rounded-full [&_svg:not([class*='size-'])]:size-4"
       aria-label={isLoading ? "Avbryt svar" : "Skicka meddelande"}
       hideTooltip
       disabled={!isLoading && !canSend}
@@ -417,70 +421,87 @@ export function ChatInput({
         )}
       >
         <div
+          ref={composerRef}
+          data-expanded={expanded || hasHeader}
           className={cn(
-            "relative overflow-hidden rounded-xl border border-input bg-card p-1.5 shadow-xs dark:border-border dark:shadow-[0_2px_2px_-4px_rgba(0,0,0,0.15)]",
+            "relative overflow-hidden rounded-[24px] border border-input bg-card p-1.5 shadow-xs transition-[border-radius] duration-200 ease-out-quick data-[expanded=true]:rounded-[20px] motion-reduce:transition-none dark:border-border dark:shadow-[0_2px_2px_-4px_rgba(0,0,0,0.15)]",
             isLoading && "chat-prompt-generating",
           )}
         >
-          {hasHeader && (
-            <div className="-mx-2.5 -mt-2.5 mb-2.5 flex flex-col items-stretch gap-2 overflow-hidden border-b bg-muted/50 px-3 py-2">
-              {selectionContext && (
-                <div className="flex w-full animate-in items-center gap-2.5 duration-200 fade-in-0">
-                  <CornerDownLeftIcon className="size-4 shrink-0 -scale-x-100 text-muted-foreground" />
-                  <span className="line-clamp-3 min-w-0 flex-1 text-sm leading-relaxed font-normal text-foreground">
-                    "<SelectionQuote text={selectionContext} />"
-                  </span>
-                  <IconButton
-                    variant="ghost"
-                    size="icon-sm"
-                    aria-label="Ta bort citatet"
-                    onClick={onClearSelectionContext}
-                  >
-                    <XIcon />
-                  </IconButton>
-                </div>
-              )}
-              {attachments.length > 0 && (
-                <div className="flex flex-wrap gap-2">
-                  {attachments.map((a) => (
-                    <div
-                      key={a.id}
-                      className="flex max-w-full min-w-0 animate-in items-center gap-2 rounded-lg bg-background px-2.5 py-1.5 text-xs font-normal text-foreground duration-200 fade-in-0 slide-in-from-bottom-1"
-                    >
-                      {a.mediaType === "application/pdf" ? (
-                        <FileTextIcon className="size-3.5 shrink-0 text-muted-foreground" />
-                      ) : a.previewUrl ? (
-                        <img
-                          src={a.previewUrl}
-                          alt=""
-                          className="size-10 shrink-0 rounded-md object-cover"
-                        />
-                      ) : (
-                        <ImageIcon className="size-3.5 shrink-0 text-muted-foreground" />
-                      )}
-                      <span className="max-w-20 truncate" title={a.name}>
-                        {a.name}
-                      </span>
-                      <span className="shrink-0 text-muted-foreground">
-                        {formatFileSize(a.size)}
+          <AnimatePresence initial={false}>
+            {hasHeader && (
+              <m.div
+                key="context"
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: "auto", opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                transition={{
+                  type: "tween",
+                  duration: 0.18,
+                  ease: [0.2, 0.8, 0.2, 1],
+                }}
+                className="-mx-1.5 -mt-1.5 overflow-hidden"
+              >
+                <div className="mb-1.5 flex flex-col items-stretch gap-2 border-b bg-muted/50 px-3 py-2">
+                  {selectionContext && (
+                    <div className="flex w-full animate-in items-center gap-2.5 duration-200 fade-in-0">
+                      <CornerDownLeftIcon className="size-4 shrink-0 -scale-x-100 text-muted-foreground" />
+                      <span className="line-clamp-3 min-w-0 flex-1 text-sm leading-relaxed font-normal text-foreground">
+                        "<SelectionQuote text={selectionContext} />"
                       </span>
                       <IconButton
                         variant="ghost"
                         size="icon-sm"
-                        aria-label={`Ta bort ${a.name}`}
-                        onClick={() => removeAttachment(a.id)}
+                        aria-label="Ta bort citatet"
+                        onClick={onClearSelectionContext}
                       >
                         <XIcon />
                       </IconButton>
                     </div>
-                  ))}
+                  )}
+                  {attachments.length > 0 && (
+                    <div className="flex flex-wrap gap-2">
+                      {attachments.map((a) => (
+                        <div
+                          key={a.id}
+                          className="flex max-w-full min-w-0 animate-in items-center gap-2 rounded-lg bg-background px-2.5 py-1.5 text-xs font-normal text-foreground duration-200 fade-in-0 slide-in-from-bottom-1"
+                        >
+                          {a.mediaType === "application/pdf" ? (
+                            <FileTextIcon className="size-3.5 shrink-0 text-muted-foreground" />
+                          ) : a.previewUrl ? (
+                            <img
+                              src={a.previewUrl}
+                              alt=""
+                              className="size-10 shrink-0 rounded-md object-cover"
+                            />
+                          ) : (
+                            <ImageIcon className="size-3.5 shrink-0 text-muted-foreground" />
+                          )}
+                          <span className="max-w-20 truncate" title={a.name}>
+                            {a.name}
+                          </span>
+                          <span className="shrink-0 text-muted-foreground">
+                            {formatFileSize(a.size)}
+                          </span>
+                          <IconButton
+                            variant="ghost"
+                            size="icon-sm"
+                            aria-label={`Ta bort ${a.name}`}
+                            onClick={() => removeAttachment(a.id)}
+                          >
+                            <XIcon />
+                          </IconButton>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
-              )}
-            </div>
-          )}
+              </m.div>
+            )}
+          </AnimatePresence>
 
           <div
-            className="grid items-end gap-x-1"
+            className="grid items-end gap-x-1 gap-y-1"
             style={{
               gridTemplateColumns: "auto minmax(0, 1fr) auto",
               gridTemplateAreas: expanded
@@ -502,7 +523,7 @@ export function ChatInput({
             <div ref={plusRef} style={{ gridArea: "plus" }}>
               <IconButton
                 variant="ghost"
-                className="size-9 rounded-xl sm:size-10 [&_svg:not([class*='size-'])]:size-5"
+                className="size-8 rounded-full [&_svg:not([class*='size-'])]:size-4"
                 aria-label="Bifoga filer"
                 disabled={isLoading || capacityReached}
                 onClick={() => fileInputRef.current?.click()}
@@ -517,7 +538,7 @@ export function ChatInput({
                 ) : (
                   <span
                     aria-hidden="true"
-                    className="pointer-events-none absolute inset-x-2 top-2 truncate text-base leading-6 text-muted-foreground"
+                    className="pointer-events-none absolute inset-x-2 top-1 truncate text-base leading-6 text-muted-foreground"
                   >
                     {placeholder}
                   </span>
@@ -526,7 +547,7 @@ export function ChatInput({
                 <div
                   ref={mentionLayerRef}
                   aria-hidden
-                  className="pointer-events-none absolute inset-0 overflow-hidden py-2 pr-2 pl-2 text-base leading-6 wrap-break-word whitespace-pre-wrap text-transparent"
+                  className="pointer-events-none absolute inset-0 overflow-hidden py-1 pr-2 pl-2 text-base leading-6 wrap-break-word whitespace-pre-wrap text-transparent"
                 />
               )}
               <textarea
@@ -534,9 +555,9 @@ export function ChatInput({
                 defaultValue={initialText}
                 rows={1}
                 aria-label="Meddelande"
-                className="relative block max-h-52 w-full resize-none border-0 bg-transparent py-2 pr-2 pl-2 text-base leading-6 text-foreground transition-[height] duration-200 ease-out-quick outline-none placeholder:text-muted-foreground"
+                className="relative block max-h-52 w-full resize-none border-0 bg-transparent py-1 pr-2 pl-2 text-base leading-6 text-foreground transition-[height] duration-200 ease-out-quick outline-none placeholder:text-muted-foreground motion-reduce:transition-none"
                 style={{
-                  height: textHeight + 16,
+                  height: textHeight + 8,
                   overflowY: textHeight >= 192 ? "auto" : "hidden",
                 }}
                 onInput={(e) => {
@@ -625,7 +646,7 @@ function ModelPicker() {
       <DropdownMenuTrigger asChild>
         <Button
           variant="ghost"
-          className="h-10 rounded-xl px-3 text-base text-foreground/80"
+          className="h-8 rounded-full px-2.5 text-sm text-foreground/80"
           aria-label="Tankenivå"
         >
           {label}
@@ -695,7 +716,7 @@ function WelcomePlaceholder() {
     <span
       key={index}
       aria-hidden="true"
-      className="chat-welcome-placeholder pointer-events-none absolute inset-x-2 top-2 truncate text-left text-base leading-6 text-muted-foreground"
+      className="chat-welcome-placeholder pointer-events-none absolute inset-x-2 top-1 truncate text-left text-base leading-6 text-muted-foreground"
     >
       {WELCOME_PLACEHOLDERS[index]}
     </span>

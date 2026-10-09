@@ -83,6 +83,14 @@ export function LearnChat({
   const transcriptRef = useRef<ChatTranscriptApi>(null);
 
   const hasMessages = useChatStore((s) => s.messages.length > 0);
+  const keepRowsMounted = useChatStore(
+    (s) =>
+      s.messages.length <= 60 &&
+      s.messages.reduce(
+        (length, message) => length + message.content.length,
+        0,
+      ) <= 100_000,
+  );
   const currentId = useChatStore((s) => s.currentConversationId);
   const inCourse = useChatStore((s) => !!s.currentCourseId) || !!courseId;
   const { selectedModelId } = useSelectedModel();
@@ -92,8 +100,8 @@ export function LearnChat({
   const headerX = useTransform(
     () => sidebarProgress.get() * sidebarWidth.get(),
   );
-  const bodyX = useTransform(
-    () => (sidebarProgress.get() * sidebarWidth.get()) / 2,
+  const bodyInset = useTransform(
+    () => ((1 + sidebarProgress.get()) * sidebarWidth.get()) / 2,
   );
   const bodyWidth = useTransform(() => `calc(100% - ${sidebarWidth.get()}px)`);
   // The body is narrowed and centered, so stretch scrollers over the space to
@@ -449,6 +457,7 @@ export function LearnChat({
             className="pt-16 pb-36 sm:pb-44"
             onReplyToSelection={replyToSelection}
             onScrollDistanceChange={updateScrollDistance}
+            keepRowsMounted={keepRowsMounted}
           />
         </m.div>
         <div className="chat-composer-backdrop pointer-events-none absolute inset-x-0 bottom-0 z-20 flex flex-col items-center pt-12 pb-3 sm:pb-4">
@@ -510,7 +519,10 @@ export function LearnChat({
 
       <m.div
         className="relative mx-auto flex min-h-0 flex-1 flex-col"
-        style={{ x: bodyX, width: sidebar.inline ? bodyWidth : "100%" }}
+        style={{
+          marginLeft: sidebar.inline ? bodyInset : undefined,
+          width: sidebar.inline ? bodyWidth : "100%",
+        }}
       >
         {body}
       </m.div>

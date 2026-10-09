@@ -1,3 +1,4 @@
+import { DialogPresence } from "@/components/shared/dialog-presence";
 import { Link } from "@tanstack/react-router";
 import { SettingsIcon } from "lucide-react";
 import { useTheme } from "next-themes";
@@ -87,15 +88,17 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
           <SettingsIcon />
         </IconButton>
       )}
-      {isOpen && (
-        <AppDialog
-          title="Inställningar"
-          description="Anpassa hur LiU Tentor beter sig."
-          onClose={() => setOpen(false)}
-        >
-          <SettingsContent />
-        </AppDialog>
-      )}
+      <DialogPresence>
+        {isOpen && (
+          <AppDialog
+            title="Inställningar"
+            description="Anpassa hur LiU Tentor beter sig."
+            onClose={() => setOpen(false)}
+          >
+            <SettingsContent />
+          </AppDialog>
+        )}
+      </DialogPresence>
     </>
   );
 }
@@ -131,7 +134,7 @@ function SettingsContent() {
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="inter">Inter</SelectItem>
+              <SelectItem value="google-sans-flex">Google Sans Flex</SelectItem>
               <SelectItem value="system">System</SelectItem>
             </SelectContent>
           </Select>

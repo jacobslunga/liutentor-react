@@ -1,3 +1,4 @@
+import { DialogPresence } from "@/components/shared/dialog-presence";
 import { MinusIcon } from "lucide-react";
 import { useState } from "react";
 import { passRateClass } from "@/lib/course-stats";
@@ -57,85 +58,87 @@ export function ExamStatsDialog({
       >
         {passRate.toFixed(1)}%
       </Button>
-      {open && (
-        <AppDialog
-          title="Tentastatistik"
-          description={`Betygsfördelning ${date}`}
-          onClose={() => setOpen(false)}
-          footer={
-            <div className="flex w-full items-center justify-between">
-              <p className="self-center text-xs text-muted-foreground">
-                Data från{" "}
-                <a
-                  href="https://ysektionen.se/student/tentastatistik/"
-                  target="_blank"
-                  rel="noreferrer"
-                  className="text-primary hover:underline"
-                >
-                  Y-Sektionen
-                </a>
-              </p>
-              <Button variant="outline" onClick={() => setOpen(false)}>
-                Stäng
-              </Button>
-            </div>
-          }
-        >
-          <div className="flex flex-col gap-4">
-            <div className="flex items-center justify-between text-sm">
-              <span className="text-muted-foreground">{total} studenter</span>
-              <span className={cn("font-mono", passRateClass(passRate))}>
-                {passRate}% godkänt
-              </span>
-            </div>
+      <DialogPresence>
+        {open && (
+          <AppDialog
+            title="Tentastatistik"
+            description={`Betygsfördelning ${date}`}
+            onClose={() => setOpen(false)}
+            footer={
+              <div className="flex w-full items-center justify-between">
+                <p className="self-center text-xs text-muted-foreground">
+                  Data från{" "}
+                  <a
+                    href="https://ysektionen.se/student/tentastatistik/"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-primary hover:underline"
+                  >
+                    Y-Sektionen
+                  </a>
+                </p>
+                <Button variant="outline" onClick={() => setOpen(false)}>
+                  Stäng
+                </Button>
+              </div>
+            }
+          >
+            <div className="flex flex-col gap-4">
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-muted-foreground">{total} studenter</span>
+                <span className={cn("font-mono", passRateClass(passRate))}>
+                  {passRate}% godkänt
+                </span>
+              </div>
 
-            <div className="rounded-md border p-3">
-              <div className="flex h-32 items-end gap-2">
+              <div className="rounded-md border p-3">
+                <div className="flex h-32 items-end gap-2">
+                  {chartData.map(({ grade, count, color }) => (
+                    <div
+                      key={grade}
+                      className="flex flex-1 flex-col items-center gap-1"
+                    >
+                      <span className="text-2xs text-muted-foreground">
+                        {count}
+                      </span>
+                      <div
+                        className="w-full rounded-t-sm"
+                        style={{
+                          height: `${(count / maxCount) * 88}px`,
+                          backgroundColor: color,
+                        }}
+                      />
+                      <span className="text-2xs text-muted-foreground">
+                        {grade}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="space-y-2">
                 {chartData.map(({ grade, count, color }) => (
                   <div
                     key={grade}
-                    className="flex flex-1 flex-col items-center gap-1"
+                    className="flex items-center justify-between text-sm"
                   >
-                    <span className="text-2xs text-muted-foreground">
-                      {count}
-                    </span>
-                    <div
-                      className="w-full rounded-t-sm"
-                      style={{
-                        height: `${(count / maxCount) * 88}px`,
-                        backgroundColor: color,
-                      }}
-                    />
-                    <span className="text-2xs text-muted-foreground">
-                      {grade}
+                    <div className="flex items-center gap-2">
+                      <div
+                        className="size-2 rounded-md"
+                        style={{ backgroundColor: color }}
+                      />
+                      <span>Betyg {grade}</span>
+                    </div>
+                    <span className="text-muted-foreground">
+                      {count} ({((count / total) * 100).toFixed(1)}%)
                     </span>
                   </div>
                 ))}
               </div>
             </div>
-
-            <div className="space-y-2">
-              {chartData.map(({ grade, count, color }) => (
-                <div
-                  key={grade}
-                  className="flex items-center justify-between text-sm"
-                >
-                  <div className="flex items-center gap-2">
-                    <div
-                      className="size-2 rounded-md"
-                      style={{ backgroundColor: color }}
-                    />
-                    <span>Betyg {grade}</span>
-                  </div>
-                  <span className="text-muted-foreground">
-                    {count} ({((count / total) * 100).toFixed(1)}%)
-                  </span>
-                </div>
-              ))}
-            </div>
-          </div>
-        </AppDialog>
-      )}
+          </AppDialog>
+        )}
+      </DialogPresence>
     </span>
   );
 }

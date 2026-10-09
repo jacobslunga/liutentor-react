@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
+import { useDialogPresence } from "@/hooks/use-dialog-presence";
 
 export function ConfirmDialog({
   title,
@@ -28,12 +29,13 @@ export function ConfirmDialog({
   onConfirm: () => void;
   onCancel: () => void;
 }) {
+  const { open, onAnimationEnd } = useDialogPresence();
   return (
     <AlertDialog
-      open
+      open={open}
       onOpenChange={(open) => !open && !isPending && onCancel()}
     >
-      <AlertDialogContent>
+      <AlertDialogContent onAnimationEnd={onAnimationEnd}>
         <AlertDialogHeader>
           <AlertDialogTitle>{title}</AlertDialogTitle>
           <AlertDialogDescription>{children}</AlertDialogDescription>

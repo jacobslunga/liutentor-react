@@ -1,3 +1,4 @@
+import { DialogPresence } from "@/components/shared/dialog-presence";
 import { useMemo, useState } from "react";
 import {
   Bar,
@@ -94,21 +95,23 @@ export function CourseStatsPassRate({
         </Button>
       )}
 
-      {open && first && last && (
-        <AppDialog
-          width="xlarge"
-          title="Godkända över tid"
-          description={`${data.length} tentatillfällen ${new Date(first.timestamp).getFullYear()}–${new Date(last.timestamp).getFullYear()}`}
-          onClose={() => setOpen(false)}
-          footer={
-            <Button variant="outline" onClick={() => setOpen(false)}>
-              Stäng
-            </Button>
-          }
-        >
-          <AllSittings data={data} average={average} />
-        </AppDialog>
-      )}
+      <DialogPresence>
+        {open && first && last && (
+          <AppDialog
+            width="xlarge"
+            title="Godkända över tid"
+            description={`${data.length} tentatillfällen ${new Date(first.timestamp).getFullYear()}–${new Date(last.timestamp).getFullYear()}`}
+            onClose={() => setOpen(false)}
+            footer={
+              <Button variant="outline" onClick={() => setOpen(false)}>
+                Stäng
+              </Button>
+            }
+          >
+            <AllSittings data={data} average={average} />
+          </AppDialog>
+        )}
+      </DialogPresence>
     </div>
   );
 }

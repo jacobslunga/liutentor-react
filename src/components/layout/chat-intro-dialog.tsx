@@ -1,3 +1,4 @@
+import { DialogPresence } from "@/components/shared/dialog-presence";
 import { useNavigate, useRouterState } from "@tanstack/react-router";
 import {
   ArrowRightIcon,
@@ -57,55 +58,57 @@ export function ChatIntroDialog() {
     void navigate({ to: "/chatt" });
   }
 
-  if (!open) return null;
-
   return (
-    <AppDialog
-      onClose={close}
-      header={
-        <div>
-          <div className="intro-mesh flex aspect-16/10 items-center justify-center rounded-xl">
-            <div className="flex animate-in items-center gap-3 rounded-2xl bg-white/90 px-6 py-5 text-neutral-900 shadow-xl shadow-black/10 backdrop-blur-sm duration-700 fade-in-0 zoom-in-95 slide-in-from-bottom-2">
-              <LogoIcon className="size-10 shrink-0" />
-              <div>
-                <p className="text-xl font-medium tracking-tight">Chatt</p>
-                <p className="text-sm text-neutral-500">Plugga med AI</p>
+    <DialogPresence>
+      {open && (
+        <AppDialog
+          onClose={close}
+          header={
+            <div>
+              <div className="intro-mesh flex aspect-16/10 items-center justify-center rounded-xl">
+                <div className="flex animate-in items-center gap-3 rounded-2xl bg-white/90 px-6 py-5 text-neutral-900 shadow-xl shadow-black/10 backdrop-blur-sm duration-700 fade-in-0 zoom-in-95 slide-in-from-bottom-2">
+                  <LogoIcon className="size-10 shrink-0" />
+                  <div>
+                    <p className="text-xl font-medium tracking-tight">Chatt</p>
+                    <p className="text-sm text-neutral-500">Plugga med AI</p>
+                  </div>
+                </div>
+              </div>
+              <div className="space-y-1.5 pt-5">
+                <DialogTitle className="text-xl font-medium">
+                  Nyhet: plugga med AI
+                </DialogTitle>
+                <DialogDescription className="leading-relaxed">
+                  En chatt som hjälper dig förstå, inte bara lösa. Ställ frågor
+                  om vad som helst i dina kurser.
+                </DialogDescription>
               </div>
             </div>
-          </div>
-          <div className="space-y-1.5 pt-5">
-            <DialogTitle className="text-xl font-medium">
-              Nyhet: plugga med AI
-            </DialogTitle>
-            <DialogDescription className="leading-relaxed">
-              En chatt som hjälper dig förstå, inte bara lösa. Ställ frågor om
-              vad som helst i dina kurser.
-            </DialogDescription>
-          </div>
-        </div>
-      }
-      footer={
-        <>
-          <Button variant="outline" onClick={close}>
-            Inte nu
-          </Button>
-          <Button onClick={tryIt}>
-            Kolla in det
-            <ArrowRightIcon />
-          </Button>
-        </>
-      }
-    >
-      <ul className="space-y-2">
-        {HIGHLIGHTS.map(({ Icon, text }) => (
-          <li key={text} className="flex items-center gap-3 text-sm">
-            <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-muted">
-              <Icon className="size-3.5" />
-            </span>
-            {text}
-          </li>
-        ))}
-      </ul>
-    </AppDialog>
+          }
+          footer={
+            <>
+              <Button variant="outline" onClick={close}>
+                Inte nu
+              </Button>
+              <Button onClick={tryIt}>
+                Kolla in det
+                <ArrowRightIcon />
+              </Button>
+            </>
+          }
+        >
+          <ul className="space-y-2">
+            {HIGHLIGHTS.map(({ Icon, text }) => (
+              <li key={text} className="flex items-center gap-3 text-sm">
+                <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-muted">
+                  <Icon className="size-3.5" />
+                </span>
+                {text}
+              </li>
+            ))}
+          </ul>
+        </AppDialog>
+      )}
+    </DialogPresence>
   );
 }

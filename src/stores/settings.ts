@@ -11,7 +11,7 @@ import { useMediaQuery } from "@/hooks/use-media-query";
 import { useUser } from "@/stores/auth";
 
 export type LayoutMode = "exam-with-facit" | "exam-only";
-export type UiFont = "inter" | "system";
+export type UiFont = "google-sans-flex" | "system";
 
 interface SettingsState {
   uiFont: UiFont;
@@ -41,7 +41,7 @@ interface SettingsState {
 export const useSettingsStore = create<SettingsState>()(
   persist(
     (set) => ({
-      uiFont: "inter",
+      uiFont: "google-sans-flex",
       setUiFont: (uiFont) => set({ uiFont }),
       layoutMode: "exam-with-facit",
       showExplainPopover: true,
@@ -64,12 +64,12 @@ export const useSettingsStore = create<SettingsState>()(
     }),
     {
       name: "liutentor-settings",
-      version: 3,
+      version: 4,
       migrate: (persistedState) => {
         const settings = persistedState as Partial<SettingsState>;
         return {
           ...settings,
-          uiFont: settings.uiFont === "system" ? "system" : "inter",
+          uiFont: settings.uiFont === "system" ? "system" : "google-sans-flex",
         };
       },
     },

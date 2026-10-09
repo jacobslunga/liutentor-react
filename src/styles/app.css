@@ -1,11 +1,14 @@
-@import "@fontsource-variable/inter";
+@import "@fontsource-variable/google-sans-flex/full.css";
+@import "@fontsource-variable/google-sans-code";
+@import "@fontsource-variable/google-sans-code/wght-italic.css";
 @plugin "@tailwindcss/typography";
 
 :root {
   --system-font:
     -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro", "Segoe UI",
     sans-serif;
-  --ui-font: "Inter Variable", var(--system-font);
+  --ui-font: "Google Sans Flex Variable", var(--system-font);
+  --chat-font: var(--ui-font);
 }
 
 :root[data-ui-font="system"] {
@@ -23,6 +26,9 @@
 }
 
 @theme inline {
+  --font-mono:
+    "Google Sans Code Variable", ui-monospace, SFMono-Regular, Menlo, Monaco,
+    Consolas, "Liberation Mono", "Courier New", monospace;
   --font-serif: Georgia, "Times New Roman", serif;
   --font-logo: "Logo", serif;
   --text-2xs: 0.6875rem;

@@ -1,3 +1,4 @@
+import { DialogPresence } from "@/components/shared/dialog-presence";
 import { ArrowLeftIcon, ArrowRightIcon, CircleCheckIcon } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
@@ -100,21 +101,23 @@ export function QuizAnswering({ questions }: { questions: QuizQuestion[] }) {
         </div>
       </div>
 
-      {confirmExit && (
-        <ConfirmDialog
-          title="Avsluta quizet?"
-          confirmLabel="Avsluta"
-          cancelLabel="Fortsätt quizet"
-          onConfirm={() => {
-            setConfirmExit(false);
-            reset();
-          }}
-          onCancel={() => setConfirmExit(false)}
-        >
-          Du har svarat på {answeredCount} av {count} frågor. Dina svar
-          försvinner.
-        </ConfirmDialog>
-      )}
+      <DialogPresence>
+        {confirmExit && (
+          <ConfirmDialog
+            title="Avsluta quizet?"
+            confirmLabel="Avsluta"
+            cancelLabel="Fortsätt quizet"
+            onConfirm={() => {
+              setConfirmExit(false);
+              reset();
+            }}
+            onCancel={() => setConfirmExit(false)}
+          >
+            Du har svarat på {answeredCount} av {count} frågor. Dina svar
+            försvinner.
+          </ConfirmDialog>
+        )}
+      </DialogPresence>
     </div>
   );
 }

@@ -22,7 +22,11 @@ import { flushSync } from "react-dom";
 import { toast } from "sonner";
 import { useShallow } from "zustand/react/shallow";
 import { useChatMarkdownReady } from "@/hooks/use-chat-markdown";
-import { useVirtualizer } from "@tanstack/react-virtual";
+import {
+  defaultRangeExtractor,
+  useVirtualizer,
+  type Range,
+} from "@tanstack/react-virtual";
 import {
   renderCachedChatMarkdown,
   renderChatMarkdown,
@@ -86,7 +90,11 @@ interface ChatMessagesProps {
   className?: string;
   onReplyToSelection: (text: string) => void;
   onScrollDistanceChange?: (distance: number) => void;
+  keepRowsMounted?: boolean;
 }
+
+const allRows = (range: Range) =>
+  Array.from({ length: range.count }, (_, index) => index);
 
 export function ChatMessages({
   ref,
@@ -94,6 +102,7 @@ export function ChatMessages({
   className,
   onReplyToSelection,
   onScrollDistanceChange,
+  keepRowsMounted = false,
 }: ChatMessagesProps) {
   const chatStore = useChatStoreApi();
   const ids = useChatStore(useShallow((s) => s.messages.map((m) => m.id)));
@@ -119,6 +128,9 @@ export function ChatMessages({
     getItemKey,
     estimateSize: () => 240,
     overscan: 5,
+    // Medium Learn conversations stay measured instead of rebuilding rich
+    // markdown and correcting estimated heights as the reader scrolls.
+    rangeExtractor: keepRowsMounted ? allRows : defaultRangeExtractor,
     gap: 4,
     scrollMargin: paddingTop,
     scrollPaddingStart: 80,
@@ -650,7 +662,7 @@ const MessageRow = memo(function MessageRow({
       )}
       {html && (
         <div
-          className="chat-prose prose prose-sm w-full max-w-none min-w-0 font-chat sm:prose-base dark:prose-invert prose-headings:font-semibold prose-h1:text-xl sm:prose-h1:text-2xl prose-h2:text-lg sm:prose-h2:text-xl prose-h3:text-base sm:prose-h3:text-lg prose-h4:text-sm sm:prose-h4:text-base prose-h5:text-sm prose-h6:text-xs prose-strong:font-semibold prose-li:marker:text-foreground"
+          className="chat-prose prose prose-sm w-full max-w-none min-w-0 font-chat sm:prose-base dark:prose-invert prose-headings:font-medium prose-h1:text-xl sm:prose-h1:text-2xl prose-h2:text-lg sm:prose-h2:text-xl prose-h3:text-base sm:prose-h3:text-lg prose-h4:text-sm sm:prose-h4:text-base prose-h5:text-sm prose-h6:text-xs prose-strong:font-medium prose-li:marker:text-foreground"
           dangerouslySetInnerHTML={{ __html: html }}
         />
       )}

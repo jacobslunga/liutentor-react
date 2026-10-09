@@ -1,3 +1,4 @@
+import { DialogPresence } from "@/components/shared/dialog-presence";
 import { Link, useNavigate, useParams } from "@tanstack/react-router";
 import { m } from "framer-motion";
 import {
@@ -346,17 +347,19 @@ function SidebarContent() {
         )}
       </div>
 
-      {pendingDelete && (
-        <ConfirmDialog
-          title="Radera chatten?"
-          confirmLabel="Radera"
-          isPending={deleting}
-          onConfirm={() => void confirmDelete()}
-          onCancel={() => setPendingDelete(null)}
-        >
-          "{pendingDelete.title}" raderas permanent och kan inte ångras.
-        </ConfirmDialog>
-      )}
+      <DialogPresence>
+        {pendingDelete && (
+          <ConfirmDialog
+            title="Radera chatten?"
+            confirmLabel="Radera"
+            isPending={deleting}
+            onConfirm={() => void confirmDelete()}
+            onCancel={() => setPendingDelete(null)}
+          >
+            "{pendingDelete.title}" raderas permanent och kan inte ångras.
+          </ConfirmDialog>
+        )}
+      </DialogPresence>
     </div>
   );
 }

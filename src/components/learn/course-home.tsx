@@ -1,3 +1,4 @@
+import { DialogPresence } from "@/components/shared/dialog-presence";
 import { Link } from "@tanstack/react-router";
 import { m, type MotionStyle } from "framer-motion";
 import { FolderIcon, Trash2Icon } from "lucide-react";
@@ -148,17 +149,19 @@ function CourseChats({ courseId }: { courseId: string }) {
         ))}
       </ul>
 
-      {pendingDelete && (
-        <ConfirmDialog
-          title="Radera chatten?"
-          confirmLabel="Radera"
-          isPending={deleting}
-          onConfirm={() => void confirmDelete()}
-          onCancel={() => setPendingDelete(null)}
-        >
-          "{pendingDelete.title}" raderas permanent och kan inte ångras.
-        </ConfirmDialog>
-      )}
+      <DialogPresence>
+        {pendingDelete && (
+          <ConfirmDialog
+            title="Radera chatten?"
+            confirmLabel="Radera"
+            isPending={deleting}
+            onConfirm={() => void confirmDelete()}
+            onCancel={() => setPendingDelete(null)}
+          >
+            "{pendingDelete.title}" raderas permanent och kan inte ångras.
+          </ConfirmDialog>
+        )}
+      </DialogPresence>
     </>
   );
 }

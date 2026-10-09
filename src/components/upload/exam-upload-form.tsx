@@ -1,3 +1,4 @@
+import { DialogPresence } from "@/components/shared/dialog-presence";
 import {
   BookIcon,
   FileTextIcon,
@@ -183,18 +184,20 @@ export function ExamUploadForm({
         </AlertDescription>
       </Alert>
 
-      {result && (
-        <AppDialog
-          role="alertdialog"
-          title={result.ok ? "Uppladdning lyckades!" : "Något gick fel"}
-          onClose={() => setResult(null)}
-          footer={<Button onClick={() => setResult(null)}>OK</Button>}
-        >
-          {result.ok
-            ? "Tack! Din tenta har laddats upp och granskas inom kort."
-            : result.message || "Ett fel uppstod vid uppladdningen."}
-        </AppDialog>
-      )}
+      <DialogPresence>
+        {result && (
+          <AppDialog
+            role="alertdialog"
+            title={result.ok ? "Uppladdning lyckades!" : "Något gick fel"}
+            onClose={() => setResult(null)}
+            footer={<Button onClick={() => setResult(null)}>OK</Button>}
+          >
+            {result.ok
+              ? "Tack! Din tenta har laddats upp och granskas inom kort."
+              : result.message || "Ett fel uppstod vid uppladdningen."}
+          </AppDialog>
+        )}
+      </DialogPresence>
     </div>
   );
 }

@@ -72,7 +72,7 @@ export function CourseExamsTable({
 
       <div className="w-full overflow-x-auto rounded-xl border">
         <div className="w-max min-w-full overflow-hidden rounded-xl sm:w-full">
-          <div className={cn(GRID_COLS, "border-b bg-muted/30 py-3")}>
+          <div className={cn(GRID_COLS, "border-b bg-muted py-3")}>
             <div className="text-xs text-muted-foreground">Tentamen</div>
             <div className="text-xs text-muted-foreground">Typ</div>
             <div className="text-center text-xs text-muted-foreground">
@@ -129,7 +129,7 @@ const ExamRow = memo(function ExamRow({
       }}
     >
       <div className="sm:min-w-0">
-        <div className="text-sm font-semibold whitespace-nowrap transition-colors group-hover:text-foreground/80 sm:truncate">
+        <div className="text-sm font-medium whitespace-nowrap transition-colors group-hover:text-foreground/80 sm:truncate">
           {exam.exam_name}
         </div>
         <div className="mt-0.5 text-xs whitespace-nowrap text-muted-foreground/70">
