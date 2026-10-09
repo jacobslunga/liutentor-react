@@ -29,13 +29,13 @@ export function ConfirmDialog({
   onConfirm: () => void;
   onCancel: () => void;
 }) {
-  const { open, onAnimationEnd } = useDialogPresence();
+  const { open } = useDialogPresence();
   return (
     <AlertDialog
       open={open}
       onOpenChange={(open) => !open && !isPending && onCancel()}
     >
-      <AlertDialogContent onAnimationEnd={onAnimationEnd}>
+      <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>{title}</AlertDialogTitle>
           <AlertDialogDescription>{children}</AlertDialogDescription>
