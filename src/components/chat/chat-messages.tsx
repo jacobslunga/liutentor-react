@@ -613,7 +613,7 @@ const MessageRow = memo(function MessageRow({
         data-role="user"
         className="group/message chat-row flex min-w-0 scroll-mt-20 flex-col items-end pt-2"
       >
-        <div className="flex max-w-[85%] min-w-0 flex-col items-start gap-2 rounded-xl bg-brand/10 px-4 py-1.5 shadow-xs sm:max-w-[75%]">
+        <div className="flex max-w-[85%] min-w-0 flex-col items-start gap-2 rounded-2xl bg-brand/10 p-4 shadow-xs sm:max-w-[75%]">
           {message.selectionContext && (
             <div className="line-clamp-3 border-l-2 border-foreground/30 pl-3 font-chat text-sm text-muted-foreground">
               "<SelectionQuote text={message.selectionContext} />"

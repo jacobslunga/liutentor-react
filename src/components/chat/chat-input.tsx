@@ -424,7 +424,7 @@ export function ChatInput({
           ref={composerRef}
           data-expanded={expanded || hasHeader}
           className={cn(
-            "relative overflow-hidden rounded-[24px] border border-input bg-card p-1.5 shadow-xs transition-[border-radius] duration-200 ease-out-quick data-[expanded=true]:rounded-[20px] motion-reduce:transition-none dark:border-border dark:shadow-[0_2px_2px_-4px_rgba(0,0,0,0.15)]",
+            "relative overflow-hidden rounded-[24px] border border-input bg-card p-2 shadow-xs transition-[border-radius] duration-200 ease-out-quick data-[expanded=true]:rounded-[20px] motion-reduce:transition-none dark:border-border dark:shadow-[0_2px_2px_-4px_rgba(0,0,0,0.15)]",
             isLoading && "chat-prompt-generating",
           )}
         >
