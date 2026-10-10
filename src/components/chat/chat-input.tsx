@@ -630,8 +630,8 @@ function StopIcon() {
 }
 
 const MODEL_ICONS: Record<ChatModelId, LucideIcon> = {
-  "gemini-flash-lite-minimal": ZapIcon,
-  "gemini-flash-lite-medium": BrainIcon,
+  "gpt-6-luna": ZapIcon,
+  "gpt-6-terra": BrainIcon,
 };
 
 function ModelPicker() {

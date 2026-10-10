@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { readChatModel, saveChatModel } from "@/lib/chat-model-cookie";
 import { persist } from "zustand/middleware";
 import { randomAvatarColor } from "@/lib/avatar-colors";
 import { DEFAULT_QUIZ_DIFFICULTY, type QuizDifficulty } from "@/types/quiz";
@@ -39,14 +40,14 @@ interface SettingsState {
 }
 
 export const useSettingsStore = create<SettingsState>()(
-  persist(
+  persist<SettingsState, [], [], Partial<SettingsState>>(
     (set) => ({
       uiFont: "google-sans-flex",
       setUiFont: (uiFont) => set({ uiFont }),
       layoutMode: "exam-with-facit",
       showExplainPopover: true,
       blurFacitUntilHover: true,
-      selectedModelId: DEFAULT_MODEL_ID,
+      selectedModelId: readChatModel(),
       avatarColor: randomAvatarColor(),
       quizDifficulty: DEFAULT_QUIZ_DIFFICULTY,
       chatSidebarOpen: true,
@@ -56,7 +57,10 @@ export const useSettingsStore = create<SettingsState>()(
         set({ showExplainPopover }),
       setBlurFacitUntilHover: (blurFacitUntilHover) =>
         set({ blurFacitUntilHover }),
-      setSelectedModelId: (selectedModelId) => set({ selectedModelId }),
+      setSelectedModelId: (selectedModelId) => {
+        saveChatModel(selectedModelId);
+        set({ selectedModelId });
+      },
       setAvatarColor: (avatarColor) => set({ avatarColor }),
       setQuizDifficulty: (quizDifficulty) => set({ quizDifficulty }),
       setChatSidebarOpen: (chatSidebarOpen) => set({ chatSidebarOpen }),
@@ -65,6 +69,13 @@ export const useSettingsStore = create<SettingsState>()(
     {
       name: "liutentor-settings",
       version: 4,
+      partialize: ({ selectedModelId: _selectedModelId, ...settings }) =>
+        settings,
+      merge: (persistedState, currentState) => ({
+        ...currentState,
+        ...(persistedState as Partial<SettingsState>),
+        selectedModelId: currentState.selectedModelId,
+      }),
       migrate: (persistedState) => {
         const settings = persistedState as Partial<SettingsState>;
         return {

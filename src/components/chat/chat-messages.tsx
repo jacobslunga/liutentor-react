@@ -64,14 +64,12 @@ const LOADING_PHRASES = [
   "Tar en omväg via Zenit...",
 ];
 
-const OPAQUE_SOURCE_HOSTS = ["vertexaisearch.cloud.google.com"];
-
 type WebSource = Extract<MessageSource, { url: string }>;
 
 function sourceLabel(source: WebSource): string {
   try {
     const host = new URL(source.url).hostname.replace(/^www\./, "");
-    return OPAQUE_SOURCE_HOSTS.includes(host) ? source.title || host : host;
+    return host;
   } catch {
     return source.title || source.url;
   }

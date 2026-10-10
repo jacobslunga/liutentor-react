@@ -22,9 +22,9 @@ const sections: DocSection[] = [
   {
     title: "Tekniken bakom",
     content:
-      "Vi använder en modern Gemini-modell från Google för att ge snabba och pedagogiska svar:",
+      "Vi använder modeller från OpenAI för att ge snabba och pedagogiska svar:",
     items: [
-      "Google Gemini 3.1 Flash-Lite för chatt, quizgenerering och bearbetning av tentamens-PDF:er.",
+      "GPT-6 Luna för snabba chattsvar och GPT-6 Terra för mer krävande frågor. OpenAI används även för quizgenerering och bearbetning av tentamens-PDF:er.",
     ],
   },
   {
@@ -63,7 +63,7 @@ function AiPolicyPage() {
         eyebrow="Juridiskt"
         title="AI-policy"
         lead="Den här policyn förklarar hur LiU Tentor använder artificiell intelligens, vad du kan förvänta dig av tjänsten och vilket ansvar du har som användare. Vårt mål är att vara en trygg och transparent partner i dina studier."
-        meta="Senast uppdaterad 23 augusti 2026"
+        meta="Senast uppdaterad 10 oktober 2026"
       />
       <LegalDocument
         sections={sections}
