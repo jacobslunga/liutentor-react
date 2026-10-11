@@ -67,17 +67,19 @@ course study material, and user accounts.
 
 ## Typography
 
-- **Google Sans Flex** is the default font for interface and chat text, with an
+- **LiU Tentor Sans** is the default font for interface and chat text, with an
   optional **System** setting and a separate custom font for the **LiU Tentor logo**.
   Respect the selected setting; do not assume a system-font fallback is intended.
 - Font selection is persisted in `src/stores/settings.ts` and applied by
   `src/lib/font-settings.ts` through `data-ui-font` on the root element.
   `--ui-font` controls interface text; `--chat-font` follows it.
-- Google Sans Flex remains an available setting and is currently the default
-  for a fresh settings store. An existing saved System selection overrides it.
+- The local `liutentor-sans` family includes Regular (400), Medium (500), and
+  Semibold (600) WOFF2 assets. Medium is the default interface weight.
+- LiU Tentor Sans is the default for a fresh settings store. An existing saved
+  System selection overrides it; older custom font selections migrate to it.
   Do not confuse the fresh-store default with the user's saved preference.
 - The logo uses `font-logo` and the local `gt-super-text-bold.woff2` asset.
-  Code/monospace text currently uses Google Sans Code; rendered math and PDFs
+  Code/monospace text uses the system monospace stack; rendered math and PDFs
   have their own typography.
 
 ## Working conventions

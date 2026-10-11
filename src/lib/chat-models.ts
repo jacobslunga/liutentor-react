@@ -7,7 +7,7 @@ export const CHAT_MODELS = [
     requiresAuth: false,
   },
   {
-    id: "gpt-6-terra",
+    id: "gpt-6.1-sol",
     label: "Tänker",
     hint: "Hantera komplexa uppgifter",
     provider: "OpenAI",

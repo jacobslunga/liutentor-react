@@ -134,7 +134,7 @@ function SettingsContent() {
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="google-sans-flex">Google Sans Flex</SelectItem>
+              <SelectItem value="liutentor-sans">LiU Tentor Sans</SelectItem>
               <SelectItem value="system">System</SelectItem>
             </SelectContent>
           </Select>

@@ -13,7 +13,7 @@ import { useMediaQuery } from "@/hooks/use-media-query";
 import { useUser } from "@/stores/auth";
 
 export type LayoutMode = "exam-with-facit" | "exam-only";
-export type UiFont = "google-sans-flex" | "system";
+export type UiFont = "liutentor-sans" | "system";
 
 interface SettingsState {
   uiFont: UiFont;
@@ -43,7 +43,7 @@ interface SettingsState {
 export const useSettingsStore = create<SettingsState>()(
   persist<SettingsState, [], [], Partial<SettingsState>>(
     (set) => ({
-      uiFont: "google-sans-flex",
+      uiFont: "liutentor-sans",
       setUiFont: (uiFont) => set({ uiFont }),
       layoutMode: "exam-with-facit",
       showExplainPopover: true,
@@ -69,7 +69,7 @@ export const useSettingsStore = create<SettingsState>()(
     }),
     {
       name: "liutentor-settings",
-      version: 4,
+      version: 5,
       partialize: ({ selectedModelId: _selectedModelId, ...settings }) =>
         settings,
       merge: (persistedState, currentState) => ({
@@ -81,7 +81,7 @@ export const useSettingsStore = create<SettingsState>()(
         const settings = persistedState as Partial<SettingsState>;
         return {
           ...settings,
-          uiFont: settings.uiFont === "system" ? "system" : "google-sans-flex",
+          uiFont: settings.uiFont === "system" ? "system" : "liutentor-sans",
         };
       },
     },
