@@ -65,9 +65,20 @@ export function PdfScrollbars() {
       if (trackRef.current) resize.observe(trackRef.current);
       update();
     };
-    const mutations = new MutationObserver(observeContent);
-    mutations.observe(el, {
-      childList: true,
+    let frame = 0;
+    const scheduleUpdate = () => {
+      if (frame) return;
+      frame = requestAnimationFrame(() => {
+        frame = 0;
+        update();
+      });
+    };
+    // Only direct-child changes need re-observing; style churn deeper in the
+    // tree just needs a (coalesced) metrics refresh.
+    const childMutations = new MutationObserver(observeContent);
+    childMutations.observe(el, { childList: true });
+    const styleMutations = new MutationObserver(scheduleUpdate);
+    styleMutations.observe(el, {
       subtree: true,
       attributes: true,
       attributeFilter: ["style"],
@@ -77,7 +88,9 @@ export function PdfScrollbars() {
 
     return () => {
       resize.disconnect();
-      mutations.disconnect();
+      childMutations.disconnect();
+      styleMutations.disconnect();
+      cancelAnimationFrame(frame);
       el.removeEventListener("scroll", update);
     };
   }, [viewportRef, visible]);

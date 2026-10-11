@@ -23,9 +23,19 @@ export function useCourseSearch() {
     const q = query.trim().toUpperCase();
     if (!q) return [];
 
-    return codes
-      .filter((code) => code.includes(q))
-      .sort((a, b) => Number(b.startsWith(q)) - Number(a.startsWith(q)))
+    // Single pass, no full sort: prefix matches first, then other matches.
+    const prefixed: string[] = [];
+    const contained: string[] = [];
+    for (const code of codes) {
+      if (code.startsWith(q)) {
+        prefixed.push(code);
+        if (prefixed.length === MAX_RESULTS) break;
+      } else if (contained.length < MAX_RESULTS && code.includes(q)) {
+        contained.push(code);
+      }
+    }
+    return prefixed
+      .concat(contained)
       .slice(0, MAX_RESULTS)
       .map((code) => ({ code, name: nameByCode.get(code) ?? "" }));
   }, [codes, nameByCode, query]);

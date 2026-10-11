@@ -8,6 +8,7 @@ import { useSeo } from "@/hooks/use-seo";
 import { courseExamsQuery, examDetailQuery } from "@/queries/exams";
 import { Button } from "@/components/ui/button";
 
+const NO_EXAMS: never[] = [];
 const TOUCH_VIEWER_QUERY = "(max-width: 1023px), (pointer: coarse)";
 
 export const Route = createFileRoute("/search/$courseCode/$examId")({
@@ -79,7 +80,7 @@ function ExamPage() {
         examPdfUrl={exam.pdf_url}
         examDate={exam.exam_date}
         solutionPdfUrl={solutionPdfUrl}
-        exams={course?.exams ?? []}
+        exams={course?.exams ?? NO_EXAMS}
       />
     );
   }
@@ -91,7 +92,7 @@ function ExamPage() {
       examPdfUrl={exam.pdf_url}
       examDate={exam.exam_date}
       solutionPdfUrl={solutionPdfUrl}
-      exams={course?.exams ?? []}
+      exams={course?.exams ?? NO_EXAMS}
     />
   );
 }

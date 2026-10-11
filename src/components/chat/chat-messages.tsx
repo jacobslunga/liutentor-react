@@ -13,6 +13,7 @@ import {
   useEffect,
   useImperativeHandle,
   useLayoutEffect,
+  useMemo,
   useRef,
   useState,
   type Ref,
@@ -28,8 +29,7 @@ import {
   type Range,
 } from "@tanstack/react-virtual";
 import {
-  renderCachedChatMarkdown,
-  renderChatMarkdown,
+  renderChatMarkdownBlocks,
   selectionToMarkdown,
 } from "@/lib/chat-markdown";
 import { splitCourseMentions } from "@/lib/course-mentions";
@@ -589,6 +589,21 @@ function randomLoadingPhrase() {
   return LOADING_PHRASES[Math.floor(Math.random() * LOADING_PHRASES.length)];
 }
 
+const MarkdownBlock = memo(function MarkdownBlock({ html }: { html: string }) {
+  return (
+    <div className="contents" dangerouslySetInnerHTML={{ __html: html }} />
+  );
+});
+
+const MarkdownBlocks = memo(function MarkdownBlocks({
+  content,
+}: {
+  content: string;
+}) {
+  const blocks = useMemo(() => renderChatMarkdownBlocks(content), [content]);
+  return blocks.map((html, i) => <MarkdownBlock key={i} html={html} />);
+});
+
 const MessageRow = memo(function MessageRow({
   id,
   index,
@@ -639,11 +654,6 @@ const MessageRow = memo(function MessageRow({
 
   const showStatus =
     !!message.status?.message || (!message.content && isStreaming);
-  const html = message.content
-    ? isStreaming
-      ? renderChatMarkdown(message.content)
-      : renderCachedChatMarkdown(message.content)
-    : "";
 
   return (
     <div
@@ -658,11 +668,10 @@ const MessageRow = memo(function MessageRow({
           </span>
         </div>
       )}
-      {html && (
-        <div
-          className="chat-prose prose prose-sm w-full max-w-none min-w-0 font-chat sm:prose-base dark:prose-invert prose-headings:font-medium prose-h1:text-xl sm:prose-h1:text-2xl prose-h2:text-lg sm:prose-h2:text-xl prose-h3:text-base sm:prose-h3:text-lg prose-h4:text-sm sm:prose-h4:text-base prose-h5:text-sm prose-h6:text-xs prose-strong:font-medium prose-li:marker:text-foreground"
-          dangerouslySetInnerHTML={{ __html: html }}
-        />
+      {message.content && (
+        <div className="chat-prose prose prose-sm w-full max-w-none min-w-0 font-chat sm:prose-base dark:prose-invert prose-headings:font-medium prose-h1:text-xl sm:prose-h1:text-2xl prose-h2:text-lg sm:prose-h2:text-xl prose-h3:text-base sm:prose-h3:text-lg prose-h4:text-sm sm:prose-h4:text-base prose-h5:text-sm prose-h6:text-xs prose-strong:font-medium prose-li:marker:text-foreground [&>div:first-child>:first-child]:mt-0 [&>div:last-child>:last-child]:mb-0">
+          <MarkdownBlocks content={message.content} />
+        </div>
       )}
       {message.content && !isStreaming && (
         <div className="mt-1 -ml-1.5">

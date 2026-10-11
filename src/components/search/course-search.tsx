@@ -42,9 +42,11 @@ function CourseSearchBase({
   const [active, setActive] = useState("");
   const open = focused && query.trim().length > 0;
 
-  useEffect(() => {
+  const [prevItems, setPrevItems] = useState(items);
+  if (prevItems !== items) {
+    setPrevItems(items);
     setActive(items[0]?.code ?? "");
-  }, [items]);
+  }
 
   function select(code: string) {
     goToCourse(code);

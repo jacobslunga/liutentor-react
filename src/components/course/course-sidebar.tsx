@@ -5,7 +5,7 @@ import {
   TrendingUpIcon,
   UsersIcon,
 } from "lucide-react";
-import { lazy, Suspense, useMemo, type ReactNode } from "react";
+import { lazy, memo, Suspense, useMemo, type ReactNode } from "react";
 import {
   computeCourseStats,
   passRateClass,
@@ -21,7 +21,7 @@ const CourseStatsPassRate = lazy(() =>
   })),
 );
 
-export function CourseSidebar({
+export const CourseSidebar = memo(function CourseSidebar({
   exams,
   className,
 }: {
@@ -29,15 +29,19 @@ export function CourseSidebar({
   className?: string;
 }) {
   const stats = useMemo(() => computeCourseStats(exams), [exams]);
-  const withSolutions = exams.filter((e) => e.has_solution).length;
-  const years = exams
-    .map((e) => e.exam_date.slice(0, 4))
-    .filter(Boolean)
-    .sort();
-  const yearSpan =
-    years.length && years[0] !== years.at(-1)
-      ? `${years[0]}–${years.at(-1)}`
-      : years[0];
+  const { withSolutions, yearSpan } = useMemo(() => {
+    const years = exams
+      .map((e) => e.exam_date.slice(0, 4))
+      .filter(Boolean)
+      .sort();
+    return {
+      withSolutions: exams.filter((e) => e.has_solution).length,
+      yearSpan:
+        years.length && years[0] !== years.at(-1)
+          ? `${years[0]}–${years.at(-1)}`
+          : years[0],
+    };
+  }, [exams]);
 
   return (
     <aside className={cn("flex flex-col divide-y text-sm", className)}>
@@ -104,7 +108,7 @@ export function CourseSidebar({
       </Section>
     </aside>
   );
-}
+});
 
 function Section({
   title,

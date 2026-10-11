@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import { create } from "zustand";
 import { readChatModel, saveChatModel } from "@/lib/chat-model-cookie";
 import { persist } from "zustand/middleware";
@@ -94,7 +95,11 @@ export function useSelectedModel() {
   const stored = useSettingsStore((s) => s.selectedModelId);
   const mobile = useMediaQuery(MOBILE_QUERY);
 
-  const availableModels = CHAT_MODELS.filter((m) => !m.requiresAuth || !!user);
+  const signedIn = !!user;
+  const availableModels = useMemo(
+    () => CHAT_MODELS.filter((m) => !m.requiresAuth || signedIn),
+    [signedIn],
+  );
   // The model picker is hidden on mobile, which always uses the default.
   const selectedModelId =
     !mobile && availableModels.some((m) => m.id === stored)

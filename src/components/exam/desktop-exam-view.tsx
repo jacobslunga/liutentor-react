@@ -3,6 +3,7 @@ import { m } from "framer-motion";
 import { ChatMotion } from "@/components/chat/chat-motion";
 import {
   lazy,
+  memo,
   Suspense,
   useCallback,
   useEffect,
@@ -28,7 +29,12 @@ const PdfRenderer = lazy(() =>
   })),
 );
 const loadChatWindow = () => import("@/components/chat/chat-window");
-const ChatWindow = lazy(loadChatWindow);
+// Memoized so facit hover / overlay toggles in this view don't re-render the
+// whole (parked) chat transcript.
+const ChatWindow = lazy(() =>
+  loadChatWindow().then((mod) => ({ default: memo(mod.default) })),
+);
+const closeChat = () => examChatStore.getState().close();
 
 const SPLIT_MIN = 20;
 const SPLIT_MAX = 80;
@@ -379,7 +385,7 @@ export function DesktopExamView({
               courseCode={courseCode}
               examUrl={examPdfUrl}
               solutionUrl={solutionPdfUrl}
-              onClose={() => examChatStore.getState().close()}
+              onClose={closeChat}
             />
           </Suspense>
         </SideOverlay>

@@ -4,6 +4,7 @@ import { ChevronDownIcon, InboxIcon, LoaderCircleIcon } from "lucide-react";
 import { lazy, Suspense, useEffect, useMemo } from "react";
 import { CourseExamsTable } from "@/components/course/course-exams-table";
 import { CourseSidebar } from "@/components/course/course-sidebar";
+import { useMediaQuery } from "@/hooks/use-media-query";
 import { HeaderCourseSearch } from "@/components/search/course-search";
 import { ExamUploadForm } from "@/components/upload/exam-upload-form";
 import { computeCourseStats, passRateClass } from "@/lib/course-stats";
@@ -125,6 +126,7 @@ function CoursePage() {
   }, [courseCode, data]);
 
   useSeo({ ...seo, path: `/search/${courseCode}` });
+  const isMobile = useMediaQuery("(max-width: 767px)");
 
   useEffect(() => {
     addRecentSearch(courseCode);
@@ -132,9 +134,11 @@ function CoursePage() {
 
   return (
     <div className="container mx-auto max-w-6xl px-4 pt-2 pb-8 md:px-8 md:py-8">
-      <div className="sticky top-0 z-30 mb-4 h-12 bg-background pt-2 md:hidden">
-        <HeaderCourseSearch className="mx-auto w-full max-w-xl" />
-      </div>
+      {isMobile && (
+        <div className="sticky top-0 z-30 mb-4 h-12 bg-background pt-2">
+          <HeaderCourseSearch className="mx-auto w-full max-w-xl" />
+        </div>
+      )}
 
       {isPending ? (
         <div className="flex min-h-[60vh] items-center justify-center">

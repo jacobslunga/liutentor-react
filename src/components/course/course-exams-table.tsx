@@ -1,7 +1,7 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { useNavigate, useRouter } from "@tanstack/react-router";
 import { CheckIcon, MinusIcon } from "lucide-react";
-import { memo, useMemo, useState } from "react";
+import { memo, useCallback, useMemo, useState } from "react";
 import { getExamPrefix } from "@/lib/exams";
 import { cn } from "@/lib/utils";
 import { examDetailQuery } from "@/queries/exams";
@@ -30,7 +30,30 @@ export function CourseExamsTable({
   sortBy,
   sortDirection,
 }: CourseExamsTableProps) {
+  const navigate = useNavigate();
+  const router = useRouter();
+  const queryClient = useQueryClient();
   const [activeFilters, setActiveFilters] = useState<Set<string>>(new Set());
+
+  const examTarget = useCallback(
+    (examId: number) =>
+      ({
+        to: "/search/$courseCode/$examId",
+        params: { courseCode, examId: String(examId) },
+      }) as const,
+    [courseCode],
+  );
+  const openExam = useCallback(
+    (examId: number) => void navigate(examTarget(examId)),
+    [navigate, examTarget],
+  );
+  const prefetchExam = useCallback(
+    (examId: number) => {
+      void router.preloadRoute(examTarget(examId));
+      void queryClient.prefetchQuery(examDetailQuery(examId));
+    },
+    [router, queryClient, examTarget],
+  );
 
   const prefixes = useMemo(
     () => [...new Set(exams.map(getExamPrefix).filter(Boolean))],
@@ -84,7 +107,12 @@ export function CourseExamsTable({
           </div>
 
           {visibleExams.map((exam) => (
-            <ExamRow key={exam.id} courseCode={courseCode} exam={exam} />
+            <ExamRow
+              key={exam.id}
+              exam={exam}
+              onOpen={openExam}
+              onPrefetch={prefetchExam}
+            />
           ))}
         </div>
       </div>
@@ -93,25 +121,16 @@ export function CourseExamsTable({
 }
 
 const ExamRow = memo(function ExamRow({
-  courseCode,
   exam,
+  onOpen,
+  onPrefetch,
 }: {
-  courseCode: string;
   exam: Exam;
+  onOpen: (examId: number) => void;
+  onPrefetch: (examId: number) => void;
 }) {
-  const navigate = useNavigate();
-  const router = useRouter();
-  const queryClient = useQueryClient();
   const prefix = getExamPrefix(exam);
-  const target = {
-    to: "/search/$courseCode/$examId",
-    params: { courseCode, examId: String(exam.id) },
-  } as const;
-
-  function prefetch() {
-    void router.preloadRoute(target);
-    void queryClient.prefetchQuery(examDetailQuery(exam.id));
-  }
+  const prefetch = () => onPrefetch(exam.id);
 
   return (
     <div
@@ -123,9 +142,9 @@ const ExamRow = memo(function ExamRow({
       )}
       onMouseEnter={prefetch}
       onFocus={prefetch}
-      onClick={() => void navigate(target)}
+      onClick={() => onOpen(exam.id)}
       onKeyDown={(e) => {
-        if (e.key === "Enter") void navigate(target);
+        if (e.key === "Enter") onOpen(exam.id);
       }}
     >
       <div className="sm:min-w-0">

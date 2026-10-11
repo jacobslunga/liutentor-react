@@ -12,6 +12,7 @@ export const courseExamsQuery = (courseCode: string) =>
   queryOptions({
     queryKey: ["exams", courseCode],
     queryFn: ({ signal }) => getCourseExams(courseCode, signal),
+    staleTime: 5 * 60_000,
   });
 
 export const examDetailQuery = (examId: string | number) =>
@@ -21,8 +22,10 @@ export const examDetailQuery = (examId: string | number) =>
     staleTime: Infinity,
   });
 
+const NO_COURSES: Awaited<ReturnType<typeof getCourses>> = [];
+
 export function useCourseCodes() {
-  const { data: courses = [], isPending } = useQuery(coursesQuery);
+  const { data: courses = NO_COURSES, isPending } = useQuery(coursesQuery);
 
   return useMemo(
     () => ({
