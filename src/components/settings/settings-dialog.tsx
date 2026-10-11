@@ -10,7 +10,6 @@ import {
   useSelectedModel,
   useSettingsStore,
   type LayoutMode,
-  type UiFont,
 } from "@/stores/settings";
 import { Button } from "@/components/ui/button";
 import { IconButton } from "@/components/shared/icon-button";
@@ -104,8 +103,6 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
 }
 
 function SettingsContent() {
-  const uiFont = useSettingsStore((s) => s.uiFont);
-  const setUiFont = useSettingsStore((s) => s.setUiFont);
   const { theme = "system", setTheme } = useTheme();
   const layoutMode = useSettingsStore((s) => s.layoutMode);
   const setLayoutMode = useSettingsStore((s) => s.setLayoutMode);
@@ -121,24 +118,6 @@ function SettingsContent() {
   return (
     <div className="flex flex-col gap-6 pt-1 pb-2">
       <Section title="Utseende">
-        <Row label="Gränssnittets typsnitt">
-          <Select
-            value={uiFont}
-            onValueChange={(value) => setUiFont(value as UiFont)}
-          >
-            <SelectTrigger
-              size="sm"
-              className="w-44"
-              aria-label="Gränssnittets typsnitt"
-            >
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="liutentor-sans">LiU Tentor Sans</SelectItem>
-              <SelectItem value="system">System</SelectItem>
-            </SelectContent>
-          </Select>
-        </Row>
         <Row
           label="Tema"
           description="System följer inställningen i din enhet."

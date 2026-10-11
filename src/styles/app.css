@@ -1,59 +1,9 @@
 @plugin "@tailwindcss/typography";
 
-@font-face {
-  font-family: "liutentor-sans";
-  src: url("../assets/fonts/liutentor-sans-Regular.woff2") format("woff2");
-  font-style: normal;
-  font-weight: 400;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: "liutentor-sans";
-  src: url("../assets/fonts/liutentor-sans-Medium.woff2") format("woff2");
-  font-style: normal;
-  font-weight: 500;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: "liutentor-sans";
-  src: url("../assets/fonts/liutentor-sans-Semibold.woff2") format("woff2");
-  font-style: normal;
-  font-weight: 600;
-  font-display: swap;
-}
-
-:root {
-  --system-font:
-    -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro", "Segoe UI",
-    sans-serif;
-  --ui-font: "liutentor-sans", var(--system-font);
-  --ui-font-weight: 500;
-  --chat-font: var(--ui-font);
-}
-
-:root[data-ui-font="system"] {
-  --ui-font: var(--system-font);
-  --ui-font-weight: 400;
-}
-
-@font-face {
-  font-family: "Logo";
-  src: url("../assets/fonts/gt-super-text-bold.woff2") format("woff2");
-  font-style: normal;
-  font-weight: 500;
-  font-display: swap;
-  unicode-range:
-    U+0020, U+004C, U+0054-0055, U+0065, U+0069, U+006E-006F, U+0072, U+0074;
-}
-
 @theme inline {
-  --font-mono:
-    ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
-    "Courier New", monospace;
-  --font-serif: Georgia, "Times New Roman", serif;
-  --font-logo: "Logo", serif;
+  --font-mono: ui-monospace, monospace;
+  --font-serif: ui-serif, serif;
+  --font-logo: var(--font-serif);
   --text-2xs: 0.6875rem;
   --breakpoint-3xl: 1920px;
   --ease-spring: cubic-bezier(0.25, 0.1, 0.25, 1);

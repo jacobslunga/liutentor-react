@@ -13,11 +13,8 @@ import { useMediaQuery } from "@/hooks/use-media-query";
 import { useUser } from "@/stores/auth";
 
 export type LayoutMode = "exam-with-facit" | "exam-only";
-export type UiFont = "liutentor-sans" | "system";
 
 interface SettingsState {
-  uiFont: UiFont;
-  setUiFont: (font: UiFont) => void;
   layoutMode: LayoutMode;
   showExplainPopover: boolean;
   blurFacitUntilHover: boolean;
@@ -43,8 +40,6 @@ interface SettingsState {
 export const useSettingsStore = create<SettingsState>()(
   persist<SettingsState, [], [], Partial<SettingsState>>(
     (set) => ({
-      uiFont: "liutentor-sans",
-      setUiFont: (uiFont) => set({ uiFont }),
       layoutMode: "exam-with-facit",
       showExplainPopover: true,
       blurFacitUntilHover: true,
@@ -69,7 +64,7 @@ export const useSettingsStore = create<SettingsState>()(
     }),
     {
       name: "liutentor-settings",
-      version: 5,
+      version: 6,
       partialize: ({ selectedModelId: _selectedModelId, ...settings }) =>
         settings,
       merge: (persistedState, currentState) => ({
@@ -78,11 +73,15 @@ export const useSettingsStore = create<SettingsState>()(
         selectedModelId: currentState.selectedModelId,
       }),
       migrate: (persistedState) => {
-        const settings = persistedState as Partial<SettingsState>;
-        return {
-          ...settings,
-          uiFont: settings.uiFont === "system" ? "system" : "liutentor-sans",
+        const {
+          uiFont: _uiFont,
+          setUiFont: _setUiFont,
+          ...settings
+        } = persistedState as Partial<SettingsState> & {
+          uiFont?: unknown;
+          setUiFont?: unknown;
         };
+        return settings;
       },
     },
   ),

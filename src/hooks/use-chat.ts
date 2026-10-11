@@ -6,7 +6,11 @@ import {
   LEARN_COMPLETION_URL,
   readSseEvents,
 } from "@/lib/chat-api";
-import { DEFAULT_MODEL_ID } from "@/lib/chat-models";
+import {
+  CHAT_MODELS,
+  DEFAULT_MODEL_ID,
+  type ChatModelId,
+} from "@/lib/chat-models";
 import { conversationCourses } from "@/lib/course-mentions";
 import {
   createLocalConversationId,
@@ -86,7 +90,7 @@ export interface ChatContext {
 }
 
 export interface SendOptions {
-  modelId?: string;
+  modelId?: ChatModelId;
   selectionContext?: string;
 }
 
@@ -349,13 +353,18 @@ export function useChat(
             ...(m.context ? { context: m.context } : {}),
           }));
 
+        const selectedModel =
+          CHAT_MODELS.find(
+            (model) => model.id === (opts.modelId ?? DEFAULT_MODEL_ID),
+          ) ?? CHAT_MODELS[0];
         const formData = new FormData();
         formData.append(
           "payload",
           JSON.stringify({
             ...transportAtSend.payload,
             messages: history,
-            modelId: opts.modelId || DEFAULT_MODEL_ID,
+            modelId: selectedModel.modelId,
+            effort: selectedModel.effort,
 
             conversationId: isLocalConversationId(
               store.getState().currentConversationId,

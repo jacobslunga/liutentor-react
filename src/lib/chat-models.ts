@@ -1,13 +1,17 @@
 export const CHAT_MODELS = [
   {
-    id: "gpt-6-luna",
+    id: "fast",
+    modelId: "gpt-6-luna",
+    effort: "low",
     label: "Snabb",
     hint: "Få snabba svar",
     provider: "OpenAI",
     requiresAuth: false,
   },
   {
-    id: "gpt-6.1-sol",
+    id: "thinking",
+    modelId: "gpt-6-luna",
+    effort: "high",
     label: "Tänker",
     hint: "Hantera komplexa uppgifter",
     provider: "OpenAI",
@@ -17,4 +21,4 @@ export const CHAT_MODELS = [
 
 export type ChatModelId = (typeof CHAT_MODELS)[number]["id"];
 
-export const DEFAULT_MODEL_ID: ChatModelId = "gpt-6-luna";
+export const DEFAULT_MODEL_ID: ChatModelId = "fast";

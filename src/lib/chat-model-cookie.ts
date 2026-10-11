@@ -1,6 +1,6 @@
 import { CHAT_MODELS, DEFAULT_MODEL_ID, type ChatModelId } from "./chat-models";
 
-const MODEL_COOKIE_KEY = "liutentor_chat_model";
+const MODEL_COOKIE_KEY = "liutentor_chat_mode_v1";
 
 export function saveChatModel(modelId: ChatModelId): void {
   if (typeof document === "undefined") return;
@@ -12,7 +12,7 @@ export function readChatModel(): ChatModelId {
   const cookies = document.cookie.split(";").map((cookie) => cookie.trim());
   for (const cookie of cookies) {
     const key = cookie.split("=")[0];
-    if (/^liutentor_selected_model(?:_v\d+)?$/.test(key)) {
+    if (/^liutentor_(?:selected_model|chat_model)(?:_v\d+)?$/.test(key)) {
       document.cookie = `${key}=; Path=/; Max-Age=0; SameSite=Lax`;
     }
   }

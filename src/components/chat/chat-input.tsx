@@ -630,8 +630,8 @@ function StopIcon() {
 }
 
 const MODEL_ICONS: Record<ChatModelId, LucideIcon> = {
-  "gpt-6-luna": ZapIcon,
-  "gpt-6.1-sol": BrainIcon,
+  fast: ZapIcon,
+  thinking: BrainIcon,
 };
 
 function ModelPicker() {
