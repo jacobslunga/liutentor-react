@@ -2,7 +2,7 @@ import { Link, Outlet, createFileRoute } from "@tanstack/react-router";
 import { UploadIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 import { AppFooter } from "@/components/layout/app-footer";
-import { LogoIcon } from "@/components/layout/logo-icon";
+import { Logo } from "@/components/layout/logo";
 import { cn } from "@/lib/utils";
 import { useUploadModal } from "@/stores/upload-modal";
 import { Button } from "@/components/ui/button";
@@ -41,10 +41,7 @@ function InfoLayout() {
             to="/"
             className="flex items-center gap-2 transition-opacity duration-150 hover:opacity-70"
           >
-            <LogoIcon className="size-6" />
-            <span className="font-logo text-lg font-medium tracking-tighter">
-              LiU Tentor
-            </span>
+            <Logo iconClassName="size-6" />
           </Link>
 
           <Button variant="outline" size="sm" onClick={() => openUploadModal()}>

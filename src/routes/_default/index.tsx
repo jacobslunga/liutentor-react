@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { HeaderActions } from "@/components/layout/header-actions";
-import { LogoIcon } from "@/components/layout/logo-icon";
+import { Logo } from "@/components/layout/logo";
 import { HeroCourseSearch } from "@/components/search/course-search";
 import { RecentSearches } from "@/components/search/recent-searches";
 import { useSeo } from "@/hooks/use-seo";
@@ -21,12 +21,13 @@ function HomePage() {
       <HeaderActions className="absolute top-5 right-5" />
 
       <div className="mb-20 flex w-full max-w-150 flex-col items-center gap-6">
-        <div className="flex flex-row items-center justify-center space-x-2">
-          <LogoIcon className="h-12 w-12 md:h-14 md:w-14 lg:h-24 lg:w-24" />
-          <h1 className="font-logo text-4xl font-medium tracking-tighter lg:text-5xl">
-            LiU Tentor
-          </h1>
-        </div>
+        <h1>
+          <Logo
+            className="justify-center"
+            iconClassName="h-12 w-12 md:h-14 md:w-14 lg:h-24 lg:w-24"
+            textClassName="text-4xl lg:text-5xl"
+          />
+        </h1>
 
         <HeroCourseSearch />
 

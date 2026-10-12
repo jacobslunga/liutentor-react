@@ -1,7 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { HeaderCourseSearch } from "@/components/search/course-search";
 import { HeaderActions } from "./header-actions";
-import { LogoIcon } from "./logo-icon";
+import { Logo } from "./logo";
 
 export function SearchHeader() {
   return (
@@ -12,10 +12,10 @@ export function SearchHeader() {
           className="flex shrink-0 items-center gap-2 transition-opacity hover:opacity-80"
           aria-label="LiU Tentor"
         >
-          <LogoIcon className="size-10" />
-          <span className="hidden font-logo text-xl font-medium tracking-tighter xl:inline">
-            LiU Tentor
-          </span>
+          <Logo
+            iconClassName="size-10"
+            textClassName="hidden text-xl xl:inline"
+          />
         </Link>
 
         <HeaderCourseSearch className="hidden max-w-sm md:block" />

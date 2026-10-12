@@ -14,7 +14,7 @@ import { toast } from "sonner";
 import { AuthActions } from "@/components/auth/auth-actions";
 import { UserAvatar } from "@/components/auth/user-avatar";
 import { TypedTitle } from "@/components/chat/conversation-title";
-import { LogoIcon } from "@/components/layout/logo-icon";
+import { Logo } from "@/components/layout/logo";
 import { RouterLinkButton } from "@/components/shared/router-link";
 import { useConversationList } from "@/hooks/use-conversation-list";
 import { signOut } from "@/lib/auth";
@@ -295,10 +295,7 @@ function SidebarContent() {
           className="flex items-center gap-2 transition-opacity hover:opacity-80"
           aria-label="LiU Tentor"
         >
-          <LogoIcon className="size-8" />
-          <span className="font-logo text-lg font-medium tracking-tighter">
-            LiU Tentor
-          </span>
+          <Logo iconClassName="size-8" />
         </Link>
         <IconButton
           variant="ghost"

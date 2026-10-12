@@ -1,6 +1,6 @@
 import { Link, type LinkProps } from "@tanstack/react-router";
 import { SettingsDialog } from "@/components/settings/settings-dialog";
-import { LogoIcon } from "./logo-icon";
+import { Logo } from "./logo";
 
 const groupedLinks: {
   title: string;
@@ -43,10 +43,7 @@ export function AppFooter() {
               to="/"
               className="flex items-center gap-2 transition-opacity duration-150 hover:opacity-70"
             >
-              <LogoIcon className="size-7" />
-              <span className="font-logo text-xl font-medium tracking-tighter">
-                LiU Tentor
-              </span>
+              <Logo textClassName="text-xl" />
             </Link>
             <p className="max-w-56 text-sm leading-relaxed text-muted-foreground">
               Studentdrivet tentaarkiv för Linköpings universitet.

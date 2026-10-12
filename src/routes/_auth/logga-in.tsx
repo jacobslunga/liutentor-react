@@ -7,7 +7,7 @@ import {
 } from "lucide-react";
 import { useState, type SubmitEvent } from "react";
 import { PasswordInput } from "@/components/auth/password-input";
-import { LogoIcon } from "@/components/layout/logo-icon";
+import { Logo } from "@/components/layout/logo";
 import { useSeo } from "@/hooks/use-seo";
 import {
   validateLiuEmail,
@@ -56,8 +56,7 @@ function AuthPage() {
   return (
     <div className="flex w-full max-w-sm flex-col items-center space-y-8 lg:max-w-md">
       <Link to="/" className="mb-10 flex items-center space-x-2">
-        <LogoIcon className="size-8" />
-        <span className="font-logo text-xl tracking-tighter">LiU Tentor</span>
+        <Logo iconClassName="size-8" textClassName="text-xl font-normal" />
       </Link>
 
       <Tabs

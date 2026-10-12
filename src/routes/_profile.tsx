@@ -8,7 +8,7 @@ import {
 } from "@tanstack/react-router";
 import { ArrowLeftIcon } from "lucide-react";
 import { useEffect } from "react";
-import { LogoIcon } from "@/components/layout/logo-icon";
+import { Logo } from "@/components/layout/logo";
 import { useSeo } from "@/hooks/use-seo";
 import { getUser, useUser } from "@/stores/auth";
 import { Button } from "@/components/ui/button";
@@ -52,10 +52,7 @@ function ProfileLayout() {
             to="/"
             className="flex items-center gap-2 transition-opacity hover:opacity-80"
           >
-            <LogoIcon className="size-7" />
-            <span className="font-logo text-lg font-medium tracking-tighter">
-              LiU Tentor
-            </span>
+            <Logo />
           </Link>
         </div>
       </header>
