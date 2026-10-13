@@ -1,12 +1,20 @@
 import { useMemo } from "react";
 import { create } from "zustand";
-import { readChatModel, saveChatModel } from "@/lib/chat-model-cookie";
+import {
+  readChatEffort,
+  readChatModel,
+  saveChatEffort,
+  saveChatModel,
+} from "@/lib/chat-model-cookie";
 import { persist } from "zustand/middleware";
 import { randomAvatarColor } from "@/lib/avatar-colors";
 import { DEFAULT_QUIZ_DIFFICULTY, type QuizDifficulty } from "@/types/quiz";
 import {
+  CHAT_EFFORTS,
   CHAT_MODELS,
+  DEFAULT_EFFORT,
   DEFAULT_MODEL_ID,
+  type ChatEffort,
   type ChatModelId,
 } from "@/lib/chat-models";
 import { useMediaQuery } from "@/hooks/use-media-query";
@@ -19,6 +27,7 @@ interface SettingsState {
   showExplainPopover: boolean;
   blurFacitUntilHover: boolean;
   selectedModelId: ChatModelId;
+  selectedEffort: ChatEffort;
 
   avatarColor: string;
 
@@ -31,6 +40,7 @@ interface SettingsState {
   setShowExplainPopover: (value: boolean) => void;
   setBlurFacitUntilHover: (value: boolean) => void;
   setSelectedModelId: (id: ChatModelId) => void;
+  setSelectedEffort: (effort: ChatEffort) => void;
   setAvatarColor: (color: string) => void;
   setQuizDifficulty: (difficulty: QuizDifficulty) => void;
   setChatSidebarOpen: (value: boolean) => void;
@@ -44,6 +54,7 @@ export const useSettingsStore = create<SettingsState>()(
       showExplainPopover: true,
       blurFacitUntilHover: true,
       selectedModelId: readChatModel(),
+      selectedEffort: readChatEffort(),
       avatarColor: randomAvatarColor(),
       quizDifficulty: DEFAULT_QUIZ_DIFFICULTY,
       chatSidebarOpen: true,
@@ -57,6 +68,10 @@ export const useSettingsStore = create<SettingsState>()(
         saveChatModel(selectedModelId);
         set({ selectedModelId });
       },
+      setSelectedEffort: (selectedEffort) => {
+        saveChatEffort(selectedEffort);
+        set({ selectedEffort });
+      },
       setAvatarColor: (avatarColor) => set({ avatarColor }),
       setQuizDifficulty: (quizDifficulty) => set({ quizDifficulty }),
       setChatSidebarOpen: (chatSidebarOpen) => set({ chatSidebarOpen }),
@@ -65,12 +80,16 @@ export const useSettingsStore = create<SettingsState>()(
     {
       name: "liutentor-settings",
       version: 6,
-      partialize: ({ selectedModelId: _selectedModelId, ...settings }) =>
-        settings,
+      partialize: ({
+        selectedModelId: _selectedModelId,
+        selectedEffort: _selectedEffort,
+        ...settings
+      }) => settings,
       merge: (persistedState, currentState) => ({
         ...currentState,
         ...(persistedState as Partial<SettingsState>),
         selectedModelId: currentState.selectedModelId,
+        selectedEffort: currentState.selectedEffort,
       }),
       migrate: (persistedState) => {
         const {
@@ -91,19 +110,29 @@ export const MOBILE_QUERY = "(max-width: 639px)";
 
 export function useSelectedModel() {
   const user = useUser();
-  const stored = useSettingsStore((s) => s.selectedModelId);
+  const storedModel = useSettingsStore((s) => s.selectedModelId);
+  const storedEffort = useSettingsStore((s) => s.selectedEffort);
   const mobile = useMediaQuery(MOBILE_QUERY);
 
   const signedIn = !!user;
-  const availableModels = useMemo(
-    () => CHAT_MODELS.filter((m) => !m.requiresAuth || signedIn),
+  const availableEfforts = useMemo(
+    () => CHAT_EFFORTS.filter((e) => !e.requiresAuth || signedIn),
     [signedIn],
   );
-  // The model picker is hidden on mobile, which always uses the default.
+  // The model picker is hidden on mobile, which always uses the defaults.
   const selectedModelId =
-    !mobile && availableModels.some((m) => m.id === stored)
-      ? stored
+    !mobile && CHAT_MODELS.some((m) => m.id === storedModel)
+      ? storedModel
       : DEFAULT_MODEL_ID;
+  const selectedEffort =
+    !mobile && availableEfforts.some((e) => e.id === storedEffort)
+      ? storedEffort
+      : DEFAULT_EFFORT;
 
-  return { selectedModelId, availableModels };
+  return {
+    selectedModelId,
+    selectedEffort,
+    availableModels: CHAT_MODELS,
+    availableEfforts,
+  };
 }

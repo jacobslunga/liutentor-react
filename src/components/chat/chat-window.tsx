@@ -42,7 +42,7 @@ export default function ChatWindow({
   const chatStore = useChatStoreApi();
   const hasMessages = useChatStore((s) => s.messages.length > 0);
   const isOpen = useChatStore((s) => s.isOpen);
-  const { selectedModelId } = useSelectedModel();
+  const { selectedModelId, selectedEffort } = useSelectedModel();
   const { send, cancelGeneration } = useExamChat({
     examId,
     examUrl,
@@ -70,10 +70,11 @@ export default function ChatWindow({
       );
       await send(text, attachments, {
         modelId: selectedModelId,
+        effort: selectedEffort,
         selectionContext: context,
       });
     },
-    [send, selectedModelId],
+    [send, selectedModelId, selectedEffort],
   );
 
   function handleSend() {

@@ -12,6 +12,7 @@ export interface CourseMentionMenuApi {
 interface CourseMentionMenuProps {
   ref?: Ref<CourseMentionMenuApi>;
 
+  className?: string;
   query: string;
   onPick: (code: string) => void;
   onClose: () => void;
@@ -19,6 +20,7 @@ interface CourseMentionMenuProps {
 
 export function CourseMentionMenu({
   ref,
+  className,
   query,
   onPick,
   onClose,
@@ -70,7 +72,10 @@ export function CourseMentionMenu({
     <div
       role="listbox"
       aria-label="Kurser"
-      className="absolute inset-x-0 bottom-full z-30 mb-2 animate-in overflow-hidden rounded-lg border bg-popover p-1 text-popover-foreground shadow-lg duration-150 fade-in-0 slide-in-from-bottom-1"
+      className={cn(
+        "absolute inset-x-0 bottom-full z-30 mb-2 animate-in overflow-hidden rounded-lg border bg-popover p-1 text-popover-foreground shadow-lg duration-150 fade-in-0 slide-in-from-bottom-1",
+        className,
+      )}
     >
       {results.length ? (
         results.map((course, i) => (

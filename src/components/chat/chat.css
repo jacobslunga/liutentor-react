@@ -11,7 +11,7 @@
 }
 
 .chat-column {
-  max-width: clamp(38rem, 52%, 44rem);
+  max-width: min(95%, 44rem);
 }
 
 .learn-chat .chat-column {
@@ -92,6 +92,10 @@
   overflow-y: hidden;
   overscroll-behavior-x: contain;
   scrollbar-width: none;
+}
+
+.chat-prose .math-glue {
+  white-space: nowrap;
 }
 
 .chat-prose eq > .katex {
@@ -266,36 +270,4 @@
 
 .selection-quote .code-header {
   display: none;
-}
-
-.chat-prompt-generating {
-  border-color: transparent !important;
-  background:
-    linear-gradient(var(--background), var(--background)) padding-box,
-    linear-gradient(
-        110deg,
-        color-mix(in srgb, var(--foreground) 18%, transparent),
-        color-mix(in srgb, var(--foreground) 65%, transparent),
-        color-mix(in srgb, var(--foreground) 30%, transparent),
-        color-mix(in srgb, var(--foreground) 18%, transparent)
-      )
-      border-box;
-  background-size:
-    100% 100%,
-    200% 100%;
-  animation: chat-prompt-border-flow 2.4s linear infinite;
-}
-
-@keyframes chat-prompt-border-flow {
-  to {
-    background-position:
-      0 0,
-      -200% 0;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .chat-prompt-generating {
-    animation: none;
-  }
 }

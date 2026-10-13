@@ -2,13 +2,16 @@ import { useCallback, useEffect, useRef } from "react";
 import {
   AI_API_BASE,
   CHAT_COMPLETION_URL,
+  CHAT_COMPLETION_URL_LOCAL,
   getAnonymousId,
   LEARN_COMPLETION_URL,
   readSseEvents,
 } from "@/lib/chat-api";
 import {
   CHAT_MODELS,
+  DEFAULT_EFFORT,
   DEFAULT_MODEL_ID,
+  type ChatEffort,
   type ChatModelId,
 } from "@/lib/chat-models";
 import { conversationCourses } from "@/lib/course-mentions";
@@ -91,6 +94,7 @@ export interface ChatContext {
 
 export interface SendOptions {
   modelId?: ChatModelId;
+  effort?: ChatEffort;
   selectionContext?: string;
 }
 
@@ -103,7 +107,7 @@ export function useExamChat(ctx: ChatContext) {
   const store = useChatStoreApi();
   return useChat(store, () => ({
     kind: "exam",
-    url: `${CHAT_COMPLETION_URL}/${ctx.examId}`,
+    url: `${CHAT_COMPLETION_URL_LOCAL}/${ctx.examId}`,
     payload: {
       examUrl: ctx.examUrl,
       courseCode: ctx.courseCode,
@@ -363,8 +367,8 @@ export function useChat(
           JSON.stringify({
             ...transportAtSend.payload,
             messages: history,
-            modelId: selectedModel.modelId,
-            effort: selectedModel.effort,
+            modelId: selectedModel.id,
+            effort: opts.effort ?? DEFAULT_EFFORT,
 
             conversationId: isLocalConversationId(
               store.getState().currentConversationId,

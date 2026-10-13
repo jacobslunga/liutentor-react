@@ -93,7 +93,7 @@ export function LearnChat({
   );
   const currentId = useChatStore((s) => s.currentConversationId);
   const inCourse = useChatStore((s) => !!s.currentCourseId) || !!courseId;
-  const { selectedModelId } = useSelectedModel();
+  const { selectedModelId, selectedEffort } = useSelectedModel();
   const { send, cancelGeneration } = useLearnChat();
   const sidebar = useLearnSidebar();
   const sidebarProgress = useSidebarProgress(sidebar.inline && sidebar.open);
@@ -263,10 +263,11 @@ export function LearnChat({
       );
       await send(text, attachments, {
         modelId: selectedModelId,
+        effort: selectedEffort,
         selectionContext: context,
       });
     },
-    [send, selectedModelId],
+    [send, selectedModelId, selectedEffort],
   );
 
   function handleSend() {

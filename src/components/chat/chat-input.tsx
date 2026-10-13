@@ -1,8 +1,6 @@
 import {
-  BrainIcon,
+  CheckIcon,
   ChevronDownIcon,
-  ZapIcon,
-  type LucideIcon,
   ArrowUpIcon,
   CornerDownLeftIcon,
   FileTextIcon,
@@ -30,7 +28,11 @@ import {
   MAX_ATTACHMENTS,
   MAX_ATTACHMENTS_TOTAL_SIZE,
 } from "@/lib/chat-attachments";
-import type { ChatModelId } from "@/lib/chat-models";
+import {
+  CHAT_EFFORTS,
+  type ChatEffort,
+  type ChatModelId,
+} from "@/lib/chat-models";
 import {
   activeMentionQuery,
   findMentionRanges,
@@ -60,6 +62,12 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuSeparator,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
@@ -425,7 +433,6 @@ export function ChatInput({
           data-expanded={expanded || hasHeader}
           className={cn(
             "relative overflow-hidden rounded-[24px] border border-input bg-card p-2 shadow-xs transition-[border-radius] duration-200 ease-out-quick data-[expanded=true]:rounded-[20px] motion-reduce:transition-none dark:border-border dark:shadow-[0_2px_2px_-4px_rgba(0,0,0,0.15)]",
-            isLoading && "chat-prompt-generating",
           )}
         >
           <AnimatePresence initial={false}>
@@ -607,6 +614,8 @@ export function ChatInput({
         {mention && (
           <CourseMentionMenu
             ref={mentionMenuRef}
+            // Line up with the composer, which sits inside the shell's padding.
+            className={welcome ? undefined : "inset-x-4 sm:inset-x-5"}
             query={mention.query}
             onPick={pickMention}
             onClose={() => setMention(null)}
@@ -629,27 +638,26 @@ function StopIcon() {
   return <span className="size-2.5 rounded-xs bg-current" aria-hidden />;
 }
 
-const MODEL_ICONS: Record<ChatModelId, LucideIcon> = {
-  fast: ZapIcon,
-  thinking: BrainIcon,
-};
-
 function ModelPicker() {
-  const { selectedModelId, availableModels } = useSelectedModel();
+  const { selectedModelId, selectedEffort, availableModels, availableEfforts } =
+    useSelectedModel();
   const setSelectedModelId = useSettingsStore((s) => s.setSelectedModelId);
-  const label =
-    availableModels.find((m) => m.id === selectedModelId)?.label ??
-    availableModels[0].label;
+  const setSelectedEffort = useSettingsStore((s) => s.setSelectedEffort);
+  const model =
+    availableModels.find((m) => m.id === selectedModelId) ?? availableModels[0];
+  const effortLabel =
+    CHAT_EFFORTS.find((e) => e.id === selectedEffort)?.label ?? "";
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button
           variant="ghost"
-          className="h-8 rounded-full px-2.5 text-sm text-foreground/80"
-          aria-label="Tankenivå"
+          className="h-8 gap-1 rounded-full px-2.5 text-xs text-foreground/80"
+          aria-label="Modell och tankenivå"
         >
-          {label}
+          {model.label}
+          <span className="text-muted-foreground">{effortLabel}</span>
           <ChevronDownIcon />
         </Button>
       </DropdownMenuTrigger>
@@ -659,25 +667,70 @@ function ModelPicker() {
         sideOffset={8}
         className="flex w-56 min-w-0 flex-col gap-1 rounded-xl p-1"
       >
-        {availableModels.map((model) => {
-          const Icon = MODEL_ICONS[model.id];
-          return (
-            <DropdownMenuItem
-              key={model.id}
-              data-selected={model.id === selectedModelId}
-              className="items-start gap-2.5 rounded-lg px-2.5 py-1.5 data-[selected=true]:bg-muted"
-              onSelect={() => setSelectedModelId(model.id)}
+        <DropdownMenuItem
+          className="items-start gap-2.5 rounded-lg px-2.5 py-1.5"
+          onSelect={(e) => e.preventDefault()}
+        >
+          <div className="flex min-w-0 flex-1 flex-col">
+            <span className="leading-snug">{model.label}</span>
+            <span className="text-xs leading-snug font-normal text-muted-foreground">
+              {model.hint}
+            </span>
+          </div>
+          <CheckIcon className="mt-0.5 size-4 text-primary" />
+        </DropdownMenuItem>
+        <DropdownMenuSeparator className="my-0" />
+        <DropdownMenuSub>
+          <DropdownMenuSubTrigger className="rounded-lg px-2.5 py-1.5">
+            <span className="flex-1">Tankenivå</span>
+            <span className="text-muted-foreground">{effortLabel}</span>
+          </DropdownMenuSubTrigger>
+          <DropdownMenuSubContent className="w-40 rounded-xl p-1">
+            <DropdownMenuRadioGroup
+              value={selectedEffort}
+              onValueChange={(value) => setSelectedEffort(value as ChatEffort)}
             >
-              <Icon className="mt-0.5 size-4" />
-              <div className="flex flex-col">
-                <span className="text-sm leading-snug">{model.label}</span>
-                <span className="text-xs leading-snug font-normal text-muted-foreground">
-                  {model.hint}
-                </span>
-              </div>
-            </DropdownMenuItem>
-          );
-        })}
+              {availableEfforts.map((effort) => (
+                <DropdownMenuRadioItem
+                  key={effort.id}
+                  value={effort.id}
+                  className="rounded-lg px-2.5 py-1.5 text-xs"
+                >
+                  {effort.label}
+                </DropdownMenuRadioItem>
+              ))}
+            </DropdownMenuRadioGroup>
+          </DropdownMenuSubContent>
+        </DropdownMenuSub>
+        <DropdownMenuSeparator className="my-0" />
+        <DropdownMenuSub>
+          <DropdownMenuSubTrigger className="rounded-lg px-2.5 py-1.5">
+            Fler modeller
+          </DropdownMenuSubTrigger>
+          <DropdownMenuSubContent className="w-60 rounded-xl p-1">
+            <DropdownMenuRadioGroup
+              value={selectedModelId}
+              onValueChange={(value) =>
+                setSelectedModelId(value as ChatModelId)
+              }
+            >
+              {availableModels.map((m) => (
+                <DropdownMenuRadioItem
+                  key={m.id}
+                  value={m.id}
+                  className="items-start rounded-lg px-2.5 py-1.5 text-xs"
+                >
+                  <div className="flex flex-col">
+                    <span className="text-xs leading-snug">{m.label}</span>
+                    <span className="text-2xs leading-snug font-normal text-muted-foreground">
+                      {m.hint}
+                    </span>
+                  </div>
+                </DropdownMenuRadioItem>
+              ))}
+            </DropdownMenuRadioGroup>
+          </DropdownMenuSubContent>
+        </DropdownMenuSub>
       </DropdownMenuContent>
     </DropdownMenu>
   );

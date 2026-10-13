@@ -2,7 +2,7 @@ import { MonitorIcon, MoonIcon, SettingsIcon, SunIcon } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useState } from "react";
 import { SettingsDialog } from "@/components/settings/settings-dialog";
-import type { ChatModelId } from "@/lib/chat-models";
+import type { ChatEffort, ChatModelId } from "@/lib/chat-models";
 import { useSelectedModel, useSettingsStore } from "@/stores/settings";
 import { IconButton } from "@/components/shared/icon-button";
 import {
@@ -24,8 +24,10 @@ const THEMES = [
 
 export function ChatSettingsMenu() {
   const { theme = "system", setTheme } = useTheme();
-  const { selectedModelId, availableModels } = useSelectedModel();
+  const { selectedModelId, selectedEffort, availableModels, availableEfforts } =
+    useSelectedModel();
   const setSelectedModelId = useSettingsStore((s) => s.setSelectedModelId);
+  const setSelectedEffort = useSettingsStore((s) => s.setSelectedEffort);
   const [dialogOpen, setDialogOpen] = useState(false);
 
   return (
@@ -52,7 +54,7 @@ export function ChatSettingsMenu() {
               ))}
             </DropdownMenuRadioGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuLabel>Tankenivå</DropdownMenuLabel>
+            <DropdownMenuLabel>Modell</DropdownMenuLabel>
             <DropdownMenuRadioGroup
               value={selectedModelId}
               onValueChange={(value) =>
@@ -71,6 +73,22 @@ export function ChatSettingsMenu() {
                       {model.hint}
                     </span>
                   </div>
+                </DropdownMenuRadioItem>
+              ))}
+            </DropdownMenuRadioGroup>
+            <DropdownMenuSeparator />
+            <DropdownMenuLabel>Tankenivå</DropdownMenuLabel>
+            <DropdownMenuRadioGroup
+              value={selectedEffort}
+              onValueChange={(value) => setSelectedEffort(value as ChatEffort)}
+            >
+              {availableEfforts.map((effort) => (
+                <DropdownMenuRadioItem
+                  key={effort.id}
+                  value={effort.id}
+                  onSelect={(e) => e.preventDefault()}
+                >
+                  {effort.label}
                 </DropdownMenuRadioItem>
               ))}
             </DropdownMenuRadioGroup>

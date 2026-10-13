@@ -4,7 +4,7 @@ import { SettingsIcon } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useState, type ReactNode } from "react";
 import { toast } from "sonner";
-import type { ChatModelId } from "@/lib/chat-models";
+import type { ChatEffort, ChatModelId } from "@/lib/chat-models";
 import { useRecentSearches } from "@/stores/recent-searches";
 import {
   useSelectedModel,
@@ -111,7 +111,9 @@ function SettingsContent() {
   const showExplain = useSettingsStore((s) => s.showExplainPopover);
   const setShowExplain = useSettingsStore((s) => s.setShowExplainPopover);
   const setSelectedModelId = useSettingsStore((s) => s.setSelectedModelId);
-  const { selectedModelId, availableModels } = useSelectedModel();
+  const setSelectedEffort = useSettingsStore((s) => s.setSelectedEffort);
+  const { selectedModelId, selectedEffort, availableModels, availableEfforts } =
+    useSelectedModel();
   const recentSearches = useRecentSearches((s) => s.latest);
   const clearRecentSearches = useRecentSearches((s) => s.clear);
 
@@ -178,21 +180,38 @@ function SettingsContent() {
       </Section>
 
       <Section title="AI-assistenten">
-        <Row
-          label="Tankenivå"
-          description="Hur mycket chatten tänker innan den svarar."
-        >
+        <Row label="Modell" description="Vilken AI som svarar i chatten.">
           <Select
             value={selectedModelId}
             onValueChange={(value) => setSelectedModelId(value as ChatModelId)}
           >
-            <SelectTrigger size="sm" className="w-44" aria-label="Tankenivå">
+            <SelectTrigger size="sm" className="w-44" aria-label="Modell">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
               {availableModels.map((model) => (
                 <SelectItem key={model.id} value={model.id}>
                   {model.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </Row>
+        <Row
+          label="Tankenivå"
+          description="Hur mycket chatten tänker innan den svarar."
+        >
+          <Select
+            value={selectedEffort}
+            onValueChange={(value) => setSelectedEffort(value as ChatEffort)}
+          >
+            <SelectTrigger size="sm" className="w-44" aria-label="Tankenivå">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {availableEfforts.map((effort) => (
+                <SelectItem key={effort.id} value={effort.id}>
+                  {effort.label}
                 </SelectItem>
               ))}
             </SelectContent>
