@@ -2,7 +2,6 @@ import { useCallback, useEffect, useRef } from "react";
 import {
   AI_API_BASE,
   CHAT_COMPLETION_URL,
-  CHAT_COMPLETION_URL_LOCAL,
   getAnonymousId,
   LEARN_COMPLETION_URL,
   readSseEvents,
@@ -107,7 +106,7 @@ export function useExamChat(ctx: ChatContext) {
   const store = useChatStoreApi();
   return useChat(store, () => ({
     kind: "exam",
-    url: `${CHAT_COMPLETION_URL_LOCAL}/${ctx.examId}`,
+    url: `${CHAT_COMPLETION_URL}/${ctx.examId}`,
     payload: {
       examUrl: ctx.examUrl,
       courseCode: ctx.courseCode,
