@@ -1,39 +1,7 @@
 @plugin "@tailwindcss/typography";
 
-@font-face {
-  font-family: "GitLab Sans";
-  src: url("../assets/fonts/gitlab-sans.woff2") format("woff2");
-  font-weight: 100 900;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: "GitLab Sans";
-  src: url("../assets/fonts/gitlab-sans-italic.woff2") format("woff2");
-  font-weight: 100 900;
-  font-style: italic;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: "GitLab Mono";
-  src: url("../assets/fonts/gitlab-mono.woff2") format("woff2");
-  font-weight: 100 800;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: "GitLab Mono";
-  src: url("../assets/fonts/gitlab-mono-italic.woff2") format("woff2");
-  font-weight: 100 800;
-  font-style: italic;
-  font-display: swap;
-}
-
 @theme inline {
-  --font-mono: "GitLab Mono", ui-monospace, monospace;
+  --font-mono: monospace;
   --font-serif: ui-serif, serif;
   --font-logo: var(--font-serif);
   --text-2xs: 0.6875rem;
