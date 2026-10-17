@@ -152,6 +152,7 @@ export function useChat(
   );
 
   const cancelGeneration = useCallback((): CancelledTurn | null => {
+    if (!store.getState().isLoading) return null;
     if (turnIdRef.current) void cancelTurnOnServer(turnIdRef.current);
     turnIdRef.current = null;
     abortRef.current?.abort();
@@ -303,7 +304,8 @@ export function useChat(
       let pendingFrame = 0;
       const patch = (p: Partial<Message>) => {
         turnReply = { ...turnReply, ...p };
-        if (isShown()) store.getState().updateMessage(assistantId, p);
+        if (!controller.signal.aborted && isShown())
+          store.getState().updateMessage(assistantId, p);
       };
 
       const persistTurn = () => {
@@ -399,6 +401,7 @@ export function useChat(
 
         let failed = false;
         for await (const { event, data } of readSseEvents(response.body)) {
+          if (controller.signal.aborted) return;
           const payload = data as {
             delta?: string;
             step?: string;
@@ -440,13 +443,16 @@ export function useChat(
             );
           } else if (event === "done") {
             patch({ status: null });
+            break;
           } else if (event === "error") {
             failed = true;
             patch({ status: null });
+            break;
           }
         }
 
         cancelFlush();
+        if (controller.signal.aborted) return;
         patch({
           content:
             streamText.trim() ||
@@ -454,7 +460,11 @@ export function useChat(
         });
       } catch (error) {
         cancelFlush();
-        if (error instanceof Error && error.name === "AbortError") return;
+        if (
+          controller.signal.aborted ||
+          (error instanceof Error && error.name === "AbortError")
+        )
+          return;
         patch({ content: GENERIC_ERROR });
       } finally {
         cancelFlush();

@@ -318,6 +318,7 @@ export default function ChatWindow({
         {hasMessages ? (
           <ChatMessages
             ref={transcriptRef}
+            keepRowsMounted
             scrollRef={scrollRef}
             className="pt-16 pb-36 sm:pb-44"
             onReplyToSelection={replyToSelection}

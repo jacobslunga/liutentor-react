@@ -295,10 +295,17 @@ export function ChatInput({
 
   useLayoutEffect(() => {
     measurePrompt();
-    const observer = new ResizeObserver(() => measurePrompt());
+    let frame = 0;
+    const observer = new ResizeObserver(() => {
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(measurePrompt);
+    });
     if (shellRef.current) observer.observe(shellRef.current);
     if (controlsRef.current) observer.observe(controlsRef.current);
-    return () => observer.disconnect();
+    return () => {
+      observer.disconnect();
+      cancelAnimationFrame(frame);
+    };
   }, [measurePrompt]);
 
   const addFiles = (files: File[]) => {
@@ -391,6 +398,7 @@ export function ChatInput({
 
   const sendButton = (
     <IconButton
+      type="button"
       variant={isLoading ? "secondary" : "default"}
       className="size-9 rounded-full [&_svg:not([class*='size-'])]:size-4"
       aria-label={isLoading ? "Avbryt svar" : "Skicka meddelande"}

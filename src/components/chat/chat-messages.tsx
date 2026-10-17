@@ -418,8 +418,12 @@ export function ChatMessages({
       const anchor = items.find((item) => item.end > el.scrollTop);
       const relative = anchor ? el.scrollTop - anchor.start : 0;
       width = root.clientWidth;
-      virtualizer.measure();
-      setMeasurementVersion((version) => version + 1);
+      // Mounted rows observe their own height changes. Clearing their cache
+      // during a drag can temporarily remove the streaming row from the range.
+      if (!keepRowsMounted) {
+        virtualizer.measure();
+        setMeasurementVersion((version) => version + 1);
+      }
       if (anchor)
         scrollToTarget(() => {
           const item = virtualizer
@@ -434,6 +438,7 @@ export function ChatMessages({
     return () => observer.disconnect();
   }, [
     initialPosition,
+    keepRowsMounted,
     mdReady,
     scrollElement,
     scrollRef,

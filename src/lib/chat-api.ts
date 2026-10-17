@@ -29,21 +29,30 @@ export async function* readSseEvents(
   const decoder = new TextDecoder("utf-8");
   let buffer = "";
 
-  while (true) {
-    const { done, value } = await reader.read();
-    if (done) break;
-    buffer += decoder.decode(value, { stream: true });
+  try {
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      buffer += decoder.decode(value, { stream: true });
 
-    const frames = buffer.split("\n\n");
-    buffer = frames.pop() ?? "";
+      const frames = buffer.split("\n\n");
+      buffer = frames.pop() ?? "";
 
-    for (const frame of frames) {
-      const event = frame.match(/^event: (\w+)/m)?.[1];
-      const data = frame.match(/^data: (.+)/m)?.[1];
-      if (!event || !data) continue;
-      try {
-        yield { event, data: JSON.parse(data) };
-      } catch {}
+      for (const frame of frames) {
+        const event = frame.match(/^event: (\w+)/m)?.[1];
+        const data = frame.match(/^data: (.+)/m)?.[1];
+        if (!event || !data) continue;
+        try {
+          yield { event, data: JSON.parse(data) };
+        } catch {}
+      }
     }
+  } finally {
+    // Terminal SSE events can arrive before the server closes the connection.
+    // Releasing the iterator must also close its reader.
+    try {
+      await reader.cancel();
+    } catch {}
+    reader.releaseLock();
   }
 }

@@ -387,6 +387,7 @@ export function DesktopExamView({
       {chatHasBeenOpened && (
         <SideOverlay
           visible={chatOpen}
+          maxWidth={800}
           zIndex="z-40"
           overlayRef={registerOverlay}
           onResize={applyOverlayWidth}
@@ -411,6 +412,7 @@ export function DesktopExamView({
 
 function SideOverlay({
   visible,
+  maxWidth,
   zIndex,
   children,
   overlayRef,
@@ -419,6 +421,7 @@ function SideOverlay({
   onResizeEnd,
 }: {
   visible: boolean;
+  maxWidth?: number;
   zIndex: string;
   children: ReactNode;
   overlayRef: (el: HTMLElement | null) => (() => void) | undefined;
@@ -434,6 +437,7 @@ function SideOverlay({
     <ChatMotion>
       <m.div
         ref={overlayRef}
+        style={{ maxWidth: maxWidth ? `min(${maxWidth}px, 85vw)` : undefined }}
         aria-hidden={hidden}
         inert={hidden}
         initial={{ x: "110%" }}
