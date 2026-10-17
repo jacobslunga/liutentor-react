@@ -1,22 +1,27 @@
 import { GripVerticalIcon } from "lucide-react";
-import { useState, type MouseEvent } from "react";
+import { useEffect, useRef, useState, type MouseEvent } from "react";
 import { cn } from "@/lib/utils";
 
 interface ResizeHandleProps {
   onResize: (clientX: number) => void;
+  constrainX?: (clientX: number) => number;
   onResizeStart?: () => void;
   onResizeEnd?: () => void;
 }
 
 export function ResizeHandle({
   onResize,
+  constrainX = (x) => x,
   onResizeStart,
   onResizeEnd,
 }: ResizeHandleProps) {
   const [isResizing, setIsResizing] = useState(false);
+  const cleanupRef = useRef<(() => void) | null>(null);
+  useEffect(() => () => cleanupRef.current?.(), []);
 
   function start(event: MouseEvent) {
     event.preventDefault();
+    cleanupRef.current?.();
     setIsResizing(true);
     onResizeStart?.();
     document.body.classList.add("select-none", "cursor-col-resize");
@@ -24,16 +29,23 @@ export function ResizeHandle({
     let frame = 0;
     const move = (e: globalThis.MouseEvent) => {
       cancelAnimationFrame(frame);
-      frame = requestAnimationFrame(() => onResize(e.clientX));
+      frame = requestAnimationFrame(() => onResize(constrainX(e.clientX)));
     };
-    const up = () => {
+    const cleanup = () => {
       cancelAnimationFrame(frame);
       window.removeEventListener("mousemove", move);
       window.removeEventListener("mouseup", up);
       document.body.classList.remove("select-none", "cursor-col-resize");
+      cleanupRef.current = null;
+    };
+    const up = (e: globalThis.MouseEvent) => {
+      cleanup();
+      // Commit the release position, including the last move before a frame.
+      onResize(constrainX(e.clientX));
       setIsResizing(false);
       onResizeEnd?.();
     };
+    cleanupRef.current = cleanup;
     window.addEventListener("mousemove", move);
     window.addEventListener("mouseup", up);
   }

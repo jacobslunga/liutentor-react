@@ -421,7 +421,7 @@ export function ChatInput({
       <div
         ref={shellRef}
         className={cn(
-          "chat-column relative mx-auto",
+          "chat-column @container relative mx-auto",
           welcome ? "chat-welcome-column" : "px-4 sm:px-5",
         )}
       >
@@ -616,7 +616,7 @@ export function ChatInput({
               layoutDependency={layoutKey}
               transition={layoutTransition}
               ref={controlsRef}
-              className="flex items-center gap-1"
+              className="flex shrink-0 items-center gap-1"
               style={{ gridArea: "controls" }}
             >
               {longLength > 0 && (
@@ -632,7 +632,11 @@ export function ChatInput({
                   {MAX_LENGTH.toLocaleString("sv-SE")}
                 </span>
               )}
-              {!mobile && <ModelPicker />}
+              {!mobile && (
+                <div className="hidden @min-[440px]:block">
+                  <ModelPicker />
+                </div>
+              )}
               {sendButton}
             </m.div>
           </div>

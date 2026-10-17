@@ -453,6 +453,17 @@ function SideOverlay({
       >
         <div className="relative z-10 w-0 shrink-0">
           <ResizeHandle
+            constrainX={(x) => {
+              const max = Math.min(
+                maxWidth ?? Infinity,
+                window.innerWidth * OVERLAY_MAX_SHARE,
+              );
+              const min = Math.min(OVERLAY_MIN, max);
+              return (
+                window.innerWidth -
+                Math.max(min, Math.min(window.innerWidth - x, max))
+              );
+            }}
             onResize={(x) => onResize(window.innerWidth - x)}
             onResizeStart={onResizeStart}
             onResizeEnd={onResizeEnd}

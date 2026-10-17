@@ -407,16 +407,43 @@ export function ChatMessages({
     if (!root || !el) return;
     el.style.overflowAnchor = "none";
     let width = root.clientWidth;
+    let previousHeight = el.scrollHeight;
+    let resizeFromBottom: boolean | null = null;
+    const previousAdjustment =
+      virtualizer.shouldAdjustScrollPositionOnItemSizeChange;
     if (initialPosition && initialPosition.width !== width) {
       virtualizer.measure();
       setMeasurementVersion((version) => version + 1);
     }
+    let resizeTimer: ReturnType<typeof setTimeout> | undefined;
+    let resizeAnchor: {
+      key: string | number | bigint;
+      index: number;
+      relative: number;
+    } | null = null;
     const observer = new ResizeObserver(() => {
       setPaddingTop(Number.parseFloat(getComputedStyle(root).paddingTop) || 0);
+      const oldHeight = previousHeight;
+      previousHeight = el.scrollHeight;
       if (width === root.clientWidth) return;
+      if (resizeFromBottom === null) {
+        resizeFromBottom = oldHeight - el.clientHeight - el.scrollTop < 80;
+        // The resize observer below owns the reading position during a drag.
+        virtualizer.shouldAdjustScrollPositionOnItemSizeChange = () => false;
+        if (scrollAnimationRef.current !== null) {
+          cancelAnimationFrame(scrollAnimationRef.current);
+          scrollAnimationRef.current = null;
+        }
+      }
       const items = virtualizer.getVirtualItems();
       const anchor = items.find((item) => item.end > el.scrollTop);
-      const relative = anchor ? el.scrollTop - anchor.start : 0;
+      if (!resizeAnchor && anchor) {
+        resizeAnchor = {
+          key: anchor.key,
+          index: anchor.index,
+          relative: el.scrollTop - anchor.start,
+        };
+      }
       width = root.clientWidth;
       // Mounted rows observe their own height changes. Clearing their cache
       // during a drag can temporarily remove the streaming row from the range.
@@ -424,24 +451,47 @@ export function ChatMessages({
         virtualizer.measure();
         setMeasurementVersion((version) => version + 1);
       }
-      if (anchor)
+      if (keepRowsMounted && resizeFromBottom)
+        el.scrollTop = Math.max(0, el.scrollHeight - el.clientHeight);
+      // Let text reflow during the drag, then restore the original reading
+      // position once. Repeated scroll corrections fight changing row heights.
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(() => {
+        const saved = resizeAnchor;
+        const fromBottom = resizeFromBottom;
+        resizeAnchor = null;
+        resizeFromBottom = null;
+        virtualizer.shouldAdjustScrollPositionOnItemSizeChange =
+          previousAdjustment;
+        if (fromBottom) {
+          scrollToBottom("auto");
+          return;
+        }
+        if (!saved) return;
         scrollToTarget(() => {
           const item = virtualizer
             .getVirtualItems()
-            .find((item) => item.key === anchor.key);
-          if (item) return item.start + relative;
-          const offset = virtualizer.getOffsetForIndex(anchor.index, "start");
-          return offset ? offset[0] + 80 + relative : null;
+            .find((item) => item.key === saved.key);
+          if (item) return item.start + saved.relative;
+          const offset = virtualizer.getOffsetForIndex(saved.index, "start");
+          return offset ? offset[0] + 80 + saved.relative : null;
         }, "auto");
+      }, 120);
     });
     observer.observe(root);
-    return () => observer.disconnect();
+    return () => {
+      observer.disconnect();
+      clearTimeout(resizeTimer);
+      virtualizer.shouldAdjustScrollPositionOnItemSizeChange =
+        previousAdjustment;
+    };
   }, [
     initialPosition,
     keepRowsMounted,
     mdReady,
     scrollElement,
     scrollRef,
+    scrollToBottom,
     scrollToTarget,
     virtualizer,
   ]);
@@ -555,13 +605,22 @@ export function ChatMessages({
       >
         <div
           className="relative"
-          style={{ height: virtualizer.getTotalSize() }}
+          style={
+            keepRowsMounted ? undefined : { height: virtualizer.getTotalSize() }
+          }
         >
           <div
-            className="absolute inset-x-0 top-0 flex flex-col gap-1"
-            style={{
-              transform: `translateY(${(virtualizer.getVirtualItems()[0]?.start ?? paddingTop) - paddingTop}px)`,
-            }}
+            className={cn(
+              "flex flex-col gap-1",
+              !keepRowsMounted && "absolute inset-x-0 top-0",
+            )}
+            style={
+              keepRowsMounted
+                ? undefined
+                : {
+                    transform: `translateY(${(virtualizer.getVirtualItems()[0]?.start ?? paddingTop) - paddingTop}px)`,
+                  }
+            }
           >
             {virtualizer.getVirtualItems().map((item) => (
               <div
