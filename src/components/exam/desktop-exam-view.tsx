@@ -203,16 +203,31 @@ export function DesktopExamView({
       if (next !== view.isFacitVisible) view.setFacitVisible(next);
     }
 
-    function onLeave() {
+    function hideAutomaticFacit() {
       const view = useExamViewStore.getState();
       if (!view.isFacitManual && view.isFacitVisible)
         view.setFacitVisible(false);
     }
 
+    function onLeave(e: MouseEvent) {
+      // Firefox can emit mouseleave when the pointer hits the display edge.
+      // Screen coordinates distinguish that from leaving a smaller window.
+      const screen = window.screen as Screen & { availLeft?: number };
+      const rightEdge = (screen.availLeft ?? 0) + screen.availWidth;
+      const atDisplayEdge = Math.abs(e.screenX - rightEdge) <= 2;
+      const atViewportRight = e.clientX >= window.innerWidth - 2;
+      const withinViewportHeight =
+        e.clientY >= 0 && e.clientY < window.innerHeight;
+      if (atDisplayEdge && atViewportRight && withinViewportHeight) return;
+      hideAutomaticFacit();
+    }
+
     window.addEventListener("mousemove", onMove, { passive: true });
+    window.addEventListener("blur", hideAutomaticFacit);
     document.documentElement.addEventListener("mouseleave", onLeave);
     return () => {
       window.removeEventListener("mousemove", onMove);
+      window.removeEventListener("blur", hideAutomaticFacit);
       document.documentElement.removeEventListener("mouseleave", onLeave);
     };
   }, [latest]);
