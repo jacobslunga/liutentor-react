@@ -73,6 +73,9 @@ export default defineConfig(({ mode }) => {
     ],
     resolve: {
       alias: { "@": path.resolve(import.meta.dirname, "./src") },
+      // Hooks and the renderer must share one React instance, including when
+      // dependencies contain nested copies left over in a cached install.
+      dedupe: ["react", "react-dom"],
     },
 
     optimizeDeps: {
