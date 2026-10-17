@@ -1,9 +1,8 @@
 import { Link, Outlet, createFileRoute } from "@tanstack/react-router";
 import { UploadIcon } from "lucide-react";
-import { useEffect, useState } from "react";
 import { AppFooter } from "@/components/layout/app-footer";
 import { Logo } from "@/components/layout/logo";
-import { cn } from "@/lib/utils";
+import { InfoNavigation } from "@/components/layout/info-navigation";
 import { useUploadModal } from "@/stores/upload-modal";
 import { Button } from "@/components/ui/button";
 
@@ -11,32 +10,13 @@ export const Route = createFileRoute("/_info")({
   component: InfoLayout,
 });
 
-function useScrolled(threshold = 8) {
-  const [scrolled, setScrolled] = useState(false);
-
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > threshold);
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, [threshold]);
-
-  return scrolled;
-}
-
 function InfoLayout() {
-  const scrolled = useScrolled();
   const openUploadModal = useUploadModal((s) => s.open);
 
   return (
     <div className="flex min-h-dvh flex-col bg-background">
-      <header
-        className={cn(
-          "sticky top-0 z-30 h-14 shrink-0 border-b bg-background transition-colors duration-200",
-          scrolled ? "border-border" : "border-transparent",
-        )}
-      >
-        <div className="mx-auto flex h-full max-w-6xl items-center justify-between px-5 sm:px-8">
+      <header className="sticky top-0 z-30 shrink-0 bg-background/75 pt-[env(safe-area-inset-top,0px)] backdrop-blur-xl">
+        <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-5 sm:px-8">
           <Link
             to="/"
             className="flex items-center gap-2 transition-opacity duration-150 hover:opacity-70"
@@ -44,11 +24,18 @@ function InfoLayout() {
             <Logo iconClassName="size-6" />
           </Link>
 
-          <Button variant="outline" size="sm" onClick={() => openUploadModal()}>
-            <UploadIcon />
-            <span className="hidden sm:inline">Ladda upp tenta</span>
-            <span className="sm:hidden">Ladda upp</span>
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => openUploadModal()}
+            >
+              <UploadIcon />
+              <span className="hidden sm:inline">Ladda upp tenta</span>
+              <span className="sm:hidden">Ladda upp</span>
+            </Button>
+            <InfoNavigation />
+          </div>
         </div>
       </header>
 

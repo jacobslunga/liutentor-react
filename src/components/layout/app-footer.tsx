@@ -1,35 +1,7 @@
-import { Link, type LinkProps } from "@tanstack/react-router";
+import { Link } from "@tanstack/react-router";
 import { SettingsDialog } from "@/components/settings/settings-dialog";
 import { Logo } from "./logo";
-
-const groupedLinks: {
-  title: string;
-  links: { name: string; to: LinkProps["to"] }[];
-}[] = [
-  {
-    title: "Tjänsten",
-    links: [
-      { name: "Sök tentor", to: "/" },
-      { name: "Ladda upp tenta", to: "/upload-exams" },
-      { name: "Om oss", to: "/om-oss" },
-    ],
-  },
-  {
-    title: "Support",
-    links: [
-      { name: "Vanliga frågor", to: "/faq" },
-      { name: "Feedback", to: "/feedback" },
-    ],
-  },
-  {
-    title: "Juridiskt",
-    links: [
-      { name: "Integritetspolicy", to: "/privacy-policy" },
-      { name: "Upphovsrätt", to: "/copyright-policy" },
-      { name: "AI-policy", to: "/ai-policy" },
-    ],
-  },
-];
+import { siteLinks } from "./site-links";
 
 export function AppFooter() {
   const year = new Date().getFullYear();
@@ -51,7 +23,7 @@ export function AppFooter() {
           </div>
 
           <div className="grid grid-cols-2 gap-8 sm:grid-cols-3 lg:col-span-3">
-            {groupedLinks.map((section) => (
+            {siteLinks.map((section) => (
               <div key={section.title}>
                 <h4 className="text-sm font-medium text-foreground">
                   {section.title}

@@ -1,0 +1,23 @@
+.info-navigation {
+  clip-path: inset(0);
+}
+
+.info-navigation-icon path {
+  transform-box: view-box;
+  transform-origin: center;
+  transition: transform 160ms ease-out;
+}
+
+.info-navigation-icon[data-open="true"] .info-navigation-line-top {
+  transform: rotate(45deg) translateY(4px);
+}
+
+.info-navigation-icon[data-open="true"] .info-navigation-line-bottom {
+  transform: rotate(-45deg) translateY(-4px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .info-navigation-icon path {
+    transition: none;
+  }
+}
