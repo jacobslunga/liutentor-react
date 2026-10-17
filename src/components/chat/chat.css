@@ -244,15 +244,16 @@
 
 .chat-prose .code-block pre.shiki,
 .chat-prose .code-block pre.shiki span {
-  color: var(--shiki-light);
+  color: var(--shiki-light, var(--foreground));
 }
 
 .dark .chat-prose .code-block pre.shiki {
   background-color: transparent !important;
 }
 
+.dark .chat-prose .code-block pre.shiki,
 .dark .chat-prose .code-block pre.shiki span {
-  color: var(--shiki-dark);
+  color: var(--shiki-dark, var(--foreground));
 }
 
 .selection-quote :is(p, li, section, h1, h2, h3, h4) {

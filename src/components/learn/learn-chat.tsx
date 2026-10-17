@@ -417,7 +417,7 @@ export function LearnChat({
         <div className="w-full px-3 sm:px-4">
           <div className="chat-column chat-welcome-column mx-auto">
             <ChatMascot className="size-14 shrink-0" />
-            <h1 className="mt-6 mb-6 text-3xl font-medium sm:text-4xl">
+            <h1 className="mt-6 mb-6 text-2xl font-medium sm:text-3xl">
               Vad vill du lära dig idag?
             </h1>
           </div>

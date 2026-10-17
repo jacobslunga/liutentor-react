@@ -847,7 +847,7 @@ function WelcomePlaceholder() {
     <span
       key={index}
       aria-hidden="true"
-      className="chat-welcome-placeholder text-muted-foreground70 pointer-events-none absolute inset-x-2 top-1 truncate text-left text-base leading-6"
+      className="chat-welcome-placeholder pointer-events-none absolute inset-x-2 top-1 truncate text-left text-base leading-6 text-muted-foreground/70"
     >
       {WELCOME_PLACEHOLDERS[index]}
     </span>
