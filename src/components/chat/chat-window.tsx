@@ -40,6 +40,7 @@ export default function ChatWindow({
   const transcriptRef = useRef<ChatTranscriptApi>(null);
 
   const chatStore = useChatStoreApi();
+  const [courseExams, setCourseExams] = useState(false);
   const hasMessages = useChatStore((s) => s.messages.length > 0);
   const isOpen = useChatStore((s) => s.isOpen);
   const { selectedModelId, selectedEffort } = useSelectedModel();
@@ -64,6 +65,7 @@ export default function ChatWindow({
       text: string,
       context?: string,
       attachments = inputRef.current?.getAttachments() ?? [],
+      includeCourseExams = false,
     ) => {
       requestAnimationFrame(() =>
         transcriptRef.current?.scrollUserMessageToTop(),
@@ -72,6 +74,7 @@ export default function ChatWindow({
         modelId: selectedModelId,
         effort: selectedEffort,
         selectionContext: context,
+        courseExams: includeCourseExams,
       });
     },
     [send, selectedModelId, selectedEffort],
@@ -87,7 +90,8 @@ export default function ChatWindow({
     input?.setText("");
     input?.clearAttachments();
     setSelectionContext("");
-    void submit(text, context, attachments);
+    setCourseExams(false);
+    void submit(text, context, attachments, courseExams);
   }
 
   function handleCancel() {
@@ -117,6 +121,19 @@ export default function ChatWindow({
       void submit(pending.prompt, pending.context, []);
     },
     [chatStore, submit],
+  );
+
+  useEffect(
+    () =>
+      chatStore.subscribe((state, previous) => {
+        if (
+          state.currentExamId !== previous.currentExamId ||
+          state.currentConversationId !== previous.currentConversationId
+        ) {
+          setCourseExams(false);
+        }
+      }),
+    [chatStore],
   );
 
   useEffect(() => {
@@ -283,7 +300,7 @@ export default function ChatWindow({
 
       <div className="pointer-events-none absolute inset-x-0 top-0 z-20">
         <div className="pointer-events-none relative isolate flex h-14 items-center justify-between gap-2 px-3">
-          <div className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[4.5rem] bg-[linear-gradient(to_bottom,var(--background)_0,var(--background)_55%,transparent_100%)]" />
+          <div className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-18 bg-[linear-gradient(to_bottom,var(--background)_0,var(--background)_55%,transparent_100%)]" />
           <div className="flex min-w-0 items-center gap-1">
             <HeaderButton
               icon={ChevronRightIcon}
@@ -312,7 +329,7 @@ export default function ChatWindow({
 
       <div
         ref={scrollRef}
-        className="relative flex min-h-0 min-w-0 flex-1 [scrollbar-gutter:stable] flex-col overflow-x-hidden overflow-y-auto overscroll-y-contain"
+        className="relative flex min-h-0 min-w-0 flex-1 scrollbar-gutter-stable flex-col overflow-x-hidden overflow-y-auto overscroll-y-contain"
         onScroll={onScroll}
       >
         {hasMessages ? (
@@ -328,7 +345,7 @@ export default function ChatWindow({
           <div className="flex min-h-0 flex-1 flex-col items-center justify-center gap-4 px-4 pb-28 text-center">
             <ChatMascot className="size-14 shrink-0" />
             <div className="space-y-2">
-              <h2 className="text-2xl font-semibold">
+              <h2 className="text-2xl font-medium">
                 Vad kan jag hjälpa till med?
               </h2>
               <p className="mx-auto max-w-70 text-sm leading-relaxed text-muted-foreground sm:max-w-md">
@@ -356,6 +373,10 @@ export default function ChatWindow({
           className="pointer-events-auto"
           initialText={initialDraft.text}
           initialAttachments={initialDraft.attachments}
+          courseExamAnalysis={{
+            enabled: courseExams,
+            onChange: setCourseExams,
+          }}
           selectionContext={selectionContext}
           onSend={handleSend}
           onCancel={handleCancel}

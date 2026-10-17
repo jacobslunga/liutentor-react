@@ -203,7 +203,7 @@ function CourseContent({
       <header className="flex flex-wrap items-center justify-between gap-4">
         <div className="flex min-w-0 flex-col flex-wrap items-start gap-y-2">
           <Badge variant="secondary">{courseCode}</Badge>
-          <h1 className="text-2xl leading-tight font-semibold wrap-break-word md:text-4xl">
+          <h1 className="text-2xl leading-tight font-medium wrap-break-word md:text-4xl">
             {course.courseName}
           </h1>
         </div>

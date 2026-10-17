@@ -1,20 +1,17 @@
 export const CHAT_MODELS = [
   {
     id: "claude-haiku-5-5",
-    label: "Haiku",
-    hint: "Snabb och träffsäker",
+    label: "Claude",
     provider: "Anthropic",
   },
   {
     id: "gpt-6-luna",
-    label: "Luna",
-    hint: "Bra för vardagliga frågor",
+    label: "ChatGPT",
     provider: "OpenAI",
   },
   {
     id: "gemini-3.1-flash-lite",
     label: "Gemini",
-    hint: "Lätt och snabb",
     provider: "Google",
   },
 ] as const;

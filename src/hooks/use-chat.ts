@@ -95,6 +95,7 @@ export interface SendOptions {
   modelId?: ChatModelId;
   effort?: ChatEffort;
   selectionContext?: string;
+  courseExams?: boolean;
 }
 
 export interface CancelledTurn {
@@ -367,6 +368,9 @@ export function useChat(
           "payload",
           JSON.stringify({
             ...transportAtSend.payload,
+            ...(transportAtSend.kind === "exam" && opts.courseExams
+              ? { courseExams: true }
+              : {}),
             messages: history,
             modelId: selectedModel.id,
             effort: opts.effort ?? DEFAULT_EFFORT,
@@ -387,6 +391,9 @@ export function useChat(
             formData.append("files", attachment.file, attachment.name);
         }
 
+        patch({
+          status: { step: "connecting", message: "Ansluter till AI-tjänsten" },
+        });
         const response = await fetch(transportAtSend.url, {
           method: "POST",
           headers: {
@@ -410,17 +417,17 @@ export function useChat(
             title?: string;
           };
           if (event === "text") {
+            if (payload.delta && turnReply.status) patch({ status: null });
             streamText += payload.delta ?? "";
             if (!pendingFrame) pendingFrame = requestAnimationFrame(flush);
           } else if (event === "status") {
             patch({
-              status:
-                payload.step === "search_done"
-                  ? null
-                  : {
-                      step: payload.step ?? "",
-                      message: payload.message ?? "",
-                    },
+              status: payload.message
+                ? {
+                    step: payload.step ?? "",
+                    message: payload.message,
+                  }
+                : null,
             });
           } else if (event === "sources") {
             patch({ sources: payload.items ?? [] });

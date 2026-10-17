@@ -50,20 +50,6 @@ import { Button } from "@/components/ui/button";
 import { ButtonLink } from "@/components/shared/router-link";
 import { Spinner } from "@/components/ui/spinner";
 
-const LOADING_PHRASES = [
-  "Baljar...",
-  "Går till Terra...",
-  "Kollar Lisam...",
-  "Letar grupprum i B-huset...",
-  "Köar i Kårallen...",
-  "Räknar om HP...",
-  "Cyklar över Campus Valla...",
-  "Hämtar kaffe i Key...",
-  "Frågar någon i märkesbacken...",
-  "Letar facit i tenta-P...",
-  "Tar en omväg via Zenit...",
-];
-
 type WebSource = Extract<MessageSource, { url: string }>;
 
 function sourceLabel(source: WebSource): string {
@@ -649,10 +635,6 @@ export function ChatMessages({
   );
 }
 
-function randomLoadingPhrase() {
-  return LOADING_PHRASES[Math.floor(Math.random() * LOADING_PHRASES.length)];
-}
-
 const MarkdownBlock = memo(function MarkdownBlock({ html }: { html: string }) {
   return (
     <div className="contents" dangerouslySetInnerHTML={{ __html: html }} />
@@ -681,7 +663,6 @@ const MessageRow = memo(function MessageRow({
     const atIndex = s.messages[index];
     return atIndex?.id === id ? atIndex : s.messages.find((m) => m.id === id);
   });
-  const [loadingPhrase] = useState(randomLoadingPhrase);
   const isStreaming = useChatStore((s) => isLast && s.isLoading);
 
   if (!message) return null;
@@ -717,7 +698,7 @@ const MessageRow = memo(function MessageRow({
   }
 
   const showStatus =
-    !!message.status?.message || (!message.content && isStreaming);
+    isStreaming && (!!message.status?.message || !message.content);
 
   return (
     <div
@@ -725,10 +706,17 @@ const MessageRow = memo(function MessageRow({
       className="group/message chat-row w-full min-w-0 overflow-hidden pt-2 pb-4"
     >
       {showStatus && (
-        <div className="mb-2 flex h-6 items-center gap-2">
-          <LoaderCircleIcon className="variable-spin size-4 text-muted-foreground" />
+        <div
+          role="status"
+          aria-live="polite"
+          className="mb-2 flex min-h-6 items-center gap-2"
+        >
+          <LoaderCircleIcon
+            aria-hidden="true"
+            className="variable-spin size-4 shrink-0 text-muted-foreground"
+          />
           <span className="shimmer-text text-sm">
-            {message.status?.message || loadingPhrase}
+            {message.status?.message || "Väntar på svar"}
           </span>
         </div>
       )}
@@ -779,6 +767,11 @@ function FileSourceChip({
   async function open() {
     if (opening) return;
     const tab = window.open("", "_blank");
+    if (!tab) {
+      toast.error("Tillåt popup-fönster för att öppna källan i en ny flik.");
+      return;
+    }
+    tab.opener = null;
     setOpening(true);
     try {
       const url = await courseFileUrl(source.fileId);
@@ -787,12 +780,7 @@ function FileSourceChip({
         toast.error("Filen finns inte längre i kursen.");
         return;
       }
-      if (tab) {
-        tab.opener = null;
-        tab.location.href = url;
-      } else {
-        window.location.href = url;
-      }
+      tab.location.href = url;
     } catch {
       tab?.close();
       toast.error("Kunde inte öppna filen.");

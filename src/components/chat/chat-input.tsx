@@ -1,5 +1,6 @@
 import {
-  CheckIcon,
+  BookOpenIcon,
+  PaperclipIcon,
   ChevronDownIcon,
   ArrowUpIcon,
   CornerDownLeftIcon,
@@ -63,13 +64,12 @@ import { IconButton } from "@/components/shared/icon-button";
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuCheckboxItem,
+  DropdownMenuLabel,
   DropdownMenuItem,
   DropdownMenuRadioGroup,
   DropdownMenuRadioItem,
   DropdownMenuSeparator,
-  DropdownMenuSub,
-  DropdownMenuSubContent,
-  DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
@@ -104,6 +104,10 @@ interface ChatInputProps {
   courseMentions?: boolean;
 
   showDisclaimer?: boolean;
+  courseExamAnalysis?: {
+    enabled: boolean;
+    onChange: (enabled: boolean) => void;
+  };
   onSend: () => void;
   onCancel: () => void;
   onClearSelectionContext: () => void;
@@ -119,6 +123,7 @@ export function ChatInput({
   welcome = false,
   courseMentions = false,
   showDisclaimer = true,
+  courseExamAnalysis,
   onSend,
   onCancel,
   onClearSelectionContext,
@@ -153,9 +158,12 @@ export function ChatInput({
   }, [attachments]);
 
   const mentionLayerRef = useRef<HTMLDivElement>(null);
-  const hasHeader = !!selectionContext || attachments.length > 0;
+  const hasHeader =
+    !!selectionContext ||
+    attachments.length > 0 ||
+    !!courseExamAnalysis?.enabled;
   const expanded = hasHeader || textExpanded;
-  const layoutKey = `${expanded}-${hasHeader}-${attachments.length}`;
+  const layoutKey = `${expanded}-${hasHeader}-${attachments.length}-${!!courseExamAnalysis?.enabled}`;
   const layoutTransition = {
     layout: {
       type: "tween" as const,
@@ -444,6 +452,25 @@ export function ChatInput({
               className="-mx-2.5 -mt-2.5 overflow-hidden"
             >
               <div className="mb-1.5 flex flex-col items-stretch gap-2 border-b bg-muted/50 px-3 py-2">
+                {courseExamAnalysis?.enabled && (
+                  <div className="flex items-center gap-2">
+                    <div className="flex min-w-0 items-center gap-2 rounded-lg bg-primary/10 py-1 pr-1 pl-2.5 text-xs text-primary">
+                      <BookOpenIcon className="size-3.5 shrink-0" />
+                      <span className="min-w-0 truncate">
+                        Kursens tentor · nästa meddelande
+                      </span>
+                      <IconButton
+                        type="button"
+                        size="icon-xs"
+                        aria-label="Ta bort kursanalys"
+                        disabled={isLoading}
+                        onClick={() => courseExamAnalysis.onChange(false)}
+                      >
+                        <XIcon />
+                      </IconButton>
+                    </div>
+                  </div>
+                )}
                 {selectionContext && (
                   <div className="flex w-full items-center gap-2.5">
                     <CornerDownLeftIcon className="size-4 shrink-0 -scale-x-100 text-muted-foreground" />
@@ -530,15 +557,56 @@ export function ChatInput({
               ref={plusRef}
               style={{ gridArea: "plus" }}
             >
-              <IconButton
-                variant="ghost"
-                className="size-8 rounded-full p-0"
-                aria-label="Bifoga filer"
-                disabled={isLoading || capacityReached}
-                onClick={() => fileInputRef.current?.click()}
-              >
-                <PlusIcon className="size-6" strokeWidth={1.75} />
-              </IconButton>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <IconButton
+                    type="button"
+                    variant="ghost"
+                    className="size-8 rounded-full p-0"
+                    aria-label="Lägg till i meddelandet"
+                    hideTooltip
+                    disabled={isLoading}
+                  >
+                    <PlusIcon className="size-6" strokeWidth={1.75} />
+                  </IconButton>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent
+                  side="top"
+                  align="start"
+                  sideOffset={12}
+                  collisionPadding={12}
+                  className="w-72 max-w-[calc(100vw-1.5rem)] rounded-xl p-1.5"
+                >
+                  <DropdownMenuItem
+                    className="gap-2.5 rounded-lg px-2.5 py-2.5"
+                    disabled={capacityReached}
+                    onSelect={() => fileInputRef.current?.click()}
+                  >
+                    <PaperclipIcon />
+                    Bifoga filer
+                  </DropdownMenuItem>
+                  {courseExamAnalysis && (
+                    <>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuCheckboxItem
+                        checked={courseExamAnalysis.enabled}
+                        onCheckedChange={(checked) =>
+                          courseExamAnalysis.onChange(checked === true)
+                        }
+                        className="items-start gap-2.5 rounded-lg py-2.5 pl-2.5"
+                      >
+                        <BookOpenIcon className="mt-0.5" />
+                        <span className="flex min-w-0 flex-col gap-0.5">
+                          <span>Analysera kursens tentor</span>
+                          <span className="text-xs font-normal text-muted-foreground">
+                            För nästa meddelande
+                          </span>
+                        </span>
+                      </DropdownMenuCheckboxItem>
+                    </>
+                  )}
+                </DropdownMenuContent>
+              </DropdownMenu>
             </m.div>
             <m.div
               layout="position"
@@ -700,73 +768,47 @@ function ModelPicker() {
       <DropdownMenuContent
         side="top"
         align="end"
-        sideOffset={8}
-        className="flex w-56 min-w-0 flex-col gap-1 rounded-xl p-1"
+        sideOffset={12}
+        collisionPadding={12}
+        className="w-64 max-w-[calc(100vw-1.5rem)] rounded-xl p-1.5"
       >
-        <DropdownMenuItem
-          className="items-start gap-2.5 rounded-lg px-2.5 py-1.5"
-          onSelect={(e) => e.preventDefault()}
+        <DropdownMenuLabel className="px-2.5 pt-1.5 pb-1">
+          Modell
+        </DropdownMenuLabel>
+        <DropdownMenuRadioGroup
+          aria-label="Modell"
+          value={selectedModelId}
+          onValueChange={(value) => setSelectedModelId(value as ChatModelId)}
         >
-          <div className="flex min-w-0 flex-1 flex-col">
-            <span className="leading-snug">{model.label}</span>
-            <span className="text-xs leading-snug font-normal text-muted-foreground">
-              {model.hint}
-            </span>
-          </div>
-          <CheckIcon className="mt-0.5 size-4 text-primary" />
-        </DropdownMenuItem>
-        <DropdownMenuSeparator className="my-0" />
-        <DropdownMenuSub>
-          <DropdownMenuSubTrigger className="rounded-lg px-2.5 py-1.5">
-            <span className="flex-1">Tankenivå</span>
-            <span className="text-muted-foreground">{effortLabel}</span>
-          </DropdownMenuSubTrigger>
-          <DropdownMenuSubContent className="w-40 rounded-xl p-1">
-            <DropdownMenuRadioGroup
-              value={selectedEffort}
-              onValueChange={(value) => setSelectedEffort(value as ChatEffort)}
+          {availableModels.map((item) => (
+            <DropdownMenuRadioItem
+              key={item.id}
+              value={item.id}
+              className="items-start rounded-lg py-2 pl-2.5"
             >
-              {availableEfforts.map((effort) => (
-                <DropdownMenuRadioItem
-                  key={effort.id}
-                  value={effort.id}
-                  className="rounded-lg px-2.5 py-1.5 text-xs"
-                >
-                  {effort.label}
-                </DropdownMenuRadioItem>
-              ))}
-            </DropdownMenuRadioGroup>
-          </DropdownMenuSubContent>
-        </DropdownMenuSub>
-        <DropdownMenuSeparator className="my-0" />
-        <DropdownMenuSub>
-          <DropdownMenuSubTrigger className="rounded-lg px-2.5 py-1.5">
-            Fler modeller
-          </DropdownMenuSubTrigger>
-          <DropdownMenuSubContent className="w-60 rounded-xl p-1">
-            <DropdownMenuRadioGroup
-              value={selectedModelId}
-              onValueChange={(value) =>
-                setSelectedModelId(value as ChatModelId)
-              }
+              <span className="flex min-w-0 flex-col gap-0.5">
+                <span>{item.label}</span>
+              </span>
+            </DropdownMenuRadioItem>
+          ))}
+        </DropdownMenuRadioGroup>
+        <DropdownMenuSeparator className="my-1.5" />
+        <DropdownMenuLabel className="px-2.5 pb-1">Tankenivå</DropdownMenuLabel>
+        <DropdownMenuRadioGroup
+          aria-label="Tankenivå"
+          value={selectedEffort}
+          onValueChange={(value) => setSelectedEffort(value as ChatEffort)}
+        >
+          {availableEfforts.map((effort) => (
+            <DropdownMenuRadioItem
+              key={effort.id}
+              value={effort.id}
+              className="rounded-lg py-2 pl-2.5"
             >
-              {availableModels.map((m) => (
-                <DropdownMenuRadioItem
-                  key={m.id}
-                  value={m.id}
-                  className="items-start rounded-lg px-2.5 py-1.5 text-xs"
-                >
-                  <div className="flex flex-col">
-                    <span className="text-xs leading-snug">{m.label}</span>
-                    <span className="text-2xs leading-snug font-normal text-muted-foreground">
-                      {m.hint}
-                    </span>
-                  </div>
-                </DropdownMenuRadioItem>
-              ))}
-            </DropdownMenuRadioGroup>
-          </DropdownMenuSubContent>
-        </DropdownMenuSub>
+              {effort.label}
+            </DropdownMenuRadioItem>
+          ))}
+        </DropdownMenuRadioGroup>
       </DropdownMenuContent>
     </DropdownMenu>
   );

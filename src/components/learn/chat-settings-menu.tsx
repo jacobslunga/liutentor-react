@@ -70,7 +70,7 @@ export function ChatSettingsMenu() {
                   <div className="flex flex-col">
                     <span>{model.label}</span>
                     <span className="text-xs text-muted-foreground">
-                      {model.hint}
+                      {model.provider}
                     </span>
                   </div>
                 </DropdownMenuRadioItem>

@@ -56,6 +56,10 @@ course study material, and user accounts.
   in production.
 - AI chat uses a separate service configured by `VITE_AI_API_URL`
   (`src/lib/chat-api.ts`) and streams responses using server-sent events.
+- Course-wide exam analysis is explicitly enabled for one message in the exam
+  chat and sent as `courseExams: true`. Keep it off for ordinary messages and
+  selection shortcuts. The Hono backend caches exam outlines and supplies
+  coverage, topic counts, and PDF sources across all chat providers.
 - Netlify hosts the built `dist/` directory. `netlify/functions/` contains upload,
   feedback, sitemap, and revalidation handlers; `netlify/edge-functions/seo.ts`
   handles initial-response SEO metadata.
