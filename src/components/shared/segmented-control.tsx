@@ -62,7 +62,7 @@ export function SegmentedControl<T extends string>({
       value={value}
       onValueChange={(next) => next && onValueChange(next as T)}
       className={cn(
-        "relative isolate inline-flex h-8 items-center rounded-lg bg-accent p-0.5 dark:bg-muted",
+        "relative isolate inline-flex h-8 items-center rounded-full bg-accent p-0.5 dark:bg-muted",
         className,
       )}
     >
@@ -70,7 +70,7 @@ export function SegmentedControl<T extends string>({
         <span
           aria-hidden
           className={cn(
-            "absolute inset-y-0.5 left-0 -z-10 rounded-md bg-card shadow-raised inset-shadow-highlight dark:bg-input/60",
+            "absolute inset-y-0.5 left-0 -z-10 rounded-full bg-card shadow-raised inset-shadow-highlight dark:bg-input/60",
             ready &&
               "transition-[translate,width] duration-200 ease-snap motion-reduce:transition-none",
           )}

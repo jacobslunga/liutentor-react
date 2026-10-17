@@ -39,7 +39,7 @@ export function QuizStart({
   const canStart = poolSize > 0;
 
   return (
-    <Card>
+    <Card className="dark:bg-muted/30 dark:inset-shadow-none">
       <CardHeader>
         <CardTitle className="text-base">
           Testa dig själv på {courseCode}
@@ -72,7 +72,7 @@ export function QuizStart({
                   <ToggleGroupItem
                     key={level}
                     value={level}
-                    className="h-auto flex-col items-start gap-1.5 rounded-lg border bg-card px-3 py-3 text-left whitespace-normal shadow-raised transition-[border-color,background-color,box-shadow] hover:bg-muted/50 data-[state=on]:border-brand data-[state=on]:bg-brand/5 data-[state=on]:shadow-none"
+                    className="h-auto flex-col items-start gap-1.5 rounded-lg border bg-background px-3 py-3 text-left whitespace-normal transition-[border-color,background-color,box-shadow] hover:bg-muted/30 data-[state=on]:border-brand data-[state=on]:bg-brand/5 data-[state=on]:shadow-none"
                   >
                     <span className="flex items-center gap-2 text-sm font-medium">
                       <Icon className="size-4 text-muted-foreground group-data-[state=on]/toggle:text-brand" />
@@ -87,7 +87,7 @@ export function QuizStart({
             </ToggleGroup>
           </CardContent>
 
-          <CardFooter className="flex-col items-stretch gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <CardFooter className="flex-col items-stretch gap-3 sm:flex-row sm:items-center sm:justify-between dark:bg-muted/10">
             <p className="text-xs text-muted-foreground">
               {poolSize > 2
                 ? "Frågorna tas från 2–4 slumpade tentor."

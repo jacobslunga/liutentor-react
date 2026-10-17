@@ -161,7 +161,8 @@
 .chat-prose .code-block {
   margin: 1.25rem 0;
   border: 1px solid var(--border);
-  border-radius: var(--radius-xl);
+  border-radius: var(--radius-3xl);
+  background-color: color-mix(in srgb, var(--muted) 60%, var(--background));
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -173,24 +174,35 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0.4rem 0.75rem 0.4rem 1rem;
-  background-color: var(--muted);
-  border-bottom: 1px solid var(--border);
+  padding: 0.65rem 0.85rem 0.4rem 1.25rem;
 }
 
 .chat-prose .code-lang {
-  font-family: var(--font-mono);
-  font-size: 0.7rem;
-  color: var(--muted-foreground);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  font-family: var(--font-sans);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--foreground);
 }
 
-.chat-prose .code-copy {
+.chat-prose .code-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.chat-prose :is(.code-copy, .code-wrap) {
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
   font-family: var(--font-mono);
   font-size: 0.72rem;
-  padding: 0.2rem 0.55rem;
+  width: 2rem;
+  height: 2rem;
+  justify-content: center;
+  cursor: pointer;
   border-radius: 9999px;
   color: var(--muted-foreground);
   transition:
@@ -198,7 +210,8 @@
     color 150ms;
 }
 
-.chat-prose .code-copy:hover {
+.chat-prose :is(.code-copy, .code-wrap):hover,
+.chat-prose .code-wrap[aria-pressed="true"] {
   background-color: var(--accent);
   color: var(--foreground);
 }
@@ -226,7 +239,7 @@
   overflow: auto;
   overscroll-behavior: contain;
   line-height: 1.6;
-  background-color: var(--background) !important;
+  background-color: transparent !important;
 }
 
 .chat-prose .code-block pre.shiki,
@@ -235,7 +248,7 @@
 }
 
 .dark .chat-prose .code-block pre.shiki {
-  background-color: var(--background) !important;
+  background-color: transparent !important;
 }
 
 .dark .chat-prose .code-block pre.shiki span {
@@ -270,4 +283,24 @@
 
 .selection-quote .code-header {
   display: none;
+}
+
+.chat-prose .code-copy .code-icon {
+  width: 1.125rem;
+  height: 1.125rem;
+}
+
+.chat-prose .code-copy-label {
+  display: none;
+}
+
+.chat-prose :is(.code-copy, .code-wrap):focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+.chat-prose .code-wrapped pre.shiki,
+.chat-prose .code-wrapped pre.shiki code {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
 }

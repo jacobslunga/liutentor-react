@@ -1,9 +1,21 @@
 @plugin "@tailwindcss/typography";
 
+@font-face {
+  font-family: "GT Super Text";
+  src: url("../assets/fonts/gt-super-text-bold.woff2") format("woff2");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
 @theme inline {
-  --font-mono: monospace;
+  --font-mono:
+    "SF Mono", SFMono-Regular, ui-monospace, Menlo, Monaco, Consolas,
+    "Cascadia Mono", "Cascadia Code", "Segoe UI Mono", "Roboto Mono",
+    "Ubuntu Mono", "Liberation Mono", "DejaVu Sans Mono", "Courier New",
+    monospace;
   --font-serif: ui-serif, serif;
-  --font-logo: var(--font-serif);
+  --font-logo: "GT Super Text", var(--font-serif);
   --text-2xs: 0.6875rem;
   --breakpoint-3xl: 1920px;
   --ease-spring: cubic-bezier(0.25, 0.1, 0.25, 1);
@@ -136,7 +148,7 @@
 
 @layer base {
   ::selection {
-    background: color-mix(in srgb, var(--primary) 25%, transparent);
+    background: color-mix(in srgb, var(--primary) 45%, transparent);
     color: inherit;
   }
 

@@ -95,7 +95,7 @@ export function CourseExamsTable({
 
       <div className="w-full overflow-x-auto rounded-xl border">
         <div className="w-max min-w-full overflow-hidden rounded-xl sm:w-full">
-          <div className={cn(GRID_COLS, "border-b bg-muted py-3")}>
+          <div className={cn(GRID_COLS, "border-b bg-muted/30 py-3")}>
             <div className="text-xs text-muted-foreground">Tentamen</div>
             <div className="text-xs text-muted-foreground">Typ</div>
             <div className="text-center text-xs text-muted-foreground">

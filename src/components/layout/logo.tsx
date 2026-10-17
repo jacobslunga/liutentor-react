@@ -19,7 +19,7 @@ export function Logo({
       {showIcon && <LogoIcon className={cn("size-7", iconClassName)} />}
       <span
         className={cn(
-          "font-logo text-lg font-semibold tracking-tighter",
+          "font-logo text-lg font-bold tracking-tighter",
           textClassName,
         )}
       >

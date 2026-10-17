@@ -1,4 +1,4 @@
 dist
-pnpm-lock.yaml
+bun.lock
 src/routeTree.gen.ts
 public

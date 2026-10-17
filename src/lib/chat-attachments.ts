@@ -1,6 +1,6 @@
 import type { ChatAttachment } from "@/stores/chat";
 
-export const MAX_ATTACHMENTS = 5;
+export const MAX_ATTACHMENTS = 20;
 export const MAX_ATTACHMENT_SIZE = 5 * 1024 * 1024;
 export const MAX_ATTACHMENTS_TOTAL_SIZE = 20 * 1024 * 1024;
 
@@ -39,7 +39,7 @@ export function acceptFiles(
     } else if (keys.has(attachmentKey(file))) {
       errors.add("Dubbletter har hoppats över.");
     } else if (count >= MAX_ATTACHMENTS) {
-      errors.add("En aktiv chatt kan ha högst fem filer.");
+      errors.add(`En aktiv chatt kan ha högst ${MAX_ATTACHMENTS} filer.`);
     } else if (totalSize + file.size > MAX_ATTACHMENTS_TOTAL_SIZE) {
       errors.add("Filerna får vara högst 20 MB tillsammans.");
     } else {

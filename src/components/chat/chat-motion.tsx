@@ -1,11 +1,11 @@
-import { domAnimation, LazyMotion, MotionConfig } from "framer-motion";
+import { domMax, LazyMotion, MotionConfig } from "framer-motion";
 import type { ReactNode } from "react";
 import { useMediaQuery } from "@/hooks/use-media-query";
 
 export function ChatMotion({ children }: { children: ReactNode }) {
   const reducedMotion = useMediaQuery("(prefers-reduced-motion: reduce)");
   return (
-    <LazyMotion features={domAnimation} strict>
+    <LazyMotion features={domMax} strict>
       <MotionConfig
         reducedMotion="user"
         skipAnimations={reducedMotion}

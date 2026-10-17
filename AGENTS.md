@@ -6,21 +6,20 @@ course study material, and user accounts.
 
 ## Package manager and commands
 
-- Use **pnpm** for all dependency management and project commands. Do not use
-  Bun/bunx, npm/npx, or Yarn, even if they are installed on the machine.
-- `package.json` declares the pnpm version in `packageManager`. Keep
-  `pnpm-lock.yaml` as the only package-manager lockfile.
-- Install dependencies: `pnpm install`.
-- Add/remove dependencies: `pnpm add <package>`, `pnpm add -D <package>`,
-  `pnpm remove <package>`.
-- Run local tools with `pnpm exec <tool>`; use `pnpm dlx` for one-off tools.
-- Development: `pnpm dev`. Keep port **5173** because the AI service allows that
+- Use **Bun** for all dependency management and project commands. Do not use
+  pnpm, npm/npx, or Yarn, even if they are installed on the machine.
+- Keep `bun.lock` as the only package-manager lockfile.
+- Install dependencies: `bun install`.
+- Add/remove dependencies: `bun add <package>`, `bun add -d <package>`,
+  `bun remove <package>`.
+- Run local tools and one-off tools with `bunx <tool>`.
+- Development: `bun run dev`. Keep port **5173** because the AI service allows that
   localhost origin. Reuse an existing dev server when available.
-- Build and typecheck: `pnpm build` (`tsc -b` followed by Vite).
-- Lint: `pnpm lint` (Oxlint).
-- Format: `pnpm format`; check formatting: `pnpm format:check` (Prettier).
-  For a small change, format only the touched files with `pnpm exec prettier`.
-- Preview the production build: `pnpm preview`.
+- Build and typecheck: `bun run build` (`tsc -b` followed by Vite).
+- Lint: `bun run lint` (Oxlint).
+- Format: `bun run format`; check formatting: `bun run format:check` (Prettier).
+  For a small change, format only the touched files with `bunx prettier`.
+- Preview the production build: `bun run preview`.
 - There is currently no test script. Choose checks appropriate to the change;
   do not assume a test runner is configured.
 
@@ -60,7 +59,7 @@ course study material, and user accounts.
 - Netlify hosts the built `dist/` directory. `netlify/functions/` contains upload,
   feedback, sitemap, and revalidation handlers; `netlify/edge-functions/seo.ts`
   handles initial-response SEO metadata.
-- `pnpm dev` serves upload/feedback functions through `netlify-functions-dev.ts`;
+- `bun run dev` serves upload/feedback functions through `netlify-functions-dev.ts`;
   a separate Netlify CLI is not required for these endpoints.
 - See `.env.example` and `README.md` for environment setup. Keep private values
   out of source code and documentation.
