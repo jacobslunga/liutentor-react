@@ -2,7 +2,6 @@ import type { QueryClient } from "@tanstack/react-query";
 import { Outlet, createRootRouteWithContext } from "@tanstack/react-router";
 import { AppLoadingBar } from "@/components/layout/app-loading-bar";
 import { AnalyticsConsent } from "@/components/layout/analytics-consent";
-import { ChatIntroDialog } from "@/components/layout/chat-intro-dialog";
 import { RouterLinkButton } from "@/components/shared/router-link";
 import { Toaster } from "@/components/ui/sonner";
 import { ExamUploadDialog } from "@/components/upload/exam-upload-dialog";
@@ -24,7 +23,6 @@ function RootLayout() {
       <Outlet />
       <ExamUploadDialog />
       <AnalyticsConsent />
-      <ChatIntroDialog />
       <Toaster position="top-center" duration={4000} />
     </>
   );

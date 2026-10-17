@@ -20,7 +20,7 @@ import {
   type Ref,
 } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { AnimatePresence, m } from "framer-motion";
+import { m, useReducedMotion } from "framer-motion";
 import { toast } from "sonner";
 import {
   acceptFiles,
@@ -40,6 +40,8 @@ import {
 } from "@/lib/course-mentions";
 import { formatFileSize } from "@/lib/format";
 import { cn } from "@/lib/utils";
+import { MAX_CHAT_MESSAGE_LENGTH } from "@/lib/chat-limits";
+import { formattedClipboardText } from "@/lib/chat-paste";
 import { coursesQuery } from "@/queries/exams";
 import {
   useChatStore,
@@ -72,7 +74,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 
-const MAX_LENGTH = 4000;
+const MAX_LENGTH = MAX_CHAT_MESSAGE_LENGTH;
 
 const MENTION_PILL_CLASS =
   "rounded-[5px] bg-primary/15 text-transparent ring-2 ring-primary/15 box-decoration-clone";
@@ -136,11 +138,10 @@ export function ChatInput({
   const [hasInput, setHasInput] = useState(initialText.length > 0);
   const [longLength, setLongLength] = useState(0);
   const [textHeight, setTextHeight] = useState(24);
-  const [expanded, setExpanded] = useState(false);
-  const expandedRef = useRef(false);
+  const [textExpanded, setTextExpanded] = useState(false);
+  const reducedMotion = useReducedMotion();
   const plusRef = useRef<HTMLDivElement>(null);
   const controlsRef = useRef<HTMLDivElement>(null);
-  const flipRects = useRef<Map<HTMLElement, DOMRect>>(new Map());
   const [mention, setMention] = useState<{
     start: number;
     query: string;
@@ -153,6 +154,15 @@ export function ChatInput({
 
   const mentionLayerRef = useRef<HTMLDivElement>(null);
   const hasHeader = !!selectionContext || attachments.length > 0;
+  const expanded = hasHeader || textExpanded;
+  const layoutKey = `${expanded}-${hasHeader}-${attachments.length}`;
+  const layoutTransition = {
+    layout: {
+      type: "tween" as const,
+      duration: reducedMotion ? 0 : 0.16,
+      ease: [0.2, 0.8, 0.2, 1] as const,
+    },
+  };
 
   const renderMentionPills = (value: string) => {
     const layer = mentionLayerRef.current;
@@ -198,35 +208,14 @@ export function ChatInput({
       return measurement.scrollHeight;
     };
     const compactHeight = measureAt(compactWidth - 16);
-    const wantExpanded = hasHeader || compactHeight > 26;
+    const lineHeight = parseFloat(getComputedStyle(measurement).lineHeight);
+    const wraps = textarea.value.length > 0 && compactHeight > lineHeight + 1;
+    const wantExpanded = hasHeader || wraps;
     const height = wantExpanded ? measureAt(contentWidth - 16) : compactHeight;
 
-    if (wantExpanded !== expandedRef.current) {
-      for (const el of [plusRef.current, controlsRef.current])
-        if (el) flipRects.current.set(el, el.getBoundingClientRect());
-      expandedRef.current = wantExpanded;
-      setExpanded(wantExpanded);
-    }
-    setTextHeight(Math.min(192, Math.max(24, height)));
+    setTextExpanded(wraps);
+    setTextHeight(Math.min(192, Math.max(lineHeight, height)));
   }, [hasHeader]);
-
-  useLayoutEffect(() => {
-    const reducedMotion = window.matchMedia(
-      "(prefers-reduced-motion: reduce)",
-    ).matches;
-    for (const [el, from] of flipRects.current) {
-      for (const animation of el.getAnimations()) animation.cancel();
-      const to = el.getBoundingClientRect();
-      const dx = from.left - to.left;
-      const dy = from.top - to.top;
-      if (!reducedMotion && (dx || dy))
-        el.animate(
-          [{ transform: `translate(${dx}px, ${dy}px)` }, { transform: "none" }],
-          { duration: 220, easing: "cubic-bezier(0.2, 0.8, 0.2, 1)" },
-        );
-    }
-    flipRects.current.clear();
-  }, [expanded]);
 
   const setText = (value: string) => {
     if (textareaRef.current) textareaRef.current.value = value;
@@ -403,7 +392,7 @@ export function ChatInput({
   const sendButton = (
     <IconButton
       variant={isLoading ? "secondary" : "default"}
-      className="size-8 rounded-full [&_svg:not([class*='size-'])]:size-4"
+      className="size-9 rounded-full [&_svg:not([class*='size-'])]:size-4"
       aria-label={isLoading ? "Avbryt svar" : "Skicka meddelande"}
       hideTooltip
       disabled={!isLoading && !canSend}
@@ -428,87 +417,86 @@ export function ChatInput({
           welcome ? "chat-welcome-column" : "px-4 sm:px-5",
         )}
       >
-        <div
+        <m.div
           ref={composerRef}
+          layout
+          layoutDependency={layoutKey}
+          transition={layoutTransition}
+          style={{ borderRadius: expanded || hasHeader ? "1.25rem" : "2rem" }}
           data-expanded={expanded || hasHeader}
           className={cn(
-            "relative overflow-hidden rounded-[24px] border border-input bg-card p-2 shadow-xs transition-[border-radius] duration-200 ease-out-quick data-[expanded=true]:rounded-[20px] motion-reduce:transition-none dark:border-border dark:shadow-[0_2px_2px_-4px_rgba(0,0,0,0.15)]",
+            "relative min-h-14 overflow-hidden rounded-full border border-border/70 bg-card p-2.5 shadow-[0_2px_6px_-2px_oklch(0_0_0/0.08),0_8px_28px_-8px_oklch(0_0_0/0.06)] data-[expanded=true]:rounded-[20px] dark:border-border dark:shadow-[0_2px_8px_-2px_oklch(0_0_0/0.3),0_8px_28px_-8px_oklch(0_0_0/0.2)]",
           )}
         >
-          <AnimatePresence initial={false}>
-            {hasHeader && (
-              <m.div
-                key="context"
-                initial={{ height: 0, opacity: 0 }}
-                animate={{ height: "auto", opacity: 1 }}
-                exit={{ height: 0, opacity: 0 }}
-                transition={{
-                  type: "tween",
-                  duration: 0.18,
-                  ease: [0.2, 0.8, 0.2, 1],
-                }}
-                className="-mx-1.5 -mt-1.5 overflow-hidden"
-              >
-                <div className="mb-1.5 flex flex-col items-stretch gap-2 border-b bg-muted/50 px-3 py-2">
-                  {selectionContext && (
-                    <div className="flex w-full animate-in items-center gap-2.5 duration-200 fade-in-0">
-                      <CornerDownLeftIcon className="size-4 shrink-0 -scale-x-100 text-muted-foreground" />
-                      <span className="line-clamp-3 min-w-0 flex-1 text-sm leading-relaxed font-normal text-foreground">
-                        "<SelectionQuote text={selectionContext} />"
-                      </span>
-                      <IconButton
-                        variant="ghost"
-                        size="icon-sm"
-                        aria-label="Ta bort citatet"
-                        onClick={onClearSelectionContext}
+          {hasHeader && (
+            <m.div
+              layout="position"
+              layoutDependency={layoutKey}
+              transition={layoutTransition}
+              className="-mx-2.5 -mt-2.5 overflow-hidden"
+            >
+              <div className="mb-1.5 flex flex-col items-stretch gap-2 border-b bg-muted/50 px-3 py-2">
+                {selectionContext && (
+                  <div className="flex w-full items-center gap-2.5">
+                    <CornerDownLeftIcon className="size-4 shrink-0 -scale-x-100 text-muted-foreground" />
+                    <span className="line-clamp-3 min-w-0 flex-1 text-sm leading-relaxed font-normal text-foreground">
+                      "<SelectionQuote text={selectionContext} />"
+                    </span>
+                    <IconButton
+                      variant="ghost"
+                      size="icon-sm"
+                      aria-label="Ta bort citatet"
+                      onClick={onClearSelectionContext}
+                    >
+                      <XIcon />
+                    </IconButton>
+                  </div>
+                )}
+                {attachments.length > 0 && (
+                  <div className="flex flex-wrap gap-2">
+                    {attachments.map((a) => (
+                      <div
+                        key={a.id}
+                        className="flex max-w-full min-w-0 items-center gap-2 rounded-lg bg-background px-2.5 py-1.5 text-xs font-normal text-foreground"
                       >
-                        <XIcon />
-                      </IconButton>
-                    </div>
-                  )}
-                  {attachments.length > 0 && (
-                    <div className="flex flex-wrap gap-2">
-                      {attachments.map((a) => (
-                        <div
-                          key={a.id}
-                          className="flex max-w-full min-w-0 animate-in items-center gap-2 rounded-lg bg-background px-2.5 py-1.5 text-xs font-normal text-foreground duration-200 fade-in-0 slide-in-from-bottom-1"
+                        {a.mediaType === "application/pdf" ? (
+                          <FileTextIcon className="size-3.5 shrink-0 text-muted-foreground" />
+                        ) : a.previewUrl ? (
+                          <img
+                            src={a.previewUrl}
+                            alt=""
+                            className="size-10 shrink-0 rounded-md object-cover"
+                          />
+                        ) : (
+                          <ImageIcon className="size-3.5 shrink-0 text-muted-foreground" />
+                        )}
+                        <span className="max-w-20 truncate" title={a.name}>
+                          {a.name}
+                        </span>
+                        <span className="shrink-0 text-muted-foreground">
+                          {formatFileSize(a.size)}
+                        </span>
+                        <IconButton
+                          variant="ghost"
+                          size="icon-sm"
+                          aria-label={`Ta bort ${a.name}`}
+                          onClick={() => removeAttachment(a.id)}
                         >
-                          {a.mediaType === "application/pdf" ? (
-                            <FileTextIcon className="size-3.5 shrink-0 text-muted-foreground" />
-                          ) : a.previewUrl ? (
-                            <img
-                              src={a.previewUrl}
-                              alt=""
-                              className="size-10 shrink-0 rounded-md object-cover"
-                            />
-                          ) : (
-                            <ImageIcon className="size-3.5 shrink-0 text-muted-foreground" />
-                          )}
-                          <span className="max-w-20 truncate" title={a.name}>
-                            {a.name}
-                          </span>
-                          <span className="shrink-0 text-muted-foreground">
-                            {formatFileSize(a.size)}
-                          </span>
-                          <IconButton
-                            variant="ghost"
-                            size="icon-sm"
-                            aria-label={`Ta bort ${a.name}`}
-                            onClick={() => removeAttachment(a.id)}
-                          >
-                            <XIcon />
-                          </IconButton>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </m.div>
-            )}
-          </AnimatePresence>
+                          <XIcon />
+                        </IconButton>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </m.div>
+          )}
 
           <div
-            className="grid items-end gap-x-1 gap-y-1"
+            className={cn(
+              "grid gap-x-1 gap-y-1",
+              expanded ? "items-end" : "items-center",
+            )}
             style={{
               gridTemplateColumns: "auto minmax(0, 1fr) auto",
               gridTemplateAreas: expanded
@@ -527,25 +515,37 @@ export function ChatInput({
                 e.target.value = "";
               }}
             />
-            <div ref={plusRef} style={{ gridArea: "plus" }}>
+            <m.div
+              layout="position"
+              layoutDependency={layoutKey}
+              transition={layoutTransition}
+              ref={plusRef}
+              style={{ gridArea: "plus" }}
+            >
               <IconButton
                 variant="ghost"
-                className="size-8 rounded-full [&_svg:not([class*='size-'])]:size-4"
+                className="size-8 rounded-full p-0"
                 aria-label="Bifoga filer"
                 disabled={isLoading || capacityReached}
                 onClick={() => fileInputRef.current?.click()}
               >
-                <PlusIcon />
+                <PlusIcon className="size-6" strokeWidth={1.75} />
               </IconButton>
-            </div>
-            <div className="relative min-w-0" style={{ gridArea: "text" }}>
+            </m.div>
+            <m.div
+              layout="position"
+              layoutDependency={layoutKey}
+              transition={layoutTransition}
+              className="relative min-w-0"
+              style={{ gridArea: "text" }}
+            >
               {!hasInput &&
                 (welcome ? (
                   <WelcomePlaceholder />
                 ) : (
                   <span
                     aria-hidden="true"
-                    className="pointer-events-none absolute inset-x-2 top-1 truncate text-base leading-6 text-muted-foreground"
+                    className="pointer-events-none absolute inset-x-2 top-1 truncate text-base leading-6 text-muted-foreground/70"
                   >
                     {placeholder}
                   </span>
@@ -562,7 +562,7 @@ export function ChatInput({
                 defaultValue={initialText}
                 rows={1}
                 aria-label="Meddelande"
-                className="relative block max-h-52 w-full resize-none border-0 bg-transparent py-1 pr-2 pl-2 text-base leading-6 text-foreground transition-[height] duration-200 ease-out-quick outline-none placeholder:text-muted-foreground motion-reduce:transition-none"
+                className="relative block max-h-52 w-full resize-none border-0 bg-transparent px-2 py-1 text-base leading-6 text-foreground outline-none placeholder:text-foreground"
                 style={{
                   height: textHeight + 8,
                   overflowY: textHeight >= 192 ? "auto" : "hidden",
@@ -570,6 +570,27 @@ export function ChatInput({
                 onInput={(e) => {
                   syncTextState(e.currentTarget.value);
                   syncMention(e.currentTarget);
+                  measurePrompt();
+                }}
+                onPaste={(event) => {
+                  if (
+                    event.defaultPrevented ||
+                    event.clipboardData.files.length
+                  )
+                    return;
+                  const text = formattedClipboardText(
+                    event.clipboardData.getData("text/html"),
+                  );
+                  if (!text) return;
+                  event.preventDefault();
+                  const textarea = event.currentTarget;
+                  replaceRange(
+                    textarea.selectionStart,
+                    textarea.selectionEnd,
+                    text,
+                  );
+                  syncTextState(textarea.value);
+                  syncMention(textarea);
                   measurePrompt();
                 }}
                 onSelect={(e) => syncMention(e.currentTarget)}
@@ -581,8 +602,11 @@ export function ChatInput({
                 }}
                 onKeyDown={onKeyDown}
               />
-            </div>
-            <div
+            </m.div>
+            <m.div
+              layout="position"
+              layoutDependency={layoutKey}
+              transition={layoutTransition}
               ref={controlsRef}
               className="flex items-center gap-1"
               style={{ gridArea: "controls" }}
@@ -596,14 +620,15 @@ export function ChatInput({
                       : "text-muted-foreground",
                   )}
                 >
-                  {longLength} / {MAX_LENGTH}
+                  {longLength.toLocaleString("sv-SE")} /{" "}
+                  {MAX_LENGTH.toLocaleString("sv-SE")}
                 </span>
               )}
               {!mobile && <ModelPicker />}
               {sendButton}
-            </div>
+            </m.div>
           </div>
-        </div>
+        </m.div>
 
         {showDisclaimer && (
           <p className="mt-2 text-center text-2xs text-muted-foreground">
@@ -614,7 +639,6 @@ export function ChatInput({
         {mention && (
           <CourseMentionMenu
             ref={mentionMenuRef}
-            // Line up with the composer, which sits inside the shell's padding.
             className={welcome ? undefined : "inset-x-4 sm:inset-x-5"}
             query={mention.query}
             onPick={pickMention}
@@ -653,7 +677,7 @@ function ModelPicker() {
       <DropdownMenuTrigger asChild>
         <Button
           variant="ghost"
-          className="h-8 gap-1 rounded-full px-2.5 text-xs text-foreground/80"
+          className="h-9 gap-1 rounded-full px-2.5 text-xs text-foreground/80"
           aria-label="Modell och tankenivå"
         >
           {model.label}
@@ -769,7 +793,7 @@ function WelcomePlaceholder() {
     <span
       key={index}
       aria-hidden="true"
-      className="chat-welcome-placeholder pointer-events-none absolute inset-x-2 top-1 truncate text-left text-base leading-6 text-muted-foreground"
+      className="chat-welcome-placeholder pointer-events-none absolute inset-x-2 top-1 truncate text-left text-base leading-6 text-muted-foreground/30"
     >
       {WELCOME_PLACEHOLDERS[index]}
     </span>

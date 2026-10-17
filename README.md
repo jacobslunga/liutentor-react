@@ -17,16 +17,16 @@ React rewrite of [liutentor.se](https://liutentor.se) — find and study old exa
 
 ```sh
 cp .env.example .env   # fill in values
-pnpm install
-pnpm dev               # http://localhost:5173
+bun install
+bun run dev               # http://localhost:5173
 ```
 
 Keep the default port: the AI chat service only allows `localhost:5173` (and the production origin).
 
-`pnpm dev` also serves the Netlify Functions (`/api/upload`, `/api/feedback`) and proxies the Go exam
+`bun run dev` also serves the Netlify Functions (`/api/upload`, `/api/feedback`) and proxies the Go exam
 API under `/api/go`, so no Netlify CLI is needed.
 
-Other scripts: `pnpm build`, `pnpm preview`, `pnpm lint`.
+Other scripts: `bun run build`, `bun run preview`, `bun run lint`.
 
 ## Environment
 
@@ -43,7 +43,7 @@ Other scripts: `pnpm build`, `pnpm preview`, `pnpm lint`.
 
 ## Deploy
 
-Netlify builds with `pnpm build` and publishes `dist` (see `netlify.toml`):
+Netlify builds with `bun run build` and publishes `dist` (see `netlify.toml`):
 
 - `/api/go/*` is rewritten to the Go exam service (it sends no CORS headers).
 - `/api/upload` and `/api/feedback` are Netlify Functions.

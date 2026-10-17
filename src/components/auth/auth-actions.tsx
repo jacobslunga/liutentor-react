@@ -22,7 +22,6 @@ export function AuthActions({
 
   return (
     <div className="flex items-center gap-2">
-      {settings}
       <RouterLinkButton variant="outline" to="/logga-in" size={size}>
         Logga in
       </RouterLinkButton>
@@ -33,6 +32,7 @@ export function AuthActions({
       >
         Skapa konto
       </RouterLinkButton>
+      {settings}
     </div>
   );
 }

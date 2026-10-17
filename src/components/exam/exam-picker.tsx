@@ -162,7 +162,7 @@ export function ExamPicker({
                   className={cn(
                     "relative grid w-full grid-cols-[3.25rem_6.75rem_3.75rem_3.5rem_1rem] items-center gap-x-2 rounded-sm px-3 py-2 text-left transition-colors duration-150",
                     current
-                      ? "bg-accent font-semibold before:absolute before:inset-y-2 before:left-0 before:w-0.5 before:rounded-full before:bg-brand"
+                      ? "bg-accent font-semibold before:absolute"
                       : "text-foreground/90 hover:bg-muted hover:text-foreground",
                   )}
                   onClick={() => pick(exam)}
@@ -175,7 +175,7 @@ export function ExamPicker({
                   </span>
                   {exam.has_solution ? (
                     <Badge
-                      variant="secondary"
+                      variant="default"
                       className="col-start-3 justify-self-start"
                     >
                       Facit

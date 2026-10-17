@@ -1,4 +1,6 @@
 import { DialogPresence } from "@/components/shared/dialog-presence";
+import { MAX_ATTACHMENTS } from "@/lib/chat-attachments";
+import { MAX_CHAT_MESSAGE_LENGTH } from "@/lib/chat-limits";
 import { Link } from "@tanstack/react-router";
 import { SettingsIcon } from "lucide-react";
 import { useTheme } from "next-themes";
@@ -15,13 +17,6 @@ import { Button } from "@/components/ui/button";
 import { IconButton } from "@/components/shared/icon-button";
 import { AppDialog } from "@/components/shared/app-dialog";
 import { KeyHint } from "@/components/shared/key-hint";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 
 const SHORTCUT_GROUPS = [
@@ -53,12 +48,18 @@ const SHORTCUT_GROUPS = [
 ];
 
 const FIXED_LIMITS = [
-  { label: "Meddelanden i chatten", value: "Max 4 000 tecken" },
+  {
+    label: "Meddelanden i chatten",
+    value: `Max ${MAX_CHAT_MESSAGE_LENGTH.toLocaleString("sv-SE")} tecken`,
+  },
   {
     label: "Bilagor i en aktiv chatt",
-    value: "5 filer, 5 MB per fil, 20 MB totalt",
+    value: `${MAX_ATTACHMENTS} filer, 5 MB per fil, 20 MB totalt`,
   },
-  { label: "Markerad text till chatten", value: "Max 4 000 tecken" },
+  {
+    label: "Markerad text till chatten",
+    value: `Max ${MAX_CHAT_MESSAGE_LENGTH.toLocaleString("sv-SE")} tecken`,
+  },
   { label: "Senaste sökningar", value: "3 kurskoder" },
   { label: "Chatthistorik", value: "Sparas bara när du är inloggad" },
   { label: "Dina inställningar", value: "Sparas lokalt i webbläsaren" },
@@ -124,16 +125,16 @@ function SettingsContent() {
           label="Tema"
           description="System följer inställningen i din enhet."
         >
-          <Select value={theme} onValueChange={setTheme}>
-            <SelectTrigger size="sm" className="w-44" aria-label="Tema">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="light">Ljust</SelectItem>
-              <SelectItem value="dark">Mörkt</SelectItem>
-              <SelectItem value="system">System</SelectItem>
-            </SelectContent>
-          </Select>
+          <select
+            aria-label="Tema"
+            className="h-8 w-44 max-w-full rounded-md border border-input bg-background px-2 text-sm text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+            value={theme}
+            onChange={(event) => setTheme(event.target.value)}
+          >
+            <option value="light">Ljust</option>
+            <option value="dark">Mörkt</option>
+            <option value="system">System</option>
+          </select>
         </Row>
       </Section>
 
@@ -142,18 +143,17 @@ function SettingsContent() {
           label="Standardvy"
           description="Hur en tenta öppnas. Du kan alltid byta i tentavyn."
         >
-          <Select
+          <select
+            aria-label="Standardvy"
+            className="h-8 w-44 max-w-full rounded-md border border-input bg-background px-2 text-sm text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
             value={layoutMode}
-            onValueChange={(value) => setLayoutMode(value as LayoutMode)}
+            onChange={(event) =>
+              setLayoutMode(event.target.value as LayoutMode)
+            }
           >
-            <SelectTrigger size="sm" className="w-44" aria-label="Standardvy">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="exam-with-facit">Tenta och facit</SelectItem>
-              <SelectItem value="exam-only">Endast tenta</SelectItem>
-            </SelectContent>
-          </Select>
+            <option value="exam-with-facit">Tenta och facit</option>
+            <option value="exam-only">Endast tenta</option>
+          </select>
         </Row>
         <Row
           id="setting-blur-facit"
@@ -181,41 +181,39 @@ function SettingsContent() {
 
       <Section title="AI-assistenten">
         <Row label="Modell" description="Vilken AI som svarar i chatten.">
-          <Select
+          <select
+            aria-label="Modell"
+            className="h-8 w-44 max-w-full rounded-md border border-input bg-background px-2 text-sm text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
             value={selectedModelId}
-            onValueChange={(value) => setSelectedModelId(value as ChatModelId)}
+            onChange={(event) =>
+              setSelectedModelId(event.target.value as ChatModelId)
+            }
           >
-            <SelectTrigger size="sm" className="w-44" aria-label="Modell">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {availableModels.map((model) => (
-                <SelectItem key={model.id} value={model.id}>
-                  {model.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+            {availableModels.map((model) => (
+              <option key={model.id} value={model.id}>
+                {model.label}
+              </option>
+            ))}
+          </select>
         </Row>
         <Row
           label="Tankenivå"
           description="Hur mycket chatten tänker innan den svarar."
         >
-          <Select
+          <select
+            aria-label="Tankenivå"
+            className="h-8 w-44 max-w-full rounded-md border border-input bg-background px-2 text-sm text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
             value={selectedEffort}
-            onValueChange={(value) => setSelectedEffort(value as ChatEffort)}
+            onChange={(event) =>
+              setSelectedEffort(event.target.value as ChatEffort)
+            }
           >
-            <SelectTrigger size="sm" className="w-44" aria-label="Tankenivå">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {availableEfforts.map((effort) => (
-                <SelectItem key={effort.id} value={effort.id}>
-                  {effort.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+            {availableEfforts.map((effort) => (
+              <option key={effort.id} value={effort.id}>
+                {effort.label}
+              </option>
+            ))}
+          </select>
         </Row>
         <p className="pt-3.5 text-xs leading-relaxed text-muted-foreground">
           AI kan göra misstag – se svaren som pedagogiska förslag, inte som
