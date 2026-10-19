@@ -122,7 +122,6 @@
   --shadow-color: oklch(0 0 0 / 0.14);
   --shadow-color-soft: oklch(0 0 0 / 0.05);
   --highlight-color: oklch(1 0 0 / 0.7);
-  /* Achromatic surfaces and text keep the primary color distinct. */
   --background: oklch(0.995 0 0);
   --foreground: oklch(0.25 0 0);
   --card: oklch(1 0 0);
@@ -131,7 +130,7 @@
   --popover-foreground: oklch(0.25 0 0);
   --primary: var(--brand);
   --primary-foreground: oklch(from var(--primary) 0.985 0.002 h);
-  --secondary: oklch(0.985 0 0);
+  --secondary: oklch(0.96 0 0);
   --secondary-foreground: oklch(0.25 0 0);
   --muted: oklch(0.97 0 0);
   --muted-foreground: oklch(0.55 0 0);
@@ -164,7 +163,6 @@
   --shadow-color: oklch(0 0 0 / 0.5);
   --shadow-color-soft: oklch(0 0 0 / 0.3);
   --highlight-color: oklch(1 0 0 / 0.08);
-  /* Achromatic surfaces and text keep the primary color distinct. */
   --background: oklch(0.205 0 0);
   --foreground: oklch(0.97 0 0);
   --card: oklch(0.265 0 0);
@@ -173,7 +171,7 @@
   --popover-foreground: oklch(0.97 0 0);
   --primary: var(--brand);
   --primary-foreground: oklch(from var(--primary) 0.205 0.004 h);
-  --secondary: oklch(0.19 0 0);
+  --secondary: oklch(0.25 0 0);
   --secondary-foreground: oklch(0.985 0 0);
   --muted: oklch(0.31 0 0);
   --muted-foreground: oklch(0.72 0 0);

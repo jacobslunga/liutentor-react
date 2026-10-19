@@ -2,6 +2,9 @@ import {
   BookOpenIcon,
   PaperclipIcon,
   ChevronDownIcon,
+  ChevronRightIcon,
+  ChevronLeftIcon,
+  CheckIcon,
   ArrowUpIcon,
   CornerDownLeftIcon,
   FileTextIcon,
@@ -21,19 +24,19 @@ import {
   type Ref,
 } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { m, useReducedMotion } from "framer-motion";
+import { AnimatePresence, m, useReducedMotion } from "framer-motion";
 import { toast } from "sonner";
+import {
+  RadioGroup as RadioGroupPrimitive,
+  Slider as SliderPrimitive,
+} from "radix-ui";
 import {
   acceptFiles,
   FILE_INPUT_ACCEPT,
   MAX_ATTACHMENTS,
   MAX_ATTACHMENTS_TOTAL_SIZE,
 } from "@/lib/chat-attachments";
-import {
-  CHAT_EFFORTS,
-  type ChatEffort,
-  type ChatModelId,
-} from "@/lib/chat-models";
+import { CHAT_EFFORTS, type ChatModelId } from "@/lib/chat-models";
 import {
   activeMentionQuery,
   findMentionRanges,
@@ -65,14 +68,16 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuCheckboxItem,
-  DropdownMenuLabel,
   DropdownMenuItem,
-  DropdownMenuRadioGroup,
-  DropdownMenuRadioItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 
 const MAX_LENGTH = MAX_CHAT_MESSAGE_LENGTH;
 
@@ -144,6 +149,10 @@ export function ChatInput({
   const [longLength, setLongLength] = useState(0);
   const [textHeight, setTextHeight] = useState(24);
   const [textExpanded, setTextExpanded] = useState(false);
+  const [composerSize, setComposerSize] = useState<{
+    height: number;
+    animate: boolean;
+  }>();
   const reducedMotion = useReducedMotion();
   const plusRef = useRef<HTMLDivElement>(null);
   const controlsRef = useRef<HTMLDivElement>(null);
@@ -164,12 +173,12 @@ export function ChatInput({
     !!courseExamAnalysis?.enabled;
   const expanded = hasHeader || textExpanded;
   const layoutKey = `${expanded}-${hasHeader}-${attachments.length}-${!!courseExamAnalysis?.enabled}`;
+  const previousLayoutKey = useRef(layoutKey);
+  const resizeTransition = reducedMotion
+    ? { duration: 0 }
+    : { type: "spring" as const, stiffness: 420, damping: 38 };
   const layoutTransition = {
-    layout: {
-      type: "tween" as const,
-      duration: reducedMotion ? 0 : 0.16,
-      ease: [0.2, 0.8, 0.2, 1] as const,
-    },
+    layout: resizeTransition,
   };
 
   const renderMentionPills = (value: string) => {
@@ -316,6 +325,26 @@ export function ChatInput({
     };
   }, [measurePrompt]);
 
+  useLayoutEffect(() => {
+    const composer = composerRef.current;
+    if (!composer) return;
+
+    const animate = previousLayoutKey.current !== layoutKey;
+    previousLayoutKey.current = layoutKey;
+    // Measure the natural content independently of the animated shell.
+    // Include the shell's one-pixel border on both sides.
+    const measure = () => {
+      const height = composer.offsetHeight + 2;
+      setComposerSize((previous) =>
+        previous?.height === height ? previous : { height, animate },
+      );
+    };
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(composer);
+    return () => observer.disconnect();
+  }, [layoutKey, textHeight]);
+
   const addFiles = (files: File[]) => {
     if (chatStore.getState().isLoading) return;
     const existing = [
@@ -434,279 +463,287 @@ export function ChatInput({
         )}
       >
         <m.div
-          ref={composerRef}
-          layout
+          layout="position"
           layoutDependency={layoutKey}
-          transition={layoutTransition}
-          style={{ borderRadius: expanded || hasHeader ? "1.25rem" : "2rem" }}
-          data-expanded={expanded || hasHeader}
+          initial={false}
+          animate={{
+            height: composerSize?.height ?? "auto",
+            borderRadius: expanded ? 20 : 32,
+          }}
+          transition={{
+            ...resizeTransition,
+            ...layoutTransition,
+            height: composerSize?.animate ? resizeTransition : { duration: 0 },
+          }}
           className={cn(
-            "relative min-h-14 overflow-hidden rounded-full border border-border/70 bg-card p-2.5 shadow-[0_2px_6px_-2px_oklch(0_0_0/0.08),0_8px_28px_-8px_oklch(0_0_0/0.06)] data-[expanded=true]:rounded-[20px] dark:border-border dark:shadow-[0_2px_8px_-2px_oklch(0_0_0/0.3),0_8px_28px_-8px_oklch(0_0_0/0.2)]",
+            "relative min-h-14 overflow-hidden border border-border/70 bg-card shadow-[0_4px_4px_-8px_oklch(0_0_0/0.08),0_8px_28px_-8px_oklch(0_0_0/0.06)] dark:border-border dark:shadow-[0px_2px_20px_-100px_oklch(0_0_0/0.3),0_8px_28px_-8px_oklch(0_0_0/0.2)]",
           )}
         >
-          {hasHeader && (
-            <m.div
-              layout="position"
-              layoutDependency={layoutKey}
-              transition={layoutTransition}
-              className="-mx-2.5 -mt-2.5 overflow-hidden"
-            >
-              <div className="mb-1.5 flex flex-col items-stretch gap-2 border-b bg-muted/50 px-3 py-2">
-                {courseExamAnalysis?.enabled && (
-                  <div className="flex items-center gap-2">
-                    <div className="flex min-w-0 items-center gap-2 rounded-lg bg-primary/10 py-1 pr-1 pl-2.5 text-xs text-primary">
-                      <BookOpenIcon className="size-3.5 shrink-0" />
-                      <span className="min-w-0 truncate">
-                        Kursens tentor · nästa meddelande
-                      </span>
-                      <IconButton
-                        type="button"
-                        size="icon-xs"
-                        aria-label="Ta bort kursanalys"
-                        disabled={isLoading}
-                        onClick={() => courseExamAnalysis.onChange(false)}
-                      >
-                        <XIcon />
-                      </IconButton>
-                    </div>
-                  </div>
-                )}
-                {selectionContext && (
-                  <div className="flex w-full items-center gap-2.5">
-                    <CornerDownLeftIcon className="size-4 shrink-0 -scale-x-100 text-muted-foreground" />
-                    <span className="line-clamp-3 min-w-0 flex-1 text-sm leading-relaxed font-normal text-foreground">
-                      "<SelectionQuote text={selectionContext} />"
-                    </span>
-                    <IconButton
-                      variant="ghost"
-                      size="icon-sm"
-                      aria-label="Ta bort citatet"
-                      onClick={onClearSelectionContext}
-                    >
-                      <XIcon />
-                    </IconButton>
-                  </div>
-                )}
-                {attachments.length > 0 && (
-                  <div className="flex flex-wrap gap-2">
-                    {attachments.map((a) => (
-                      <div
-                        key={a.id}
-                        className="flex max-w-full min-w-0 items-center gap-2 rounded-lg bg-background px-2.5 py-1.5 text-xs font-normal text-foreground"
-                      >
-                        {a.mediaType === "application/pdf" ? (
-                          <FileTextIcon className="size-3.5 shrink-0 text-muted-foreground" />
-                        ) : a.previewUrl ? (
-                          <img
-                            src={a.previewUrl}
-                            alt=""
-                            className="size-10 shrink-0 rounded-md object-cover"
-                          />
-                        ) : (
-                          <ImageIcon className="size-3.5 shrink-0 text-muted-foreground" />
-                        )}
-                        <span className="max-w-20 truncate" title={a.name}>
-                          {a.name}
-                        </span>
-                        <span className="shrink-0 text-muted-foreground">
-                          {formatFileSize(a.size)}
+          <div ref={composerRef} className="p-2.5">
+            {hasHeader && (
+              <m.div
+                layout="position"
+                layoutDependency={layoutKey}
+                transition={layoutTransition}
+                className="-mx-2.5 -mt-2.5 overflow-hidden"
+              >
+                <div className="mb-1.5 flex flex-col items-stretch gap-2 border-b bg-muted/50 px-3 py-2">
+                  {courseExamAnalysis?.enabled && (
+                    <div className="flex items-center gap-2">
+                      <div className="flex min-w-0 items-center gap-2 rounded-lg bg-primary/10 py-1 pr-1 pl-2.5 text-xs text-primary">
+                        <BookOpenIcon className="size-3.5 shrink-0" />
+                        <span className="min-w-0 truncate">
+                          Kursens tentor · nästa meddelande
                         </span>
                         <IconButton
-                          variant="ghost"
-                          size="icon-sm"
-                          aria-label={`Ta bort ${a.name}`}
-                          onClick={() => removeAttachment(a.id)}
+                          type="button"
+                          size="icon-xs"
+                          aria-label="Ta bort kursanalys"
+                          disabled={isLoading}
+                          onClick={() => courseExamAnalysis.onChange(false)}
                         >
                           <XIcon />
                         </IconButton>
                       </div>
-                    ))}
+                    </div>
+                  )}
+                  {selectionContext && (
+                    <div className="flex w-full items-center gap-2.5">
+                      <CornerDownLeftIcon className="size-4 shrink-0 -scale-x-100 text-muted-foreground" />
+                      <span className="line-clamp-3 min-w-0 flex-1 text-sm leading-relaxed font-normal text-foreground">
+                        "<SelectionQuote text={selectionContext} />"
+                      </span>
+                      <IconButton
+                        variant="ghost"
+                        size="icon-sm"
+                        aria-label="Ta bort citatet"
+                        onClick={onClearSelectionContext}
+                      >
+                        <XIcon />
+                      </IconButton>
+                    </div>
+                  )}
+                  {attachments.length > 0 && (
+                    <div className="flex flex-wrap gap-2">
+                      {attachments.map((a) => (
+                        <div
+                          key={a.id}
+                          className="flex max-w-full min-w-0 items-center gap-2 rounded-lg bg-background px-2.5 py-1.5 text-xs font-normal text-foreground"
+                        >
+                          {a.mediaType === "application/pdf" ? (
+                            <FileTextIcon className="size-3.5 shrink-0 text-muted-foreground" />
+                          ) : a.previewUrl ? (
+                            <img
+                              src={a.previewUrl}
+                              alt=""
+                              className="size-10 shrink-0 rounded-md object-cover"
+                            />
+                          ) : (
+                            <ImageIcon className="size-3.5 shrink-0 text-muted-foreground" />
+                          )}
+                          <span className="max-w-20 truncate" title={a.name}>
+                            {a.name}
+                          </span>
+                          <span className="shrink-0 text-muted-foreground">
+                            {formatFileSize(a.size)}
+                          </span>
+                          <IconButton
+                            variant="ghost"
+                            size="icon-sm"
+                            aria-label={`Ta bort ${a.name}`}
+                            onClick={() => removeAttachment(a.id)}
+                          >
+                            <XIcon />
+                          </IconButton>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </m.div>
+            )}
+
+            <div
+              className={cn(
+                "grid gap-x-1 gap-y-1",
+                expanded ? "items-end" : "items-center",
+              )}
+              style={{
+                gridTemplateColumns: "auto minmax(0, 1fr) auto",
+                gridTemplateAreas: expanded
+                  ? '"text text text" "plus . controls"'
+                  : '"plus text controls"',
+              }}
+            >
+              <input
+                ref={fileInputRef}
+                type="file"
+                multiple
+                className="hidden"
+                accept={FILE_INPUT_ACCEPT}
+                onChange={(e) => {
+                  if (e.target.files) addFiles(Array.from(e.target.files));
+                  e.target.value = "";
+                }}
+              />
+              <m.div
+                layout="position"
+                layoutDependency={layoutKey}
+                transition={layoutTransition}
+                ref={plusRef}
+                style={{ gridArea: "plus" }}
+              >
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <IconButton
+                      type="button"
+                      variant="ghost"
+                      className="size-10 rounded-full p-0"
+                      aria-label="Lägg till i meddelandet"
+                      hideTooltip
+                      disabled={isLoading}
+                    >
+                      <PlusIcon className="size-6" strokeWidth={1.75} />
+                    </IconButton>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent
+                    side="top"
+                    align="start"
+                    sideOffset={12}
+                    collisionPadding={12}
+                    className="w-72 max-w-[calc(100vw-1.5rem)] rounded-xl p-1.5"
+                  >
+                    <DropdownMenuItem
+                      className="gap-2.5 rounded-lg px-2.5 py-2.5"
+                      disabled={capacityReached}
+                      onSelect={() => fileInputRef.current?.click()}
+                    >
+                      <PaperclipIcon />
+                      Bifoga filer
+                    </DropdownMenuItem>
+                    {courseExamAnalysis && (
+                      <>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuCheckboxItem
+                          checked={courseExamAnalysis.enabled}
+                          onCheckedChange={(checked) =>
+                            courseExamAnalysis.onChange(checked === true)
+                          }
+                          className="items-start gap-2.5 rounded-lg py-2.5 pl-2.5"
+                        >
+                          <BookOpenIcon className="mt-0.5" />
+                          <span className="flex min-w-0 flex-col gap-0.5">
+                            <span>Analysera kursens tentor</span>
+                            <span className="text-xs font-normal text-muted-foreground">
+                              För nästa meddelande
+                            </span>
+                          </span>
+                        </DropdownMenuCheckboxItem>
+                      </>
+                    )}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </m.div>
+              <m.div
+                layout="position"
+                layoutDependency={layoutKey}
+                transition={layoutTransition}
+                className="relative min-w-0"
+                style={{ gridArea: "text" }}
+              >
+                {!hasInput &&
+                  (welcome ? (
+                    <WelcomePlaceholder />
+                  ) : (
+                    <span
+                      aria-hidden="true"
+                      className="pointer-events-none absolute inset-x-2 top-1 truncate text-base leading-6 text-muted-foreground/70"
+                    >
+                      {placeholder}
+                    </span>
+                  ))}
+                {courseMentions && (
+                  <div
+                    ref={mentionLayerRef}
+                    aria-hidden
+                    className="pointer-events-none absolute inset-0 overflow-hidden py-1 pr-2 pl-2 text-base leading-6 wrap-break-word whitespace-pre-wrap text-transparent"
+                  />
+                )}
+                <textarea
+                  ref={textareaRef}
+                  defaultValue={initialText}
+                  rows={1}
+                  aria-label="Meddelande"
+                  className="relative block max-h-52 w-full resize-none border-0 bg-transparent px-2 py-1 text-base leading-6 text-foreground outline-none placeholder:text-foreground"
+                  style={{
+                    height: textHeight + 8,
+                    overflowY: textHeight >= 192 ? "auto" : "hidden",
+                  }}
+                  onInput={(e) => {
+                    syncTextState(e.currentTarget.value);
+                    syncMention(e.currentTarget);
+                    measurePrompt();
+                  }}
+                  onPaste={(event) => {
+                    if (
+                      event.defaultPrevented ||
+                      event.clipboardData.files.length
+                    )
+                      return;
+                    const text = formattedClipboardText(
+                      event.clipboardData.getData("text/html"),
+                    );
+                    if (!text) return;
+                    event.preventDefault();
+                    const textarea = event.currentTarget;
+                    replaceRange(
+                      textarea.selectionStart,
+                      textarea.selectionEnd,
+                      text,
+                    );
+                    syncTextState(textarea.value);
+                    syncMention(textarea);
+                    measurePrompt();
+                  }}
+                  onSelect={(e) => syncMention(e.currentTarget)}
+                  onBlur={() => setMention(null)}
+                  onScroll={(e) => {
+                    if (mentionLayerRef.current)
+                      mentionLayerRef.current.scrollTop =
+                        e.currentTarget.scrollTop;
+                  }}
+                  onKeyDown={onKeyDown}
+                />
+              </m.div>
+              <m.div
+                layout="position"
+                layoutDependency={layoutKey}
+                transition={layoutTransition}
+                ref={controlsRef}
+                className="flex shrink-0 items-center gap-1"
+                style={{ gridArea: "controls" }}
+              >
+                {longLength > 0 && (
+                  <span
+                    className={cn(
+                      "text-2xs",
+                      tooLong
+                        ? "font-medium text-destructive"
+                        : "text-muted-foreground",
+                    )}
+                  >
+                    {longLength.toLocaleString("sv-SE")} /{" "}
+                    {MAX_LENGTH.toLocaleString("sv-SE")}
+                  </span>
+                )}
+                {!mobile && (
+                  <div className="hidden @min-[440px]:block">
+                    <ModelPicker />
                   </div>
                 )}
-              </div>
-            </m.div>
-          )}
-
-          <div
-            className={cn(
-              "grid gap-x-1 gap-y-1",
-              expanded ? "items-end" : "items-center",
-            )}
-            style={{
-              gridTemplateColumns: "auto minmax(0, 1fr) auto",
-              gridTemplateAreas: expanded
-                ? '"text text text" "plus . controls"'
-                : '"plus text controls"',
-            }}
-          >
-            <input
-              ref={fileInputRef}
-              type="file"
-              multiple
-              className="hidden"
-              accept={FILE_INPUT_ACCEPT}
-              onChange={(e) => {
-                if (e.target.files) addFiles(Array.from(e.target.files));
-                e.target.value = "";
-              }}
-            />
-            <m.div
-              layout="position"
-              layoutDependency={layoutKey}
-              transition={layoutTransition}
-              ref={plusRef}
-              style={{ gridArea: "plus" }}
-            >
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <IconButton
-                    type="button"
-                    variant="ghost"
-                    className="size-8 rounded-full p-0"
-                    aria-label="Lägg till i meddelandet"
-                    hideTooltip
-                    disabled={isLoading}
-                  >
-                    <PlusIcon className="size-6" strokeWidth={1.75} />
-                  </IconButton>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent
-                  side="top"
-                  align="start"
-                  sideOffset={12}
-                  collisionPadding={12}
-                  className="w-72 max-w-[calc(100vw-1.5rem)] rounded-xl p-1.5"
-                >
-                  <DropdownMenuItem
-                    className="gap-2.5 rounded-lg px-2.5 py-2.5"
-                    disabled={capacityReached}
-                    onSelect={() => fileInputRef.current?.click()}
-                  >
-                    <PaperclipIcon />
-                    Bifoga filer
-                  </DropdownMenuItem>
-                  {courseExamAnalysis && (
-                    <>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuCheckboxItem
-                        checked={courseExamAnalysis.enabled}
-                        onCheckedChange={(checked) =>
-                          courseExamAnalysis.onChange(checked === true)
-                        }
-                        className="items-start gap-2.5 rounded-lg py-2.5 pl-2.5"
-                      >
-                        <BookOpenIcon className="mt-0.5" />
-                        <span className="flex min-w-0 flex-col gap-0.5">
-                          <span>Analysera kursens tentor</span>
-                          <span className="text-xs font-normal text-muted-foreground">
-                            För nästa meddelande
-                          </span>
-                        </span>
-                      </DropdownMenuCheckboxItem>
-                    </>
-                  )}
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </m.div>
-            <m.div
-              layout="position"
-              layoutDependency={layoutKey}
-              transition={layoutTransition}
-              className="relative min-w-0"
-              style={{ gridArea: "text" }}
-            >
-              {!hasInput &&
-                (welcome ? (
-                  <WelcomePlaceholder />
-                ) : (
-                  <span
-                    aria-hidden="true"
-                    className="pointer-events-none absolute inset-x-2 top-1 truncate text-base leading-6 text-muted-foreground/70"
-                  >
-                    {placeholder}
-                  </span>
-                ))}
-              {courseMentions && (
-                <div
-                  ref={mentionLayerRef}
-                  aria-hidden
-                  className="pointer-events-none absolute inset-0 overflow-hidden py-1 pr-2 pl-2 text-base leading-6 wrap-break-word whitespace-pre-wrap text-transparent"
-                />
-              )}
-              <textarea
-                ref={textareaRef}
-                defaultValue={initialText}
-                rows={1}
-                aria-label="Meddelande"
-                className="relative block max-h-52 w-full resize-none border-0 bg-transparent px-2 py-1 text-base leading-6 text-foreground outline-none placeholder:text-foreground"
-                style={{
-                  height: textHeight + 8,
-                  overflowY: textHeight >= 192 ? "auto" : "hidden",
-                }}
-                onInput={(e) => {
-                  syncTextState(e.currentTarget.value);
-                  syncMention(e.currentTarget);
-                  measurePrompt();
-                }}
-                onPaste={(event) => {
-                  if (
-                    event.defaultPrevented ||
-                    event.clipboardData.files.length
-                  )
-                    return;
-                  const text = formattedClipboardText(
-                    event.clipboardData.getData("text/html"),
-                  );
-                  if (!text) return;
-                  event.preventDefault();
-                  const textarea = event.currentTarget;
-                  replaceRange(
-                    textarea.selectionStart,
-                    textarea.selectionEnd,
-                    text,
-                  );
-                  syncTextState(textarea.value);
-                  syncMention(textarea);
-                  measurePrompt();
-                }}
-                onSelect={(e) => syncMention(e.currentTarget)}
-                onBlur={() => setMention(null)}
-                onScroll={(e) => {
-                  if (mentionLayerRef.current)
-                    mentionLayerRef.current.scrollTop =
-                      e.currentTarget.scrollTop;
-                }}
-                onKeyDown={onKeyDown}
-              />
-            </m.div>
-            <m.div
-              layout="position"
-              layoutDependency={layoutKey}
-              transition={layoutTransition}
-              ref={controlsRef}
-              className="flex shrink-0 items-center gap-1"
-              style={{ gridArea: "controls" }}
-            >
-              {longLength > 0 && (
-                <span
-                  className={cn(
-                    "text-2xs",
-                    tooLong
-                      ? "font-medium text-destructive"
-                      : "text-muted-foreground",
-                  )}
-                >
-                  {longLength.toLocaleString("sv-SE")} /{" "}
-                  {MAX_LENGTH.toLocaleString("sv-SE")}
-                </span>
-              )}
-              {!mobile && (
-                <div className="hidden @min-[440px]:block">
-                  <ModelPicker />
-                </div>
-              )}
-              {sendButton}
-            </m.div>
+                {sendButton}
+              </m.div>
+            </div>
           </div>
         </m.div>
 
@@ -743,74 +780,267 @@ function StopIcon() {
 }
 
 function ModelPicker() {
+  const [effortPreview, setEffortPreview] = useState<number | null>(null);
+  const [draggingEffort, setDraggingEffort] = useState(false);
+  const [holdingEffort, setHoldingEffort] = useState(false);
+  const [animateEffort, setAnimateEffort] = useState(false);
+  const [showModels, setShowModels] = useState(false);
+  const effortButtonRef = useRef<HTMLButtonElement>(null);
+  const modelOptionsRef = useRef<HTMLDivElement>(null);
+  const reducedMotion = useReducedMotion();
   const { selectedModelId, selectedEffort, availableModels, availableEfforts } =
     useSelectedModel();
   const setSelectedModelId = useSettingsStore((s) => s.setSelectedModelId);
   const setSelectedEffort = useSettingsStore((s) => s.setSelectedEffort);
-  const model =
-    availableModels.find((m) => m.id === selectedModelId) ?? availableModels[0];
+  const modelLabel = (
+    availableModels.find((model) => model.id === selectedModelId) ??
+    availableModels[0]
+  ).label;
   const effortLabel =
     CHAT_EFFORTS.find((e) => e.id === selectedEffort)?.label ?? "";
+  const effortIndex = availableEfforts.findIndex(
+    (e) => e.id === selectedEffort,
+  );
+  const viewTransition = reducedMotion
+    ? { duration: 0 }
+    : { type: "spring" as const, stiffness: 420, damping: 36 };
+
+  useEffect(() => {
+    const target = showModels
+      ? modelOptionsRef.current?.querySelector<HTMLButtonElement>(
+          '[data-state="checked"]',
+        )
+      : effortButtonRef.current;
+    target?.focus({ preventScroll: true });
+  }, [showModels]);
+
+  const finishEffortDrag = () => {
+    setHoldingEffort(false);
+    setDraggingEffort(false);
+    setEffortPreview(null);
+  };
 
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
+    <Popover
+      onOpenChange={(open) => {
+        finishEffortDrag();
+        setAnimateEffort(false);
+        if (!open) setShowModels(false);
+      }}
+    >
+      <PopoverTrigger asChild>
         <Button
           variant="ghost"
           className="h-9 gap-1 rounded-full px-2.5 text-xs text-foreground/80"
-          aria-label="Modell och tankenivå"
+          aria-label={`Modell: ${modelLabel}, tankenivå: ${effortLabel}`}
         >
-          {model.label}
-          <span className="text-muted-foreground">{effortLabel}</span>
+          <span className="text-foreground">{modelLabel}</span> {effortLabel}
           <ChevronDownIcon />
         </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent
+      </PopoverTrigger>
+      <PopoverContent
         side="top"
         align="end"
         sideOffset={12}
         collisionPadding={12}
-        className="w-64 max-w-[calc(100vw-1.5rem)] rounded-xl p-1.5"
+        className="block w-72 max-w-[calc(100vw-1.5rem)] overflow-hidden rounded-[22px] p-0"
       >
-        <DropdownMenuLabel className="px-2.5 pt-1.5 pb-1">
-          Modell
-        </DropdownMenuLabel>
-        <DropdownMenuRadioGroup
-          aria-label="Modell"
-          value={selectedModelId}
-          onValueChange={(value) => setSelectedModelId(value as ChatModelId)}
+        <m.div
+          animate={{ height: showModels ? 196 : 112 }}
+          initial={false}
+          transition={viewTransition}
+          className="relative"
+          onKeyDown={(event) => {
+            if (event.key === "Escape" && showModels) {
+              event.preventDefault();
+              event.stopPropagation();
+              setShowModels(false);
+            }
+          }}
         >
-          {availableModels.map((item) => (
-            <DropdownMenuRadioItem
-              key={item.id}
-              value={item.id}
-              className="items-start rounded-lg py-2 pl-2.5"
-            >
-              <span className="flex min-w-0 flex-col gap-0.5">
-                <span>{item.label}</span>
-              </span>
-            </DropdownMenuRadioItem>
-          ))}
-        </DropdownMenuRadioGroup>
-        <DropdownMenuSeparator className="my-1.5" />
-        <DropdownMenuLabel className="px-2.5 pb-1">Tankenivå</DropdownMenuLabel>
-        <DropdownMenuRadioGroup
-          aria-label="Tankenivå"
-          value={selectedEffort}
-          onValueChange={(value) => setSelectedEffort(value as ChatEffort)}
-        >
-          {availableEfforts.map((effort) => (
-            <DropdownMenuRadioItem
-              key={effort.id}
-              value={effort.id}
-              className="rounded-lg py-2 pl-2.5"
-            >
-              {effort.label}
-            </DropdownMenuRadioItem>
-          ))}
-        </DropdownMenuRadioGroup>
-      </DropdownMenuContent>
-    </DropdownMenu>
+          <AnimatePresence initial={false} mode="popLayout">
+            {showModels ? (
+              <m.div
+                key="models"
+                initial={{ opacity: 0, x: reducedMotion ? 0 : 32 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: reducedMotion ? 0 : 32 }}
+                transition={viewTransition}
+                className="w-full p-3"
+              >
+                <Button
+                  type="button"
+                  variant="ghost"
+                  className="mx-auto mb-2 flex text-base"
+                  onClick={() => setShowModels(false)}
+                  aria-label="Tillbaka till tankenivå"
+                >
+                  <ChevronLeftIcon className="size-4 text-muted-foreground" />
+                  Modell
+                </Button>
+                <RadioGroupPrimitive.Root
+                  ref={modelOptionsRef}
+                  aria-label="Modell"
+                  value={selectedModelId}
+                  onValueChange={(value) => {
+                    setSelectedModelId(value as ChatModelId);
+                    setShowModels(false);
+                  }}
+                  className="space-y-1"
+                >
+                  {availableModels.map((model) => (
+                    <RadioGroupPrimitive.Item
+                      asChild
+                      key={model.id}
+                      value={model.id}
+                      onClick={() => setShowModels(false)}
+                    >
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        className="h-10 w-full justify-between rounded-xl data-[state=checked]:bg-muted"
+                      >
+                        {model.label}
+                        <RadioGroupPrimitive.Indicator>
+                          <CheckIcon className="size-4" />
+                        </RadioGroupPrimitive.Indicator>
+                      </Button>
+                    </RadioGroupPrimitive.Item>
+                  ))}
+                </RadioGroupPrimitive.Root>
+              </m.div>
+            ) : (
+              <m.div
+                key="effort"
+                initial={{ opacity: 0, x: reducedMotion ? 0 : -32 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: reducedMotion ? 0 : -32 }}
+                transition={viewTransition}
+                className="w-full px-4 pt-3 pb-4"
+              >
+                <Button
+                  ref={effortButtonRef}
+                  type="button"
+                  variant="ghost"
+                  className="mx-auto mb-3 flex h-9 gap-1 text-lg"
+                  onClick={() => {
+                    setAnimateEffort(false);
+                    setShowModels(true);
+                  }}
+                  aria-label={`${effortLabel}, välj modell`}
+                >
+                  {effortLabel}
+                  <ChevronRightIcon className="size-4 text-muted-foreground" />
+                </Button>
+                <SliderPrimitive.Root
+                  className={cn(
+                    "relative flex h-8 w-full touch-none items-center select-none [&>span:has([role=slider])]:duration-250 [&>span:has([role=slider])]:ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:[&>span:has([role=slider])]:transition-none",
+                    animateEffort && !draggingEffort
+                      ? "[&>span:has([role=slider])]:transition-[left]"
+                      : "[&>span:has([role=slider])]:transition-none",
+                  )}
+                  min={0}
+                  max={availableEfforts.length - 1}
+                  step={0.001}
+                  value={[effortPreview ?? effortIndex]}
+                  onValueChange={([value]) => {
+                    setEffortPreview(value);
+                    const effort = availableEfforts[Math.round(value)];
+                    if (effort) setSelectedEffort(effort.id);
+                  }}
+                  onPointerDown={() => {
+                    setAnimateEffort(true);
+                    setHoldingEffort(true);
+                  }}
+                  onPointerMove={(event) => {
+                    if (event.buttons) setDraggingEffort(true);
+                  }}
+                  onPointerUp={finishEffortDrag}
+                  onPointerCancel={finishEffortDrag}
+                  onLostPointerCapture={finishEffortDrag}
+                  onKeyDown={(event) => {
+                    if (
+                      [
+                        "ArrowLeft",
+                        "ArrowRight",
+                        "ArrowUp",
+                        "ArrowDown",
+                        "Home",
+                        "End",
+                        "PageUp",
+                        "PageDown",
+                      ].includes(event.key)
+                    ) {
+                      event.preventDefault();
+                      event.stopPropagation();
+                      setAnimateEffort(true);
+                      const lastIndex = availableEfforts.length - 1;
+                      const nextIndex =
+                        event.key === "Home"
+                          ? 0
+                          : event.key === "End"
+                            ? lastIndex
+                            : effortIndex +
+                              (["ArrowRight", "ArrowUp", "PageUp"].includes(
+                                event.key,
+                              )
+                                ? 1
+                                : -1);
+                      setEffortPreview(null);
+                      setSelectedEffort(
+                        availableEfforts[
+                          Math.max(0, Math.min(lastIndex, nextIndex))
+                        ].id,
+                      );
+                    }
+                  }}
+                >
+                  <SliderPrimitive.Track className="relative h-7 w-full overflow-hidden rounded-full bg-foreground/15 ring-1 ring-foreground/15 ring-inset">
+                    <SliderPrimitive.Range
+                      className={cn(
+                        "absolute h-full rounded-full bg-primary duration-250 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none",
+                        animateEffort && !draggingEffort
+                          ? "transition-[right]"
+                          : "transition-none",
+                      )}
+                    />
+                  </SliderPrimitive.Track>
+                  <div
+                    aria-hidden="true"
+                    className="pointer-events-none absolute inset-x-4 flex items-center justify-between"
+                  >
+                    {availableEfforts.map((effort) => (
+                      <span
+                        key={effort.id}
+                        className="size-1 rounded-full bg-foreground/30"
+                      />
+                    ))}
+                  </div>
+                  <SliderPrimitive.Thumb
+                    asChild
+                    aria-label="Tankenivå"
+                    aria-valuetext={effortLabel}
+                  >
+                    <m.span
+                      initial={false}
+                      className="block size-8 rounded-full bg-white shadow-sm outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-popover"
+                      animate={{
+                        scale: holdingEffort && !reducedMotion ? 1.18 : 1,
+                      }}
+                      transition={
+                        reducedMotion
+                          ? { duration: 0 }
+                          : { type: "spring", stiffness: 500, damping: 28 }
+                      }
+                    />
+                  </SliderPrimitive.Thumb>
+                </SliderPrimitive.Root>
+              </m.div>
+            )}
+          </AnimatePresence>
+        </m.div>
+      </PopoverContent>
+    </Popover>
   );
 }
 

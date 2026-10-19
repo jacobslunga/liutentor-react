@@ -235,7 +235,7 @@ function CourseContent({
       </header>
 
       <div className="grid gap-x-8 gap-y-10 pt-6 lg:grid-cols-[minmax(0,1fr)_18.5rem]">
-        <div className="grid min-w-0 grid-cols-[minmax(0,1fr)_auto] content-start [&_[role=tabpanel]]:col-span-2">
+        <div className="grid min-w-0 grid-cols-[minmax(0,1fr)_auto] content-start **:[[role=tabpanel]]:col-span-2">
           <Tabs
             value={activeTab}
             onValueChange={(value) => setTab(value as CourseTab)}

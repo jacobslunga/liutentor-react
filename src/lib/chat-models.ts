@@ -1,10 +1,5 @@
 export const CHAT_MODELS = [
   {
-    id: "claude-haiku-5-5",
-    label: "Claude",
-    provider: "Anthropic",
-  },
-  {
     id: "gpt-6-luna",
     label: "ChatGPT",
     provider: "OpenAI",
@@ -14,11 +9,16 @@ export const CHAT_MODELS = [
     label: "Gemini",
     provider: "Google",
   },
+  {
+    id: "claude-haiku-5-5",
+    label: "Claude",
+    provider: "Anthropic",
+  },
 ] as const;
 
 export const CHAT_EFFORTS = [
   { id: "low", label: "Låg", requiresAuth: false },
-  { id: "medium", label: "Medel", requiresAuth: false },
+  { id: "medium", label: "Medium", requiresAuth: false },
   { id: "high", label: "Hög", requiresAuth: true },
 ] as const;
 

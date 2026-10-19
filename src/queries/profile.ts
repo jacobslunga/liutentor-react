@@ -27,7 +27,7 @@ export const profileQuery = (userId: string) =>
           .select("first_name, last_name, avatar_url, avatar_color")
           .eq("id", userId)
           .abortSignal(requestSignal)
-          .single();
+          .maybeSingle();
 
       let timeout: ReturnType<typeof setTimeout> | undefined;
       try {
