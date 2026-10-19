@@ -7,6 +7,7 @@ import {
   MonitorIcon,
   MoonIcon,
   PaletteIcon,
+  RefreshCwIcon,
   SettingsIcon,
   SunIcon,
   UserIcon,
@@ -38,7 +39,7 @@ const THEMES = [
 
 export function UserDropdown() {
   const navigate = useNavigate();
-  const { user, displayName } = useProfile();
+  const { user, displayName, isError, isFetching, retry } = useProfile();
   const { theme = "system", setTheme } = useTheme();
   const [settingsOpen, setSettingsOpen] = useState(false);
   const themeLabel = THEMES.find((t) => t.value === theme)?.label ?? "System";
@@ -68,6 +69,15 @@ export function UserDropdown() {
             </div>
           </div>
           <DropdownMenuSeparator />
+          {isError && (
+            <DropdownMenuItem
+              disabled={isFetching}
+              onSelect={() => void retry()}
+            >
+              <RefreshCwIcon />
+              Försök ladda profilen igen
+            </DropdownMenuItem>
+          )}
           <DropdownMenuItem onSelect={() => void navigate({ to: "/me" })}>
             <UserIcon />
             Profil

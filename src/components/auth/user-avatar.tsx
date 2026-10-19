@@ -10,7 +10,7 @@ export function UserAvatar({
   className?: string;
   fallbackClassName?: string;
 }) {
-  const { profile, initials, avatarColor, isPending } = useProfile();
+  const { profile, initials, avatarColor } = useProfile();
 
   return (
     <Avatar className={cn("size-8", className)}>
@@ -24,7 +24,7 @@ export function UserAvatar({
           fallbackClassName,
         )}
       >
-        {isPending ? "" : initials}
+        {initials}
       </AvatarFallback>
     </Avatar>
   );

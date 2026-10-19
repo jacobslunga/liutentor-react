@@ -18,16 +18,49 @@ export interface Profile {
 export const profileQuery = (userId: string) =>
   queryOptions({
     queryKey: ["profile", userId],
-    queryFn: async (): Promise<Profile | null> => {
-      const { data, error } = await supabase
-        .from("profiles")
-        .select("first_name, last_name, avatar_url, avatar_color")
-        .eq("id", userId)
-        .single();
-      if (error) throw error;
-      return data as Profile | null;
+    queryFn: async ({ signal }): Promise<Profile | null> => {
+      const controller = new AbortController();
+      const requestSignal = AbortSignal.any([signal, controller.signal]);
+      const load = () =>
+        supabase
+          .from("profiles")
+          .select("first_name, last_name, avatar_url, avatar_color")
+          .eq("id", userId)
+          .abortSignal(requestSignal)
+          .single();
+
+      let timeout: ReturnType<typeof setTimeout> | undefined;
+      try {
+        // Bound the entire operation, including waiting for auth/token refresh.
+        return await Promise.race([
+          (async () => {
+            let result = await load();
+            if (result.status === 401 && !requestSignal.aborted) {
+              const { error } = await supabase.auth.refreshSession();
+              if (error) throw error;
+              if (requestSignal.aborted) throw requestSignal.reason;
+              result = await load();
+            }
+            if (result.error) throw result.error;
+            return result.data as Profile | null;
+          })(),
+          new Promise<never>((_, reject) => {
+            timeout = setTimeout(() => {
+              const error = new Error("Profile request timed out");
+              controller.abort(error);
+              reject(error);
+            }, 15_000);
+          }),
+        ]);
+      } finally {
+        clearTimeout(timeout);
+      }
     },
     staleTime: 5 * 60_000,
+    retry: 2,
+    retryDelay: (attempt) => Math.min(1_000 * 2 ** attempt, 5_000),
+    refetchOnWindowFocus: true,
+    refetchOnReconnect: true,
   });
 
 export interface Activity {
@@ -86,6 +119,9 @@ export function useProfile() {
     user,
     profile,
     isPending: !!user && query.isPending,
+    isError: query.isError,
+    isFetching: query.isFetching,
+    retry: query.refetch,
     firstName,
     lastName,
     displayName: [firstName, lastName].filter(Boolean).join(" "),
