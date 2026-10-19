@@ -7,11 +7,11 @@ import {
   type ChatModelId,
 } from "./chat-models";
 
-const MODEL_COOKIE_KEY = "liutentor_ai_model";
+const MODEL_COOKIE_KEY = "liutentor_ai_model_v2";
 const EFFORT_COOKIE_KEY = "liutentor_ai_effort";
-// Earlier versions stored "fast" / "thinking" or a different cookie name.
+// Reset earlier model preferences so existing users start with the new default.
 const OBSOLETE_COOKIE_KEY =
-  /^liutentor_(?:selected_model|chat_model|chat_mode)(?:_v\d+)?$/;
+  /^liutentor_(?:ai_model|selected_model|chat_model|chat_mode)(?:_v\d+)?$/;
 
 function writeCookie(key: string, value: string): void {
   if (typeof document === "undefined") return;
@@ -39,7 +39,7 @@ export function readChatModel(): ChatModelId {
   if (typeof document === "undefined") return DEFAULT_MODEL_ID;
   const cookies = readCookies();
   for (const key of cookies.keys()) {
-    if (OBSOLETE_COOKIE_KEY.test(key)) {
+    if (key !== MODEL_COOKIE_KEY && OBSOLETE_COOKIE_KEY.test(key)) {
       document.cookie = `${key}=; Path=/; Max-Age=0; SameSite=Lax`;
     }
   }

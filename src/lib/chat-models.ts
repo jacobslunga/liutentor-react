@@ -26,5 +26,5 @@ export const CHAT_EFFORTS = [
 export type ChatModelId = (typeof CHAT_MODELS)[number]["id"];
 export type ChatEffort = (typeof CHAT_EFFORTS)[number]["id"];
 
-export const DEFAULT_MODEL_ID: ChatModelId = "gpt-6-luna";
+export const DEFAULT_MODEL_ID: ChatModelId = "gemini-3.1-flash-lite";
 export const DEFAULT_EFFORT: ChatEffort = "low";
