@@ -14,8 +14,13 @@ import { getUser, useUser } from "@/stores/auth";
 import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/_profile")({
-  beforeLoad: async () => {
-    if (!(await getUser())) throw redirect({ to: "/logga-in", replace: true });
+  beforeLoad: async ({ location }) => {
+    if (!(await getUser()))
+      throw redirect({
+        to: "/logga-in",
+        search: { redirect: location.href },
+        replace: true,
+      });
   },
   component: ProfileLayout,
 });
@@ -32,8 +37,13 @@ function ProfileLayout() {
   const user = useUser();
 
   useEffect(() => {
-    if (!user) void navigate({ to: "/logga-in", replace: true });
-  }, [user, navigate]);
+    if (!user)
+      void navigate({
+        to: "/logga-in",
+        search: { redirect: router.state.location.href },
+        replace: true,
+      });
+  }, [user, navigate, router, router.state.location.href]);
 
   return (
     <div className="flex min-h-dvh flex-col bg-background">

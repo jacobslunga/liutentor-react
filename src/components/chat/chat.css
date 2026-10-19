@@ -14,6 +14,10 @@
   max-width: min(95%, 44rem);
 }
 
+.exam-chat .chat-column {
+  max-width: 95%;
+}
+
 .learn-chat .chat-column {
   max-width: clamp(38rem, 74%, 46rem);
 }

@@ -1,6 +1,11 @@
 import { DialogPresence } from "@/components/shared/dialog-presence";
 import { useQueryClient } from "@tanstack/react-query";
-import { Link, useNavigate, useParams } from "@tanstack/react-router";
+import {
+  Link,
+  useNavigate,
+  useParams,
+  useRouterState,
+} from "@tanstack/react-router";
 import {
   EllipsisIcon,
   FolderIcon,
@@ -36,6 +41,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 export function SidebarCourses({ onNavigate }: { onNavigate: () => void }) {
+  const returnTo = useRouterState({ select: (s) => s.location.href });
   const queryClient = useQueryClient();
   const navigate = useNavigate();
   const { courses, user, isPending, isError } = useStudyCourses();
@@ -127,7 +133,11 @@ export function SidebarCourses({ onNavigate }: { onNavigate: () => void }) {
 
       {!user ? (
         <p className="px-3 py-1 text-xs leading-relaxed text-muted-foreground">
-          <Link to="/logga-in" className="underline underline-offset-2">
+          <Link
+            to="/logga-in"
+            search={{ redirect: returnTo }}
+            className="underline underline-offset-2"
+          >
             Logga in
           </Link>{" "}
           för att skapa kurser med eget material.

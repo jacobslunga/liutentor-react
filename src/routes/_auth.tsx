@@ -2,7 +2,6 @@ import {
   Outlet,
   createFileRoute,
   redirect,
-  useNavigate,
   useRouter,
 } from "@tanstack/react-router";
 import { ArrowLeftIcon } from "lucide-react";
@@ -10,22 +9,27 @@ import { useEffect } from "react";
 import { AppFooter } from "@/components/layout/app-footer";
 import { getUser, useUser } from "@/stores/auth";
 import { Button } from "@/components/ui/button";
+import { validateAuthRedirect } from "@/lib/auth-redirect";
 
 export const Route = createFileRoute("/_auth")({
-  beforeLoad: async () => {
-    if (await getUser()) throw redirect({ to: "/", replace: true });
+  validateSearch: (search: Record<string, unknown>) => ({
+    redirect: validateAuthRedirect(search.redirect),
+  }),
+  beforeLoad: async ({ search }) => {
+    if (await getUser())
+      throw redirect({ href: search.redirect ?? "/", replace: true });
   },
   component: AuthLayout,
 });
 
 function AuthLayout() {
   const router = useRouter();
-  const navigate = useNavigate();
   const user = useUser();
+  const { redirect: returnTo } = Route.useSearch();
 
   useEffect(() => {
-    if (user) void navigate({ to: "/", replace: true });
-  }, [user, navigate]);
+    if (user) void router.navigate({ href: returnTo ?? "/", replace: true });
+  }, [user, router, returnTo]);
 
   return (
     <>

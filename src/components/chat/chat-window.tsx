@@ -294,7 +294,7 @@ export default function ChatWindow({
   return (
     <div
       ref={rootRef}
-      className="relative flex h-full w-full flex-col overflow-hidden bg-background"
+      className="exam-chat relative flex h-full w-full flex-col overflow-hidden bg-background"
     >
       {isOverDrop && <ChatDropOverlay />}
 
@@ -345,7 +345,7 @@ export default function ChatWindow({
           <div className="flex min-h-0 flex-1 flex-col items-center justify-center gap-4 px-4 pb-28 text-center">
             <ChatMascot className="size-14 shrink-0" />
             <div className="space-y-2">
-              <h2 className="text-2xl font-medium">
+              <h2 className="text-2xl font-semibold">
                 Vad kan jag hjälpa till med?
               </h2>
               <p className="mx-auto max-w-70 text-sm leading-relaxed text-muted-foreground sm:max-w-md">

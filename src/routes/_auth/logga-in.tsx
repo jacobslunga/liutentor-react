@@ -51,7 +51,10 @@ function AuthPage() {
   });
 
   const setTab = (value: AuthTab) =>
-    void navigate({ search: { tab: value }, replace: true });
+    void navigate({
+      search: (previous) => ({ ...previous, tab: value }),
+      replace: true,
+    });
 
   return (
     <div className="flex w-full max-w-sm flex-col items-center space-y-8 lg:max-w-md">
@@ -126,7 +129,7 @@ function LoginForm({ onSwitch }: { onSwitch: () => void }) {
         </div>
         <p className="font-medium">Inloggad!</p>
         <p className="text-sm text-muted-foreground">
-          Loggar in dig, tar dig till första sidan...
+          Loggar in dig, tar dig tillbaka...
         </p>
         <LoaderCircleIcon className="mt-1 size-4 animate-spin text-muted-foreground" />
       </div>
@@ -197,6 +200,7 @@ const EMPTY_SIGNUP = {
 };
 
 function SignupForm({ onSwitch }: { onSwitch: () => void }) {
+  const { redirect: returnTo } = Route.useSearch();
   const [form, setForm] = useState(EMPTY_SIGNUP);
   const [errors, setErrors] = useState({ ...EMPTY_SIGNUP, general: "" });
   const [loading, setLoading] = useState(false);
@@ -236,6 +240,9 @@ function SignupForm({ onSwitch }: { onSwitch: () => void }) {
     const { data, error } = await supabase.auth.signUp({
       email: form.email,
       password: form.password,
+      options: {
+        emailRedirectTo: new URL(returnTo ?? "/", window.location.origin).href,
+      },
     });
 
     if (error) {

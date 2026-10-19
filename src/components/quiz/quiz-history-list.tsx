@@ -1,6 +1,6 @@
 import { DialogPresence } from "@/components/shared/dialog-presence";
 import { CheckIcon, ChevronRightIcon, Trash2Icon } from "lucide-react";
-import { Link } from "@tanstack/react-router";
+import { Link, useRouterState } from "@tanstack/react-router";
 import { useState } from "react";
 import { QUIZ_DIFFICULTY_INFO } from "@/lib/quiz";
 import { cn } from "@/lib/utils";
@@ -31,6 +31,7 @@ export function QuizHistoryList({
   onLoad,
   onDelete,
 }: QuizHistoryListProps) {
+  const returnTo = useRouterState({ select: (s) => s.location.href });
   const [pendingDelete, setPendingDelete] = useState<StoredQuizItem | null>(
     null,
   );
@@ -50,6 +51,7 @@ export function QuizHistoryList({
         <p className="text-sm text-muted-foreground">
           <Link
             to="/logga-in"
+            search={{ redirect: returnTo }}
             className="font-medium text-foreground underline underline-offset-4"
           >
             Logga in

@@ -2,6 +2,7 @@ import { RouterLinkButton } from "@/components/shared/router-link";
 import { useAuthStore } from "@/stores/auth";
 import { SettingsDialog } from "@/components/settings/settings-dialog";
 import { UserDropdown } from "./user-dropdown";
+import { useRouterState } from "@tanstack/react-router";
 
 export function AuthActions({
   largerOnDesktop = false,
@@ -11,6 +12,7 @@ export function AuthActions({
   showSettings?: boolean;
 }) {
   const ready = useAuthStore((s) => s.ready);
+  const returnTo = useRouterState({ select: (s) => s.location.href });
   const signedIn = useAuthStore((s) => !!s.user);
   const size = largerOnDesktop ? "default" : "sm";
 
@@ -22,12 +24,17 @@ export function AuthActions({
 
   return (
     <div className="flex items-center gap-2">
-      <RouterLinkButton variant="outline" to="/logga-in" size={size}>
+      <RouterLinkButton
+        variant="outline"
+        to="/logga-in"
+        search={{ redirect: returnTo }}
+        size={size}
+      >
         Logga in
       </RouterLinkButton>
       <RouterLinkButton
         to="/logga-in"
-        search={{ tab: "skapa-konto" }}
+        search={{ tab: "skapa-konto", redirect: returnTo }}
         size={size}
       >
         Skapa konto
