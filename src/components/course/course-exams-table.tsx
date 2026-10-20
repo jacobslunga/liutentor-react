@@ -148,7 +148,7 @@ const ExamRow = memo(function ExamRow({
       }}
     >
       <div className="sm:min-w-0">
-        <div className="text-sm font-medium whitespace-nowrap transition-colors group-hover:text-foreground/80 sm:truncate">
+        <div className="text-sm font-semibold whitespace-nowrap transition-colors group-hover:text-foreground/80 sm:truncate">
           {exam.exam_name}
         </div>
         <div className="mt-0.5 text-xs whitespace-nowrap text-muted-foreground/70">
