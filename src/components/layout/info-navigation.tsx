@@ -51,7 +51,19 @@ export function InfoNavigation() {
       </DialogTrigger>
       {present && (
         <DialogPortal forceMount>
-          <DialogOverlay className="info-navigation-overlay top-[calc(3.5rem+env(safe-area-inset-top,0px))] bg-transparent backdrop-blur-none" />
+          <DialogOverlay
+            asChild
+            className="top-[calc(3.5rem+env(safe-area-inset-top,0px))] bg-transparent backdrop-blur-none sm:bg-black/20"
+          >
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: open ? 1 : 0 }}
+              transition={{
+                duration: reducedMotion ? 0 : open ? 0.16 : 0.12,
+                ease: "easeOut",
+              }}
+            />
+          </DialogOverlay>
           <DialogPrimitive.Content
             aria-describedby={undefined}
             className="info-navigation-dialog pointer-events-none fixed inset-0 z-50 outline-none"
@@ -79,7 +91,7 @@ export function InfoNavigation() {
               onAnimationComplete={() => {
                 if (!open) setPresent(false);
               }}
-              className="info-navigation pointer-events-auto absolute top-[calc(3.5rem+env(safe-area-inset-top,0px))] right-0 bottom-0 flex w-full flex-col bg-background pb-[env(safe-area-inset-bottom,0px)] shadow-overlay sm:max-w-lg"
+              className="pointer-events-auto absolute top-[calc(3.5rem+env(safe-area-inset-top,0px))] right-0 bottom-0 flex w-full flex-col overflow-hidden bg-background pb-[env(safe-area-inset-bottom,0px)] sm:max-w-lg sm:border-l sm:border-border sm:shadow-overlay"
             >
               <nav
                 aria-label="Huvudmeny"
