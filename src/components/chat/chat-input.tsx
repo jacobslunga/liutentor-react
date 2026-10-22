@@ -476,16 +476,16 @@ export function ChatInput({
             height: composerSize?.animate ? resizeTransition : { duration: 0 },
           }}
           className={cn(
-            "relative min-h-14 overflow-hidden border border-border/70 bg-card shadow-[0_4px_4px_-8px_oklch(0_0_0/0.08),0_8px_28px_-8px_oklch(0_0_0/0.06)] dark:border-border dark:shadow-[0px_2px_20px_-100px_oklch(0_0_0/0.3),0_8px_28px_-8px_oklch(0_0_0/0.2)]",
+            "relative overflow-hidden border border-border/70 bg-card shadow-[0_4px_4px_-8px_oklch(0_0_0/0.08),0_8px_28px_-8px_oklch(0_0_0/0.06)] dark:border-border dark:shadow-[0px_2px_20px_-100px_oklch(0_0_0/0.3),0_8px_28px_-8px_oklch(0_0_0/0.2)]",
           )}
         >
-          <div ref={composerRef} className="p-2.5">
+          <div ref={composerRef} className="px-2.5 py-1.5">
             {hasHeader && (
               <m.div
                 layout="position"
                 layoutDependency={layoutKey}
                 transition={layoutTransition}
-                className="-mx-2.5 -mt-2.5 overflow-hidden"
+                className="-mx-2.5 -mt-1.5 overflow-hidden"
               >
                 <div className="mb-1.5 flex flex-col items-stretch gap-2 border-b bg-muted/50 px-3 py-2">
                   {courseExamAnalysis?.enabled && (

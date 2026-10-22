@@ -18,7 +18,7 @@ export function ScrollToBottomButton({
       size="icon-lg"
       variant="outline"
       className={cn(
-        "group absolute top-0 left-1/2 -translate-x-1/2 rounded-full transition-[opacity,scale] duration-250 ease-snap disabled:opacity-100 motion-reduce:transition-none",
+        "group absolute top-0 left-1/2 -translate-x-1/2 rounded-full bg-background/80 backdrop-blur-[2px] transition-[opacity,scale] duration-250 ease-snap disabled:opacity-100 motion-reduce:transition-none dark:bg-secondary/80",
         shown
           ? "pointer-events-auto scale-100 opacity-100"
           : "pointer-events-none scale-50 opacity-0",
@@ -45,7 +45,7 @@ export function ScrollToBottomButton({
           ))}
         </span>
       ) : (
-        <ArrowDownIcon className="text-muted-foreground transition-colors duration-200 group-hover:text-foreground" />
+        <ArrowDownIcon className="text-foreground transition-colors duration-200" />
       )}
     </IconButton>
   );
