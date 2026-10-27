@@ -1,3 +1,4 @@
+import { THEME_PALETTES, isThemePalette } from "@/lib/theme-palettes";
 import { DialogPresence } from "@/components/shared/dialog-presence";
 import { MAX_ATTACHMENTS } from "@/lib/chat-attachments";
 import { MAX_CHAT_MESSAGE_LENGTH } from "@/lib/chat-limits";
@@ -105,6 +106,8 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
 
 function SettingsContent() {
   const { theme = "system", setTheme } = useTheme();
+  const themePalette = useSettingsStore((s) => s.themePalette);
+  const setThemePalette = useSettingsStore((s) => s.setThemePalette);
   const layoutMode = useSettingsStore((s) => s.layoutMode);
   const setLayoutMode = useSettingsStore((s) => s.setLayoutMode);
   const blurFacit = useSettingsStore((s) => s.blurFacitUntilHover);
@@ -122,11 +125,11 @@ function SettingsContent() {
     <div className="flex flex-col gap-6 pt-1 pb-2">
       <Section title="Utseende">
         <Row
-          label="Tema"
+          label="Läge"
           description="System följer inställningen i din enhet."
         >
           <select
-            aria-label="Tema"
+            aria-label="Läge"
             className="h-8 w-44 max-w-full rounded-md border border-input bg-background px-2 text-sm text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
             value={theme}
             onChange={(event) => setTheme(event.target.value)}
@@ -136,6 +139,44 @@ function SettingsContent() {
             <option value="system">System</option>
           </select>
         </Row>
+        <Row
+          label="Färgtema"
+          description="Kodeditorns färger, anpassade för LiU Tentor."
+        >
+          <select
+            aria-label="Färgtema"
+            className="h-8 w-44 max-w-full rounded-md border border-input bg-background px-2 text-sm text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+            value={themePalette}
+            onChange={(event) => {
+              if (isThemePalette(event.target.value))
+                setThemePalette(event.target.value);
+            }}
+          >
+            {THEME_PALETTES.map((palette) => (
+              <option key={palette.id} value={palette.id}>
+                {palette.label}
+              </option>
+            ))}
+          </select>
+        </Row>
+        <div
+          aria-hidden="true"
+          className="mt-3.5 flex items-center gap-2 rounded-lg border bg-card p-3"
+        >
+          <span className="flex size-8 items-center justify-center rounded-full bg-primary text-sm font-medium text-primary-foreground">
+            Aa
+          </span>
+          <span className="text-sm text-card-foreground">
+            {
+              THEME_PALETTES.find((palette) => palette.id === themePalette)
+                ?.label
+            }
+          </span>
+          <span className="ml-auto size-5 rounded-full border bg-background" />
+          <span className="size-5 rounded-full border bg-secondary" />
+          <span className="size-5 rounded-full border bg-accent" />
+          <span className="size-5 rounded-full border bg-primary" />
+        </div>
       </Section>
 
       <Section title="Läsvy">

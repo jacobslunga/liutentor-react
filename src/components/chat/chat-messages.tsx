@@ -721,7 +721,7 @@ const MessageRow = memo(function MessageRow({
         </div>
       )}
       {message.content && (
-        <div className="chat-prose prose prose-sm w-full max-w-none min-w-0 font-chat sm:prose-base dark:prose-invert prose-headings:font-semibold prose-h1:text-xl sm:prose-h1:text-2xl prose-h2:text-lg sm:prose-h2:text-xl prose-h3:text-base sm:prose-h3:text-lg prose-h4:text-sm sm:prose-h4:text-base prose-h5:text-sm prose-h6:text-xs prose-strong:font-semibold prose-li:marker:text-foreground [&>div:first-child>:first-child]:mt-0 [&>div:last-child>:last-child]:mb-0">
+        <div className="chat-prose prose prose-sm w-full max-w-none min-w-0 font-chat sm:prose-base dark:prose-invert prose-headings:font-medium prose-h1:text-xl sm:prose-h1:text-2xl prose-h2:text-lg sm:prose-h2:text-xl prose-h3:text-base sm:prose-h3:text-lg prose-h4:text-sm sm:prose-h4:text-base prose-h5:text-sm prose-h6:text-xs prose-strong:font-medium prose-li:marker:text-foreground [&>div:first-child>:first-child]:mt-0 [&>div:last-child>:last-child]:mb-0">
           <MarkdownBlocks content={message.content} />
         </div>
       )}

@@ -1,3 +1,4 @@
+import { isThemePalette, type ThemePalette } from "@/lib/theme-palettes";
 import { useMemo } from "react";
 import { create } from "zustand";
 import {
@@ -23,6 +24,8 @@ import { useUser } from "@/stores/auth";
 export type LayoutMode = "exam-with-facit" | "exam-only";
 
 interface SettingsState {
+  themePalette: ThemePalette;
+  setThemePalette: (palette: ThemePalette) => void;
   layoutMode: LayoutMode;
   showExplainPopover: boolean;
   blurFacitUntilHover: boolean;
@@ -50,6 +53,8 @@ interface SettingsState {
 export const useSettingsStore = create<SettingsState>()(
   persist<SettingsState, [], [], Partial<SettingsState>>(
     (set) => ({
+      themePalette: "default",
+      setThemePalette: (themePalette) => set({ themePalette }),
       layoutMode: "exam-with-facit",
       showExplainPopover: true,
       blurFacitUntilHover: true,
@@ -88,6 +93,11 @@ export const useSettingsStore = create<SettingsState>()(
       merge: (persistedState, currentState) => ({
         ...currentState,
         ...(persistedState as Partial<SettingsState>),
+        themePalette: isThemePalette(
+          (persistedState as Partial<SettingsState>)?.themePalette,
+        )
+          ? (persistedState as SettingsState).themePalette
+          : "default",
         selectedModelId: currentState.selectedModelId,
         selectedEffort: currentState.selectedEffort,
       }),

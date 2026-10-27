@@ -476,7 +476,7 @@ export function ChatInput({
             height: composerSize?.animate ? resizeTransition : { duration: 0 },
           }}
           className={cn(
-            "relative overflow-hidden border border-border/70 bg-card shadow-[0_4px_4px_-8px_oklch(0_0_0/0.08),0_8px_28px_-8px_oklch(0_0_0/0.06)] dark:border-border dark:shadow-[0px_2px_20px_-100px_oklch(0_0_0/0.3),0_8px_28px_-8px_oklch(0_0_0/0.2)]",
+            "relative overflow-hidden border border-input bg-card shadow-[0_4px_4px_-8px_oklch(0_0_0/0.08),0_8px_28px_-8px_oklch(0_0_0/0.06)] dark:shadow-[0px_2px_20px_-100px_oklch(0_0_0/0.3),0_8px_28px_-8px_oklch(0_0_0/0.2)]",
           )}
         >
           <div ref={composerRef} className="px-2.5 py-1.5">

@@ -15,10 +15,10 @@ export function ScrollToBottomButton({
 
   return (
     <IconButton
-      size="icon-lg"
+      size="icon"
       variant="outline"
       className={cn(
-        "group absolute top-0 left-1/2 -translate-x-1/2 rounded-full bg-background/80 backdrop-blur-[2px] transition-[opacity,scale] duration-250 ease-snap disabled:opacity-100 motion-reduce:transition-none dark:bg-secondary/80",
+        "group motion-reduce:transition-none0 absolute top-0 left-1/2 -translate-x-1/2 rounded-full transition-[opacity,scale] duration-250 ease-snap disabled:opacity-100",
         shown
           ? "pointer-events-auto scale-100 opacity-100"
           : "pointer-events-none scale-50 opacity-0",

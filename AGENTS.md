@@ -41,6 +41,10 @@ course study material, and user accounts.
   theme/color tokens and base styles; `src/styles/app.css` contains font setup
   and additional app styles. Features also have local CSS where needed.
   Use existing tokens and the `cn` helper in `src/lib/utils.ts`.
+  Editor-inspired palettes live in `src/styles/palettes.css`, with picker metadata
+  in `src/lib/theme-palettes.ts`. Palette selection persists in the settings store,
+  independently of light/dark/system mode. Keep the early palette allowlist in
+  `index.html` in sync when adding palettes.
 - **Imports/types/hooks:** `@/` resolves to `src/`. Shared domain types live in
   `src/types/`; reusable hooks live in `src/hooks/`.
 - **PDFs:** EmbedPDF and its plugins render and manage exam documents.

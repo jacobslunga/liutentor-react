@@ -50,6 +50,28 @@
     <script>
       (function () {
         try {
+          try {
+            var settings = JSON.parse(
+              localStorage.getItem("liutentor-settings") || "{}",
+            );
+            var palette = settings.state && settings.state.themePalette;
+            if (
+              [
+                "catppuccin",
+                "claude",
+                "tokyo-night",
+                "everforest",
+                "github",
+                "gruvbox",
+                "one",
+                "rose-pine",
+                "solarized",
+                "vscode",
+              ].includes(palette)
+            ) {
+              document.documentElement.dataset.palette = palette;
+            }
+          } catch (e) {}
           var pref = localStorage.getItem("color-mode") || "system";
           if (pref === "dim") {
             pref = "dark";
