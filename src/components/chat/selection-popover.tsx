@@ -1,3 +1,4 @@
+import { ReplyIcon } from "lucide-react";
 import { createPortal } from "react-dom";
 import { Button } from "@/components/ui/button";
 
@@ -21,8 +22,7 @@ export function SelectionPopover({
     >
       <div className="animate-in duration-150 fade-in-0 zoom-in-95">
         <Button
-          variant="outline"
-          className="h-8 rounded-lg border-border/70 bg-popover px-2.5 text-sm font-normal text-popover-foreground shadow-[0_2px_8px_oklch(0_0_0/0.08)] hover:bg-accent"
+          className="h-9 gap-2 border-white/10 bg-foreground px-3 text-sm font-medium text-background shadow-[0_4px_12px_oklch(0_0_0/0.25)] hover:bg-foreground hover:opacity-90"
           onMouseDown={(e) => {
             e.preventDefault();
             e.stopPropagation();
@@ -30,6 +30,7 @@ export function SelectionPopover({
           }}
         >
           Fråga LiU Tentor
+          <ReplyIcon />
         </Button>
       </div>
     </div>,

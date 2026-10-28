@@ -455,7 +455,7 @@ export function LearnChat({
           <ChatMessages
             ref={transcriptRef}
             scrollRef={scrollRef}
-            className="pt-16 pb-36 sm:pb-44"
+            className="pt-20 pb-36 sm:pb-44"
             onReplyToSelection={replyToSelection}
             onScrollDistanceChange={updateScrollDistance}
             keepRowsMounted={keepRowsMounted}
@@ -480,8 +480,7 @@ export function LearnChat({
       {isOverDrop && <ChatDropOverlay />}
 
       <div className="pointer-events-none absolute inset-x-0 top-0 z-20">
-        <div className="pointer-events-none relative isolate flex h-10 items-center justify-between gap-2 px-3">
-          <div className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-16 bg-[linear-gradient(to_bottom,var(--background)_0,var(--background)_55%,transparent_100%)]" />
+        <div className="pointer-events-auto relative flex h-12 items-center justify-between gap-2 border-b bg-background/95 px-3 backdrop-blur-[6px]">
           <m.div
             style={{ x: headerX }}
             className="flex min-w-0 items-center gap-1"
@@ -583,7 +582,7 @@ function CourseCrumb() {
     <Link
       to="/chatt/kurs/$courseId"
       params={{ courseId: course.id }}
-      className="pointer-events-auto flex max-w-[min(12rem,30vw)] shrink-0 items-center gap-1 rounded-full px-2 py-0.5 text-sm text-muted-foreground transition-colors hover:bg-accent/70 hover:text-foreground"
+      className="pointer-events-auto flex max-w-[min(12rem,30vw)] shrink-0 items-center gap-1 rounded-lg px-2 py-0.5 text-sm text-muted-foreground transition-colors hover:bg-accent/70 hover:text-foreground"
     >
       <FolderIcon className="size-3.5 shrink-0 fill-brand text-brand" />
       <span className="truncate">{course.name}</span>

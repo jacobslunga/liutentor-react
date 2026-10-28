@@ -62,7 +62,7 @@ export function SegmentedControl<T extends string>({
       value={value}
       onValueChange={(next) => next && onValueChange(next as T)}
       className={cn(
-        "relative isolate inline-flex h-8 items-center rounded-full bg-accent p-0.5 dark:bg-muted",
+        "relative isolate inline-flex h-8 items-center rounded-md bg-accent p-0.5 dark:bg-muted",
         className,
       )}
     >
@@ -70,7 +70,7 @@ export function SegmentedControl<T extends string>({
         <span
           aria-hidden
           className={cn(
-            "absolute inset-y-0.5 left-0 -z-10 rounded-full bg-card shadow-raised inset-shadow-highlight dark:bg-input/60",
+            "absolute inset-y-0.5 left-0 -z-10 rounded-sm bg-card shadow-raised inset-shadow-highlight dark:bg-input/60",
             ready &&
               "transition-[translate,width] duration-200 ease-snap motion-reduce:transition-none",
           )}
@@ -83,7 +83,7 @@ export function SegmentedControl<T extends string>({
             key={optionValue}
             value={optionValue}
             aria-label={iconOnly ? label : undefined}
-            className="inline-flex h-full items-center justify-center gap-1.5 rounded-md px-2.5 text-sm font-medium text-muted-foreground transition-colors duration-150 ease-out-quick outline-none hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/50 aria-checked:text-foreground [&_svg]:size-4 [&_svg]:shrink-0"
+            className="inline-flex h-full items-center justify-center gap-1.5 rounded-sm px-2.5 text-sm font-medium text-muted-foreground transition-colors duration-150 ease-out-quick outline-none hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/50 aria-checked:text-foreground [&_svg]:size-4 [&_svg]:shrink-0"
           >
             {Icon && <Icon />}
             {!iconOnly && label}

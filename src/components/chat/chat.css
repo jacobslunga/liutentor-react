@@ -47,7 +47,9 @@
   }
 }
 
-.chat-prose {
+.chat-prose.prose {
+  font-size: 0.9375rem;
+  line-height: 1.7;
   --tw-prose-body: var(--foreground);
   --tw-prose-headings: var(--foreground);
   --tw-prose-lead: var(--muted-foreground);

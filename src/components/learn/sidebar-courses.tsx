@@ -298,7 +298,7 @@ function CourseChatList({
         <Link
           to="/chatt/kurs/$courseId"
           params={{ courseId: course.id }}
-          className="flex shrink-0 items-center gap-1 rounded-full px-2 py-0.5 text-xs text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+          className="flex shrink-0 items-center gap-1 rounded-lg px-2 py-0.5 text-xs text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
           onClick={onNavigate}
         >
           <PlusIcon className="size-3" />
