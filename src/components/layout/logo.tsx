@@ -17,12 +17,7 @@ export function Logo({
   return (
     <span className={cn("flex items-center gap-2", className)}>
       {showIcon && <LogoIcon className={cn("size-7", iconClassName)} />}
-      <span
-        className={cn(
-          "font-logo text-lg font-bold tracking-tighter",
-          textClassName,
-        )}
-      >
+      <span className={cn("font-logo text-lg font-bold", textClassName)}>
         LiU Tentor
       </span>
     </span>

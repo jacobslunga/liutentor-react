@@ -15,7 +15,6 @@ import { ScrollToBottomButton } from "./scroll-to-bottom-button";
 import { ChatInput, type ChatInputApi } from "./chat-input";
 import { ChatMascot } from "./chat-mascot";
 import { ChatMessages, type ChatTranscriptApi } from "./chat-messages";
-import { ConversationTitle } from "./conversation-title";
 import "./chat.css";
 import { IconButton } from "@/components/shared/icon-button";
 
@@ -299,14 +298,14 @@ export default function ChatWindow({
       {isOverDrop && <ChatDropOverlay />}
 
       <div className="pointer-events-none absolute inset-x-0 top-0 z-20">
-        <div className="pointer-events-auto relative flex h-12 items-center justify-between gap-2 border-b bg-background/95 px-3 backdrop-blur-[6px]">
+        <div className="pointer-events-none relative isolate flex h-14 items-center justify-between gap-2 px-3">
+          <div className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-18 bg-[linear-gradient(to_bottom,var(--background)_0,var(--background)_55%,transparent_100%)]" />
           <div className="flex min-w-0 items-center gap-1">
             <HeaderButton
               icon={ChevronRightIcon}
               label="Stäng chatten"
               onClick={onClose}
             />
-            <ConversationTitle />
           </div>
           <div className="pointer-events-auto flex shrink-0 items-center gap-1">
             <HeaderButton

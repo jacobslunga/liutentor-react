@@ -112,7 +112,7 @@ export function InfoNavigation() {
                 >
                   {siteLinks.map((section) => (
                     <div key={section.title}>
-                      <p className="mb-3 text-xs font-medium tracking-widest text-muted-foreground uppercase">
+                      <p className="mb-3 text-xs font-medium text-muted-foreground uppercase">
                         {section.title}
                       </p>
                       <ul>
@@ -126,7 +126,7 @@ export function InfoNavigation() {
                                   className: "text-primary",
                                   "aria-current": "page",
                                 }}
-                                className="group flex min-h-12 items-center justify-between gap-4 rounded-sm py-2 font-heading text-[1.75rem] leading-tight font-medium tracking-tight transition-colors hover:text-primary sm:text-3xl keyboard-focus:outline-2 keyboard-focus:outline-offset-4 keyboard-focus:outline-ring"
+                                className="group flex min-h-12 items-center justify-between gap-4 rounded-sm py-2 font-heading text-[1.75rem] leading-tight font-medium transition-colors hover:text-primary sm:text-3xl keyboard-focus:outline-2 keyboard-focus:outline-offset-4 keyboard-focus:outline-ring"
                               >
                                 {link.name}
                                 <ArrowUpRightIcon className="size-5 shrink-0 text-muted-foreground/50 transition-colors group-hover:text-primary" />

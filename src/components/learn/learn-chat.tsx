@@ -2,7 +2,6 @@ import { Link, useNavigate } from "@tanstack/react-router";
 import { m, useTransform } from "framer-motion";
 import {
   CalendarIcon,
-  ChevronRightIcon,
   FileTextIcon,
   FolderIcon,
   GraduationCapIcon,
@@ -19,13 +18,11 @@ import {
   ChatMessages,
   type ChatTranscriptApi,
 } from "@/components/chat/chat-messages";
-import { ConversationTitle } from "@/components/chat/conversation-title";
 import "@/components/chat/chat.css";
 import { RouterLinkButton } from "@/components/shared/router-link";
 import { useLearnChat } from "@/hooks/use-chat";
 import { loadConversation } from "@/hooks/use-conversation-list";
 import { normalizeClipboardFile } from "@/lib/chat-attachments";
-import { cn } from "@/lib/utils";
 import { useChatStore, useChatStoreApi, type Message } from "@/stores/chat";
 import { useStudyCourse } from "@/queries/study-courses";
 import {
@@ -480,7 +477,7 @@ export function LearnChat({
       {isOverDrop && <ChatDropOverlay />}
 
       <div className="pointer-events-none absolute inset-x-0 top-0 z-20">
-        <div className="pointer-events-auto relative flex h-12 items-center justify-between gap-2 border-b bg-background/95 px-3 backdrop-blur-[6px]">
+        <div className="pointer-events-none relative flex h-12 items-center justify-between gap-2 px-3">
           <m.div
             style={{ x: headerX }}
             className="flex min-w-0 items-center gap-1"
@@ -493,7 +490,7 @@ export function LearnChat({
                 onClick={() => sidebar.setOpen(true)}
               />
             )}
-            {loadState === "ready" && <TitlePill showCrumb={!courseId} />}
+            {loadState === "ready" && <CourseCrumb courseId={courseId} />}
           </m.div>
           {(!sidebar.open || !sidebar.inline) && (
             <div className="pointer-events-auto flex shrink-0 items-center gap-1">
@@ -554,29 +551,9 @@ function HeaderButton({
   );
 }
 
-function TitlePill({ showCrumb }: { showCrumb: boolean }) {
-  const hasTitle = useChatStore(
-    (s) => s.isConversationTitleReady && !!s.currentConversationTitle,
-  );
-  const courseId = useChatStore((s) => s.currentCourseId);
-  const { course } = useStudyCourse(showCrumb ? courseId : null);
-  if (!hasTitle && !course) return null;
-  return (
-    <div
-      className={cn(
-        "pointer-events-auto flex min-w-0 items-center gap-0.5 py-1 pr-3.5 select-none",
-        course ? "pl-1" : "pl-3.5",
-      )}
-    >
-      {course && <CourseCrumb />}
-      <ConversationTitle />
-    </div>
-  );
-}
-
-function CourseCrumb() {
-  const courseId = useChatStore((s) => s.currentCourseId);
-  const { course } = useStudyCourse(courseId);
+function CourseCrumb({ courseId }: { courseId: string | null }) {
+  const currentCourseId = useChatStore((s) => s.currentCourseId);
+  const { course } = useStudyCourse(courseId ?? currentCourseId);
   if (!course) return null;
   return (
     <Link
@@ -586,7 +563,6 @@ function CourseCrumb() {
     >
       <FolderIcon className="size-3.5 shrink-0 fill-brand text-brand" />
       <span className="truncate">{course.name}</span>
-      <ChevronRightIcon className="size-3.5 shrink-0" />
     </Link>
   );
 }

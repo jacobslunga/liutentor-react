@@ -6,12 +6,14 @@ import {
   ChevronLeftIcon,
   CheckIcon,
   ArrowUpIcon,
+  MessageSquareTextIcon,
   FileTextIcon,
   ImageIcon,
   PlusIcon,
   XIcon,
 } from "lucide-react";
 import {
+  useCallback,
   useEffect,
   useImperativeHandle,
   useLayoutEffect,
@@ -65,7 +67,9 @@ import { IconButton } from "@/components/shared/icon-button";
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuCheckboxItem,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
@@ -81,8 +85,6 @@ const MENTION_PILL_CLASS =
   "rounded-[5px] bg-primary/15 text-transparent ring-2 ring-primary/15 box-decoration-clone";
 
 const COUNTER_FROM = MAX_LENGTH * 0.8;
-
-const MAX_TEXTAREA_HEIGHT = 192;
 
 export interface ChatInputApi {
   focus: () => void;
@@ -134,10 +136,10 @@ export function ChatInput({
   const chatStore = useChatStoreApi();
   const mobile = useMediaQuery(MOBILE_QUERY);
   const isLoading = useChatStore((s) => s.isLoading);
-  const reducedMotion = useReducedMotion();
   const shellRef = useRef<HTMLDivElement>(null);
+  const composerRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const mentionLayerRef = useRef<HTMLDivElement>(null);
+  const measurementRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [attachments, setAttachments] = useState<ChatAttachment[]>(() =>
     initialAttachments.filter((a) => a.active && a.file),
@@ -145,6 +147,12 @@ export function ChatInput({
   const [hasText, setHasText] = useState(!!initialText.trim());
   const [hasInput, setHasInput] = useState(initialText.length > 0);
   const [longLength, setLongLength] = useState(0);
+  const [textHeight, setTextHeight] = useState(24);
+  const [textExpanded, setTextExpanded] = useState(false);
+  const [composerHeight, setComposerHeight] = useState<number>();
+  const reducedMotion = useReducedMotion();
+  const plusRef = useRef<HTMLDivElement>(null);
+  const controlsRef = useRef<HTMLDivElement>(null);
   const [mention, setMention] = useState<{
     start: number;
     query: string;
@@ -155,9 +163,16 @@ export function ChatInput({
     attachmentsRef.current = attachments;
   }, [attachments]);
 
-  const quoteTransition = reducedMotion
+  const mentionLayerRef = useRef<HTMLDivElement>(null);
+  const hasHeader =
+    !!selectionContext ||
+    attachments.length > 0 ||
+    !!courseExamAnalysis?.enabled;
+  const expanded = hasHeader || textExpanded;
+  const layoutKey = `${expanded}-${hasHeader}-${attachments.length}-${!!courseExamAnalysis?.enabled}`;
+  const resizeTransition = reducedMotion
     ? { duration: 0 }
-    : { type: "spring" as const, stiffness: 420, damping: 38 };
+    : { duration: 0.22, ease: [0.22, 1, 0.36, 1] as const };
 
   const renderMentionPills = (value: string) => {
     const layer = mentionLayerRef.current;
@@ -170,17 +185,8 @@ export function ChatInput({
       return pill;
     });
 
-    layer.replaceChildren(...nodes, document.createTextNode("​"));
+    layer.replaceChildren(...nodes, document.createTextNode("\u200b"));
     layer.scrollTop = textareaRef.current?.scrollTop ?? 0;
-  };
-
-  const resizeTextarea = () => {
-    const textarea = textareaRef.current;
-    if (!textarea) return;
-    textarea.style.height = "auto";
-    textarea.style.height = `${Math.min(MAX_TEXTAREA_HEIGHT, textarea.scrollHeight)}px`;
-    textarea.style.overflowY =
-      textarea.scrollHeight > MAX_TEXTAREA_HEIGHT ? "auto" : "hidden";
   };
 
   const syncTextState = (value: string) => {
@@ -188,13 +194,44 @@ export function ChatInput({
     setHasInput(value.length > 0);
     setLongLength(value.length >= COUNTER_FROM ? value.length : 0);
     renderMentionPills(value);
-    resizeTextarea();
   };
+
+  const measurePrompt = useCallback(() => {
+    const textarea = textareaRef.current;
+    const measurement = measurementRef.current;
+    const composer = composerRef.current;
+    const plus = plusRef.current;
+    const controls = controlsRef.current;
+    if (!textarea || !measurement || !composer || !plus || !controls) return;
+
+    // Whether the text fits on one row is always decided at the compact
+    // width, so expanding never feeds back into the decision.
+    const style = getComputedStyle(composer);
+    const gutter =
+      parseFloat(style.paddingLeft) + parseFloat(style.paddingRight);
+    const contentWidth = composer.clientWidth - gutter;
+    const compactWidth =
+      contentWidth - plus.offsetWidth - controls.offsetWidth - 8;
+    const measureAt = (width: number) => {
+      measurement.value = textarea.value;
+      measurement.style.width = `${Math.max(1, width)}px`;
+      return measurement.scrollHeight;
+    };
+    const compactHeight = measureAt(compactWidth - 16);
+    const lineHeight = parseFloat(getComputedStyle(measurement).lineHeight);
+    const wraps = textarea.value.length > 0 && compactHeight > lineHeight + 1;
+    const wantExpanded = hasHeader || wraps;
+    const height = wantExpanded ? measureAt(contentWidth - 16) : compactHeight;
+
+    setTextExpanded(wraps);
+    setTextHeight(Math.min(192, Math.max(lineHeight, height)));
+  }, [hasHeader]);
 
   const setText = (value: string) => {
     if (textareaRef.current) textareaRef.current.value = value;
     syncTextState(value);
     setMention(null);
+    measurePrompt();
   };
 
   function syncMention(textarea: HTMLTextAreaElement) {
@@ -267,21 +304,46 @@ export function ChatInput({
   }
 
   useLayoutEffect(() => {
-    resizeTextarea();
+    measurePrompt();
     let frame = 0;
-    let width = shellRef.current?.clientWidth;
-    const observer = new ResizeObserver(() => {
-      if (shellRef.current?.clientWidth === width) return;
-      width = shellRef.current?.clientWidth;
+    // Height changes during the reveal do not affect text wrapping.
+    const widths = new WeakMap<Element, number>();
+    const observer = new ResizeObserver((entries) => {
+      let widthChanged = false;
+      for (const entry of entries) {
+        const width = entry.contentRect.width;
+        if (widths.get(entry.target) !== width) {
+          widths.set(entry.target, width);
+          widthChanged = true;
+        }
+      }
+      if (!widthChanged) return;
       cancelAnimationFrame(frame);
-      frame = requestAnimationFrame(resizeTextarea);
+      frame = requestAnimationFrame(measurePrompt);
     });
     if (shellRef.current) observer.observe(shellRef.current);
+    if (controlsRef.current) observer.observe(controlsRef.current);
     return () => {
       observer.disconnect();
       cancelAnimationFrame(frame);
     };
-  }, []);
+  }, [measurePrompt]);
+
+  useLayoutEffect(() => {
+    const composer = composerRef.current;
+    if (!composer) return;
+
+    // Measure the natural content independently of the animated shell.
+    // Include the shell's one-pixel border on both sides.
+    const measure = () => {
+      const height = composer.offsetHeight + 2;
+      setComposerHeight(height);
+    };
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(composer);
+    return () => observer.disconnect();
+  }, [layoutKey, textHeight]);
 
   const addFiles = (files: File[]) => {
     if (chatStore.getState().isLoading) return;
@@ -371,6 +433,20 @@ export function ChatInput({
     });
   }
 
+  const sendButton = (
+    <IconButton
+      type="button"
+      variant={isLoading ? "secondary" : "default"}
+      className="size-9 rounded-full [&_svg:not([class*='size-'])]:size-4"
+      aria-label={isLoading ? "Avbryt svar" : "Skicka meddelande"}
+      hideTooltip
+      disabled={!isLoading && !canSend}
+      onClick={() => (isLoading ? onCancel() : submit())}
+    >
+      {isLoading ? <StopIcon /> : <ArrowUpIcon />}
+    </IconButton>
+  );
+
   return (
     <form
       className={cn("w-full px-3 sm:px-4", className)}
@@ -382,245 +458,303 @@ export function ChatInput({
       <div
         ref={shellRef}
         className={cn(
-          "chat-column relative mx-auto",
-          welcome && "chat-welcome-column",
+          "chat-column @container relative mx-auto",
+          welcome ? "chat-welcome-column" : "px-4 sm:px-5",
         )}
       >
-        <div className="relative overflow-hidden rounded-xl border border-input bg-card shadow-[0_4px_4px_-8px_oklch(0_0_0/0.08),0_8px_28px_-8px_oklch(0_0_0/0.06)] dark:shadow-[0px_2px_20px_-100px_oklch(0_0_0/0.3),0_8px_28px_-8px_oklch(0_0_0/0.2)]">
-          <AnimatePresence initial={false}>
-            {selectionContext && (
-              <m.div
-                key="quote"
-                initial={{ height: 0, opacity: 0 }}
-                animate={{ height: "auto", opacity: 1 }}
-                exit={{ height: 0, opacity: 0 }}
-                transition={quoteTransition}
-                className="overflow-hidden"
-              >
-                <div className="px-3 pt-3">
-                  <div className="relative w-48 max-w-full rounded-lg border bg-background py-3 pr-7 pl-3">
-                    <div className="border-l-2 border-border pl-2.5 text-sm leading-snug text-muted-foreground">
-                      <span className="line-clamp-5">
-                        <SelectionQuote text={selectionContext} />
-                      </span>
+        <m.div
+          initial={false}
+          animate={{
+            height: composerHeight ?? "auto",
+            borderRadius: expanded ? 20 : 32,
+          }}
+          transition={resizeTransition}
+          className={cn(
+            "relative overflow-hidden border border-input bg-card shadow-[0_4px_4px_-8px_oklch(0_0_0/0.08),0_8px_28px_-8px_oklch(0_0_0/0.06)] dark:shadow-[0px_2px_20px_-100px_oklch(0_0_0/0.3),0_8px_28px_-8px_oklch(0_0_0/0.2)]",
+          )}
+        >
+          {/* Keep the controls anchored while the shell reveals its new height. */}
+          <div
+            ref={composerRef}
+            className="absolute inset-x-0 bottom-0 px-2.5 py-1.5"
+          >
+            {hasHeader && (
+              <m.div className="-mx-2.5 -mt-1.5 overflow-hidden">
+                <div className="mb-3 flex flex-col items-stretch gap-2 px-3 pt-3 pb-2">
+                  {courseExamAnalysis?.enabled && (
+                    <div className="flex items-center gap-2">
+                      <div className="flex min-w-0 items-center gap-2 rounded-lg bg-primary/10 py-1 pr-1 pl-2.5 text-xs text-primary">
+                        <BookOpenIcon className="size-3.5 shrink-0" />
+                        <span className="min-w-0 truncate">
+                          Kursens tentor · nästa meddelande
+                        </span>
+                        <IconButton
+                          type="button"
+                          size="icon-xs"
+                          aria-label="Ta bort kursanalys"
+                          disabled={isLoading}
+                          onClick={() => courseExamAnalysis.onChange(false)}
+                        >
+                          <XIcon />
+                        </IconButton>
+                      </div>
                     </div>
-                    <IconButton
-                      type="button"
-                      variant="ghost"
-                      size="icon-xs"
-                      className="absolute top-1 right-1"
-                      aria-label="Ta bort citatet"
-                      onClick={onClearSelectionContext}
-                    >
-                      <XIcon />
-                    </IconButton>
-                  </div>
+                  )}
+                  {selectionContext && (
+                    <div className="relative w-40 max-w-full overflow-hidden rounded-2xl border border-border bg-background">
+                      <div className="px-3 pt-3 pr-7 pb-4 text-sm leading-relaxed text-muted-foreground">
+                        <div className="line-clamp-4 wrap-break-word">
+                          <SelectionQuote text={selectionContext} />
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-1.5 border-t border-border bg-muted/40 px-3 py-2 text-xs text-foreground">
+                        <MessageSquareTextIcon className="size-3.5 shrink-0" />
+                        Markerad text
+                      </div>
+                      <IconButton
+                        type="button"
+                        variant="ghost"
+                        size="icon-xs"
+                        className="absolute top-1 right-1"
+                        aria-label="Ta bort citatet"
+                        onClick={onClearSelectionContext}
+                      >
+                        <XIcon />
+                      </IconButton>
+                    </div>
+                  )}
+                  {attachments.length > 0 && (
+                    <div className="flex flex-wrap gap-2">
+                      {attachments.map((a) => (
+                        <div
+                          key={a.id}
+                          className="flex max-w-full min-w-0 items-center gap-2 rounded-lg bg-background px-2.5 py-1.5 text-xs font-normal text-foreground"
+                        >
+                          {a.mediaType === "application/pdf" ? (
+                            <FileTextIcon className="size-3.5 shrink-0 text-muted-foreground" />
+                          ) : a.previewUrl ? (
+                            <img
+                              src={a.previewUrl}
+                              alt=""
+                              className="size-10 shrink-0 rounded-md object-cover"
+                            />
+                          ) : (
+                            <ImageIcon className="size-3.5 shrink-0 text-muted-foreground" />
+                          )}
+                          <span className="max-w-20 truncate" title={a.name}>
+                            {a.name}
+                          </span>
+                          <span className="shrink-0 text-muted-foreground">
+                            {formatFileSize(a.size)}
+                          </span>
+                          <IconButton
+                            variant="ghost"
+                            size="icon-sm"
+                            aria-label={`Ta bort ${a.name}`}
+                            onClick={() => removeAttachment(a.id)}
+                          >
+                            <XIcon />
+                          </IconButton>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </m.div>
             )}
-          </AnimatePresence>
 
-          {attachments.length > 0 && (
-            <div className="flex flex-wrap gap-2 px-3 pt-3">
-              {attachments.map((a) => (
-                <div
-                  key={a.id}
-                  className="flex max-w-full min-w-0 items-center gap-2 rounded-lg border bg-background px-2.5 py-1.5 text-xs font-normal text-foreground"
-                >
-                  {a.mediaType === "application/pdf" ? (
-                    <FileTextIcon className="size-3.5 shrink-0 text-muted-foreground" />
-                  ) : a.previewUrl ? (
-                    <img
-                      src={a.previewUrl}
-                      alt=""
-                      className="size-10 shrink-0 rounded-md object-cover"
-                    />
-                  ) : (
-                    <ImageIcon className="size-3.5 shrink-0 text-muted-foreground" />
-                  )}
-                  <span className="max-w-20 truncate" title={a.name}>
-                    {a.name}
-                  </span>
-                  <span className="shrink-0 text-muted-foreground">
-                    {formatFileSize(a.size)}
-                  </span>
-                  <IconButton
-                    variant="ghost"
-                    size="icon-sm"
-                    aria-label={`Ta bort ${a.name}`}
-                    onClick={() => removeAttachment(a.id)}
-                  >
-                    <XIcon />
-                  </IconButton>
-                </div>
-              ))}
-            </div>
-          )}
-
-          <div className="flex items-end gap-2 pr-2">
-            <div className="relative min-w-0 flex-1">
-              {!hasInput &&
-                (welcome ? (
-                  <WelcomePlaceholder />
-                ) : (
-                  <span
-                    aria-hidden="true"
-                    className="pointer-events-none absolute inset-x-3 top-3 truncate text-base leading-6 text-muted-foreground/70"
-                  >
-                    {placeholder}
-                  </span>
-                ))}
-              {courseMentions && (
-                <div
-                  ref={mentionLayerRef}
-                  aria-hidden
-                  className="pointer-events-none absolute inset-0 overflow-hidden px-3 py-3 text-base leading-6 wrap-break-word whitespace-pre-wrap text-transparent"
-                />
+            <div
+              className={cn(
+                "grid gap-x-1 gap-y-1",
+                expanded ? "items-end" : "items-center",
               )}
-              <textarea
-                ref={textareaRef}
-                defaultValue={initialText}
-                rows={1}
-                aria-label="Meddelande"
-                className="relative block w-full resize-none border-0 bg-transparent px-3 py-3 text-base leading-6 text-foreground outline-none"
-                onInput={(e) => {
-                  syncTextState(e.currentTarget.value);
-                  syncMention(e.currentTarget);
+              style={{
+                gridTemplateColumns: "auto minmax(0, 1fr) auto",
+                gridTemplateAreas: expanded
+                  ? '"text text text" "plus . controls"'
+                  : '"plus text controls"',
+              }}
+            >
+              <input
+                ref={fileInputRef}
+                type="file"
+                multiple
+                className="hidden"
+                accept={FILE_INPUT_ACCEPT}
+                onChange={(e) => {
+                  if (e.target.files) addFiles(Array.from(e.target.files));
+                  e.target.value = "";
                 }}
-                onPaste={(event) => {
-                  if (
-                    event.defaultPrevented ||
-                    event.clipboardData.files.length
-                  )
-                    return;
-                  const text = formattedClipboardText(
-                    event.clipboardData.getData("text/html"),
-                  );
-                  if (!text) return;
-                  event.preventDefault();
-                  const textarea = event.currentTarget;
-                  replaceRange(
-                    textarea.selectionStart,
-                    textarea.selectionEnd,
-                    text,
-                  );
-                  syncTextState(textarea.value);
-                  syncMention(textarea);
-                }}
-                onSelect={(e) => syncMention(e.currentTarget)}
-                onBlur={() => setMention(null)}
-                onScroll={(e) => {
-                  if (mentionLayerRef.current)
-                    mentionLayerRef.current.scrollTop =
-                      e.currentTarget.scrollTop;
-                }}
-                onKeyDown={onKeyDown}
               />
-            </div>
-            <div className="mb-2 shrink-0">
-              <IconButton
-                type="button"
-                variant={isLoading ? "secondary" : "default"}
-                className="size-8"
-                aria-label={isLoading ? "Avbryt svar" : "Skicka meddelande"}
-                hideTooltip
-                disabled={!isLoading && !canSend}
-                onClick={() => (isLoading ? onCancel() : submit())}
-              >
-                {isLoading ? <StopIcon /> : <ArrowUpIcon />}
-              </IconButton>
-            </div>
-          </div>
-        </div>
-
-        <div className="relative mt-2 flex items-center gap-1 px-1">
-          <input
-            ref={fileInputRef}
-            type="file"
-            multiple
-            className="hidden"
-            accept={FILE_INPUT_ACCEPT}
-            onChange={(e) => {
-              if (e.target.files) addFiles(Array.from(e.target.files));
-              e.target.value = "";
-            }}
-          />
-
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <IconButton
-                type="button"
-                variant="ghost"
-                className="size-8"
-                aria-label="Lägg till i meddelandet"
-                hideTooltip
-                disabled={isLoading}
-              >
-                <PlusIcon className="size-5" strokeWidth={1.75} />
-              </IconButton>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent
-              side="top"
-              align="start"
-              sideOffset={12}
-              collisionPadding={12}
-              className="w-72 max-w-[calc(100vw-1.5rem)] rounded-xl p-1.5"
-            >
-              <DropdownMenuItem
-                className="gap-2.5 rounded-lg px-2.5 py-2.5"
-                disabled={capacityReached}
-                onSelect={() => fileInputRef.current?.click()}
-              >
-                <PaperclipIcon />
-                Bifoga filer
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-          {courseExamAnalysis && (
-            <Button
-              type="button"
-              variant={courseExamAnalysis.enabled ? "default" : "ghost"}
-              className={cn("h-8 gap-1.5 px-2 text-xs")}
-              aria-pressed={courseExamAnalysis.enabled}
-              title="Analysera kursens tentor i nästa meddelande"
-              disabled={isLoading}
-              onClick={() =>
-                courseExamAnalysis.onChange(!courseExamAnalysis.enabled)
-              }
-            >
-              <BookOpenIcon />
-              <span className="max-sm:hidden">Kursens tentor</span>
-            </Button>
-          )}
-          <p className="pointer-events-none absolute inset-x-0 mx-auto w-fit max-w-[50%] truncate text-center text-2xs text-muted-foreground max-sm:hidden">
-            {showDisclaimer && "AI kan göra misstag. Kontrollera svar."}
-          </p>
-          <div className="ml-auto flex shrink-0 items-center gap-1">
-            {longLength > 0 && (
-              <span
-                className={cn(
-                  "text-2xs",
-                  tooLong
-                    ? "font-medium text-destructive"
-                    : "text-muted-foreground",
+              <m.div ref={plusRef} style={{ gridArea: "plus" }}>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <IconButton
+                      type="button"
+                      variant="ghost"
+                      className="size-10 rounded-full p-0"
+                      aria-label="Lägg till i meddelandet"
+                      hideTooltip
+                      disabled={isLoading}
+                    >
+                      <PlusIcon className="size-6" strokeWidth={1.75} />
+                    </IconButton>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent
+                    side="top"
+                    align="start"
+                    sideOffset={12}
+                    collisionPadding={12}
+                    className="w-72 max-w-[calc(100vw-1.5rem)] rounded-xl p-1.5"
+                  >
+                    <DropdownMenuItem
+                      className="gap-2.5 rounded-lg px-2.5 py-2.5"
+                      disabled={capacityReached}
+                      onSelect={() => fileInputRef.current?.click()}
+                    >
+                      <PaperclipIcon />
+                      Bifoga filer
+                    </DropdownMenuItem>
+                    {courseExamAnalysis && (
+                      <>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuCheckboxItem
+                          checked={courseExamAnalysis.enabled}
+                          onCheckedChange={(checked) =>
+                            courseExamAnalysis.onChange(checked === true)
+                          }
+                          className="items-start gap-2.5 rounded-lg py-2.5 pl-2.5"
+                        >
+                          <BookOpenIcon className="mt-0.5" />
+                          <span className="flex min-w-0 flex-col gap-0.5">
+                            <span>Analysera kursens tentor</span>
+                            <span className="text-xs font-normal text-muted-foreground">
+                              För nästa meddelande
+                            </span>
+                          </span>
+                        </DropdownMenuCheckboxItem>
+                      </>
+                    )}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </m.div>
+              <m.div className="relative min-w-0" style={{ gridArea: "text" }}>
+                {!hasInput &&
+                  (welcome ? (
+                    <WelcomePlaceholder />
+                  ) : (
+                    <span
+                      aria-hidden="true"
+                      className="pointer-events-none absolute inset-x-2 top-1 truncate text-base leading-6 text-muted-foreground/60"
+                    >
+                      {placeholder}
+                    </span>
+                  ))}
+                {courseMentions && (
+                  <div
+                    ref={mentionLayerRef}
+                    aria-hidden
+                    className="pointer-events-none absolute inset-0 overflow-hidden py-1 pr-2 pl-2 text-base leading-6 wrap-break-word whitespace-pre-wrap text-transparent"
+                  />
                 )}
+                <textarea
+                  ref={textareaRef}
+                  defaultValue={initialText}
+                  rows={1}
+                  aria-label="Meddelande"
+                  className="relative block max-h-52 w-full resize-none border-0 bg-transparent px-2 py-1 text-base leading-6 text-foreground outline-none placeholder:text-foreground"
+                  style={{
+                    height: textHeight + 8,
+                    overflowY: textHeight >= 192 ? "auto" : "hidden",
+                  }}
+                  onInput={(e) => {
+                    syncTextState(e.currentTarget.value);
+                    syncMention(e.currentTarget);
+                    measurePrompt();
+                  }}
+                  onPaste={(event) => {
+                    if (
+                      event.defaultPrevented ||
+                      event.clipboardData.files.length
+                    )
+                      return;
+                    const text = formattedClipboardText(
+                      event.clipboardData.getData("text/html"),
+                    );
+                    if (!text) return;
+                    event.preventDefault();
+                    const textarea = event.currentTarget;
+                    replaceRange(
+                      textarea.selectionStart,
+                      textarea.selectionEnd,
+                      text,
+                    );
+                    syncTextState(textarea.value);
+                    syncMention(textarea);
+                    measurePrompt();
+                  }}
+                  onSelect={(e) => syncMention(e.currentTarget)}
+                  onBlur={() => setMention(null)}
+                  onScroll={(e) => {
+                    if (mentionLayerRef.current)
+                      mentionLayerRef.current.scrollTop =
+                        e.currentTarget.scrollTop;
+                  }}
+                  onKeyDown={onKeyDown}
+                />
+              </m.div>
+              <m.div
+                ref={controlsRef}
+                className="flex shrink-0 items-center gap-1"
+                style={{ gridArea: "controls" }}
               >
-                {longLength.toLocaleString("sv-SE")} /{" "}
-                {MAX_LENGTH.toLocaleString("sv-SE")}
-              </span>
-            )}
-            {!mobile && <ModelPicker />}
+                {longLength > 0 && (
+                  <span
+                    className={cn(
+                      "text-2xs",
+                      tooLong
+                        ? "font-medium text-destructive"
+                        : "text-muted-foreground",
+                    )}
+                  >
+                    {longLength.toLocaleString("sv-SE")} /{" "}
+                    {MAX_LENGTH.toLocaleString("sv-SE")}
+                  </span>
+                )}
+                {!mobile && (
+                  <div className="hidden @min-[440px]:block">
+                    <ModelPicker />
+                  </div>
+                )}
+                {sendButton}
+              </m.div>
+            </div>
           </div>
-        </div>
+        </m.div>
+
+        {showDisclaimer && (
+          <p className="mt-2 text-center text-2xs text-muted-foreground">
+            AI kan göra misstag. Kontrollera svar.
+          </p>
+        )}
 
         {mention && (
           <CourseMentionMenu
             ref={mentionMenuRef}
+            className={welcome ? undefined : "inset-x-4 sm:inset-x-5"}
             query={mention.query}
             onPick={pickMention}
             onClose={() => setMention(null)}
           />
         )}
+
+        <textarea
+          ref={measurementRef}
+          aria-hidden="true"
+          tabIndex={-1}
+          rows={1}
+          className="pointer-events-none invisible absolute h-0 overflow-hidden border-0 p-0 text-base leading-6 whitespace-pre-wrap"
+        />
       </div>
     </form>
   );
@@ -682,7 +816,7 @@ function ModelPicker() {
       <PopoverTrigger asChild>
         <Button
           variant="ghost"
-          className="h-8 gap-1 px-2 text-xs text-foreground/80"
+          className="h-9 gap-1 rounded-full px-2.5 text-xs text-foreground/80"
           aria-label={`Modell: ${modelLabel}, tankenivå: ${effortLabel}`}
         >
           <span className="text-foreground">{modelLabel}</span> {effortLabel}
@@ -928,7 +1062,7 @@ function WelcomePlaceholder() {
     <span
       key={index}
       aria-hidden="true"
-      className="chat-welcome-placeholder pointer-events-none absolute inset-x-3 top-3 truncate text-left text-base leading-6 text-muted-foreground/70"
+      className="chat-welcome-placeholder pointer-events-none absolute inset-x-2 top-1 truncate text-left text-base leading-6 text-muted-foreground/70"
     >
       {WELCOME_PLACEHOLDERS[index]}
     </span>

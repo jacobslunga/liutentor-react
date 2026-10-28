@@ -19,7 +19,7 @@
 }
 
 .learn-chat .chat-column {
-  max-width: clamp(38rem, 74%, 46rem);
+  max-width: clamp(38rem, 78%, 49rem);
 }
 
 .learn-chat .chat-welcome-column {
@@ -48,7 +48,7 @@
 }
 
 .chat-prose.prose {
-  font-size: 0.9375rem;
+  font-size: 1rem;
   line-height: 1.7;
   --tw-prose-body: var(--foreground);
   --tw-prose-headings: var(--foreground);
