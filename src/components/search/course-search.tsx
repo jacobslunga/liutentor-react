@@ -37,7 +37,8 @@ function CourseSearchBase({
   }) => ReactNode;
 }) {
   const listId = useId();
-  const { query, setQuery, items, goToCourse } = useCourseSearch();
+  const { query, setQuery, items, goToCourse, isSearching, searchFailed } =
+    useCourseSearch();
   const [focused, setFocused] = useState(false);
   const [active, setActive] = useState("");
   const open = focused && query.trim().length > 0;
@@ -99,6 +100,8 @@ function CourseSearchBase({
             id={listId}
             query={query}
             items={items}
+            isSearching={isSearching}
+            searchFailed={searchFailed}
             active={active}
             onSelect={select}
           />

@@ -1,6 +1,7 @@
+import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { useCallback, useMemo, useState } from "react";
-import { useCourseCodes } from "@/queries/exams";
+import { courseExamsQuery, useCourseCodes } from "@/queries/exams";
 import { useRecentSearches } from "@/stores/recent-searches";
 
 export interface CourseItem {
@@ -19,6 +20,17 @@ export function useCourseSearch() {
   const { codes, nameByCode } = useCourseCodes();
   const [query, setQuery] = useState("");
 
+  const normalizedQuery = query.trim().toUpperCase();
+  // The course index can lag behind the per-course exam endpoint.
+  const lookupEnabled =
+    /^[A-Z]{4}[0-9]{2}$/.test(normalizedQuery) &&
+    !nameByCode.has(normalizedQuery);
+  const lookup = useQuery({
+    ...courseExamsQuery(normalizedQuery),
+    enabled: lookupEnabled,
+    retry: false,
+  });
+
   const items = useMemo<CourseItem[]>(() => {
     const q = query.trim().toUpperCase();
     if (!q) return [];
@@ -34,11 +46,14 @@ export function useCourseSearch() {
         contained.push(code);
       }
     }
+    if (lookupEnabled && lookup.data) {
+      return [{ code: q, name: lookup.data.courseName ?? "" }];
+    }
     return prefixed
       .concat(contained)
       .slice(0, MAX_RESULTS)
       .map((code) => ({ code, name: nameByCode.get(code) ?? "" }));
-  }, [codes, nameByCode, query]);
+  }, [codes, nameByCode, query, lookupEnabled, lookup.data]);
 
   const goToCourse = useCallback(
     (raw: string) => {
@@ -51,5 +66,13 @@ export function useCourseSearch() {
     [addRecent, navigate],
   );
 
-  return { query, setQuery, items, goToCourse, codes };
+  return {
+    query,
+    setQuery,
+    items,
+    goToCourse,
+    codes,
+    isSearching: lookupEnabled && lookup.isFetching,
+    searchFailed: lookupEnabled && lookup.isError,
+  };
 }

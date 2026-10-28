@@ -6,6 +6,8 @@ interface CourseSearchResultsProps {
   id: string;
   query: string;
   items: CourseItem[];
+  isSearching: boolean;
+  searchFailed: boolean;
   active: string;
   onSelect: (code: string) => void;
 }
@@ -14,6 +16,8 @@ export function CourseSearchResults({
   id,
   query,
   items,
+  isSearching,
+  searchFailed,
   active,
   onSelect,
 }: CourseSearchResultsProps) {
@@ -21,8 +25,17 @@ export function CourseSearchResults({
 
   if (items.length === 0) {
     return (
-      <p className="px-3 py-6 text-center text-sm text-muted-foreground">
-        {q ? `Ingen kurs matchar "${q}"` : "Skriv en kurskod"}
+      <p
+        role="status"
+        className="px-3 py-6 text-center text-sm text-muted-foreground"
+      >
+        {isSearching
+          ? "Söker efter kursen…"
+          : searchFailed
+            ? "Kunde inte söka efter kursen. Försök igen."
+            : q
+              ? `Ingen kurs matchar "${q}"`
+              : "Skriv en kurskod"}
       </p>
     );
   }

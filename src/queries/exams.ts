@@ -5,7 +5,9 @@ import { getCourseExams, getCourses, getExamDetail } from "@/lib/api";
 export const coursesQuery = queryOptions({
   queryKey: ["courses"],
   queryFn: ({ signal }) => getCourses(signal),
-  staleTime: Infinity,
+  staleTime: 5 * 60_000,
+  refetchInterval: 5 * 60_000,
+  refetchOnWindowFocus: true,
 });
 
 export const courseExamsQuery = (courseCode: string) =>
