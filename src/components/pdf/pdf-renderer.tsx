@@ -30,7 +30,7 @@ import {
   ZoomPluginPackage,
 } from "@embedpdf/plugin-zoom/react";
 import { LoaderCircleIcon } from "lucide-react";
-import { memo, useCallback, useMemo, useState } from "react";
+import { memo, useCallback, useMemo, useState, type ReactNode } from "react";
 import { useLatest } from "@/hooks/use-latest";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { cn } from "@/lib/utils";
@@ -48,6 +48,7 @@ export type PdfLayoutMode = "exam-only" | "exam-with-facit" | "default";
 
 export interface PdfRendererProps {
   pdfUrl: string;
+  mobileToolbarActions?: ReactNode;
   layoutMode?: PdfLayoutMode;
   explainEnabled?: boolean;
   onExplain?: (text: string) => void;
@@ -74,6 +75,7 @@ export const PdfRenderer = memo(function PdfRenderer({
   layoutMode = "default",
   explainEnabled = false,
   onExplain,
+  mobileToolbarActions,
 }: PdfRendererProps) {
   const { engine, isLoading } = usePdfiumEngine();
   usePageLoadingTask(isLoading || !engine);
@@ -122,6 +124,7 @@ export const PdfRenderer = memo(function PdfRenderer({
                 <PdfDocument
                   documentId={activeDocumentId}
                   isMobile={isMobile}
+                  mobileToolbarActions={mobileToolbarActions}
                   maxPageWidth={maxPageWidth}
                   onExplain={explainEnabled ? explain : undefined}
                 />
@@ -135,6 +138,7 @@ export const PdfRenderer = memo(function PdfRenderer({
 });
 
 interface PdfDocumentProps {
+  mobileToolbarActions?: ReactNode;
   documentId: string;
   isMobile: boolean;
   maxPageWidth: number | null;
@@ -145,6 +149,7 @@ function PdfDocument({
   documentId,
   isMobile,
   maxPageWidth,
+  mobileToolbarActions,
   onExplain,
 }: PdfDocumentProps) {
   const renderPage = useCallback(
@@ -162,7 +167,7 @@ function PdfDocument({
   return (
     <>
       <PdfZoomController documentId={documentId} maxPageWidth={maxPageWidth}>
-        {!isMobile && (
+        {!isMobile && !mobileToolbarActions && (
           <PdfPageControls
             documentId={documentId}
             className="absolute bottom-4 left-1/2 z-30 -translate-x-1/2"
@@ -170,11 +175,19 @@ function PdfDocument({
         )}
       </PdfZoomController>
 
-      {isMobile && (
-        <PdfZoomControls
-          documentId={documentId}
-          className="absolute bottom-[calc(20px+env(safe-area-inset-bottom,0px))] left-1/2 z-30 -translate-x-1/2"
-        />
+      {(isMobile || mobileToolbarActions) && (
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 z-30 flex items-end justify-between gap-3 bg-[linear-gradient(to_top,var(--background)_0%,var(--background)_25%,transparent_100%)] px-4 pt-12 pb-[calc(16px+env(safe-area-inset-bottom,0px))]">
+          <PdfZoomControls
+            documentId={documentId}
+            className={cn(
+              "pointer-events-auto",
+              !mobileToolbarActions && "mx-auto",
+            )}
+          />
+          {mobileToolbarActions && (
+            <div className="pointer-events-auto">{mobileToolbarActions}</div>
+          )}
+        </div>
       )}
 
       <DocumentContent documentId={documentId}>

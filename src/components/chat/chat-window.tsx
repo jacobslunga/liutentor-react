@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { ChevronRightIcon, HistoryIcon, PlusIcon } from "lucide-react";
+import { ChevronRightIcon, HistoryIcon, PlusIcon, XIcon } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useExamChat } from "@/hooks/use-chat";
 import { normalizeClipboardFile } from "@/lib/chat-attachments";
@@ -24,6 +24,7 @@ export interface ChatWindowProps {
   examUrl: string;
   solutionUrl: string | null;
   onClose: () => void;
+  mobile?: boolean;
 }
 
 export default function ChatWindow({
@@ -32,6 +33,7 @@ export default function ChatWindow({
   examUrl,
   solutionUrl,
   onClose,
+  mobile = false,
 }: ChatWindowProps) {
   const rootRef = useRef<HTMLDivElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -40,6 +42,7 @@ export default function ChatWindow({
 
   const chatStore = useChatStoreApi();
   const [courseExams, setCourseExams] = useState(false);
+  const conversationTitle = useChatStore((s) => s.currentConversationTitle);
   const hasMessages = useChatStore((s) => s.messages.length > 0);
   const isOpen = useChatStore((s) => s.isOpen);
   const { selectedModelId, selectedEffort } = useSelectedModel();
@@ -297,15 +300,27 @@ export default function ChatWindow({
     >
       {isOverDrop && <ChatDropOverlay />}
 
-      <div className="pointer-events-none absolute inset-x-0 top-0 z-20">
+      <div
+        className={
+          mobile
+            ? "pointer-events-none absolute inset-x-0 top-0 z-20 border-b bg-background"
+            : "pointer-events-none absolute inset-x-0 top-0 z-20"
+        }
+      >
         <div className="pointer-events-none relative isolate flex h-14 items-center justify-between gap-2 px-3">
           <div className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-18 bg-[linear-gradient(to_bottom,var(--background)_0,var(--background)_55%,transparent_100%)]" />
           <div className="flex min-w-0 items-center gap-1">
-            <HeaderButton
-              icon={ChevronRightIcon}
-              label="Stäng chatten"
-              onClick={onClose}
-            />
+            {mobile ? (
+              <p className="truncate text-sm font-normal">
+                {conversationTitle || "Chatt"}
+              </p>
+            ) : (
+              <HeaderButton
+                icon={ChevronRightIcon}
+                label="Stäng chatten"
+                onClick={onClose}
+              />
+            )}
           </div>
           <div className="pointer-events-auto flex shrink-0 items-center gap-1">
             <HeaderButton
@@ -321,6 +336,16 @@ export default function ChatWindow({
                 store.setHistoryOpen(!store.isHistoryOpen);
               }}
             />
+            {mobile && (
+              <IconButton
+                variant="outline"
+                size="icon-sm"
+                aria-label="Stäng chatten"
+                onClick={onClose}
+              >
+                <XIcon />
+              </IconButton>
+            )}
           </div>
         </div>
       </div>

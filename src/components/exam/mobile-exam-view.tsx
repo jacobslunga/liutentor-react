@@ -9,8 +9,9 @@ import {
 import { lazy, Suspense, useEffect, useState, type ReactNode } from "react";
 import { RouterLinkButton } from "@/components/shared/router-link";
 import { downloadBoth, downloadFile } from "@/lib/download";
-import { cn } from "@/lib/utils";
 import type { Exam } from "@/types/exam";
+import { MobileChatOverlay } from "@/components/chat/mobile-chat-overlay";
+import { examChatStore, useChatStore } from "@/stores/chat";
 import { ExamPicker } from "./exam-picker";
 import { Button } from "@/components/ui/button";
 import { IconButton } from "@/components/shared/icon-button";
@@ -67,31 +68,57 @@ export function MobileExamView({
   examDate,
   solutionPdfUrl,
 }: MobileExamViewProps) {
+  const chatOpen = useChatStore((s) => s.isOpen);
+  const [chatMounted, setChatMounted] = useState(false);
+
+  useEffect(() => {
+    const chat = examChatStore.getState();
+    chat.close();
+    chat.clearChat();
+    return () => {
+      examChatStore.getState().close();
+      examChatStore.getState().clearChat();
+    };
+  }, [examId]);
+
   const [showSolution, setShowSolution] = useState(false);
   const [solutionMounted, setSolutionMounted] = useState(false);
 
   useEffect(() => {
     function onKeyDown(e: KeyboardEvent) {
+      if (e.defaultPrevented || e.isComposing) return;
       if (e.key === "Escape") {
+        const chat = examChatStore.getState();
+        if (chat.isHistoryOpen) return;
+        chat.close();
         setShowSolution(false);
         return;
       }
       const target = e.target as HTMLElement | null;
       if (
-        e.key.toLowerCase() !== "f" ||
         e.metaKey ||
         e.ctrlKey ||
         e.altKey ||
         e.repeat ||
-        !solutionPdfUrl ||
         target?.isContentEditable ||
         target?.tagName === "INPUT" ||
-        target?.tagName === "TEXTAREA"
+        target?.tagName === "TEXTAREA" ||
+        target?.tagName === "SELECT"
       ) {
         return;
       }
-      setSolutionMounted(true);
-      setShowSolution((v) => !v);
+      const chat = examChatStore.getState();
+      const key = e.key.toLowerCase();
+      if (key === "c" && !chat.isHistoryOpen) {
+        e.preventDefault();
+        setChatMounted(true);
+        setShowSolution(false);
+        chat.toggle();
+      } else if (key === "f" && solutionPdfUrl && !chat.isOpen) {
+        e.preventDefault();
+        setSolutionMounted(true);
+        setShowSolution((v) => !v);
+      }
     }
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
@@ -104,92 +131,122 @@ export function MobileExamView({
 
   return (
     <div className="relative h-dvh w-full overflow-hidden bg-background">
-      <MobileHeader>
-        <RouterLinkButton
-          variant="outline"
-          to="/search/$courseCode"
-          params={{ courseCode }}
-          aria-label="Gå tillbaka"
-          size="icon"
-        >
-          <ArrowLeftIcon />
-        </RouterLinkButton>
-        <div className="min-w-0 flex-1">
-          <p className="truncate text-sm leading-tight font-semibold">
-            {courseCode}
-          </p>
-          <p className="truncate text-xs leading-tight text-muted-foreground">
-            {examDate}
-          </p>
-        </div>
-        {exams.length > 0 && (
-          <div className="hidden shrink-0 md:block">
-            <ExamPicker
-              exams={exams}
-              examId={examId}
-              courseCode={courseCode}
-              triggerSize="sm"
-            >
+      <div className="h-full" inert={chatOpen || showSolution}>
+        <MobileHeader>
+          <RouterLinkButton
+            variant="outline"
+            to="/search/$courseCode"
+            params={{ courseCode }}
+            aria-label="Gå tillbaka"
+            size="icon"
+          >
+            <ArrowLeftIcon />
+          </RouterLinkButton>
+          <div className="min-w-0 flex-1">
+            <p className="truncate text-sm leading-tight font-semibold">
+              {courseCode}
+            </p>
+            <p className="truncate text-xs leading-tight text-muted-foreground">
               {examDate}
-            </ExamPicker>
+            </p>
           </div>
-        )}
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <IconButton variant="outline" size="icon-sm" aria-label="Ladda ned">
-              <DownloadIcon />
-            </IconButton>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem
-              onSelect={() =>
-                void downloadFile(
-                  examPdfUrl,
-                  `${courseCode}_${examDate}_EXAM.pdf`,
-                )
-              }
-            >
-              <DownloadIcon />
-              Ladda ned tenta
-            </DropdownMenuItem>
-            <DropdownMenuItem
-              disabled={!solutionPdfUrl}
-              onSelect={() =>
-                solutionPdfUrl &&
-                void downloadFile(
-                  solutionPdfUrl,
-                  `${courseCode}_${examDate}_SOLUTION.pdf`,
-                )
-              }
-            >
-              <DownloadIcon />
-              Ladda ned facit
-            </DropdownMenuItem>
-            <DropdownMenuItem
-              disabled={!solutionPdfUrl}
-              onSelect={() =>
-                solutionPdfUrl &&
-                downloadBoth(courseCode, examDate, examPdfUrl, solutionPdfUrl)
-              }
-            >
-              <FileArchiveIcon />
-              Ladda ned båda (.zip)
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-        {solutionPdfUrl && (
-          <Button variant="outline" size="sm" onClick={openSolution}>
-            <BookIcon className="text-primary" />
-            Facit
-          </Button>
-        )}
-      </MobileHeader>
+          {exams.length > 0 && (
+            <div className="hidden shrink-0 md:block">
+              <ExamPicker
+                exams={exams}
+                examId={examId}
+                courseCode={courseCode}
+                triggerSize="sm"
+              >
+                {examDate}
+              </ExamPicker>
+            </div>
+          )}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <IconButton
+                variant="outline"
+                size="icon-sm"
+                aria-label="Ladda ned"
+              >
+                <DownloadIcon />
+              </IconButton>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem
+                onSelect={() =>
+                  void downloadFile(
+                    examPdfUrl,
+                    `${courseCode}_${examDate}_EXAM.pdf`,
+                  )
+                }
+              >
+                <DownloadIcon />
+                Ladda ned tenta
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                disabled={!solutionPdfUrl}
+                onSelect={() =>
+                  solutionPdfUrl &&
+                  void downloadFile(
+                    solutionPdfUrl,
+                    `${courseCode}_${examDate}_SOLUTION.pdf`,
+                  )
+                }
+              >
+                <DownloadIcon />
+                Ladda ned facit
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                disabled={!solutionPdfUrl}
+                onSelect={() =>
+                  solutionPdfUrl &&
+                  downloadBoth(courseCode, examDate, examPdfUrl, solutionPdfUrl)
+                }
+              >
+                <FileArchiveIcon />
+                Ladda ned båda (.zip)
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+          {solutionPdfUrl && (
+            <Button variant="outline" size="sm" onClick={openSolution}>
+              <BookIcon className="text-primary" />
+              Facit
+            </Button>
+          )}
+        </MobileHeader>
 
-      <div className="h-full w-full overflow-hidden" style={PDF_BOX_STYLE}>
-        <Suspense fallback={<Spinner />}>
-          <PdfRenderer pdfUrl={examPdfUrl} />
-        </Suspense>
+        <div className="h-full w-full overflow-hidden" style={PDF_BOX_STYLE}>
+          <Suspense fallback={<Spinner />}>
+            <PdfRenderer
+              pdfUrl={examPdfUrl}
+              mobileToolbarActions={
+                <Button
+                  size="lg"
+                  onClick={() => {
+                    setChatMounted(true);
+                    examChatStore.getState().open();
+                  }}
+                >
+                  Chatt
+                </Button>
+              }
+            />
+          </Suspense>
+        </div>
       </div>
+
+      {chatMounted && (
+        <MobileChatOverlay
+          open={chatOpen}
+          examId={examId}
+          courseCode={courseCode}
+          examUrl={examPdfUrl}
+          solutionUrl={solutionPdfUrl}
+          onClose={() => examChatStore.getState().close()}
+        />
+      )}
 
       {solutionPdfUrl && solutionMounted && (
         <section
@@ -198,12 +255,8 @@ export function MobileExamView({
           aria-label="Facit"
           aria-hidden={!showSolution}
           inert={!showSolution}
-          className={cn(
-            "fixed inset-0 z-40 h-dvh w-screen overflow-hidden bg-background transition-[translate,opacity,scale] duration-200 ease-(--ease-spring)",
-            showSolution
-              ? "translate-y-0 scale-100 opacity-100"
-              : "pointer-events-none translate-y-4 scale-[0.99] opacity-0",
-          )}
+          data-state={showSolution ? "open" : "closed"}
+          className="mobile-exam-overlay fixed inset-0 z-40 h-dvh w-screen overflow-hidden bg-background"
         >
           <MobileHeader>
             <div className="min-w-0 flex-1">

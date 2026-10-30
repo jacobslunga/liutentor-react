@@ -123,14 +123,14 @@ export function PdfZoomControls({
   return (
     <div
       className={cn(
-        "flex items-center overflow-hidden rounded-xl border bg-background/95 shadow-sm backdrop-blur-sm",
+        "flex h-9 items-center overflow-hidden rounded-full border bg-background/95 shadow-sm backdrop-blur-sm",
         className,
       )}
     >
       <IconButton
         variant="ghost"
         size="icon-lg"
-        className="size-10 rounded-none"
+        className="h-full rounded-full"
         aria-label="Zooma in"
         disabled={currentZoom >= MAX_ZOOM - EPSILON}
         onClick={() => zoom?.zoomIn()}
@@ -141,7 +141,7 @@ export function PdfZoomControls({
       <IconButton
         variant="ghost"
         size="icon-lg"
-        className="size-10 rounded-none"
+        className="h-full rounded-full"
         aria-label="Zooma ut"
         disabled={currentZoom <= MIN_ZOOM + EPSILON}
         onClick={() => zoom?.zoomOut()}
@@ -152,7 +152,7 @@ export function PdfZoomControls({
       <IconButton
         variant="ghost"
         size="icon-lg"
-        className="size-10 rounded-none"
+        className="h-full rounded-full"
         aria-label="Rotera medurs"
         disabled={!rotate}
         onClick={() => rotate?.rotateForward()}

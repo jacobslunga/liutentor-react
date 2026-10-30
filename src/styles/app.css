@@ -166,3 +166,30 @@
     cursor: pointer;
   }
 }
+
+/* Animate the shell independently of lazy-loaded chat and PDF content. */
+.mobile-exam-overlay {
+  translate: 0 100%;
+  transition: translate 300ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.mobile-exam-overlay[data-state="open"] {
+  translate: 0 0;
+}
+
+.mobile-exam-overlay[data-state="closed"] {
+  pointer-events: none;
+}
+
+/* Supply the offscreen starting position even on the first mount. */
+@starting-style {
+  .mobile-exam-overlay[data-state="open"] {
+    translate: 0 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mobile-exam-overlay {
+    transition: none;
+  }
+}
